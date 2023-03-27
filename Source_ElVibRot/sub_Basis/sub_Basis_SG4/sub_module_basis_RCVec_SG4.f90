@@ -182,7 +182,7 @@ SUBROUTINE sub_ReadRVec(RVec,FileName_RVec,err_sub)
     END IF
   END IF
 
-  close(nio,iostat=err_file)
+  close(nio,iostat=err_file) ! CALL file_close cannot be used
 
   IF (present(err_sub)) THEN
     err_sub = error
@@ -234,7 +234,7 @@ SUBROUTINE sub_WriteRVec(RVec,FileName_RVec,err_sub)
     END IF
   END IF
 
-  close(nio,iostat=err_file)
+  close(nio,iostat=err_file)  ! CALL file_close cannot be used
 
   IF (present(err_sub)) THEN
     err_sub = error

@@ -426,7 +426,7 @@
           flush(out_unitp)
 !         T = T + abs(WPdeltaT)
         END DO
-        close(nio)
+        CALL file_close(para_field%file)
       END IF
 
       IF (para_field%max_der > 2) para_field%max_der = 2
@@ -456,8 +456,7 @@
         write(nio,11) para_field%grid_T(i),para_field%grid_E(i,:)
  11     format(e30.20,3(1X,f30.20))
       END DO
-      close(nio)
-
+      CALL file_close(para_field%file)
 
       end subroutine  save_field_grid
       SUBROUTINE  print_field_grid(para_field)

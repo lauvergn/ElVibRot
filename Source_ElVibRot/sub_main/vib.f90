@@ -1002,7 +1002,7 @@
         write(out_unitp,*) '================================================'
         write(out_unitp,*)
 
-        IF(MPI_id==0) close(nio_res_int)
+        IF(MPI_id==0) CALL file_close(para_intensity%file_resart_int)
         nullify(para_Dip)
       END IF !for .NOT. para_H%cplx .AND. para_ana%intensity
       flush(out_unitp)
@@ -1070,7 +1070,7 @@
       IF (associated(para_Tnum%Gref)) THEN
         CALL dealloc_array(para_Tnum%Gref,"para_Tnum%Gref","vib")
       END IF
-      !CALL dealloc_Tnum(para_Tnum)
+      CALL dealloc_Tnum(para_Tnum)
 
       CALL dealloc_para_AllOp(para_AllOp)
       CALL dealloc_para_ana(para_ana)
@@ -1558,7 +1558,7 @@ para_mem%mem_debug = .FALSE.
       IF (associated(para_Tnum%Gref)) THEN
         CALL dealloc_array(para_Tnum%Gref,"para_Tnum%Gref","vib")
       END IF
-      !CALL dealloc_Tnum(para_Tnum)
+      CALL dealloc_Tnum(para_Tnum)
 
       CALL dealloc_para_AllOp(para_AllOp)
 

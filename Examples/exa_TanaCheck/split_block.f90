@@ -402,7 +402,7 @@ RECURSIVE SUBROUTINE Split_blocks_new(nv)
 
     CALL write_footer(iv,nio)
 
-    close(nio)
+    close(nio)  ! CALL file_close cannot be used
 
 
   END DO

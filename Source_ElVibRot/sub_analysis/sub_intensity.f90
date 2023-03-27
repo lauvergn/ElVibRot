@@ -671,7 +671,7 @@
       END DO
       END DO
 
-      close(nio_int)
+      CALL file_close(file_intensity)
 
       CALL file_open(file_spectrum,nio)
 
@@ -681,7 +681,7 @@
         write(nio,*) e,spectre(i)
         e = e + pas
       END DO
-      close(nio)
+      CALL file_close(file_spectrum)
 
       CALL dealloc_NParray(spectre,"spectre",name_sub)
 
@@ -1086,7 +1086,8 @@
         e = e + pas*auTOenergy
       END DO
 
-      close(nio)
+      CALL file_close(file_spectrum)
+
 
       CALL dealloc_NParray(spectre,"spectre","sub_spectre")
 

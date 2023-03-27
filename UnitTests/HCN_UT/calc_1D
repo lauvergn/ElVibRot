@@ -1,7 +1,10 @@
 #!/bin/bash
 
- ./DAT_files/dat_publi_rigid0 &> err.log
+ echo " dat_publi_rigid0" >> err.log
+
+ ./DAT_files/dat_publi_rigid0 >> err.log 2>&1
  ./CompareLevel res_rigid0 lev_res_rigid0 Table2_JCP2002-1D.txt 2 0.01
 
- ./DAT_files/dat_publi_flex20  &> err.log
+ echo " dat_publi_flex20" >> err.log
+ ./DAT_files/dat_publi_flex20  >> err.log 2>&1
  ./CompareLevel res_flex20 lev_res_flex20 Table2_JCP2002-1D.txt 4 0.1

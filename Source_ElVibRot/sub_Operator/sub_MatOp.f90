@@ -982,7 +982,7 @@ CONTAINS
       IF (nreste .GT. 0) GOTO 98
 !     - END of loop of kmem block ----------------------------
 !     --------------------------------------------------------
-      close(para_Op%file_grid%unit)
+      CALL file_close(para_Op%file_grid)
       flush(out_unitp)
 
 

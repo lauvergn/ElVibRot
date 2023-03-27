@@ -9,6 +9,9 @@ ElVibRot.code-workspace
 Source_ElVibRot/sub_Basis/laguerre_integrands.sh
 Source_ElVibRot/sub_Basis/laguerre_integrands.txt
 
+sub_pot/sub_system.f
+sub_pot/sub_system.f90
+
 obj/*
 vib
 comp.log

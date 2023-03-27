@@ -13,8 +13,8 @@ C================================================================
       USE mod_Tnum
       IMPLICIT NONE
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
       integer           :: nb_be,nb_ScalOp,nb_var
       logical           :: calc_ScalOp,pot_cplx
@@ -47,8 +47,8 @@ C================================================================
       USE mod_Tnum
       implicit none
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
       real (kind=8) :: pot0_9DQflex,V
 
@@ -233,8 +233,8 @@ C================================================================
       USE mod_Tnum
       implicit none
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
       real (kind=8) :: d0g(mole%nb_inact2n)
       real (kind=8) :: d1g(mole%nb_inact2n,mole%nb_act1)
@@ -310,8 +310,8 @@ C================================================================
       USE mod_Tnum
       implicit none
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
        integer i_qact
        real (kind=8)  Qact1(1),Qsym0(mole%nb_var)
@@ -457,8 +457,8 @@ c---------------------------------------------------------------------
       USE mod_Tnum
       implicit none
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
       integer i_qsym
       real (kind=8)  Qact1(1),Qsym(mole%nb_var)

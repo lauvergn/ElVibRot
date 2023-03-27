@@ -189,7 +189,7 @@ CONTAINS
           CALL file_open(para_WP0%file_WP0,nio)
           read(nio,*) nb_WPdum
           CALL lect_psiBasisRepnotall_nD(WP0(1),nio,WP0(1)%cplx,para_WP0%file_WP0%formatted)
-          close(nio)
+          CALL file_close(para_WP0%file_WP0)
 
         ELSE IF (para_WP0%lect_WP0BasisRep .AND. para_WP0%lect_WP0BasisRepall) THEN
 

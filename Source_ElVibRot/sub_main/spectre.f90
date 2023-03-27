@@ -40,6 +40,7 @@
 !
 !===========================================================================
 !===========================================================================
+  PROGRAM spectre
       implicit none
 
       integer :: npts,nptE
@@ -53,7 +54,7 @@
       character (len=50) :: file_auto
 
       real (kind=8) :: a,b
-      integer :: i
+      integer :: i,nio
 
       complex (kind=8), parameter :: EYE = (0,1)
       real (kind=8), parameter ::                                       &
@@ -72,19 +73,19 @@
 
 !     read the time function (autocorrelation...)
 
-       open(unit=10,file=file_auto)
-       read(10,*) npts
+       open(newunit=nio,file=file_auto)
+       read(nio,*) npts
 
           allocate(auto(npts))
           allocate(t(npts))
 
           DO i=1,npts
-            read(10,*) t(i),a,b
+            read(nio,*) t(i),a,b
             auto(i) = cmplx(a,b,kind=8)
           END DO
           dt = t(2)-t(1)
           tmax = t(npts)
-          close(10)
+          close(nio) ! CALL file_close cannot be used
           write(out_unitp,*) 'npts t0,tmax,dt: ',npts,t0,tmax,dt
 !     END read the time function
 
@@ -98,7 +99,7 @@
           nptE = int((Emax-Emin)/dE)
 
           allocate(funcE(nptE))
-          allocate(Expiwt(npts)
+          allocate(Expiwt(npts))
           DO i=1,nptE
             E=Emin+real(i-1,kind=8)*dE
             Expiwt(:) = exp(EYE*E*t(:))
@@ -113,5 +114,5 @@
           deallocate(Expiwt)
           deallocate(t)
           deallocate(auto)
-      END
+  END PROGRAM spectre
 

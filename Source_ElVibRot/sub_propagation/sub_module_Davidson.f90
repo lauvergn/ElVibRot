@@ -2042,11 +2042,10 @@ END SUBROUTINE sub_NewVec_Davidson
     IF(exist) THEN
       save_WP=.TRUE.
       exit_Davidson=.TRUE.
-      !CALL RENAME('Davidson_exit','done_Davidson_exit')
       open(NEWUNIT=iunit, FILE='Davidson_exit')
-      close(iunit, status='delete')
-      open(NEWUNIT=iunit, FILE='done_Davidson_exit')
-      close(iunit)
+      close(iunit, status='delete') ! CALL file_close cannot be used
+      open(NEWUNIT=iunit, FILE='done_Davidson_exit') 
+      close(iunit) ! CALL file_close cannot be used
     ENDIF
   ENDIF
 END SUBROUTINE exit_Davidson_external

@@ -200,7 +200,7 @@
                     '(Version_File=0, option=2 or Version_File=1): done'
         END IF
 
-        close(nioWP)
+        CALL file_close(para_WP0%file_WP0)
         CALL dealloc_NParray(list_readWP,"list_readWP",name_sub)
       ELSE
         DO i=1,para_WP0%nb_WP0
@@ -349,7 +349,7 @@
         END DO
       END IF
 
-      close(nioWP)
+      CALL file_close(file_WP)
 
 !----------------------------------------------------------
        IF (debug) THEN
@@ -412,7 +412,7 @@
           flush(nioWP)
       END DO
 
-      close(nioWP)
+      CALL file_close(file_WP)
 
 !----------------------------------------------------------
        IF (debug) THEN
@@ -1349,7 +1349,7 @@ IF (file_WP%formatted) THEN
 
   IF (ioerr /= 0) THEN ! it means that no integer is present => It must be the namelist (option 3)
     ! the file has to be reopened
-    close(nioWP)
+    CALL file_close(file_WP)
     CALL file_open(file_WP,nioWP,lformatted=file_WP%formatted,old=.TRUE.)
 
     Version_File = FilePsiVersion ! default from the module "mod_system"
@@ -1418,7 +1418,7 @@ IF (nb_tot > 0) THEN
   IF (Version_File == 0) THEN ! Version_File=0, option=2
     ! the file has to be reoponed (only for Version_File=0, option=2)
     ! because one psi has been read to get the indexes
-    close(nioWP)
+    CALL file_close(file_WP)
     CALL file_open(file_WP,nioWP,lformatted=file_WP%formatted,old=.TRUE.)
     IF (file_WP%formatted) THEN
       read(nioWP,*,iostat=ioerr) n1,n2

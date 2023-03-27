@@ -103,11 +103,11 @@ CONSTPHYS_DIR     = $(ExtLibDIR)/ConstPhys
 CONSTPHYSMOD_DIR  = $(CONSTPHYS_DIR)/obj/obj$(extlibwi_obj)
 CONSTPHYSLIBA     = $(CONSTPHYS_DIR)/libPhysConst$(extlibwi_obj).a
 
-KEO_DIR           = $(ExtLibDIR)/Coord_KEO_PrimOp
-KEOMOD_DIR        = $(KEO_DIR)/obj/obj$(extlibwi_obj)
-KEOLIBA           = $(KEO_DIR)/libCoord_KEO_PrimOp$(extlibwi_obj).a
+TNUMTANA_DIR      = $(ExtLibDIR)/Tnum-Tana
+TNUMTANAMOD_DIR   = $(TNUMTANA_DIR)/obj/obj$(extlibwi_obj)
+TNUMTANALIBA      = $(TNUMTANA_DIR)/libTnum-Tana$(extlibwi_obj).a
 
-EXTLib     = $(KEOLIBA) $(CONSTPHYSLIBA) $(FOREVRTLIBA) $(QMLLIBA) $(ADLIBA) $(QDLIBA)
+EXTLib     = $(TNUMTANALIBA) $(CONSTPHYSLIBA) $(FOREVRTLIBA) $(QMLLIBA) $(ADLIBA) $(QDLIBA)
 #===============================================================================
 #
 #===============================================================================
@@ -139,7 +139,7 @@ ifeq ($(F90),$(filter $(F90),gfortran gfortran-8))
   FFLAGS +=-J$(MOD_DIR)
 
   # where to look the .mod files
-  FFLAGS += -I$(KEOMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
+  FFLAGS += -I$(TNUMTANAMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
 
   # some cpreprocessing
   FFLAGS += -cpp $(CPPSHELL)
@@ -191,7 +191,7 @@ ifeq ($(FFC),ifort)
   endif
 
   # where to look the .mod files
-  FFLAGS += -I$(KEOMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
+  FFLAGS += -I$(TNUMTANAMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
 
   # some cpreprocessing
   FFLAGS += -cpp $(CPPSHELL)
@@ -272,7 +272,7 @@ lib libEVR libevr: $(LIBA)
 .PHONY: vib
 vib:
 	@echo "make vib script"
-	./scripts/make_vib.sh $(LOC_path) $(FFC)
+	./scripts/make_vib.sh $(LOC_path) $(FFC) $(extf)
 	chmod a+x vib
 #
 $(VIBEXE): $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_DIR)/sub_system.o $(LIBA) $(EXTLib)
@@ -294,6 +294,7 @@ $(LIBA): $(OBJ) $(EXTLib)
 #=============  with the .f or .f90 extention ==
 #===============================================
 sub_pot/sub_system.$(extf): sub_pot/sub_system_save.$(extf)
+	@echo "cp sub_system.... from sub_pot"
 	cp sub_pot/sub_system_save.$(extf) sub_pot/sub_system.$(extf)
 #
 #===============================================
@@ -327,24 +328,19 @@ BaseName := EVR
 .PHONY: zip
 zip: cleanall
 	test -d $(ExtLibSAVEDIR) || (echo $(ExtLibDIR) "does not exist" ; exit 1)
-	cd $(ExtLibSAVEDIR) ; rm -rf $(BaseName)_devloc
-	mkdir $(ExtLibSAVEDIR)/$(BaseName)_devloc
-	cp -r * $(ExtLibSAVEDIR)/$(BaseName)_devloc
-	cd $(ExtLibSAVEDIR) ; zip -r Save_$(BaseName)_devloc.zip $(BaseName)_devloc
-	cd $(ExtLibSAVEDIR) ; rm -rf $(BaseName)_devloc
+	$(ExtLibSAVEDIR)/makezip.sh $(BaseName)
 	@echo "  done zip"
 #===============================================
 #=== external libraries ========================
 # AD_dnSVM + QML Libs ...
 #===============================================
 #
-$(KEOLIBA):
-	@test -d $(ExtLibDIR)     || (echo $(ExtLibDIR) "does not exist" ; exit 1)
-	@test -d $(KEO_DIR) || (cd $(ExtLibDIR) ; ./get_Coord_KEO_PrimOp.sh $(EXTLIB_TYPE))
-	@test -d $(KEO_DIR) || (echo $(KEO_DIR) "does not exist" ; exit 1)
-	cd $(KEO_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) ExtLibDIR=$(ExtLibDIR) INT=$(INT)
-	@echo "  done " $(KEO_DIR) " in "$(BaseName)
-#	ln -s $(KEO_DIR)/sub_pot sub_pot
+$(TNUMTANALIBA):
+	@test -d $(ExtLibDIR)    || (echo $(ExtLibDIR) "does not exist" ; exit 1)
+	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh $(EXTLIB_TYPE))
+	@test -d $(TNUMTANA_DIR) || (echo $(TNUMTANA_DIR) "does not exist" ; exit 1)
+	cd $(TNUMTANA_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) ExtLibDIR=$(ExtLibDIR) INT=$(INT)
+	@echo "  done " $(TNUMTANA_DIR) " in "$(BaseName)
 #
 $(CONSTPHYSLIBA):
 	@test -d $(ExtLibDIR)     || (echo $(ExtLibDIR) "does not exist" ; exit 1)

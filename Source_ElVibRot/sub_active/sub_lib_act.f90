@@ -220,30 +220,30 @@
         IF (para_AllOp%tab_Op(1)%file_grid%nb_thread > 1 .AND. iq == 1) THEN
           CALL file_open(para_AllOp%tab_Op(1)%file_grid,nio,      &
              lformatted=para_AllOp%tab_Op(1)%file_grid%formatted)
-         nio = para_AllOp%tab_Op(1)%file_grid%unit
-         IF (para_AllOp%tab_Op(1)%file_grid%formatted) THEN
+          nio = para_AllOp%tab_Op(1)%file_grid%unit
+          IF (para_AllOp%tab_Op(1)%file_grid%formatted) THEN
 
-           write(nio,*) '- Beginning_th ',                              &
+            write(nio,*) '- Beginning_th ',                              &
                         para_AllOp%tab_Op(1)%file_grid%nb_thread, &
                        '-------------------'
-         ELSE
+          ELSE
             !write(nio) 'Beginning_th'
             write(nio) para_AllOp%tab_Op(1)%file_grid%nb_thread
-         END IF
-         CALL file_close(para_AllOp%tab_Op(1)%file_grid)
-       END IF
+          END IF
+          CALL file_close(para_AllOp%tab_Op(1)%file_grid)
+        END IF
 
-       IF (para_AllOp%tab_Op(1)%file_grid%nb_thread > 1) THEN
-         CALL file_open2(                                               &
+        IF (para_AllOp%tab_Op(1)%file_grid%nb_thread > 1) THEN
+          CALL file_open2(                                               &
           para_AllOp%tab_Op(1)%file_grid%tab_name_th(ithread),nio,&
               lformatted=para_AllOp%tab_Op(1)%file_grid%formatted,&
                      append=.TRUE.)
-       ELSE
-         CALL file_open2(                                               &
+        ELSE
+          CALL file_open2(                                               &
             para_AllOp%tab_Op(1)%file_grid%name,nio,              &
               lformatted=para_AllOp%tab_Op(1)%file_grid%formatted,&
                      append=.TRUE.)
-       END IF
+        END IF
        !---------------------------------------------------------
        nb_var  = para_AllOp%tab_Op(1)%mole%nb_var
        nb_act1 = para_AllOp%tab_Op(1)%mole%nb_act1
@@ -345,7 +345,12 @@
        END IF
 
        !---------------------------------------------------------
-       close(nio)
+       close(nio) ! we cannot use CALL file_close
+       IF (para_AllOp%tab_Op(1)%file_grid%nb_thread > 1) THEN
+         para_AllOp%tab_Op(1)%file_grid%tab_unit(ithread) = 0
+       ELSE
+        para_AllOp%tab_Op(1)%file_grid%unit = 0
+      END IF
        !---------------------------------------------------------
 !$OMP  END CRITICAL (sub_Save_GridFile_AllOp_CRIT3)
      END IF
@@ -1094,7 +1099,7 @@
 
       END IF
 
-      close(file_HADA%unit)
+      CALL file_close(file_HADA)
 
       IF(MPI_id==0) write(out_unitp,*) 'check_HADA: last grid point, iqf=',iqf
 

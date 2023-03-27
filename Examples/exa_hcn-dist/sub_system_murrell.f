@@ -14,8 +14,8 @@ C================================================================
       USE mod_Tnum
       IMPLICIT NONE
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
       integer           :: nb_be,nb_ScalOp,nb_var
       logical           :: calc_ScalOp,pot_cplx
@@ -232,8 +232,8 @@ C================================================================
       USE mod_Tnum
       IMPLICIT NONE
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
        integer nb_Q,nb_ScalOp
        parameter (nb_Q=3)
@@ -260,8 +260,8 @@ C================================================================
       USE mod_Tnum
       IMPLICIT NONE
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
       real (kind=Rkind) :: d0g(mole%nb_inact2n)
       real (kind=Rkind) :: d1g(mole%nb_inact2n,mole%nb_act1)
@@ -314,8 +314,8 @@ C================================================================
       USE mod_Tnum
       IMPLICIT NONE
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
        real (kind=Rkind) :: Qdyn(mole%nb_var)
        real (kind=Rkind) :: c_act
@@ -372,8 +372,10 @@ c$OMP CRITICAL (d0d1d2_h_CRIT)
           iv = mole%liste_QactTOQsym(mole%nb_act1+i)
           jv = mole%liste_QactTOQsym(mole%nb_act1+j)
           IF (iv > jv) THEN
+            !nom = 'inter12h___' // TO_String(jv) // '_' TO_String(iv)
             nom=nom_ii('inter12h__',jv,iv)
           ELSE
+            !nom = 'inter12h___' // TO_String(iv) // '_' TO_String(jv)
             nom=nom_ii('inter12h__',iv,jv)
           END IF
 
@@ -507,7 +509,8 @@ c$OMP    CRITICAL (dnQflex_CRIT)
          nn(:) = 0
          F(:,:) = ZERO
          DO vi=2,3
-           nom=nom_i('inter12___',vi)
+            !nom = 'inter12____' // TO_String(vi)
+            nom=nom_i('inter12___',vi)
            write(out_unitp,*) 'read file :',nom,vi
 
            CALL read_para0d(F(1,vi),nn(vi),max_points,nom,exist)
@@ -563,8 +566,8 @@ C================================================================
       USE mod_Tnum
       IMPLICIT NONE
 
-c----- for the zmatrix and Tnum --------------------------------------
-      TYPE (zmatrix) :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
        integer :: i_Qdyn
        real (kind=Rkind) ::  Qdyn(mole%nb_var)
@@ -644,7 +647,8 @@ c        -------------------------------------------------------------
          nn(:) = 0
          F(:,:) = ZERO
          DO vi=2,3
-           nom=nom_i('inter12___',vi)
+            !nom = 'inter12____' // TO_String(vi)
+            nom=nom_i('inter12___',vi)
            write(out_unitp,*) 'read file :',nom,vi
 
            CALL read_para0d(F(1,vi),nn(vi),max_points,nom,exist)

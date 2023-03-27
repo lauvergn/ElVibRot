@@ -188,7 +188,8 @@
             END IF
           END IF
         END DO
-        close(nio)
+        CALL file_close(Lebedev_file)
+
         write(out_unitp,*) '      new nb_quadra',nq
       END IF
 
@@ -291,7 +292,7 @@
 
         END DO
 
-        close(nio)
+        CALL file_close(Lebedev_file)
       END IF
       IF (debug) THEN
         write(out_unitp,*) 'grid for the Ylm. nq:',nq

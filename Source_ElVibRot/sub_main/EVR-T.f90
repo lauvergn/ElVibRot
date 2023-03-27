@@ -371,7 +371,7 @@
         write(out_unitp,*) '========================================='
         write(out_unitp,*) '========================================='
 
-        close(in_unitp)
+        close(in_unitp)   ! CALL file_close cannot be used
         IF(openmpi) THEN
           CALL time_perso('MPI closed')
           CALL end_MPI()

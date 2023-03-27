@@ -96,7 +96,7 @@ CONTAINS
 
       integer                        :: i,nb_col,ib
       real (kind=Rkind)              :: Q,E,DE
-      TYPE (File_t)              :: file_WPspectral
+      TYPE (File_t)                  :: file_WPspectral
       integer                        :: nioWP
       character (len=Name_longlen)   :: lformat
       TYPE(REAL_WU)                  :: RWU_ZPE,RWU_E,RWU_DE
@@ -191,7 +191,7 @@ CONTAINS
         IF(MPI_id==0) CALL Write_Psi_nDBasis(tab_Psi(i),nioWP,i,ZERO,file_WPspectral%formatted,FilePsiVersion)
 
       END DO
-      IF(MPI_id==0) close(nioWP)
+      IF(MPI_id==0) CALL file_close(file_WPspectral)
 
       para_ana%ana_psi%ZPE        = para_H%ZPE
       para_ana%ana_psi%Part_Func  = Q

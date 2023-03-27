@@ -350,7 +350,7 @@
       IF (associated(para_Tnum%Gref)) THEN
         CALL dealloc_array(para_Tnum%Gref,"para_Tnum%Gref",name_sub)
       END IF
-      !CALL dealloc_Tnum(para_Tnum)
+      CALL dealloc_Tnum(para_Tnum)
 
       CALL dealloc_para_AllOp(para_AllOp)
 

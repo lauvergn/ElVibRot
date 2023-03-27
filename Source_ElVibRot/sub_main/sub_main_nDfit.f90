@@ -2166,8 +2166,8 @@ END FUNCTION ValGridPoint
 
 
         END DO
-        close(nioGrid1)
-        close(nioGrid2)
+        close(nioGrid1) ! CALL file_close cannot be used
+        close(nioGrid2) ! CALL file_close cannot be used
 
         ! for the file with the basis indices
         name_file = adjustl(trim(name_Grid1)) // '1'
@@ -2188,8 +2188,8 @@ END FUNCTION ValGridPoint
 
 
         END DO
-        close(nioGrid1)
-        close(nioGrid2)
+        close(nioGrid1) ! CALL file_close cannot be used
+        close(nioGrid2) ! CALL file_close cannot be used
 
 
         CALL dealloc_array(val,    'val',name_sub)

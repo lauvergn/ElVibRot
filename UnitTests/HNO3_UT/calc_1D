@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
  SYSTEM=sub_system_HNO3_ccsdt.f
 
@@ -18,7 +18,6 @@ cd $here
 
 ./DAT_files/dat_HNO3_ccsdt-1D_rigid0
 ./CompareLevel res_HNO3_rigid0 Table3_PCCP2010-1D.txt 3
-
 
 ./DAT_files/dat_HNO3_ccsdt-1D_rigid100Publi
 ./CompareLevel res_HNO3_rigid100publi Table3_PCCP2010-1D.txt 4

@@ -853,7 +853,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
          IF (para_propa%WPdeltaT < ZERO) T = T + para_propa%WPTmax
 
       END DO ! loop on the Time iteration
-      close(nioWP)
+      CALL file_close(para_propa%file_WP)
 !-----------------------------------------------------------
 !-----------------------------------------------------------
 

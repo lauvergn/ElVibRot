@@ -96,7 +96,7 @@
         !write(out_unitp,*) t,C(I) ; flush(out_unitp)
       END DO
       C(1) = C(1) * HALF
-      close(ni)
+      CALL file_close(para_propa%file_autocorr)
       C(NPT+1:NPT2) = cmplx(ZERO,ZERO,kind=Rkind)
 
 
@@ -121,7 +121,8 @@
         E = E + DE
       END DO
 
-      IF(MPI_id==0) close(no)
+      IF(MPI_id==0) CALL file_close(para_propa%file_autocorr)
+
 
   33  FORMAT(5(E13.6,' '))
 

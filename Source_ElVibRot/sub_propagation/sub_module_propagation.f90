@@ -410,7 +410,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
           write(no_restart,*) WP(i)%CvecB
         END DO
       ENDIF
-      close(no_restart)
+      CALL file_close(file_restart)
 
 !----------------------------------------------------------
        IF (debug) THEN
@@ -474,7 +474,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
         END DO
       END IF
 
-      close(no_restart)
+      CALL file_close(file_restart)
 
 !----------------------------------------------------------
        IF (debug) THEN

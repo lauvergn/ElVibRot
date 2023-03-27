@@ -137,8 +137,6 @@ SUBROUTINE init_EVR_new()
         !> NOTE: remember to use vib to ensure "rm namelist" to prevent the
         !> reading of old namelist
         CALL file_open2('namelist',in_unitp,old=.TRUE.,err_file=err)
-        !in_unitp=10
-        !open(in_unitp,file='namelist',STATUS='OLD',IOSTAT=err)
         IF(err/=0) THEN
           write(out_unitp,*) ' ERROR in init_EVR'
           write(out_unitp,*) '   "namelist" file does not exist.'
@@ -290,7 +288,7 @@ SUBROUTINE init_EVR_new()
 
         para_mem%max_mem    = max_mem/Rkind
 
-        close(in_unitp)
+        close(in_unitp)  ! CALL file_close cannot be used
 
   allocate(tab_EVRT(maxth))
   DO ith=1,maxth
@@ -339,7 +337,7 @@ SUBROUTINE init_EVR_new()
           write(out_unitp,*) ith
           write(out_unitp,*) '========================================='
         ENDIF ! for MPI_id=0
-     close(in_unitp)
+     close(in_unitp)   ! CALL file_close cannot be used
      flush(out_unitp)
   END DO
 
@@ -1022,7 +1020,7 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
           write(out_unitp,*) '================================================'
           write(out_unitp,*)
         ENDIF
-        close(tab_EVRT(ith)%nio_res_int)
+        CALL file_close(tab_EVRT(ith)%para_intensity%file_resart_int)
         nullify(para_Dip)
       END IF !for .NOT. para_H%cplx .AND. para_ana%intensity
       flush(out_unitp)
@@ -2062,7 +2060,7 @@ write(out_unitp,*) 'intensity',para_EVRT%para_ana%intensity ; flush(out_unitp)
           write(out_unitp,*) '================================================'
           write(out_unitp,*)
         ENDIF
-        close(nio_res_int)
+        CALL file_close(para_EVRT%para_intensity%file_resart_int)
         nullify(para_Dip)
       END IF !for .NOT. para_H%cplx .AND. para_EVRT%para_ana%intensity
       flush(out_unitp)
@@ -2165,7 +2163,7 @@ SUBROUTINE Finalize_EVR()
       IF (associated(para_EVRT%para_Tnum%Gref)) THEN
         CALL dealloc_array(para_EVRT%para_Tnum%Gref,"para_Tnum%Gref","vib")
       END IF
-      !CALL dealloc_Tnum(para_EVRT%para_Tnum)
+      CALL dealloc_Tnum(para_EVRT%para_Tnum)
 
       CALL dealloc_para_AllOp(para_EVRT%para_AllOp)
       CALL dealloc_para_ana(para_EVRT%para_ana)
@@ -2177,6 +2175,6 @@ SUBROUTINE Finalize_EVR()
         CALL end_MPI()
         CALL time_perso('MPI closed')
       ENDIF
-      close(in_unitp)
+      close(in_unitp) ! CALL file_close cannot be used
 
 END SUBROUTINE Finalize_EVR

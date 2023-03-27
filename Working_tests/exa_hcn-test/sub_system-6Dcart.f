@@ -96,7 +96,7 @@ c11        format(6(2x,6i1,f14.8))
            k = k + nb_columns
          END DO
          read(nio,*) Qref(:)
-         close(nio)
+         close(nio) ! CALL file_close cannot be used
          begin=.FALSE.
 c        write(6,*) 'Qref', Qref(:)
 c        DO j=1,nb_func

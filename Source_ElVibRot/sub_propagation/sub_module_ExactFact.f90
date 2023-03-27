@@ -238,7 +238,7 @@ SUBROUTINE sub_ExactFact_analysis_option2(T,psi,ana_psi,para_H)
 
   !---------------------------------------------------------------------
   CALL dealloc_psi(dpsi,delete_all=.TRUE.)
-  close(nio)
+  close(nio) ! CALL file_close cannot be used
 
 !----------------------------------------------------------
   IF (debug) THEN
@@ -325,7 +325,7 @@ SUBROUTINE sub_ExactFact_analysis_gV(psi,para_H,Tmax,deltaT)
       write(nio,*) ZERO,iq,Wrho,Grid(:),para_H%OpGrid(iterm_pot)%Grid(iq,:,:)
     END DO
     write(nio,*)
-    close(nio)
+    close(nio) ! CALL file_close cannot be used
 
 !----------------------------------------------------------
   IF (debug) THEN
@@ -438,12 +438,12 @@ SUBROUTINE sub_ExactFact_analysis_option1(T,psi,ana_psi,para_H)
     write(nio,*) T,iq,Grid(:),d0psi(iq,:),dtpsi(iq,:),d1psi(iq,:,:),            &
                  d1dtpsi(iq,:,:),d2psi(iq,:,:)
   END DO
-  write(nio,*)
+  write(nio,*) ! CALL file_close cannot be used
 
 
   !---------------------------------------------------------------------
   CALL dealloc_psi(dpsi,delete_all=.TRUE.)
-  close(nio)
+  close(nio) ! CALL file_close cannot be used
 
 !----------------------------------------------------------
   IF (debug) THEN
@@ -570,7 +570,7 @@ SUBROUTINE sub_ExactFact_analysis_v1(T,psi,ana_psi,para_H,Tmax,deltaT,para_field
       write(nio,*) T,iq,Wrho(iq),Grid(:,iq),para_H%OpGrid(iterm_pot)%Grid(iq,:,:)
     END DO
     write(nio,*)
-    close(nio)
+    close(nio) ! CALL file_close cannot be used
 
     name_file = make_EVRTFileName('EF_parameter_dpsi')
     CALL file_open2(name_file=name_file,iunit=nio,lformatted=.TRUE.,append=.FALSE.)
@@ -620,7 +620,7 @@ SUBROUTINE sub_ExactFact_analysis_v1(T,psi,ana_psi,para_H,Tmax,deltaT,para_field
 
   !---------------------------------------------------------------------
   CALL dealloc_psi(dpsi,delete_all=.TRUE.)
-  close(nio)
+  close(nio) ! CALL file_close cannot be used
 
 !----------------------------------------------------------
   IF (debug) THEN

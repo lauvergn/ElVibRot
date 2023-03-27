@@ -15,7 +15,7 @@ echo $SYSTEM
  cp $SYSTEM $DIR_pot/sub_system.f
 
 cd $DIR_vib
- make
+ make OPT=0
 cd $here
 
 #export OMP_NUM_THREADS=4

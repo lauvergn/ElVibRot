@@ -464,9 +464,7 @@ c     for the writting of the wp (DVR)
         CALL ecri_psi(T=T,psi=psi,nioWP=6,
      *                ecri_DVR=.FALSE.,ecri_FBR=.TRUE.)
       END IF
-
-      close(nioWP)
-
+      CALL file_close(para_propa%file_WP)
 c----------------------------------------------------------
       write(6,*)
       write(6,*) 'Number of Hamiltonian operation',para_H%nb_OpPsi
@@ -642,7 +640,8 @@ c------ read guess vectors ---------------------------------
             CALL lect_psiFBRnotall_nD(psi(i),nioWP,cplx)
           END DO
         END IF
-        close(nioWP)
+        CALL file_close(para_propa%file_WP)
+
       ELSE
         DO i=1,nb_diago
           CALL lect_psiFBRnotall_nD(psi(i),5,cplx)
@@ -1327,7 +1326,7 @@ c    *               .FALSE.,.FALSE.)
 c     END DO
 c----------------------------------------------------------
 
-      close(nioWP)
+      CALL file_close(para_propa%file_WP)
 
       CALL dealloc_psi(Hpsi)
       CALL dealloc_psi(H2psi)
@@ -1536,9 +1535,8 @@ c     for the writting of the wp (DVR)
 c----------------------------------------------------------
 
 
-
-      close(no)
-      close(nioWP)
+      CALL file_close(para_propa%file_WP)
+      CALL file_close(para_propa%file_autocorr)
 
       IF (psi%norme .GE. psi%max_norme) STOP
 
@@ -1875,7 +1873,7 @@ c     for the writting of the wp (DVR)
       END IF
 c----------------------------------------------------------
 
-      close(nioWP)
+      CALL file_close(para_propa%file_WP)
 
 
       CALL dealloc_psi(w2)
@@ -2058,7 +2056,8 @@ c         Write WP (FBR or DVR)
          IF (para_propa%WPdeltaT < ZERO) T = T + para_propa%WPTmax
 
       END DO ! loop on the Time iteration
-      close(nioWP)
+      CALL file_close(para_propa%file_WP)
+
 c-----------------------------------------------------------
 c-----------------------------------------------------------
 
@@ -2514,7 +2513,7 @@ c     for the writting of the wp (DVR)
       END IF
 c----------------------------------------------------------
 
-      close(nioWP)
+      CALL file_close(para_propa%file_WP)
 
 
       CALL dealloc_psi(w1)

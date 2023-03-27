@@ -348,7 +348,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
       IF(MPI_id==0) CALL ecri_psi(T=ana_psi%T,psi=psi,nioWP=nioPsi,     &
                          ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.,     &
                          ecri_psi2=.TRUE.)
-      IF(MPI_id==0) close(nioPsi)
+      IF(MPI_id==0) close(nioPsi) ! CALL file_close cannot be used
     END IF
 
     IF (.NOT. adia .AND. ana_psi%Write_psi_Grid) THEN
@@ -364,7 +364,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
       IF(MPI_id==0) CALL ecri_psi(T=ana_psi%T,psi=psi,nioWP=nioPsi,     &
                          ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.,     &
                          ecri_psi2=.FALSE.)
-      IF(MPI_id==0) close(nioPsi)
+      IF(MPI_id==0) close(nioPsi) ! CALL file_close cannot be used
     END IF
     !---------------------------------------------------------------------------
 
@@ -391,7 +391,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
                            ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.,   &
                            ecri_psi2=.FALSE.)
       END IF
-      IF(MPI_id==0) close(nioPsi)
+      IF(MPI_id==0) close(nioPsi) ! CALL file_close cannot be used
     END IF
 
     IF (.NOT. adia .AND. ana_psi%Write_psi_Basis) THEN
@@ -417,7 +417,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
                            ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.,   &
                            ecri_psi2=.FALSE.)
       END IF
-      IF(MPI_id==0) close(nioPsi)
+      IF(MPI_id==0) close(nioPsi) ! CALL file_close cannot be used
     END IF
   END IF
 
@@ -1001,7 +1001,7 @@ END SUBROUTINE sub_analyze_psi
             END DO
           END IF
 
-          close(nio)
+          CALL file_close(file_psi)
 
         END DO
       END IF
@@ -1051,7 +1051,7 @@ END SUBROUTINE sub_analyze_psi
             END DO
           END IF
 
-          close(nio)
+          CALL file_close(file_psi)
 
         END DO
         END DO
@@ -1228,7 +1228,7 @@ END SUBROUTINE sub_analyze_psi
             END IF
 
             CALL dealloc_NParray(rho1D,'rho1D',name_sub)
-            close(nioRho)
+            CALL file_close(file_Rho)
           END DO
         END IF
 
@@ -1345,7 +1345,7 @@ END SUBROUTINE sub_analyze_psi
             END IF
 
             CALL dealloc_NParray(rho2D,'rho2D',name_sub)
-            close(nioRho)
+            CALL file_close(file_Rho)
           END DO
           END DO
         END IF

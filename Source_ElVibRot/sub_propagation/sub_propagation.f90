@@ -443,7 +443,7 @@ CONTAINS
       IF(MPI_id==0) THEN
         CALL file_open(para_propa%file_WP,nioWP)
         CALL Write_Psi_nDBasis(psi(1),nioWP,iPsi=1,epsi=ZERO,lformated=para_propa%file_WP%formatted,version=0)
-        close(nioWP)
+        CALL file_close(para_propa%file_WP)
 
         write(out_unitp,*) 'WP (BasisRep) at T=',T
         CALL Write_Psi_nDBasis(psi(1),6,iPsi=1,epsi=ONETENTH,lformated=.TRUE.,version=0)
@@ -759,7 +759,7 @@ CONTAINS
 !     END DO
 !----------------------------------------------------------
 
-      close(nioWP)
+      CALL file_close(para_propa%file_WP)
 
       CALL dealloc_psi(Hpsi)
       CALL dealloc_psi(H2psi)

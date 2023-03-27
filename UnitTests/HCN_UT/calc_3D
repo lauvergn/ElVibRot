@@ -11,11 +11,15 @@ fi
 if [ $test_size = 'small' ]
 then
  echo " Small tests"
- ./DAT_files/dat_NewQTransfo-RPH_AutoContract &> err.log
+
+ echo " dat_NewQTransfo-RPH_AutoContract" >> err.log
+ ./DAT_files/dat_NewQTransfo-RPH_AutoContract >> err.log 2>&1
  ./CompareLevel res_RPH_AutoContract_Davidson lev20_res_RPH_AutoContract_Davidson Table_CV-1+2D.txt 5 0.1
 
   #for the guess
- ./DAT_files/dat_NewQTransfo-RPH_AutoContract_SG4 f 4 &> err.log
- ./DAT_files/dat_NewQTransfo-RPH_AutoContract_SG4 t 6 &> err.log
+ echo " dat_NewQTransfo-RPH_AutoContract_SG4 f 4" >> err.log
+ ./DAT_files/dat_NewQTransfo-RPH_AutoContract_SG4 f 4 >> err.log 2>&1
+ echo " dat_NewQTransfo-RPH_AutoContract_SG4 t 6" >> err.log
+ ./DAT_files/dat_NewQTransfo-RPH_AutoContract_SG4 t 6 >> err.log 2>&1
  ./CompareLevel res_RPH_AutoContract_Davidson_SG4 lev20_res_RPH_AutoContract_Davidson_SG4 Table_CV-1+2D.txt 5 0.1
 fi

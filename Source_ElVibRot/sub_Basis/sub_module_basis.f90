@@ -983,7 +983,7 @@ MODULE mod_basis
       IF (.NOT. without_read) THEN
 
 !       - test and read a matrix ------------------------
-        nio = 5
+        nio = in_unitp
         IF (basis_set%read_contrac_file) CALL file_open(basis_set%file_contrac,nio)
 
         read(nio,*)
@@ -1022,7 +1022,7 @@ MODULE mod_basis
           flush(out_unitp)
         END IF
 !       -------------------------------------------------
-        IF (basis_set%read_contrac_file) close(nio)
+        IF (basis_set%read_contrac_file) CALL file_close(basis_set%file_contrac)
 
         IF (allocated(basis_set%Rvec))  THEN
           CALL dealloc_NParray(basis_set%Rvec,"basis_set%Rvec",name_sub)
