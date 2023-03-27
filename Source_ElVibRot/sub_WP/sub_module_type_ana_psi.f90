@@ -553,7 +553,7 @@
 
     CALL file_dealloc(ana_psi%file_PsiRho)
     CALL file_dealloc(ana_psi%file_PsiCut)
-    !CALL file_dealloc(ana_psi%file_Psi)
+    CALL file_dealloc(ana_psi%file_Psi)
     CALL file_dealloc(ana_psi%file_ExactFactPotCut)
 
     END SUBROUTINE dealloc_ana_psi

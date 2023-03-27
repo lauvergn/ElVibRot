@@ -3,5 +3,8 @@ Seg fault in dealloc_ana_psi. Called in dealloc_param_propa in sub_Auto_HmaxHmin
 
 The line 556 is commented: 
     !CALL file_dealloc(ana_psi%file_Psi)
+Problem solved: it was due to the close(). Now, the CALL file_close are used (when possible)
 
+-----------------------------------------
+Error while reading the grid (type0) (restart is ok)
 -----------------------------------------
