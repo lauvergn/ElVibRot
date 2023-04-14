@@ -21,7 +21,7 @@ rm MatOp_H
 nice $DIR_vib/vib << ** >res
  &system PMatOp_omp=3 printlevel=2 /
  &constantes /
- &variables zmat=T nat=4 sym=T nrho=2 /
+ &variables zmat=T nat=4 sym=T nrho=2 Write_QMotions=f /
 C
 X     1
 N     2  1

@@ -14,7 +14,7 @@ cd $here
 nice $DIR_vib/vib << ** >res
  &system /
  &constantes /
- &variables zmat=T nat=3 nrho=2 /
+ &variables zmat=T nat=3 nrho=2 Write_QMotions=f /
 C
 N     1
 H     1 -2

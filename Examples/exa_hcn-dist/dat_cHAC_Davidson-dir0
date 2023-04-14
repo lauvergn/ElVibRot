@@ -22,7 +22,7 @@ nice $DIR_vib/vib << ** > res
          zmat=T
          nat=4
          sym=T
-         nrho=2
+         nrho=2 Write_QMotions=f
  /
 C
 0.0     1

@@ -168,6 +168,7 @@
           integer                        :: nb_transfo = 0    ! basis type
           real (kind=Rkind), allocatable :: cte_transfo(:,:)  ! for nb_transfo
           integer                        :: opt_param = 0     ! number of parameters to be optimized
+          !character, allocatable         :: info              ! information on the basis: name, nb, nq ....
 
 
 
@@ -851,6 +852,7 @@
 
          basis_set%type  = 0
          basis_set%name  = "0"
+         !IF (allocated(basis_set%info)) deallocate(basis_set%info)
 
          CALL dealloc_dnb_OF_basis(basis_set)
 
@@ -2514,14 +2516,14 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        TYPE (basis) :: basis_set
        logical, intent(in), optional :: write_all
 
-       logical                      :: write_all_loc
-       integer                      :: i,j,L,ib,val,li,ui,lj,uj,nb_basis,n1,nq
-       integer,allocatable              :: tab_nq(:)
-       character(len=:), allocatable     :: Rec_line
+       logical                       :: write_all_loc
+       integer                       :: i,j,L,ib,val,li,ui,lj,uj,nb_basis,n1,nq
+       integer,allocatable           :: tab_nq(:)
+       character(len=:), allocatable :: Rec_line
 
-       integer :: err_mem,memory
-       character (len=*), parameter :: Rec_tab = '===='
-       integer, save                :: iRec = -1
+       integer                       :: err_mem,memory
+       character (len=*), parameter  :: Rec_tab = '===='
+       integer, save                 :: iRec = -1
 
 
        iRec = iRec + 1

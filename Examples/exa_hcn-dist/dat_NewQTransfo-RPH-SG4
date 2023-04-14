@@ -24,7 +24,7 @@ LG=9
 nice $DIR_vib/vib << ** > res
  &system /
  &constantes /
- &variables nrho=2 Old_Qtransfo=f nb_Qtransfo=4 /
+ &variables nrho=2 Old_Qtransfo=f nb_Qtransfo=4 Write_QMotions=f /
  &Coord_transfo name_transfo='zmat' nat=4 /
 C
 X     1

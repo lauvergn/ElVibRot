@@ -32,7 +32,7 @@ nice $DIR_vib/vib << ** >res
  &system printlevel=2 PGrid_omp=1 PGrid_maxth=30 /
  &constantes ene_unit="$ene_unit" auTOenergy=2. /
  &variables 
-         zmat=T nat=4 sym=T nrho=2
+         zmat=T nat=4 sym=T nrho=2 Write_QMotions=f
  /
 C
 X     1
@@ -49,7 +49,7 @@ sym  cos(a)      R     r    x    pi   dh
 
  1 1 1    0 0 0
  &minimum pot0=-0.499465823200 pot_itQtransfo=2   read_itQ0transfo=3 unit='bohr' /
-cosa .9
+cosa .999
 R 3.187
 r 2.179
 x 0.

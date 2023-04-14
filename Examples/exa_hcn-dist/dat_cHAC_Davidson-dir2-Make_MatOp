@@ -17,7 +17,7 @@ cd $here
 nice $DIR_vib/vib << ** > res
  &system PMatOp_omp=0 RMatFormat="f18.10" EneFormat="e22.15" /
  &constantes /
- &variables zmat=T nat=4 sym=T nrho=2 /
+ &variables zmat=T nat=4 sym=T nrho=2 Write_QMotions=f /
 C
 0.0     1
 N     2  1

@@ -40,8 +40,7 @@
 !
 !===========================================================================
 !===========================================================================
-      RECURSIVE SUBROUTINE RecSparseGrid_ForDP_type1(basis_SG,          &
-                          para_Tnum,mole,para_ReadOp)
+  RECURSIVE SUBROUTINE RecSparseGrid_ForDP_type1(basis_SG,para_Tnum,mole,para_ReadOp)
       USE mod_system
       USE mod_dnSVM
       USE mod_nDindex

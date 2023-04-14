@@ -18,7 +18,7 @@ cd $here
 
 
 nice $DIR_vib/vib << ** >res
- &system PGrid_omp=1 /
+ &system PGrid_omp=1 Write_QMotions=f /
  &constantes /
  &variables 
          zmat=T
