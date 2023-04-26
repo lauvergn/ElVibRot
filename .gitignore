@@ -5,6 +5,10 @@ ElVibRot.code-workspace
 */.*.swp 
 */*/.*.swp 
 */*/*/.*.swp
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+*/*/*/.DS_Store
 
 Source_ElVibRot/sub_Basis/laguerre_integrands.sh
 Source_ElVibRot/sub_Basis/laguerre_integrands.txt
