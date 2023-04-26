@@ -1888,7 +1888,7 @@
 
       IF (debug) THEN
         CALL write_param_Op(para_H)
-        write(out_unitp,*) 'END BEGINNING ',name_sub
+        write(out_unitp,*) 'END ',name_sub
       END IF
 
   END SUBROUTINE All_param_TO_para_H
