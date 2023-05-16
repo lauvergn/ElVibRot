@@ -40,9 +40,9 @@
 !
 !===========================================================================
 !===========================================================================
-      MODULE mod_param_WP0
-      USE mod_system
-      IMPLICIT NONE
+MODULE mod_param_WP0
+  USE mod_system
+  IMPLICIT NONE
 
         TYPE GWP1D_t
 
@@ -106,7 +106,7 @@
 
         END TYPE param_WP0
 
-        CONTAINS
+CONTAINS
 
   SUBROUTINE Read_GWP1D(GWP1D)
     TYPE (GWP1D_t), intent(inout) :: GWP1D
@@ -114,12 +114,12 @@
 
     !------ initial WP definition -----------------------------
     !     GWP(Q)=exp[-((Q-Qeq)/sigma)2+i*imp_k*(Q-Qeq)+i*phase]
-    real (kind=Rkind) :: sigma,imp_k,Qeq,phase
+    real (kind=Rkind) :: sigma,imp_k,Qeq,phase,k,m,G
     integer           :: iQact
     integer           :: iQdyn
     integer           :: Rerr
 
-    NAMELIST /defWP0/sigma,Qeq,imp_k,phase,iQact,iQdyn
+    NAMELIST /defWP0/sigma,Qeq,imp_k,phase,iQact,iQdyn,k,m,G
 
 
     !----- for debuging --------------------------------------------------
@@ -130,10 +130,14 @@
 
     iQact = -1
     iQdyn = -1
-    sigma    = ONETENTH
     Qeq      = ZERO
     imp_k    = ZERO
     phase    = ZERO
+
+    sigma    = -ONE
+    k        = -ONE
+    m        = -ONE
+    G        = -ONE
 
     read(in_unitp,defWP0,iostat=Rerr)
     IF (Rerr /= 0) THEN
@@ -152,6 +156,25 @@
       STOP 'ERROR in Read_GWP1D: both iQact and iQdyn are defined'
     END IF
 
+    IF ((k > ZERO .OR. m > ZERO .OR. G > ZERO) .AND. sigma > ZERO) THEN
+      write(out_unitp,*) ' ERROR in ',name_sub
+      write(out_unitp,*) ' both sigma and (k or m or G) are defined.'
+      write(out_unitp,*) ' You MUST define sigma or (k or m or G)'
+      write(out_unitp,*) ' sigma,k,m,G: ',sigma,k,m,G
+      STOP 'ERROR in Read_GWP1D:  both sigma and (k or m or G) are defined'
+    END IF
+    IF (sigma < ZERO) THEN
+      IF (k < ZERO .OR. (m > ZERO .AND. G > ZERO)) THEN
+        write(out_unitp,*) ' ERROR in ',name_sub
+        write(out_unitp,*) ' sigma is not defined and:'
+        write(out_unitp,*) '   k < 0 or '
+        write(out_unitp,*) '   m > 0 and H > 0 '
+        write(out_unitp,*) ' sigma,k,m,G: ',sigma,k,m,G
+        STOP 'ERROR in Read_GWP1D:  some inconsistencies on k or m or G'
+      END IF
+      IF (m > 0) sigma = sqrt(TWO)/sqrt(sqrt(k*m))
+      IF (G > 0) sigma = sqrt(TWO)/sqrt(sqrt(k/G))
+    END IF
     GWP1D = GWP1D_t(sigma,Qeq,imp_k,phase,iQact,iQdyn)
 
     IF (print_level > 0) write(out_unitp,*) 'iQact,iQdyn,sigma,Q0,imp_k,phase', &

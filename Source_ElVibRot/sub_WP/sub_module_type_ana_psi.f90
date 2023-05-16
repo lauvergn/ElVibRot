@@ -422,7 +422,7 @@
     IF (present(adia))        ana_psi%adia        = adia
     IF (present(Rho1D))       ana_psi%Rho1D       = Rho1D
     IF (present(Rho2D))       ana_psi%Rho2D       = Rho2D
-    IF (present(Rho_type))       ana_psi%Rho_type       = Rho_type
+    IF (present(Rho_type))    ana_psi%Rho_type    = Rho_type
     IF (ana_psi%Rho_type < 0 .OR. ana_psi%Rho_type > 2) ana_psi%Rho_type = 2
 
     IF (present(Qana_Weight) .AND. present(Weight_Rho)) THEN

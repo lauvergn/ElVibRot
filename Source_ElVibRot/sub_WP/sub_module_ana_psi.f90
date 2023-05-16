@@ -140,7 +140,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
   integer                           :: nioPsi
   character (len=Line_len)          :: name_filePsi      = " "     ! name of the file
 
-  logical :: Grid,Basis,Write_psi_loc
+  logical :: Grid,Basis,Write_psi_loc,GridDone
 
   !----- dynamic allocation memory ------------------------------------
   real (kind=Rkind), allocatable :: moy_Qba(:)
@@ -205,8 +205,10 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
 
     ! add the energy
     iE = int(log10(abs(E)+ONETENTH**8)) ! to avoid zero
-    CALL modif_ana_psi(ana_psi,                                                 &
-                 EFormat='f' // TO_string(15-iE) // '.' // TO_string(7-iE) )
+    GridDone = ana_psi%GridDone
+    CALL modif_ana_psi(ana_psi,EFormat='f' // TO_string(15-iE) // '.' // TO_string(7-iE) )
+    ana_psi%GridDone = GridDone
+
     !write(6,*) E,iE,'ana_psi%Eformat: ',ana_psi%Eformat
 
     psi_line = psi_line // ' ' // real_TO_char(E,Rformat=ana_psi%Eformat)
@@ -247,6 +249,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
       END DO
       END DO
       CALL dealloc_NParray(Mij,'Mij',name_sub)
+
     END IF
 
   ELSE ! not propa
@@ -280,11 +283,9 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
     ELSE
 
       IF (ana_psi%num_psi < 10000 .AND. Dominant_Channel(2) < 10000) THEN
-        lformat = trim( '("lev: ",i4,i4,l3,3(1x,' //      &
-                               trim(adjustl(EneIO_format)) // '))' )
+        lformat = trim( '("lev: ",i4,i4,l3,3(1x,' // trim(adjustl(EneIO_format)) // '))' )
       ELSE
-        lformat = trim( '("lev: ",i0,i0,l3,3(1x,' //      &
-                               trim(adjustl(EneIO_format)) // '))' )
+        lformat = trim( '("lev: ",i0,i0,l3,3(1x,' // trim(adjustl(EneIO_format)) // '))' )
       END IF
 
       write(out_unitp,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop
@@ -298,10 +299,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
   flush(out_unitp)
 
   IF (psi%nb_bi > 1 .AND. .NOT. ana_psi%propa) THEN
-
-    lformat = trim( '("% HAC: ",' //                    &
-                            TO_string(psi%nb_bi) // "(1x,f4.0) )" )
-
+    lformat = trim( '("% HAC: ",' // TO_string(psi%nb_bi) // "(1x,f4.0) )" )
     write(out_unitp,lformat) (tab_WeightChannels(i_bi,1)*TEN**2,i_bi=1,psi%nb_bi)
   END IF
 
@@ -309,11 +307,10 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
 
   IF (.NOT. adia .AND. .NOT. ana_psi%propa) CALL calc_MaxCoef_psi(psi,ana_psi%T,info)
 
-  IF (ana_psi%propa) CALL psi_Qba_ie_psi(ana_psi%T,psi,ana_psi,tab_WeightChannels,info)
+  IF (ana_psi%propa) CALL psi_Qba_ie_psi(ana_psi%T,psi,ana_psi,info)
 
   IF (allocated(psi%BasisnD%nDindG%nDsize)) THEN
     CALL Rho1D_Rho2D_psi(psi,ana_psi,adia)
-
     CALL write1D2D_psi(psi,ana_psi,adia)
   ELSE
     write(out_unitp,*) ' WARNING Rho1D or Rho2D or 1Dcut or 2Dcut are not possible!'
@@ -627,7 +624,7 @@ END SUBROUTINE sub_analyze_psi
 !     means of Qact1(i) psi  : <psi|Qact(i)|psi>
 !
 !================================================================
-      SUBROUTINE psi_Qba_ie_psi(T,psi,ana_psi,tab_WeightChannels,info)
+  SUBROUTINE psi_Qba_ie_psi(T,psi,ana_psi,info)
       USE mod_system
       USE mod_param_SGType2
       USE mod_psi_set_alloc
@@ -639,27 +636,26 @@ END SUBROUTINE sub_analyze_psi
       TYPE (param_ana_psi), intent(in)              :: ana_psi
       character (len=*),    intent(in)              :: info
       real (kind=Rkind),    intent(in)              :: T
-      real (kind=Rkind),    intent(in), allocatable :: tab_WeightChannels(:,:)
-
 
 !------ working variables ---------------------------------
-      TYPE(OldParam)    :: OldPara
-      real (kind=Rkind) :: Qmean(psi%nb_act1)
-      real (kind=Rkind) :: Qmean_ie(psi%nb_act1,psi%nb_bi,psi%nb_be)
+      TYPE(OldParam)        :: OldPara
 
-      real (kind=Rkind) :: Qmean2(psi%nb_act1,psi%nb_act1)
-      real (kind=Rkind) :: Qmean2_ie(psi%nb_act1,psi%nb_act1,psi%nb_bi,psi%nb_be)
+      real (kind=Rkind)     :: Qmean(psi%nb_act1)
+      real (kind=Rkind)     :: Qmean_ie(psi%nb_act1,psi%nb_bi,psi%nb_be)
+      real (kind=Rkind)     :: Qmean2(psi%nb_act1,psi%nb_act1)
+      real (kind=Rkind)     :: Qmean2_ie(psi%nb_act1,psi%nb_act1,psi%nb_bi,psi%nb_be)
+      real (kind=Rkind)     :: pop_ie(psi%nb_bi,psi%nb_be)
 
-      real (kind=Rkind) :: x(Psi%BasisnD%ndim)
-      real (kind=Rkind) :: xy(Psi%BasisnD%ndim,Psi%BasisnD%ndim)
+      real (kind=Rkind)     :: x(Psi%BasisnD%ndim)
+      real (kind=Rkind)     :: xy(Psi%BasisnD%ndim,Psi%BasisnD%ndim)
 
-      integer           :: i_qa
-      integer           :: i_be,i_bi,i_ba,i_bie
-      integer           :: i,j
-      real (kind=Rkind) :: WrhonD
-      logical           :: psiN,norm2GridRep,norm2BasisRep
-      real (kind=Rkind)    :: RVec_bie(psi%nb_bi*psi%nb_be)
-      complex (kind=Rkind) :: CVec_bie(psi%nb_bi*psi%nb_be)
+      integer               :: i_qa
+      integer               :: i_be,i_bi,i_ba,i_bie
+      integer               :: i,j
+      real (kind=Rkind)     :: WrhonD
+      logical               :: psiN,norm2GridRep,norm2BasisRep
+      real (kind=Rkind)     :: RVec_bie(psi%nb_bi*psi%nb_be)
+      complex (kind=Rkind)  :: CVec_bie(psi%nb_bi*psi%nb_be)
 !----- for debuging --------------------------------------------------
       character (len=*), parameter :: name_sub = 'psi_Qba_ie_psi'
       logical,parameter :: debug = .FALSE.
@@ -674,13 +670,7 @@ END SUBROUTINE sub_analyze_psi
 
       IF (psi%nb_baie > psi%nb_tot) RETURN
 
-
-      IF (.NOT. allocated(tab_WeightChannels)) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'tab_WeightChannels is not allocated!!'
-        write(out_unitp,*) ' It should be done in sub_analyze or sub_analyze_WP_forPropa'
-        STOP
-      END IF
+      pop_ie(:,:)        = ZERO
 
       Qmean(:)           = ZERO
       Qmean_ie(:,:,:)    = ZERO
@@ -724,22 +714,21 @@ END SUBROUTINE sub_analyze_psi
           Qmean2(:,:)              = Qmean2(:,:)              + xy(:,:) * RVec_bie(i_bie)
           Qmean2_ie(:,:,i_bi,i_be) = Qmean2_ie(:,:,i_bi,i_be) + xy(:,:) * RVec_bie(i_bie)
 
+          pop_ie(i_bi,i_be)        = pop_ie(i_bi,i_be)        + RVec_bie(i_bie)
+
         END DO
         END DO
 
       END DO
 
-      Qmean(:)    = Qmean(:)    / sum(tab_WeightChannels)
-      Qmean2(:,:) = Qmean2(:,:) / sum(tab_WeightChannels)
-
+      Qmean(:)    = Qmean(:)    / sum(pop_ie)
+      Qmean2(:,:) = Qmean2(:,:) / sum(pop_ie)
 
       DO i_be=1,psi%nb_be
       DO i_bi=1,psi%nb_bi
-        IF (tab_WeightChannels(i_bi,i_be) > ONETENTH**7) THEN
-          Qmean_ie(:,i_bi,i_be)    = Qmean_ie(:,i_bi,i_be) /                    &
-                                     tab_WeightChannels(i_bi,i_be)
-          Qmean2_ie(:,:,i_bi,i_be) = Qmean2_ie(:,:,i_bi,i_be) /                 &
-                                     tab_WeightChannels(i_bi,i_be)
+        IF (pop_ie(i_bi,i_be) > ONETENTH**7) THEN
+          Qmean_ie(:,i_bi,i_be)    = Qmean_ie(:,i_bi,i_be)    / pop_ie(i_bi,i_be)
+          Qmean2_ie(:,:,i_bi,i_be) = Qmean2_ie(:,:,i_bi,i_be) / pop_ie(i_bi,i_be)
         ELSE
           Qmean_ie(:,i_bi,i_be)    = ZERO
           Qmean2_ie(:,:,i_bi,i_be) = ZERO
@@ -748,42 +737,37 @@ END SUBROUTINE sub_analyze_psi
       END DO
 
       DO i=1,psi%nb_act1
-        write(out_unitp,11) 'T iQbasis Qmean_ie ',info,T,i,Qmean_ie(i,:,:)
-        write(out_unitp,11) 'T iQbasis Qmean    ',info,T,i,Qmean(i)
-        write(out_unitp,11) 'T iQbasis <Qi>_ie ',info,T,i,Qmean_ie(i,:,:)
-        write(out_unitp,11) 'T iQbasis <Qi>    ',info,T,i,Qmean(i)
+        write(out_unitp,11) 'T <Q',TO_string(i),'>_ie ',info,T,Qmean_ie(i,:,:)
+        write(out_unitp,11) 'T <Q',TO_string(i),'>    ',info,T,Qmean(i)
       END DO
- 11   format(2a,' ',f0.4,' ',i0,' ',100(' ',f0.3))
+ 11   format(4a,' ',f0.5,100(' ',f0.4))
+      DO i=1,psi%nb_act1
+      DO j=i,psi%nb_act1
+        write(out_unitp,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>_ie ',info,T,Qmean2_ie(j,i,:,:)
+        write(out_unitp,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>    ',info,T,Qmean2(j,i)
+      END DO
+      END DO
+ 21   format(6a,' ',f0.5,100(' ',f0.4))
+      flush(out_unitp)
+
+      CALL dealloc_OldParam(OldPara)
+
+    !----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unitp,*) 'Qmean',Qmean
+      DO i=1,psi%nb_act1
+        write(out_unitp,*) 'Qmean_ie',i,Qmean_ie(i,:,:)
+      END DO
+      write(out_unitp,*) '<Qi*Qj>',Qmean2(:,:)
       DO i=1,psi%nb_act1
       DO j=i,psi%nb_act1
         write(out_unitp,21) 'T iQbasis <Qi*Qj>_ie ',info,T,j,i,Qmean2_ie(j,i,:,:)
         write(out_unitp,21) 'T iQbasis <Qi*Qj>    ',info,T,j,i,Qmean2(j,i)
       END DO
       END DO
- 21   format(2a,' ',f0.4,' ',2(i0,' '),100(' ',f0.3))
-      flush(out_unitp)
-
-      CALL dealloc_OldParam(OldPara)
-
-!----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'Qmean',Qmean
-        DO i=1,psi%nb_act1
-          write(out_unitp,*) 'Qmean_ie',i,Qmean_ie(i,:,:)
-        END DO
-        write(out_unitp,*) '<Qi*Qj>',Qmean2(:,:)
-        DO i=1,psi%nb_act1
-        DO j=i,psi%nb_act1
-          write(out_unitp,21) 'T iQbasis <Qi*Qj>_ie ',info,T,j,i,Qmean2_ie(j,i,:,:)
-          write(out_unitp,21) 'T iQbasis <Qi*Qj>    ',info,T,j,i,Qmean2(j,i)
-        END DO
-        END DO
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!----------------------------------------------------------
-
-
-      END SUBROUTINE psi_Qba_ie_psi
+      write(out_unitp,*) 'END ',name_sub
+    END IF
+  END SUBROUTINE psi_Qba_ie_psi
       SUBROUTINE write1D2D_psi(psi,ana_psi,adia)
       USE mod_system
       USE mod_dnSVM
