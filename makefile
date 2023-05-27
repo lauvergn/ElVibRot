@@ -335,11 +335,13 @@ zip: cleanall
 # AD_dnSVM + QML Libs ...
 #===============================================
 #	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh $(EXTLIB_TYPE))
+TNUMTANALIBA_old=$(TNUMTANA_DIR)/libCoord_KEO_PrimOp_$(FFC)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT).a
 $(TNUMTANALIBA):
 	@test -d $(ExtLibDIR)    || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh)
 	@test -d $(TNUMTANA_DIR) || (echo $(TNUMTANA_DIR) "does not exist" ; exit 1)
 	cd $(TNUMTANA_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) ExtLibDIR=$(ExtLibDIR) INT=$(INT)
+	test -e $(TNUMTANALIBA_old) && ln -s $(TNUMTANALIBA_old) $(TNUMTANALIBA)
 	@echo "  done " $(TNUMTANA_DIR) " in "$(BaseName)
 #
 $(CONSTPHYSLIBA):
