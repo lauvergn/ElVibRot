@@ -334,10 +334,10 @@ zip: cleanall
 #=== external libraries ========================
 # AD_dnSVM + QML Libs ...
 #===============================================
-#
+#	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh $(EXTLIB_TYPE))
 $(TNUMTANALIBA):
 	@test -d $(ExtLibDIR)    || (echo $(ExtLibDIR) "does not exist" ; exit 1)
-	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh $(EXTLIB_TYPE))
+	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh)
 	@test -d $(TNUMTANA_DIR) || (echo $(TNUMTANA_DIR) "does not exist" ; exit 1)
 	cd $(TNUMTANA_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) ExtLibDIR=$(ExtLibDIR) INT=$(INT)
 	@echo "  done " $(TNUMTANA_DIR) " in "$(BaseName)
