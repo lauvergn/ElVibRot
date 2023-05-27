@@ -902,7 +902,7 @@ SUBROUTINE sub_analyze_mini_WP_OpWP(T,WP,nb_WP,para_H,ana_psi,adia,para_field)
       E      = convRWU_TO_R_WITH_WritingUnit(RWU_E)
 
       ! add the energy
-      iE = int(log10(abs(E)+ONETENTH**8)) ! to avoid zero
+      iE = int(log10(abs(E)+ONETENTH**8)) ! 0.1**8 to avoid zero
       CALL modif_ana_psi(ana_psi,                                               &
                 EFormat='f' // TO_string(15-iE) // '.' // TO_string(7-iE) )
       !write(6,*) E,iE,'ana_psi%Eformat: ',ana_psi%Eformat

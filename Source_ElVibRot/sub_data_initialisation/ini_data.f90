@@ -105,6 +105,9 @@
 
 !----- Operators -------------------------------------------
       TYPE (param_AllOp)     :: para_AllOp
+      integer                :: nb_Op
+      !logical                :: With_Pi = .FALSE.
+      logical                :: With_Pi = .TRUE.
 
 !----- working variables ---------------------------------------------
 
@@ -509,6 +512,7 @@
         write(out_unitp,*)
         write(out_unitp,*) 'para_ReadOp%nb_scalar_Op:    ',para_ReadOp%nb_scalar_Op
         write(out_unitp,*) 'para_ReadOp%PrimOp_t%nb_CAP: ',para_ReadOp%PrimOp_t%nb_CAP
+        write(out_unitp,*) 'Pi Operators:                ',With_Pi
       ENDIF
 
       IF (para_ReadOp%nb_scalar_Op > 27) THEN
@@ -532,6 +536,7 @@
       ! We add 2 for H and S operators
       para_AllOp%nb_Op = 2 + para_ReadOp%nb_scalar_Op +                         &
                              para_ReadOp%nb_CAP + para_ReadOp%nb_FluxOp
+      IF (With_Pi) para_AllOp%nb_Op = para_AllOp%nb_Op + mole%nb_act1
 
       IF (debug) write(out_unitp,*) 'para_AllOp%nb_Op        : ',para_AllOp%nb_Op
 
@@ -575,7 +580,7 @@
                               mole%ActiveTransfo%list_QactTOQdyn)
       para_AllOp%tab_Op(iOp)%symab    = 0 ! totally symmetric
       para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
-
+      nb_Op = iOp
 
       DO i=1,para_ReadOp%nb_scalar_Op  ! for scalar operators (Dip)
         iOp = iOp + 1
@@ -596,6 +601,7 @@
         para_AllOp%tab_Op(iOp)%symab    = -1  ! the symmetry is not used
         para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
       END DO
+      nb_Op = iOp
 
       DO i=1,para_ReadOp%PrimOp_t%nb_CAP  ! for CAP operators
         iOp = iOp + 1
@@ -619,6 +625,7 @@
         IF (debug) CALL Write_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,With_list=.TRUE.)
 
       END DO
+      nb_Op = iOp
 
       DO i=1,para_ReadOp%PrimOp_t%nb_FluxOp  ! for flux operators
         iOp = iOp + 1
@@ -642,6 +649,29 @@
         CALL Write_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,With_list=.TRUE.)
 
       END DO
+      nb_Op = iOp
+
+      IF (With_Pi) THEN
+        DO i=1,mole%nb_act1  ! for the P_i operators
+          iOp = iOp + 1
+          CALL param_Op1TOparam_Op2(para_AllOp%tab_Op(2),para_AllOp%tab_Op(iOp))
+          para_AllOp%tab_Op(iOp)%n_Op    = nb_Op+i
+          para_AllOp%tab_Op(iOp)%name_Op = 'P' // TO_string(i) // '_' // TO_string(iOp)
+
+          CALL Init_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,           &
+                           type_Op=20,nb_Qact=mole%nb_act1,iQact=i,       &
+                           cplx=.FALSE.,JRot=Para_Tnum%JJ,                &
+                           direct_KEO=.FALSE.,direct_ScalOp=para_ReadOp%direct_ScalOp)
+          CALL derive_termQact_TO_derive_termQdyn(                        &
+                                para_AllOp%tab_Op(iOp)%derive_termQdyn,   &
+                                para_AllOp%tab_Op(iOp)%derive_termQact,   &
+                                mole%ActiveTransfo%list_QactTOQdyn)
+
+          para_AllOp%tab_Op(iOp)%symab    = -1  ! the symmetry is not used
+          para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
+        END DO
+        nb_Op = iOp
+      END IF
 
       ! modify some parameters for the overlap operator. ...
       ! ... It has to be done after all the other operators
@@ -714,7 +744,6 @@
       write(out_unitp,*)
       write(out_unitp,*) "============================================================"
       write(out_unitp,*) "============================================================"
-
 !=====================================================================
 !---------------------------------------------------------------------
       IF (debug) THEN

@@ -47,8 +47,7 @@
 !      + les derivees 1er et 2d.
 !
 !=============================================================
-      SUBROUTINE sub_quadra_fourier(base,nosym,nstep,nb_shift,tab_shift)
-
+  SUBROUTINE sub_quadra_fourier(base,nosym,nstep,nb_shift,tab_shift)
       USE mod_system
       USE mod_basis
       IMPLICIT NONE
@@ -176,6 +175,47 @@
       END IF
 !-----------------------------------------------------------
 
-      RETURN
-      end subroutine sub_quadra_fourier
+  end subroutine sub_quadra_fourier
+  SUBROUTINE RB_TO_RG_fourier(RB,RG,base)
+  USE mod_system
+  USE mod_basis
+  IMPLICIT NONE
+
+  !---------------------------------------------------------------------
+  !---------- variables passees en argument ----------------------------
+  real (kind=Rkind), intent(in)    :: RB(:)
+  real (kind=Rkind), intent(inout) :: RG(:)
+
+  TYPE (basis), intent(in)         :: base
+
+  integer :: nb,nq
+  !----- for debuging --------------------------------------------------
+  logical, parameter :: debug = .FALSE.
+  !logical, parameter :: debug = .TRUE.
+  !-----------------------------------------------------------
+  nq = get_nq_FROM_basis(base)
+  IF (debug) THEN
+    write(out_unitp,*) 'BEGINNING RB_TO_RG_fourier'
+    write(out_unitp,*) 'nb,nq',base%nb,nq
+    write(out_unitp,*) 'RB',RB(:)
+  END IF
+  !-----------------------------------------------------------
+
+  IF (base%nb < size(RB) .OR. nq /= size(RG)) THEN
+    write(out_unitp,*) ' ERROR in RB_TO_RG_fourier'
+    write(out_unitp,*) ' nb is inconsistent with size(RB)',base%nb,size(RB)
+    write(out_unitp,*) ' nq is inconsistent with size(RG)',nq,size(RG)
+    STOP ' ERROR in RB_TO_RG_fourier: inconsistent sizes'
+  END IF
+
+  RG = matmul(base%dnRGB%d0(:,1:nb),RB(1:nb))
+
+!-----------------------------------------------------------
+  IF (debug) THEN
+    write(out_unitp,*) 'RG',RG(:)
+    write(out_unitp,*) 'END RB_TO_RG_fourier'
+  END IF
+!-----------------------------------------------------------
+
+end subroutine RB_TO_RG_fourier
 

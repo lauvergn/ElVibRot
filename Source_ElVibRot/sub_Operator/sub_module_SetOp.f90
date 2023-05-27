@@ -93,7 +93,7 @@ MODULE mod_SetOp
                                                  ! usefull before the spectral transformation (for another operator)
 
           integer,              allocatable :: List_Mat_i_todo(:)
-          logical                       :: Partial_MatOp = .FALSE.
+          logical                           :: Partial_MatOp = .FALSE.
           real (kind=Rkind),    allocatable :: Rmat(:,:)        ! Rmat(nb_tot ,nb_tot )
           complex (kind=Rkind), allocatable :: Cmat(:,:)        ! Cmat(nb_tot ,nb_tot )
 
@@ -126,7 +126,7 @@ MODULE mod_SetOp
 
           logical                      :: alloc_Grid           = .FALSE.
           logical                      :: Grid_done            = .FALSE.
-          TYPE (File_t)            :: file_Grid                    ! file of the grid
+          TYPE (File_t)                :: file_Grid                    ! file of the grid
 
           TYPE (param_ReadOp)          :: para_ReadOp
 

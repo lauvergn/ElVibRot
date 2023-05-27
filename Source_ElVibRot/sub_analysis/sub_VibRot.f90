@@ -123,7 +123,7 @@
         STOP
       END IF
 
-      CALL Init_d0MatOp(MatRV,type_Op,0,nb_psi,JRot=JRot,cplx=para_H%cplx)
+      CALL Init_d0MatOp(MatRV,type_Op,0,nb_psi,iQact=0,JRot=JRot,cplx=para_H%cplx)
       para_H%Make_Mat = .FALSE.
       DO iterm_Op=1,MatRV%nb_term
         DO iv=1,nb_psi

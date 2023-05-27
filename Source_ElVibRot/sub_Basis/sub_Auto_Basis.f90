@@ -2014,8 +2014,7 @@
       CALL error_memo_allo(err_mem,memory,'d0MatOpd0bWrho',name_sub,'d0MatOp')
       DO i=1,nb_ba
       DO k=1,kmem
-        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,         &
-                                            JRot=0,cplx=para_H%cplx)
+        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,iQact=0,JRot=0,cplx=para_H%cplx)
       END DO
       END DO
 

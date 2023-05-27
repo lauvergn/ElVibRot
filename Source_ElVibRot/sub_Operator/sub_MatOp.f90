@@ -840,8 +840,7 @@ CONTAINS
       CALL error_memo_allo(err_mem,memory,'d0MatOpd0bWrho',name_sub,'d0MatOp')
       DO i=1,nb_ba
       DO k=1,kmem
-        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,         &
-                                            JRot=0,cplx=para_Op%cplx)
+        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,iQact=0,JRot=0,cplx=para_Op%cplx)
       END DO
       END DO
 
@@ -1158,7 +1157,7 @@ CONTAINS
 !-------------------------------------------------------------
 !-     memories allocation: td0b, Opd0bWrho matRV, mat2, mat3
 !-------------------------------------------------------------
-      CALL Init_d0MatOp(MatRV,type_Op,0,nb_ba,JRot=JRot,cplx=para_Op%cplx)
+      CALL Init_d0MatOp(MatRV,type_Op,0,nb_ba,iQact=0,JRot=JRot,cplx=para_Op%cplx)
 
       IF (para_Op%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
         CALL alloc_NParray(mat2,[nb_ba,nb_ba],'mat2',name_sub)
@@ -1176,8 +1175,7 @@ CONTAINS
       CALL error_memo_allo(err_mem,memory,'d0MatOpd0bWrho',name_sub,'d0MatOp')
       DO i=1,nb_ba
       DO k=1,kmem
-        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,         &
-                                            JRot=JRot,cplx=para_Op%cplx)
+        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,iQact=0,JRot=JRot,cplx=para_Op%cplx)
       END DO
       END DO
 
@@ -1188,8 +1186,7 @@ CONTAINS
       CALL alloc_NParray(td0b,[nb_ba,kmem],'td0b',name_sub)
       CALL alloc_NParray(VecQ,[kmem],'VecQ',name_sub)
 
-      CALL Init_d0MatOp(d0MatOp,type_Op,para_Op%mole%nb_act1,nb_bie,    &
-                                             JRot=JRot,cplx=para_Op%cplx)
+      CALL Init_d0MatOp(d0MatOp,type_Op,para_Op%mole%nb_act1,nb_bie,iQact=0,JRot=JRot,cplx=para_Op%cplx)
       !--------------------------------------------------------
 
 
@@ -1499,7 +1496,7 @@ CONTAINS
 !-------------------------------------------------------------
 !-     memories allocation: td0b, Opd0bWrho matRV, mat2, mat3
 !-------------------------------------------------------------
-      CALL Init_d0MatOp(MatRV,type_Op,0,nb_ba,JRot=JRot,cplx=para_Op%cplx)
+      CALL Init_d0MatOp(MatRV,type_Op,0,nb_ba,iQact=0,JRot=JRot,cplx=para_Op%cplx)
 
       IF (para_Op%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
         CALL alloc_NParray(mat2,[nb_ba,nb_ba],'mat2',name_sub)
@@ -1516,8 +1513,7 @@ CONTAINS
       CALL error_memo_allo(err,memory,'d0MatOpd0bWrho',name_sub,'d0MatOp')
       DO i=1,nb_ba
       DO k=1,kmem
-        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,         &
-                                            JRot=JRot,cplx=para_Op%cplx)
+        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,iQact=0,JRot=JRot,cplx=para_Op%cplx)
       END DO
       END DO
 
@@ -1527,8 +1523,7 @@ CONTAINS
 
       CALL alloc_NParray(td0b,[nb_ba,kmem],'td0b',name_sub)
 
-      CALL Init_d0MatOp(d0MatOp,type_Op,para_Op%mole%nb_act1,nb_bie,    &
-                                             JRot=JRot,cplx=para_Op%cplx)
+      CALL Init_d0MatOp(d0MatOp,type_Op,para_Op%mole%nb_act1,nb_bie,iQact=0,JRot=JRot,cplx=para_Op%cplx)
       !--------------------------------------------------------
 
 
@@ -1977,7 +1972,7 @@ CONTAINS
 !-------------------------------------------------------------
 !-     memories allocation: td0b, Opd0bWrho matRV, mat2, mat3
 !-------------------------------------------------------------
-      CALL Init_d0MatOp(MatRV,type_Op,0,nb_ba,JRot=JRot,cplx=para_Op%cplx)
+      CALL Init_d0MatOp(MatRV,type_Op,0,nb_ba,iQact=0,JRot=JRot,cplx=para_Op%cplx)
 
       IF (para_Op%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
         CALL alloc_NParray(mat2,[nb_ba,nb_ba],'mat2',name_sub)
@@ -1994,8 +1989,7 @@ CONTAINS
       CALL error_memo_allo(err,memory,'d0MatOpd0bWrho',name_sub,'d0MatOp')
       DO i=1,nb_ba
       DO k=1,kmem
-        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,         &
-                                            JRot=JRot,cplx=para_Op%cplx)
+        CALL Init_d0MatOp(d0MatOpd0bWrho(k,i),type_Op,0,nb_bie,iQact=0,JRot=JRot,cplx=para_Op%cplx)
       END DO
       END DO
 
@@ -2005,8 +1999,7 @@ CONTAINS
 
       CALL alloc_NParray(td0b,[nb_ba,kmem],'td0b',name_sub)
 
-      CALL Init_d0MatOp(d0MatOp,type_Op,para_Op%mole%nb_act1,nb_bie,    &
-                                             JRot=JRot,cplx=para_Op%cplx)
+      CALL Init_d0MatOp(d0MatOp,type_Op,para_Op%mole%nb_act1,nb_bie,iQact=0,JRot=JRot,cplx=para_Op%cplx)
       !--------------------------------------------------------
 
 

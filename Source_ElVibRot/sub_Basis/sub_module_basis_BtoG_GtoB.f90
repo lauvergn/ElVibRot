@@ -123,8 +123,8 @@
 !          write(out_unitp,*) 'shape RVecB',shape(RVecB)
 !          flush(out_unitp)
 
-
-             RvecB(:) = matmul( basis_set%dnRBGwrho%d0,RVecG)
+             CALL RG_TO_RB_basis(RVecG,RvecB,basis_set)
+             !RvecB(:) = matmul( basis_set%dnRBGwrho%d0,RVecG)
            END IF
 
         ELSE ! basis_set%nb_basis MUST BE > 0
@@ -175,9 +175,12 @@
 
                   DO iq=1,nnq
 
-                    RTempB(iq,ibb1:ibb2) = matmul(      &
-                      basis_set%tab_Pbasis(ibasis)%Pbasis%dnRBGwrho%d0(1:newnb2,:), &
-                                                  RTempG(iq,:,ib))
+                    CALL RG_TO_RB_basis(RTempG(iq,:,ib),RTempB(iq,ibb1:ibb2),  &
+                                        basis_set%tab_Pbasis(ibasis)%Pbasis)
+
+                    !RTempB(iq,ibb1:ibb2) = matmul(      &
+                    !  basis_set%tab_Pbasis(ibasis)%Pbasis%dnRBGwrho%d0(1:newnb2,:), &
+                    !                              RTempG(iq,:,ib))
 
                     nb_mult_GTOB = nb_mult_GTOB + int(newnb2,kind=ILkind)*size(RTempG(iq,:,ib),kind=ILkind)
                     !write(out_unitp,*) 'nb_mult_GTOB,nb,size(RVecG)',nb_mult_GTOB,newnb2,size(RG)
@@ -197,8 +200,7 @@
                   DO iq=1,nnq
 
                   RG(:) = RTempG(iq,:,ib)
-                  CALL RecRVecG_TO_RvecB(RG,RB,nq2,newnb2,            &
-                                         basis_set%tab_Pbasis(ibasis)%Pbasis)
+                  CALL RecRVecG_TO_RvecB(RG,RB,nq2,newnb2,basis_set%tab_Pbasis(ibasis)%Pbasis)
 
                   RTempB(iq,ibb1:ibb2) = RB(1:newnb2)
 

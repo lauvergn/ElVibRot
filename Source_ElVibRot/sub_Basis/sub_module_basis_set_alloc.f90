@@ -40,7 +40,7 @@
 !
 !===========================================================================
 !===========================================================================
- MODULE mod_basis_set_alloc
+MODULE mod_basis_set_alloc
   use mod_system
 
   use mod_dnSVM,   only: type_dnmat,type_dncplxmat,type_intvec,          &
@@ -52,14 +52,14 @@
                          alloc_array, alloc_nparray,                    &
                          dealloc_nparray, dealloc_array
 
-      use mod_RotBasis_Param ! all
-      use mod_Basis_Grid_Param
-      USE mod_SymAbelian
-      USE mod_param_SGType2
-      USE mod_Basis_L_TO_n
-      IMPLICIT NONE
+  use mod_RotBasis_Param ! all
+  use mod_Basis_Grid_Param
+  USE mod_SymAbelian
+  USE mod_param_SGType2
+  USE mod_Basis_L_TO_n
+  IMPLICIT NONE
 
-      PRIVATE
+  PRIVATE
 
         TYPE basis
           logical           :: active                = .FALSE.    ! (F)
@@ -296,12 +296,12 @@
 
 
       PUBLIC  P_basis, alloc_tab_Pbasis_OF_basis
-      PUBLIC  param_AllBasis, alloc_AllBasis, dealloc_AllBasis,         &
-              get_Ene0_AT_ib_FROM_Basis
+      PUBLIC  param_AllBasis, alloc_AllBasis, dealloc_AllBasis, get_Ene0_AT_ib_FROM_Basis
 
       PUBLIC alloc_array, dealloc_array
+      PUBLIC RB_TO_RG_basis, RG_TO_RB_basis, CB_TO_CG_basis, CG_TO_CB_basis
 
-      CONTAINS
+CONTAINS
 
 !      ==========================================================
 !       alloc memory of the TYPE basis
@@ -2502,6 +2502,178 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE Get_MatdnCBB
+
+
+      SUBROUTINE RB_TO_RG_basis(RB,RG,base)
+        USE mod_system
+        IMPLICIT NONE
+      
+        !---------------------------------------------------------------------
+        !---------- variables passees en argument ----------------------------
+        real (kind=Rkind), intent(in)    :: RB(:)
+        real (kind=Rkind), intent(inout) :: RG(:)
+      
+        TYPE (basis), intent(in)         :: base
+      
+        integer :: nb,nq
+        !----- for debuging --------------------------------------------------
+        logical, parameter :: debug = .FALSE.
+        !logical, parameter :: debug = .TRUE.
+        !-----------------------------------------------------------
+        nq = get_nq_FROM_basis(base)
+        nb = base%nb
+
+        IF (debug) THEN
+          write(out_unitp,*) 'BEGINNING RB_TO_RG_basis'
+          write(out_unitp,*) 'nb,nq',nb,nq
+          write(out_unitp,*) 'RB',RB(:)
+        END IF
+        !-----------------------------------------------------------
+      
+        IF (nb < size(RB) .OR. nq /= size(RG)) THEN
+          write(out_unitp,*) ' ERROR in RB_TO_RG_basis'
+          write(out_unitp,*) ' nb is inconsistent with size(RB)',nb,size(RB)
+          write(out_unitp,*) ' nq is inconsistent with size(RG)',nq,size(RG)
+          STOP ' ERROR in RB_TO_RG_basis: inconsistent sizes'
+        END IF
+      
+        RG = matmul(base%dnRGB%d0(:,1:nb),RB(1:nb))
+      
+      !-----------------------------------------------------------
+        IF (debug) THEN
+          write(out_unitp,*) 'RG',RG(:)
+          write(out_unitp,*) 'END RB_TO_RG_basis'
+        END IF
+      !-----------------------------------------------------------
+      END SUBROUTINE RB_TO_RG_basis
+      SUBROUTINE RG_TO_RB_basis(RG,RB,base)
+        USE mod_system
+        IMPLICIT NONE
+      
+        !---------------------------------------------------------------------
+        !---------- variables passees en argument ----------------------------
+        real (kind=Rkind), intent(in)    :: RG(:)
+        real (kind=Rkind), intent(inout) :: RB(:)
+      
+        TYPE (basis), intent(in)         :: base
+      
+        integer :: nb,nq
+        !----- for debuging --------------------------------------------------
+        logical, parameter :: debug = .FALSE.
+        !logical, parameter :: debug = .TRUE.
+        !-----------------------------------------------------------
+        nq = get_nq_FROM_basis(base)
+        nb = base%nb
+        IF (debug) THEN
+          write(out_unitp,*) 'BEGINNING RG_TO_RB_basis'
+          write(out_unitp,*) 'nb,nq',nb,nq
+          write(out_unitp,*) 'RG',RG(:)
+        END IF
+        !-----------------------------------------------------------
+      
+        IF (nb < size(RB) .OR. nq /= size(RG)) THEN
+          write(out_unitp,*) ' ERROR in RG_TO_RB_basis'
+          write(out_unitp,*) ' nb is inconsistent with size(RB)',nb,size(RB)
+          write(out_unitp,*) ' nq is inconsistent with size(RG)',nq,size(RG)
+          STOP ' ERROR in RG_TO_RB_basis: inconsistent sizes'
+        END IF
+      
+        RB(1:nb) = matmul(base%dnRBGwrho%d0(1:nb,:),RG)
+      
+      !-----------------------------------------------------------
+        IF (debug) THEN
+          write(out_unitp,*) 'RB',RB(:)
+          write(out_unitp,*) 'END RG_TO_RB_basis'
+        END IF
+      !-----------------------------------------------------------
+      
+      END SUBROUTINE RG_TO_RB_basis
+      SUBROUTINE CB_TO_CG_basis(CB,CG,base)
+        USE mod_system
+        IMPLICIT NONE
+      
+        !---------------------------------------------------------------------
+        !---------- variables passees en argument ----------------------------
+        complex (kind=Rkind), intent(in)    :: CB(:)
+        complex (kind=Rkind), intent(inout) :: CG(:)
+      
+        TYPE (basis), intent(in)            :: base
+      
+        integer :: nb,nq
+        !----- for debuging --------------------------------------------------
+        logical, parameter :: debug = .FALSE.
+        !logical, parameter :: debug = .TRUE.
+        !-----------------------------------------------------------
+        nq = get_nq_FROM_basis(base)
+        nb = base%nb
+        IF (debug) THEN
+          write(out_unitp,*) 'BEGINNING CB_TO_CG_basis'
+          write(out_unitp,*) 'nb,nq',nb,nq
+          write(out_unitp,*) 'CB',CB(:)
+        END IF
+        !-----------------------------------------------------------
+      
+        IF (nb < size(CB) .OR. nq /= size(CG)) THEN
+          write(out_unitp,*) ' ERROR in CB_TO_CG_basis'
+          write(out_unitp,*) ' nb is inconsistent with size(CB)',nb,size(CB)
+          write(out_unitp,*) ' nq is inconsistent with size(CG)',nq,size(CG)
+          STOP ' ERROR in RB_TO_RG_basis: inconsistent sizes'
+        END IF
+      
+        CG = matmul(base%dnRGB%d0(:,1:nb),CB(1:nb))
+      
+      !-----------------------------------------------------------
+        IF (debug) THEN
+          write(out_unitp,*) 'CG',CG(:)
+          write(out_unitp,*) 'END CB_TO_CG_basis'
+        END IF
+      !-----------------------------------------------------------
+      
+      END SUBROUTINE CB_TO_CG_basis
+      SUBROUTINE CG_TO_CB_basis(CG,CB,base)
+        USE mod_system
+        IMPLICIT NONE
+      
+        !---------------------------------------------------------------------
+        !---------- variables passees en argument ----------------------------
+        complex (kind=Rkind), intent(in)    :: CG(:)
+        complex (kind=Rkind), intent(inout) :: CB(:)
+      
+        TYPE (basis), intent(in)            :: base
+      
+        integer :: nb,nq
+        !----- for debuging --------------------------------------------------
+        logical, parameter :: debug = .FALSE.
+        !logical, parameter :: debug = .TRUE.
+        !-----------------------------------------------------------
+        nq = get_nq_FROM_basis(base)
+        nb = base%nb
+        IF (debug) THEN
+          write(out_unitp,*) 'BEGINNING CG_TO_CB_basis'
+          write(out_unitp,*) 'nb,nq',nb,nq
+          write(out_unitp,*) 'CG',CG(:)
+        END IF
+        !-----------------------------------------------------------
+      
+        IF (nb < size(CB) .OR. nq /= size(CG)) THEN
+          write(out_unitp,*) ' ERROR in CG_TO_CB_basis'
+          write(out_unitp,*) ' nb is inconsistent with size(CB)',nb,size(CB)
+          write(out_unitp,*) ' nq is inconsistent with size(CG)',nq,size(CG)
+          STOP ' ERROR in CG_TO_CB_basis: inconsistent sizes'
+        END IF
+      
+        CB(1:nb) = matmul(base%dnRBGwrho%d0(1:nb,:),CG)
+      
+      !-----------------------------------------------------------
+        IF (debug) THEN
+          write(out_unitp,*) 'CB',CB(:)
+          write(out_unitp,*) 'END CG_TO_CB_basis'
+        END IF
+      !-----------------------------------------------------------
+      
+      END SUBROUTINE CG_TO_CB_basis
+
+
 !================================================================
 !       write the type basis
 !================================================================

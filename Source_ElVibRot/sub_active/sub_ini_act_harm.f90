@@ -71,8 +71,8 @@
 !----- for debuging --------------------------------------------------
       !integer :: err_mem,memory
       character (len=*), parameter :: name_sub='sub_qa_bhe'
-      logical, parameter :: debug = .FALSE.
-      !logical, parameter :: debug = .TRUE.
+      !logical, parameter :: debug = .FALSE.
+      logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
 
       nb_act     = para_AllOp%tab_Op(1)%mole%nb_act
@@ -80,7 +80,7 @@
       nb_inact2n = para_AllOp%tab_Op(1)%mole%nb_inact2n
       IF (debug) THEN
         write(out_unitp,*) 'BEGINNING ',name_sub
-
+        write(out_unitp,*) 'nb_Op',size(para_AllOp%tab_Op)
         write(out_unitp,*) 'nb_qa',para_AllOp%tab_Op(1)%nb_qa
 
         CALL RecWrite_basis(para_AllOp%tab_Op(1)%para_AllBasis%BasisnD)

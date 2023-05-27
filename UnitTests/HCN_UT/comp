@@ -2,5 +2,5 @@ DIR_vib=../..
 here=`pwd`
 
 cd $DIR_vib
- make &> $here/comp.log
+ make OPT=0 &> $here/comp.log
 cd $here

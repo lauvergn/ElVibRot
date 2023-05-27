@@ -78,7 +78,7 @@
 !----- variables to store the operators of a single grid point ----------------
       TYPE (param_d0MatOp), allocatable :: d0MatOp(:)
 
-      integer                           :: iOp,k_term,iOpE
+      integer                           :: iOp,k_term,iOpE,iterm,iact
       logical                           :: JacSave,sqRhoOVERJacSave
 
       real (kind=Rkind), allocatable    :: Qact(:),Qdyn(:)
@@ -89,12 +89,11 @@
 !----- for debuging --------------------------------------------------
       character (len=*), parameter :: name_sub = 'sub_HSOp_inact'
       integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
+      !logical, parameter :: debug=.FALSE.
+      logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       mole       => para_AllOp%tab_Op(1)%mole
       para_Tnum  => para_AllOp%tab_Op(1)%para_Tnum
-
       IF (debug) THEN
         write(out_unitp,*) 'BEGINNING ',name_sub
         write(out_unitp,*) 'nb_Op',para_AllOp%nb_Op,shape(para_AllOp%tab_Op)
@@ -170,7 +169,14 @@
           CALL get_d0MatOp_AT_Qact(Qact,d0MatOp,mole,para_Tnum,         &
                                    para_AllOp%tab_Op(1)%para_ReadOp%PrimOp_t)
           !write(6,*) 'coucou after get_d0MatOp_AT_Qact' ; flush(6)
-
+          DO iOp=1,size(d0MatOp)
+            write(6,*) 'coucou iOp',iOp,'type_Op',d0MatOp(iOp)%type_Op
+            IF (d0MatOp(iOp)%type_Op == 20) THEN
+              iact = d0MatOp(iOp)%nb_Qact
+              iterm = d0MatOp(iOp)%derive_term_TO_iterm(iact,0)
+              d0MatOp(iOp)%ReVal(:,:,iterm) = ONE
+            END IF
+          END DO
 !#if(run_MPI)
 !        ENDIF
 !#endif
@@ -267,7 +273,7 @@
 
         DO iOp=1,size(d0MatOp)
           CALL Init_d0MatOp(d0MatOp(iOp),para_AllOp%tab_Op(iOp)%param_TypeOp,&
-                        para_AllOp%tab_Op(1)%nb_bi*para_AllOp%tab_Op(1)%para_ReadOp%nb_elec)
+                            para_AllOp%tab_Op(1)%nb_bi*para_AllOp%tab_Op(1)%para_ReadOp%nb_elec)
         END DO
 
 
