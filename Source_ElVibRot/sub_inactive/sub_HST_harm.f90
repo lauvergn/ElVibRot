@@ -161,16 +161,11 @@
                             para_AllOp%tab_Op(iOp)%para_ReadOp%nb_elec)
         END DO
 
-
-!#if(run_MPI)
-!        IF(Grid_allco)  THEN
-!#endif
           !write(6,*) 'coucou before get_d0MatOp_AT_Qact' ; flush(6)
           CALL get_d0MatOp_AT_Qact(Qact,d0MatOp,mole,para_Tnum,         &
                                    para_AllOp%tab_Op(1)%para_ReadOp%PrimOp_t)
           !write(6,*) 'coucou after get_d0MatOp_AT_Qact' ; flush(6)
           DO iOp=1,size(d0MatOp)
-            write(6,*) 'coucou iOp',iOp,'type_Op',d0MatOp(iOp)%type_Op
             IF (d0MatOp(iOp)%type_Op == 20) THEN
               iact = d0MatOp(iOp)%nb_Qact
               iterm = d0MatOp(iOp)%derive_term_TO_iterm(iact,0)
