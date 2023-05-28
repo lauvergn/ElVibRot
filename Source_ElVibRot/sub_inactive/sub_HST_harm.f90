@@ -162,18 +162,10 @@
                             para_AllOp%tab_Op(iOp)%para_ReadOp%nb_elec)
         END DO
 
-
-!#if(run_MPI)
-!        IF(Grid_allco)  THEN
-!#endif
           !write(6,*) 'coucou before get_d0MatOp_AT_Qact' ; flush(6)
           CALL get_d0MatOp_AT_Qact(Qact,d0MatOp,mole,para_Tnum,         &
                                    para_AllOp%tab_Op(1)%para_ReadOp%PrimOp_t)
           !write(6,*) 'coucou after get_d0MatOp_AT_Qact' ; flush(6)
-
-!#if(run_MPI)
-!        ENDIF
-!#endif
 
         IF (.NOT. pot) THEN ! remove the potential part
           d0MatOp(iOpE)%ReVal(:,:,1) = ZERO
