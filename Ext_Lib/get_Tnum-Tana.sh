@@ -18,7 +18,8 @@ rm -rf $BaseName* #always remove the link
 
 #latest HEAD version
 #tag version
-version=https://github.com/lauvergn/Tnum-Tana/archive/refs/tags/v0.0.zip
+#version=https://github.com/lauvergn/Tnum-Tana/archive/refs/tags/v0.0.zip
+version=https://github.com/lauvergn/Tnum-Tana/archive/refs/tags/v0.3.zip
 
 test -z $EXTLIB_TYPE       &&    curl -LJ $version --output $LOC_version.zip
 test $EXTLIB_TYPE != 'loc' &&    curl -LJ $version --output $LOC_version.zip

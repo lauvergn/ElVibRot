@@ -89,8 +89,8 @@
 !----- for debuging --------------------------------------------------
       character (len=*), parameter :: name_sub = 'sub_HSOp_inact'
       integer :: err_mem,memory
-      !logical, parameter :: debug=.FALSE.
-      logical, parameter :: debug=.TRUE.
+      logical, parameter :: debug=.FALSE.
+      !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       mole       => para_AllOp%tab_Op(1)%mole
       para_Tnum  => para_AllOp%tab_Op(1)%para_Tnum

@@ -71,8 +71,8 @@
 !----- for debuging --------------------------------------------------
       !integer :: err_mem,memory
       character (len=*), parameter :: name_sub='sub_qa_bhe'
-      !logical, parameter :: debug = .FALSE.
-      logical, parameter :: debug = .TRUE.
+      logical, parameter :: debug = .FALSE.
+      !logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
 
       nb_act     = para_AllOp%tab_Op(1)%mole%nb_act

@@ -106,8 +106,8 @@
 !----- Operators -------------------------------------------
       TYPE (param_AllOp)     :: para_AllOp
       integer                :: nb_Op
-      !logical                :: With_Pi = .FALSE.
-      logical                :: With_Pi = .TRUE.
+      logical                :: With_Pi = .FALSE.
+      !logical                :: With_Pi = .TRUE.
 
 !----- working variables ---------------------------------------------
 
