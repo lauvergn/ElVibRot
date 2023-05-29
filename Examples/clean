@@ -1,0 +1,4 @@
+for dir in exa_*
+do
+  cd $dir ; ./clean ; cd ..
+done

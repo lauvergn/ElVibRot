@@ -14,7 +14,7 @@ DIR_vib=$here/../..
 DIR_pot=$DIR_vib/sub_pot
 
 cd $DIR_vib
- make &> $here/comp.log
+ make OPT=0 &> $here/comp.log
 cd $here
 ##compOK=`tail -1 comp.log | grep -c OK `
 compOK=`grep -c 'EVR OK' comp.log `

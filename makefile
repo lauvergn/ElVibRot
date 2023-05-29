@@ -320,6 +320,8 @@ cleanall : clean clean_extlib
 	rm -f lib*.a
 	rm -f *.exe
 	rm -f TESTS/res* TESTS/*log
+	cd UnitTests ; ./clean
+	cd Examples ; ./clean
 	@echo "  done all cleaning"
 #===============================================
 #================ zip and copy the directory ===
