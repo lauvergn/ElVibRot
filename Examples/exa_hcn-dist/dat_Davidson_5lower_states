@@ -19,7 +19,7 @@ cd $DIR_vib
  #./link
 cd $here
 
- export OMP_NUM_THREADS=1
+#export OMP_NUM_THREADS=1
 
  x1=0.538516066
  x2=0.461483933
