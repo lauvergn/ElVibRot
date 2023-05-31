@@ -768,7 +768,10 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
         DO iOp=3,size(tab_Op)
           w1   = WP(i)
           CALL sub_PsiOpPsi(ET,w1,w2,tab_Op(iOp))
-          write(out_unitp,*) 'WP',TO_string(i),': <tab_Op(',TO_string(iOp),')=',trim(tab_Op(iOp)%name_Op),'> at ',T,' ua: ',ET
+          !write(out_unitp,*) 'WP',TO_string(i),': <tab_Op(',TO_string(iOp),')=',trim(tab_Op(iOp)%name_Op),'> at ',T,' ua: ',ET
+          write(out_unitp,'(7a,f18.6,a,2f18.6)') 'WP',TO_string(i),': <tab_Op(',TO_string(iOp),')=',  &
+              trim(tab_Op(iOp)%name_Op),'> at ',T,' ua: ',ET
+
         END DO
       END IF
 
