@@ -106,8 +106,6 @@
 !----- Operators -------------------------------------------
       TYPE (param_AllOp)     :: para_AllOp
       integer                :: nb_Op
-      logical                :: With_Pi = .FALSE.
-      !logical                :: With_Pi = .TRUE.
 
 !----- working variables ---------------------------------------------
 
@@ -512,7 +510,7 @@
         write(out_unitp,*)
         write(out_unitp,*) 'para_ReadOp%nb_scalar_Op:    ',para_ReadOp%nb_scalar_Op
         write(out_unitp,*) 'para_ReadOp%PrimOp_t%nb_CAP: ',para_ReadOp%PrimOp_t%nb_CAP
-        write(out_unitp,*) 'Pi Operators:                ',With_Pi
+        write(out_unitp,*) 'Pi Operators:                ',para_ana%ana_psi%AvPi
       ENDIF
 
       IF (para_ReadOp%nb_scalar_Op > 27) THEN
@@ -536,7 +534,7 @@
       ! We add 2 for H and S operators
       para_AllOp%nb_Op = 2 + para_ReadOp%nb_scalar_Op +                         &
                              para_ReadOp%nb_CAP + para_ReadOp%nb_FluxOp
-      IF (With_Pi) para_AllOp%nb_Op = para_AllOp%nb_Op + mole%nb_act1
+      IF (para_ana%ana_psi%AvPi) para_AllOp%nb_Op = para_AllOp%nb_Op + mole%nb_act1
 
       IF (debug) write(out_unitp,*) 'para_AllOp%nb_Op        : ',para_AllOp%nb_Op
 
@@ -651,12 +649,12 @@
       END DO
       nb_Op = iOp
 
-      IF (With_Pi) THEN
+      IF (para_ana%ana_psi%AvPi) THEN
         DO i=1,mole%nb_act1  ! for the P_i operators
           iOp = iOp + 1
           CALL param_Op1TOparam_Op2(para_AllOp%tab_Op(2),para_AllOp%tab_Op(iOp))
           para_AllOp%tab_Op(iOp)%n_Op    = nb_Op+i
-          para_AllOp%tab_Op(iOp)%name_Op = 'P' // TO_string(i) // '_' // TO_string(iOp)
+          para_AllOp%tab_Op(iOp)%name_Op = 'P_Q' // TO_string(i)
 
           CALL Init_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,           &
                            type_Op=20,nb_Qact=mole%nb_act1,iQact=i,       &

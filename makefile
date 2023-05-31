@@ -281,6 +281,12 @@ $(VIBEXE): $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_DIR)/sub_system.o $(LIBA) $(EXTLib)
 #===============================================
 #============= TESTS ===========================
 #===============================================
+.PHONY: ut UT
+ut Ut:
+	@echo "Unitary test"
+	@cd UnitTests/HCN-WP_UT ; ./run_tests
+	@cd UnitTests/HCN_UT    ; ./run_tests
+	@cd UnitTests/HNO3_UT   ; ./run_tests
 #===============================================
 #============= Library: lib_FOR_EVRT.a  ========
 #===============================================

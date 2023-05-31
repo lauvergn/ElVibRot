@@ -140,7 +140,7 @@
       integer       :: CRP,nb_CRP_Ene
       logical       :: Rho1D,Rho2D,Wheight_rho
       integer       :: Rho_type
-      logical       :: psi2,psi1D_Q0,psi2D_Q0,psi_adia
+      logical       :: psi2,psi1D_Q0,psi2D_Q0,psi_adia,AvPi
 
       integer           :: Coherence
       real (kind=Rkind) :: Coherence_epsi
@@ -173,7 +173,7 @@
                         propa,                                          &
                         print_psi,psi2,psi1D_Q0,psi2D_Q0,QTransfo,      &
                         Rho1D,Rho2D,Wheight_rho,Rho_type,psi_adia,      &
-                        AvScalOp,AvHiterm,                              &
+                        AvScalOp,AvHiterm,AvPi,                         &
                         Coherence,Coherence_epsi,                       &
                         ExactFact,intensity,NLO,CRP,                    &
                         Psi_ScalOp,VibRot,JJmax,                        &
@@ -192,6 +192,7 @@
 
       AvScalOp             = .FALSE.
       AvHiterm             = .FALSE.
+      AvPi                 = .FALSE.
 
       Coherence            = 0
       Coherence_epsi       = ONETENTH**6
@@ -355,7 +356,7 @@
                           num_psi=0,propa=propa,T=ZERO,                         &
                           Boltzmann_pop=.FALSE.,                                &
                           adia=psi_adia,                                        &
-                          AvScalOp=AvScalOp,AvHiterm=AvHiterm,                  &
+                          AvScalOp=AvScalOp,AvHiterm=AvHiterm,AvPi=AvPi,        &
                           Write_psi2_Grid=psi2,Write_psi2_Basis=psi2,           &
                           Write_psi_Grid=(.NOT. psi2),                          &
                           Write_psi_Basis=(.NOT. psi2),                         &
@@ -374,7 +375,7 @@
                           num_psi=0,propa=propa,T=ZERO,                         &
                           Boltzmann_pop=.TRUE.,Temp=Temp,                       &
                           adia=psi_adia,                                        &
-                          AvScalOp=AvScalOp,AvHiterm=AvHiterm,                  &
+                          AvScalOp=AvScalOp,AvHiterm=AvHiterm,AvPi=AvPi,        &
                           Write_psi2_Grid=.FALSE.,                              &
                           Write_psi2_Basis=.FALSE.,                             &
                           Write_psi_Grid=.FALSE.,                               &

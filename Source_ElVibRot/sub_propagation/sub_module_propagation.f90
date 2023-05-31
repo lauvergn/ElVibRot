@@ -577,7 +577,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 
 
 !=======================================================================================
-SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,adia,para_field)
+SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
   USE mod_system
   USE mod_Op,              ONLY : param_Op,sub_PsiOpPsi,sub_psiHitermPsi, &
                                   sub_PsiDia_TO_PsiAdia_WITH_MemGrid
@@ -593,9 +593,10 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,adia,para_field)
   real (kind=Rkind) :: T      ! time
 
 !----- variables pour la namelist minimum ----------------------------
-  TYPE (param_Op)   :: para_H
+  TYPE (param_Op), target   :: tab_Op(:)
+  TYPE (param_Op), pointer  :: para_H
 
-!- variables for the WP propagation ----------------------------
+  !- variables for the WP propagation ----------------------------
   TYPE (param_propa) :: para_propa
   TYPE (param_field), optional :: para_field
   logical,            optional :: adia
@@ -608,7 +609,7 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,adia,para_field)
 !-- working parameters --------------------------------
   TYPE (param_psi)   :: w1,w2
 
-  integer                            :: j,i,i_bi,i_be,i_bie
+  integer                            :: j,i,i_bi,i_be,i_bie,iOp
   complex (kind=Rkind)               :: ET  ! energy
   character (len=:),    allocatable  :: info
 
@@ -623,6 +624,8 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,adia,para_field)
   logical, parameter :: debug=.FALSE.
   !logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
+  para_H => tab_Op(1)
+
   IF (debug) THEN
    write(out_unitp,*) 'BEGINNING ',name_sub
    write(out_unitp,*)
@@ -745,7 +748,7 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,adia,para_field)
 
       IF (para_propa%ana_psi%ExactFact > 0) THEN
         w1 = WP(i)
-        write(out_unitp,*) i,'Exact Factorization analysis at ',T, ' ua'
+        write(out_unitp,*) 'WP',TO_string(i),': Exact Factorization analysis at ',T, ' ua'
         IF (present(para_field)) THEN
           CALL sub_ExactFact_analysis(T,w1,para_propa%ana_psi,para_H,   &
                        para_propa%WPTmax,para_propa%WPdeltaT,para_field)
@@ -759,6 +762,14 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,adia,para_field)
         w1   = WP(i)
         info = real_TO_char(T,Rformat='f12.2')
         CALL sub_psiHitermPsi(w1,i,info,para_H)
+      END IF
+
+      IF (para_propa%ana_psi%AvPi) THEN
+        DO iOp=3,size(tab_Op)
+          w1   = WP(i)
+          CALL sub_PsiOpPsi(ET,w1,w2,tab_Op(iOp))
+          write(out_unitp,*) 'WP',TO_string(i),': <tab_Op(',TO_string(iOp),')=',trim(tab_Op(iOp)%name_Op),'> at ',T,' ua: ',ET
+        END DO
       END IF
 
       ! => The analysis (adiabatic)

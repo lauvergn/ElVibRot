@@ -241,8 +241,7 @@ IMPLICIT NONE
                                tab_WPt,nb_WP,                           &
                                print_cont,                              &
                                para_propa%para_field,.FALSE.,Obj,       &
-                               para_H,para_AllOp%tab_Op(iOp:iOp+2),     &
-                               para_propa)
+                               para_AllOp%tab_Op,para_propa)
 
 
 
@@ -505,8 +504,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
                                tab_WPt,nb_WP,                           &
                                print_cont,                              &
                                para_field_new,.FALSE.,Obj,              &
-                               para_H,para_AllOp%tab_Op(iOp:iOp+2),     &
-                               para_propa)
+                               para_AllOp%tab_Op,para_propa)
 
 
 !       - the target or the WP are saved -------------------
@@ -612,8 +610,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
                                tab_WPt,nb_WP,                           &
                                print_cont,                              &
                                para_field_new,.TRUE.,Obj,               &
-                               para_H,para_AllOp%tab_Op(iOp:iOp+2),     &
-                               para_propa)
+                               para_AllOp%tab_Op,para_propa)
 
         IF (print_cont) THEN
           DO j=1,2*nb_WP
@@ -646,8 +643,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
                                tab_WPt,nb_WP,                           &
                                print_cont,                              &
                                para_field_new,.FALSE.,Obj,              &
-                               para_H,para_AllOp%tab_Op(iOp:iOp+2),     &
-                               para_propa)
+                               para_AllOp%tab_Op,para_propa)
 
 
 
@@ -706,7 +702,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
       SUBROUTINE sub_propagation25(WP,nb_WP,WP0,nb_WP0,WPt,nb_WPt,      &
                                    print_Op,                            &
                                    para_field_new,make_field,Obj0,      &
-                                   para_H,para_Dip,para_propa)
+                                   tab_Op,para_propa)
       USE mod_system
       USE mod_Constant
       USE mod_psi,    ONLY : param_psi,renorm_psi,ecri_psi
@@ -717,8 +713,9 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
       IMPLICIT NONE
 
 !----- Operator : H and Dip(:) ---------------------------------------
-      TYPE (param_Op)   :: para_H
-      TYPE (param_Op)   :: para_Dip(3)
+      TYPE (param_Op), target   :: tab_Op(:)
+      TYPE (param_Op), pointer  :: para_H
+      TYPE (param_Op), pointer  :: para_Dip(:)
 
 !----- variables for the WP propagation ----------------------------
       TYPE (param_propa) :: para_propa
@@ -772,8 +769,10 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 
       END IF
 !-----------------------------------------------------------
+      para_H   => tab_Op(1)
+      para_Dip => tab_Op(3:5)
 
-      BasisRep = WP0(1)%BasisRep
+       BasisRep = WP0(1)%BasisRep
       GridRep  = WP0(1)%GridRep
 
 !-----------------------------------------------------------
@@ -814,8 +813,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
         print_WP = (print_Op .AND. mod(it,para_propa%n_WPecri) == 0)
 
         IF (print_Op .OR. debug) THEN
-          CALL sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,             &
-                                   para_field=para_propa%para_field)
+          CALL sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,para_field=para_propa%para_field)
           IF (nb_WP == nb_WPt) THEN
             alpha=ZERO
             CALL calc_fidelity(nb_WPt,SObj,Obj,WP,WPt,T,0,alpha,.TRUE.)

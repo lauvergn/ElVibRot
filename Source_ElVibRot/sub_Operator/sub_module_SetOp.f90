@@ -1526,8 +1526,8 @@ END SUBROUTINE alloc_MatOp
 
        CALL Analysis_OpGrid(para_Op%OpGrid,para_Op%n_Op)
 
-       IF (print_level>-1) THEN
-         iterm00 = para_Op%derive_term_TO_iterm(0,0)
+       iterm00 = para_Op%derive_term_TO_iterm(0,0)
+       IF (print_level>-1 .AND. iterm00 > 0 ) THEN
          iq = para_Op%OpGrid(iterm00)%iq_min
          IF (iq > 0) THEN
            CALL Rec_Qact(Qact,para_Op%para_AllBasis%BasisnD,iq,para_Op%mole,OldPara)

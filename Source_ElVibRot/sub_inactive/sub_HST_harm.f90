@@ -167,7 +167,7 @@
           !write(6,*) 'coucou after get_d0MatOp_AT_Qact' ; flush(6)
           DO iOp=1,size(d0MatOp)
             IF (d0MatOp(iOp)%type_Op == 20) THEN
-              iact = d0MatOp(iOp)%nb_Qact
+              iact = d0MatOp(iOp)%iQact
               iterm = d0MatOp(iOp)%derive_term_TO_iterm(iact,0)
               d0MatOp(iOp)%ReVal(:,:,iterm) = ONE
             END IF

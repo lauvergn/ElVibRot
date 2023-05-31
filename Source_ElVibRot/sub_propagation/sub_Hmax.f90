@@ -408,7 +408,7 @@ relax = .TRUE.
         CALL renorm_psi(WP0(1),BasisRep=.TRUE.)
 
         para_propa_loc%type_WPpropa = -3
-        CALL sub_propagation3(Emax,WP0,WP,para_H,para_propa_loc)
+        CALL sub_propagation3(Emax,WP0,WP,[para_H],para_propa_loc)
         para_H%Hmax = Real(Emax,kind=Rkind)
 
         !---- END for Hmax -------------------------------------
@@ -427,7 +427,7 @@ relax = .TRUE.
         CALL renorm_psi(WP0(1),BasisRep=.TRUE.)
 
         para_propa_loc%type_WPpropa = 3
-        CALL sub_propagation3(Emax,WP0,WP,para_H,para_propa_loc)
+        CALL sub_propagation3(Emax,WP0,WP,[para_H],para_propa_loc)
         para_H%Hmin = Real(Emax,kind=Rkind)
         !---- END for Hmin -------------------------------------
 
@@ -539,44 +539,6 @@ relax = .TRUE.
 
      END DO
      para_propa%WPdeltaT     = WPdeltaT
-
-
-!     IF (DeltaT_opt >= para_propa%WPdeltaT) THEN
-!     !optimization of DeltaT
-!     DO
-!
-!       para_propa%WPdeltaT = min(para_propa%WPTmax,para_propa%WPdeltaT*TWO)
-!
-!        WP0(1) = ZERO
-!        DO i=1,WP0(1)%nb_tot
-!          CALL random_number(a)
-!          WP0(1)%CvecB(WP0(1)%nb_tot+1-i) = cmplx(a-HALF,ZERO,kind=Rkind)
-!        END DO
-!        WP0(1)%symab = -1
-!        CALL renorm_psi(WP0(1),BasisRep=.TRUE.)
-!        WP(1) = WP0(1)
-!
-!        CALL march_gene(T,WP,WP0,1,.FALSE.,para_H,para_propa)
-!
-!        IF (para_propa%march_error) EXIT
-!
-!        write(out_unitp,*) 'March_cheby with WPdeltaT',para_propa%WPdeltaT
-!        write(out_unitp,*) 'Opt npoly',para_propa%para_poly%npoly_Opt
-!
-!        nb_HPsi = para_propa%para_poly%npoly_Opt*(ONE+para_propa%WPTmax/para_propa%WPdeltaT)
-!        write(out_unitp,*) '# HPsi',nb_HPsi
-!        IF (nb_HPsi < nb_HPsi_opt) THEN
-!          nb_HPsi_opt = nb_HPsi
-!          DeltaT_opt  = para_propa%WPdeltaT
-!        ELSE
-!          EXIT
-!        END IF
-!
-!        IF (para_propa%WPdeltaT == para_propa%WPTmax) EXIT
-!
-!
-!      END DO
-!      END IF
 
       write(out_unitp,*) 'Optimal WPdeltaT',DeltaT_opt
       write(out_unitp,*) '# HPsi (for the whole propagation)',nb_HPsi_opt

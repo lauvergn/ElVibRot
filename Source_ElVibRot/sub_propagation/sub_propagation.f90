@@ -177,16 +177,16 @@ CONTAINS
 
         IF (SGtype4 .AND. direct_KEO) THEN
           !CALL sub_propagation11_SG4(WP0,WP,1,para_H,para_propa)
-          CALL sub_propagation11(WP0,WP,1,para_H,para_propa)
+          CALL sub_propagation11(WP0,WP,1,para_AllOp%tab_Op,para_propa)
         ELSE
-          CALL sub_propagation11(WP0,WP,1,para_H,para_propa)
+          CALL sub_propagation11(WP0,WP,1,para_AllOp%tab_Op,para_propa)
         END IF
 
         IF(keep_MPI) CALL TF_autocorr(para_propa)
 
       CASE (-3,3)
 
-        CALL sub_propagation3(Et,WP0,WP,para_H,para_propa)
+        CALL sub_propagation3(Et,WP0,WP,para_AllOp%tab_Op,para_propa)
 
       CASE (34)
 
@@ -196,8 +196,7 @@ CONTAINS
         nullify(Ene0)
         CALL alloc_array(Ene0,[nb_diago],"Ene0",name_sub)
 
-        CALL sub_propagation34(psi,Ene0,nb_diago,                       &
-                               para_H,para_propa)
+        CALL sub_propagation34(psi,Ene0,nb_diago,para_AllOp%tab_Op,para_propa)
 
         CALL dealloc_array(psi,"psi",name_sub)
         CALL dealloc_array(Ene0,"Ene0",name_sub)
@@ -226,8 +225,7 @@ CONTAINS
           WP(1) = WP0(1)
           CALL sub_propagation24(WP,1,print_Op,                         &
                                  para_propa%para_field,.FALSE.,         &
-                                 para_H,para_AllOp%tab_Op(iOp:iOp+2),   &
-                                 para_propa)
+                                 para_AllOp%tab_Op,para_propa)
         ELSE
 
           write(out_unitp,*) 'propagation with scan in w'
@@ -247,8 +245,7 @@ CONTAINS
             WP = WP0
             CALL sub_propagation24(WP,1,print_Op,                       &
                                    para_propa%para_field,.FALSE.,       &
-                                   para_H,para_AllOp%tab_Op(iOp:iOp+2), &
-                                   para_propa)
+                                   para_AllOp%tab_Op,para_propa)
 
           END DO
         END IF
@@ -257,7 +254,7 @@ CONTAINS
 
         CALL sub_propagation100(WP0,1,print_Op,                         &
                                 para_propa%para_field,.FALSE.,          &
-                                para_AllOp,para_propa)
+                                para_AllOp%tab_Op,para_propa)
 
       CASE DEFAULT
         write(out_unitp,*) 'ERROR in ',name_sub
@@ -283,7 +280,7 @@ CONTAINS
 !=======================================================================================
 !     3 : propagation in imaginary time => ground state
 !=======================================================================================
-      SUBROUTINE sub_propagation3(E0,psi0,psi,para_H,para_propa)
+      SUBROUTINE sub_propagation3(E0,psi0,psi,tab_Op,para_propa)
       USE mod_system
       USE mod_psi,     ONLY : param_psi,ecri_psi,dealloc_psi,           &
                               renorm_psi,Write_Psi_nDBasis,             &
@@ -294,7 +291,9 @@ CONTAINS
       IMPLICIT NONE
 
 !----- variables pour la namelist minimum ----------------------------
-      TYPE (param_Op)   :: para_H
+      TYPE (param_Op), target   :: tab_Op(:)
+      TYPE (param_Op), pointer  :: para_H
+
       TYPE (param_psi), intent(in)   :: psi0(1)
 
 !----- variables for the WP propagation ----------------------------
@@ -340,6 +339,7 @@ CONTAINS
 
        END IF
 !-----------------------------------------------------------
+      para_H => tab_Op(1)
 
       BasisRep = psi0(1)%BasisRep
       GridRep  = psi0(1)%GridRep
@@ -438,7 +438,7 @@ CONTAINS
       para_propa%ana_psi%Write_psi_Grid  = .TRUE.
       para_propa%ana_psi%Write_psi_Basis = .TRUE.
 
-      CALL sub_analyze_WP_OpWP(T,psi,size(psi),para_H,para_propa,adia=.FALSE.)
+      CALL sub_analyze_WP_OpWP(T,psi,size(psi),tab_Op,para_propa,adia=.FALSE.)
 
       IF(MPI_id==0) THEN
         CALL file_open(para_propa%file_WP,nioWP)
@@ -480,7 +480,7 @@ CONTAINS
 
       END SUBROUTINE sub_propagation3
 
-      SUBROUTINE sub_propagation34(psi,Ene0,nb_diago,para_H,para_propa)
+      SUBROUTINE sub_propagation34(psi,Ene0,nb_diago,tab_Op,para_propa)
       USE mod_system
       USE mod_psi,  ONLY : param_psi,alloc_psi,dealloc_psi,ecri_psi,     &
                            Write_Psi_nDBasis,Set_psi_With_index,trie_psi,&
@@ -493,9 +493,10 @@ CONTAINS
       IMPLICIT NONE
 
 !----- variables pour la namelist minimum ----------------------------
-      TYPE (param_Op)   :: para_H
+      TYPE (param_Op), target   :: tab_Op(:)
+      TYPE (param_Op), pointer  :: para_H
 
-!----- variables for the WP propagation ----------------------------
+      !----- variables for the WP propagation ----------------------------
       TYPE (param_propa) :: para_propa
 
       integer            :: nb_diago,nb_diagoR
@@ -516,7 +517,7 @@ CONTAINS
       real (kind=Rkind) :: DeltaT,T      ! time
       real (kind=Rkind) :: DeltaE,Deltapsi,epsi,norm2g,th
       real (kind=Rkind) :: avH1,avH2,avH3,A,B,C,D,DT1,DT2,S,E1,E2
-      real (kind=Rkind) :: Qact(para_H%mole%nb_act1)
+      real (kind=Rkind) :: Qact(tab_Op(1)%mole%nb_act1)
       real (kind=Rkind) :: psi_q(nb_diago)
       complex (kind=Rkind)   :: CavH1,CavH2,CavH3
 
@@ -537,6 +538,7 @@ CONTAINS
         write(out_unitp,*)
        END IF
 !-----------------------------------------------------------
+       para_H => tab_Op(1)
 
 !-----------------------------------------------------------
       write(out_unitp,*) ' propagation34: ',para_propa%name_WPpropa
@@ -790,7 +792,7 @@ CONTAINS
 !          w1,w2,w3 are working WP
 !
 !================================================================
-      SUBROUTINE sub_propagation11(psi0,psi,nb_WP,para_H,para_propa)
+      SUBROUTINE sub_propagation11(psi0,psi,nb_WP,tab_Op,para_propa)
       USE mod_system
       USE mod_Op
       USE mod_psi,    ONLY : param_psi,ecri_psi
@@ -799,7 +801,8 @@ CONTAINS
       IMPLICIT NONE
 
 !----- variables pour la namelist minimum ----------------------------
-      TYPE (param_Op)   :: para_H
+      TYPE (param_Op), target   :: tab_Op(:)
+      TYPE (param_Op), pointer  :: para_H
 
 !----- variables for the WP propagation ----------------------------
       integer                      :: nb_WP
@@ -828,7 +831,10 @@ CONTAINS
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (nb_WP > 1) STOP
+      IF (nb_WP > 1) STOP 'ERROR in sub_propagation11: nb_WP > 1'
+
+      para_H => tab_Op(1)
+
       IF (debug) THEN
         write(out_unitp,*) 'BEGINNING sub_propagation11'
         write(out_unitp,*) 'Tmax,DeltaT',para_propa%WPTmax,para_propa%WPdeltaT
@@ -893,7 +899,7 @@ CONTAINS
              para_propa%ana_psi%Write_psi2_Grid = (mod(it,para_propa%n_WPecri) == 0) .AND. para_propa%WPpsi2
              para_propa%ana_psi%Write_psi_Grid  = (mod(it,para_propa%n_WPecri) == 0) .AND. para_propa%WPpsi
            ENDIF
-           CALL sub_analyze_WP_OpWP(T,psi,1,para_H,para_propa)
+           CALL sub_analyze_WP_OpWP(T,psi,1,tab_Op,para_propa)
          ELSE
            CALL sub_analyze_mini_WP_OpWP(T,psi,1,para_H,para_propa%ana_psi)
          END IF
@@ -924,7 +930,7 @@ CONTAINS
 
       para_propa%ana_psi%Write_psi2_Grid = para_propa%WPpsi2
       para_propa%ana_psi%Write_psi_Grid  = para_propa%WPpsi
-      CALL sub_analyze_WP_OpWP(T,psi,1,para_H,para_propa)
+      CALL sub_analyze_WP_OpWP(T,psi,1,tab_Op,para_propa)
 !----------------------------------------------------------
 
       IF(MPI_id==0) CALL file_close(para_propa%file_autocorr)
@@ -949,7 +955,7 @@ CONTAINS
 !=======================================================================================
       SUBROUTINE sub_propagation24(WP,nb_WP,print_Op,                   &
                                    para_field_new,make_field,           &
-                                   para_H,para_Dip,para_propa)
+                                   tab_Op,para_propa)
       USE mod_system
       USE mod_psi,    ONLY : param_psi,ecri_psi,renorm_psi
       USE mod_Op
@@ -959,10 +965,11 @@ CONTAINS
       IMPLICIT NONE
 
 !----- variables pour la namelist minimum ----------------------------
-      TYPE (param_Op)   :: para_H
-      TYPE (param_Op)   :: para_Dip(3)
+      TYPE (param_Op), target   :: tab_Op(:)
+      TYPE (param_Op), pointer  :: para_H
+      TYPE (param_Op), pointer  :: para_Dip(:)
 
-!----- variables for the WP propagation ----------------------------
+      !----- variables for the WP propagation ----------------------------
       TYPE (param_propa) :: para_propa
       TYPE (param_field) :: para_field_new
       real (kind=Rkind)      :: E_new
@@ -1008,6 +1015,8 @@ CONTAINS
         CALL ecri_psi(T=ZERO,psi=WP(1),ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
        END IF
 !-----------------------------------------------------------
+       para_H   => tab_Op(1)
+       para_Dip => tab_Op(3:5)
 
 !-----------------------------------------------------------
       IF (print_Op) THEN
@@ -1065,8 +1074,7 @@ CONTAINS
         para_propa%ana_psi%Write_psi2_Grid = (mod(it,para_propa%n_WPecri) == 0) .AND. para_propa%WPpsi2
         para_propa%ana_psi%Write_psi_Grid  = (mod(it,para_propa%n_WPecri) == 0) .AND. para_propa%WPpsi
 
-        CALL sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,          &
-                                       para_field=para_propa%para_field)
+        CALL sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,para_field=para_propa%para_field)
 
         IF (it ==0) E0(:)  = WP(:)%CAvOp
         avE(:) = avE(:) + WP(:)%CAvOp-E0(:)
@@ -1095,8 +1103,7 @@ CONTAINS
 
       para_propa%ana_psi%Write_psi2_Grid = para_propa%WPpsi2
       para_propa%ana_psi%Write_psi_Grid  = para_propa%WPpsi
-      CALL sub_analyze_WP_OpWP(T,WP,nb_WP,para_H,para_propa,            &
-                                 para_field=para_propa%para_field)
+      CALL sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,para_field=para_propa%para_field)
       avE(:) = avE(:) + WP(:)%CAvOp-E0(:)
 
       DO i=1,nb_WP
@@ -1123,7 +1130,7 @@ CONTAINS
 !================================================================
       SUBROUTINE sub_propagation100(WP,nb_WP,print_Op,                  &
                                    para_field_new,make_field,           &
-                                   para_AllOp,para_propa)
+                                   tab_Op,para_propa)
       USE mod_system
       USE mod_psi,    ONLY : param_psi,alloc_psi,dealloc_psi,ecri_psi,  &
                              sub_PsiBasisRep_TO_GridRep,sub_save_psi,   &
@@ -1135,7 +1142,7 @@ CONTAINS
       IMPLICIT NONE
 
 !----- variables pour la namelist minimum ----------------------------
-      TYPE (param_AllOp)  :: para_AllOp
+      TYPE (param_Op)  :: tab_Op(:)
       integer             :: iOp
       logical             :: print_Op
 
@@ -1183,17 +1190,17 @@ CONTAINS
 
 
       cplx = .TRUE.
-      CALL init_psi(w1,para_AllOp%tab_Op(1),cplx)
+      CALL init_psi(w1,tab_Op(1),cplx)
       CALL alloc_psi(w1)
       w1%CvecB(1) = CONE
       write(out_unitp,*) 'WP'
       CALL ecri_psi(T=ZERO,psi=w1)
 
 
-      CALL init_psi(w2,para_AllOp%tab_Op(1),cplx)
+      CALL init_psi(w2,tab_Op(1),cplx)
       CALL alloc_psi(w2)
 
-      CALL sub_OpPsi(w1,w2,para_AllOp%tab_Op(1))
+      CALL sub_OpPsi(w1,w2,tab_Op(1))
 
       write(out_unitp,*) 'H.WP'
       CALL ecri_psi(T=ZERO,psi=w2)
@@ -1210,17 +1217,16 @@ CONTAINS
 
 
       !=================================================
-      DO iOp=1,size(para_AllOp%tab_Op)
-        IF (para_propa%num_Op == para_AllOp%tab_Op(iOp)%n_Op) EXIT
+      DO iOp=1,size(tab_Op)
+        IF (para_propa%num_Op == tab_Op(iOp)%n_Op) EXIT
       END DO
-      IF (iOp > size(para_AllOp%tab_Op)) THEN
+      IF (iOp > size(tab_Op)) THEN
         write(out_unitp,*) ' ERROR in sub_propagation100'
         write(out_unitp,*) ' The Operator "',para_propa%num_Op,'" is not in the list!'
         write(out_unitp,*) ' Change the "num_Op" value in "propagation namelist"'
         write(out_unitp,*) ' Possible values are:'
-        DO iOp=1,size(para_AllOp%tab_Op)
-          write(out_unitp,*) 'iOp,num_Op,Name_Op',iOp,para_AllOp%tab_Op(iOp)%n_Op, &
-                      para_AllOp%tab_Op(iOp)%name_Op
+        DO iOp=1,size(tab_Op)
+          write(out_unitp,*) 'iOp,num_Op,Name_Op',iOp,tab_Op(iOp)%n_Op,tab_Op(iOp)%name_Op
         END DO
         STOP
       END IF
@@ -1230,7 +1236,7 @@ CONTAINS
          write(out_unitp,*) 'WP,i',i
          !CALL ecri_psiBasisRepnotall_nD(WP(i),out_unitp,ONETENTH**10,.TRUE.,i)
          !CALL ecri_psi(Psi=WP(i))
-         CALL sub_OpPsi(WP(i),OpWP(i),para_AllOp%tab_Op(iOp))
+         CALL sub_OpPsi(WP(i),OpWP(i),tab_Op(iOp))
          CALL Overlap_psi1_psi2(ET,WP(i),OpWP(i))
 
          write(out_unitp,*) 'OpWP,i',i,ET*get_Conv_au_TO_unit('E','cm-1')
