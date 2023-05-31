@@ -90,7 +90,9 @@
 
       logical                        :: AvScalOp      = .FALSE.   ! Average value of the scalar operators
       logical                        :: AvHiterm      = .FALSE.   ! Average value of H term by term
-      logical                        :: AvPi          = .FALSE.   ! Average value of Pi operatorq
+      logical                        :: AvPi          = .FALSE.   ! Average value of Pi operators
+      logical                        :: AvOp          = .FALSE.   ! Average value of all operators (except H and S)
+
       
       ! For quantum coherence Mij = Int [rho_i(Q)*rho_j(Q)/rho(Q) dQ]
       integer                        :: coherence = 0       ! default, 0: no coherence calculation
@@ -139,7 +141,7 @@
                             Write_psi_Grid,Write_psi_Basis,     &
                             Write_psi,                          &
                             AvQ,Qtransfo_type,                  &
-                            AvScalOp,AvHiterm,AvPi,             &
+                            AvScalOp,AvHiterm,AvPi,AvOp,        &
                             coherence,coherence_epsi,           &
                             ExactFact,                          &
                             Rho1D,Rho2D,Weight_Rho,Qana_Weight, &
@@ -161,7 +163,7 @@
     logical,                        optional :: Write_psi_Grid,Write_psi_Basis
     logical,                        optional :: Write_psi
 
-    logical,                        optional :: AvQ,AvScalOp,AvHiterm,AvPi
+    logical,                        optional :: AvQ,AvScalOp,AvHiterm,AvPi,AvOp
     integer,           allocatable, optional :: Qtransfo_type(:)     ! type of the transformation
 
     integer,                        optional :: coherence         ! coherence_tyep (0 non calculation)
@@ -293,6 +295,9 @@
     IF (present(AvHiterm))         ana_psi%AvHiterm         = AvHiterm
     ana_psi%AvPi     = .FALSE.
     IF (present(AvPi))             ana_psi%AvPi             = AvPi
+    ana_psi%AvOp     = .FALSE.
+    IF (present(AvOp))             ana_psi%AvOp             = AvOp
+    
 
     !------------------------------------------------------------
 
@@ -351,7 +356,7 @@
                             Write_psi_Grid,Write_psi_Basis,     &
                             Write_psi,                          &
                             AvQ,Qtransfo_type,                  &
-                            AvScalOp,AvHiterm,AvPi,             &
+                            AvScalOp,AvHiterm,AvPi,AvOp,        &
                             coherence,coherence_epsi,           &
                             ExactFact,                          &
                             Rho1D,Rho2D,Weight_Rho,Qana_Weight, &
@@ -372,7 +377,7 @@
     logical,                        optional :: Write_psi_Grid,Write_psi_Basis
     logical,                        optional :: Write_psi
 
-    logical,                        optional :: AvQ,AvScalOp,AvHiterm,AvPi
+    logical,                        optional :: AvQ,AvScalOp,AvHiterm,AvPi,AvOp
     integer,           allocatable, optional :: Qtransfo_type(:)     ! type of the transformation
 
     integer,                        optional :: coherence         ! coherence_tyep (0 non calculation)
@@ -484,6 +489,7 @@
     IF (present(AvScalOp))         ana_psi%AvScalOp         = AvScalOp
     IF (present(AvHiterm))         ana_psi%AvHiterm         = AvHiterm
     IF (present(AvPi))             ana_psi%AvPi             = AvPi
+    IF (present(AvOp))             ana_psi%AvOp             = AvOp
     !------------------------------------------------------------
 
 
@@ -598,6 +604,8 @@
     ana_psi1%AvScalOp      = ana_psi2%AvScalOp
     ana_psi1%AvHiterm      = ana_psi2%AvHiterm
     ana_psi1%AvPi          = ana_psi2%AvPi
+    ana_psi1%AvOp          = ana_psi2%AvOp
+
 
     ana_psi1%adia          = ana_psi2%adia
     ana_psi1%Rho1D         = ana_psi2%Rho1D
@@ -710,6 +718,8 @@
     write(out_unitp,*) 'AvHiterm',ana_psi%AvHiterm
     write(out_unitp,*) 'Average over Pi operators:'
     write(out_unitp,*) 'AvPi',ana_psi%AvPi
+    write(out_unitp,*) 'Average over operators (except H and S):'
+    write(out_unitp,*) 'AvOp',ana_psi%AvOp
 
     write(out_unitp,*)
     write(out_unitp,*) 'Coherence:?'

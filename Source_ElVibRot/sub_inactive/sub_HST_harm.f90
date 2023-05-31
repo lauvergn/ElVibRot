@@ -166,10 +166,22 @@
                                    para_AllOp%tab_Op(1)%para_ReadOp%PrimOp_t)
           !write(6,*) 'coucou after get_d0MatOp_AT_Qact' ; flush(6)
           DO iOp=1,size(d0MatOp)
-            IF (d0MatOp(iOp)%type_Op == 20) THEN
+            IF (d0MatOp(iOp)%type_Op == 21) THEN
               iact = d0MatOp(iOp)%iQact
               iterm = d0MatOp(iOp)%derive_term_TO_iterm(iact,0)
+              IF (iterm < 1) THEN
+                CALL Write_TypeOp(d0MatOp(iOp)%param_TypeOp,With_list=.TRUE.)
+                STOP 'iterm < 1'
+              END IF
               d0MatOp(iOp)%ReVal(:,:,iterm) = ONE
+            ELSE IF (d0MatOp(iOp)%type_Op == 22) THEN
+              iact = d0MatOp(iOp)%iQact
+              iterm = d0MatOp(iOp)%derive_term_TO_iterm(iact,iact)
+              IF (iterm < 1) THEN
+                CALL Write_TypeOp(d0MatOp(iOp)%param_TypeOp,With_list=.TRUE.)
+                STOP 'iterm < 1'
+              END IF
+              d0MatOp(iOp)%ReVal(:,:,iterm) = -ONE
             END IF
           END DO
 !#if(run_MPI)

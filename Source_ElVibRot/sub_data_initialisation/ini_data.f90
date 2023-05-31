@@ -534,7 +534,7 @@
       ! We add 2 for H and S operators
       para_AllOp%nb_Op = 2 + para_ReadOp%nb_scalar_Op +                         &
                              para_ReadOp%nb_CAP + para_ReadOp%nb_FluxOp
-      IF (para_ana%ana_psi%AvPi) para_AllOp%nb_Op = para_AllOp%nb_Op + mole%nb_act1
+      IF (para_ana%ana_psi%AvPi) para_AllOp%nb_Op = para_AllOp%nb_Op + 2*mole%nb_act1
 
       IF (debug) write(out_unitp,*) 'para_AllOp%nb_Op        : ',para_AllOp%nb_Op
 
@@ -655,9 +655,29 @@
           CALL param_Op1TOparam_Op2(para_AllOp%tab_Op(2),para_AllOp%tab_Op(iOp))
           para_AllOp%tab_Op(iOp)%n_Op    = nb_Op+i
           para_AllOp%tab_Op(iOp)%name_Op = 'P_Q' // TO_string(i)
+          write(6,*) para_AllOp%tab_Op(iOp)%name_Op
 
           CALL Init_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,           &
-                           type_Op=20,nb_Qact=mole%nb_act1,iQact=i,       &
+                           type_Op=21,nb_Qact=mole%nb_act1,iQact=i,       &
+                           cplx=.FALSE.,JRot=Para_Tnum%JJ,                &
+                           direct_KEO=.FALSE.,direct_ScalOp=para_ReadOp%direct_ScalOp)
+          CALL derive_termQact_TO_derive_termQdyn(                        &
+                                para_AllOp%tab_Op(iOp)%derive_termQdyn,   &
+                                para_AllOp%tab_Op(iOp)%derive_termQact,   &
+                                mole%ActiveTransfo%list_QactTOQdyn)
+
+          para_AllOp%tab_Op(iOp)%symab    = -1  ! the symmetry is not used
+          para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
+        END DO
+        DO i=1,mole%nb_act1  ! for the P^2_i operators
+          iOp = iOp + 1
+          CALL param_Op1TOparam_Op2(para_AllOp%tab_Op(2),para_AllOp%tab_Op(iOp))
+          para_AllOp%tab_Op(iOp)%n_Op    = nb_Op+i
+          para_AllOp%tab_Op(iOp)%name_Op = 'P^2_Q' // TO_string(i)
+          write(6,*) para_AllOp%tab_Op(iOp)%name_Op
+
+          CALL Init_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,           &
+                           type_Op=22,nb_Qact=mole%nb_act1,iQact=i,       &
                            cplx=.FALSE.,JRot=Para_Tnum%JJ,                &
                            direct_KEO=.FALSE.,direct_ScalOp=para_ReadOp%direct_ScalOp)
           CALL derive_termQact_TO_derive_termQdyn(                        &

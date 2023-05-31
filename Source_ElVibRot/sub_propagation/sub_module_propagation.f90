@@ -764,7 +764,7 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
         CALL sub_psiHitermPsi(w1,i,info,para_H)
       END IF
 
-      IF (para_propa%ana_psi%AvPi) THEN
+      IF (para_propa%ana_psi%AvOp) THEN
         DO iOp=3,size(tab_Op)
           w1   = WP(i)
           CALL sub_PsiOpPsi(ET,w1,w2,tab_Op(iOp))
