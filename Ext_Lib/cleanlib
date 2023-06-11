@@ -1,6 +1,10 @@
-rm -rf QDUtilLib*
-rm -rf AD_dnSVM*
-rm -rf QuantumModelLib*
-rm -rf ConstPhys*
-rm -rf FOR_EVRT*
-rm -rf Coord_KEO_PrimOp* Tnum-Tana*
+for lib in QDUtilLib AD_dnSVM QuantumModelLib ConstPhys FOR_EVRT Tnum-Tana
+do
+  echo "-----" $lib
+  [ ! -d $lib ] && continue
+  echo "-----" $lib "exist"
+  cd $lib
+  make cleanall
+  cd ..
+done
+

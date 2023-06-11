@@ -1,0 +1,8 @@
+EXTLIB_TYPE=$1
+
+./get_Tnum-Tana.sh $EXTLIB_TYPE
+./get_ConstPhys.sh $EXTLIB_TYPE
+./get_FOR_EVRT.sh  $EXTLIB_TYPE
+./get_QML.sh       $EXTLIB_TYPE
+./get_AD_dnSVM.sh  $EXTLIB_TYPE
+./get_QDUtilLib.sh $EXTLIB_TYPE
