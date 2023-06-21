@@ -596,6 +596,16 @@ MODULE mod_basis
           write(out_unitp,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
                                      basis_temp%Q0,basis_temp%scaleQ
         END IF
+      CASE ("boxab_fft","dfst")
+        basis_temp%type = 50
+        CALL sub_quadra_dfst(basis_temp,nosym)
+
+        IF (.NOT. basis_temp%xPOGridRep_done) THEN ! because the scaling factors are already calculated
+          basis_temp%Q0     = basis_temp%A
+          basis_temp%scaleQ = pi/(basis_temp%B-basis_temp%A)
+          write(out_unitp,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
+                                     basis_temp%Q0,basis_temp%scaleQ
+        END IF
       CASE ("sincdvr")
         basis_temp%type = 50
         CALL sub_quadra_SincDVR(basis_temp)

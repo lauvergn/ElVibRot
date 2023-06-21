@@ -177,7 +177,7 @@ ifeq ($(FFC),ifort)
   # opt management
   ifeq ($(OOPT),1)
       #F90FLAGS = -O -parallel -g -traceback
-      FFLAGS = -O  -g -traceback
+      FFLAGS = -O  -g -traceback -heap-arrays
   else
       FFLAGS = -O0 -check all -g -traceback
   endif
@@ -621,6 +621,9 @@ $(OBJ_DIR)/sub_quadra_Ylm.o : \
           $(mod_ndindex) \
           $(mod_basis)
 $(OBJ_DIR)/sub_quadra_box.o : \
+          $(mod_system) \
+          $(mod_basis)
+$(OBJ_DIR)/sub_quadra_dfst.o : \
           $(mod_system) \
           $(mod_basis)
 $(OBJ_DIR)/sub_quadra_fourier.o : \

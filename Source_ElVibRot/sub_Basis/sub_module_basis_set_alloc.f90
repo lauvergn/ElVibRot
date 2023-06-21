@@ -119,6 +119,9 @@ MODULE mod_basis_set_alloc
           real (kind=Rkind), allocatable :: wrho(:) ! weight * rho : wrho(nq)
           integer,           allocatable :: nrho(:) ! nrho(dim), to define the volume element for Tnum
 
+
+          TYPE (FFT_OOURA_t)             :: dsft
+
           logical                        :: check_basis            = .TRUE.   ! if T, the basis set is checked (ortho ...)
           logical                        :: check_nq_OF_basis      = .TRUE.   ! if T, the nq is adapted to nb (nq>= nb)
           logical                        :: packed                 = .FALSE.  ! packed=.T. if the basis set is packed (true nD basis)
@@ -152,8 +155,8 @@ MODULE mod_basis_set_alloc
           logical                        :: Restart_make_cubature  = .FALSE.
           logical                        :: read_para_cubature     = .FALSE.
           logical                        :: read_contrac_file      = .FALSE.  ! .T. if the basis set is contracted
-          TYPE(File_t)               :: file_contrac                      ! file for read contraction coef
-          real (kind=Rkind), allocatable :: Rvec(:,:)                     ! real eigenvectors for the contraction
+          TYPE(File_t)                   :: file_contrac                      ! file for read contraction coef
+          real (kind=Rkind), allocatable :: Rvec(:,:)                         ! real eigenvectors for the contraction
 
           integer                        :: type      = 0     ! basis type
           character (len=Name_len)       :: name      = "0"   ! name of the basis set
@@ -451,9 +454,6 @@ CONTAINS
            basis_set%tab_ndim_index(:,:) = 0
          END IF
 
-         !write(out_unitp,*) 'cplx,nb,nq,ndim',basis_set%cplx,basis_set%nb,nq,basis_set%ndim
-         flush(6)
-
          IF (basis_set%cplx) THEN
 
            CALL alloc_dnCplxMat(basis_set%dnCGB,                        &
@@ -469,7 +469,6 @@ CONTAINS
 
            CALL alloc_dnMat(basis_set%dnRBG,                            &
                                 basis_set%nb,nq,basis_set%ndim,nderiv=0)
-
 
          END IF
          IF (debug) write(out_unitp,*) 'END ',name_sub
@@ -493,6 +492,8 @@ CONTAINS
            CALL dealloc_NParray(basis_set%tab_ndim_index,                 &
                              'basis_set%tab_ndim_index',name_sub)
          END IF
+
+         CALL basis_set%dsft%dealloc()
 
          CALL dealloc_dnMat(basis_set%dnRGB)
          CALL dealloc_dnMat(basis_set%dnRBG)
@@ -1831,6 +1832,8 @@ CONTAINS
                               "basis_set1%Rvec",name_sub)
             basis_set1%Rvec  = basis_set2%Rvec
           END IF
+
+          basis_set1%dsft = basis_set2%dsft
 
           IF (basis_set2%dnRGB%alloc) basis_set1%dnRGB = basis_set2%dnRGB
           IF (basis_set2%dnCGB%alloc) basis_set1%dnCGB = basis_set2%dnCGB

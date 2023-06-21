@@ -25,6 +25,7 @@ sub_quadra_SparseBasis2n.f90 \
 sub_quadra_Wigner.f90 \
 sub_quadra_Ylm.f90 \
 sub_quadra_box.f90 \
+sub_quadra_dfst.f90 \
 sub_quadra_fourier.f90 \
 sub_quadra_ft.f90 \
 sub_quadra_herm.f90 \
