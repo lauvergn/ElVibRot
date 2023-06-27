@@ -101,7 +101,4 @@ sub_module_propa_march_MPI.f90 \
 sub_module_propa_march_SG4.f90 \
 sub_module_propagation.f90 \
 sub_module_propagation_MPI.f90 \
-sub_propagation.f90 \
-calc_f2_f1Q.f90 \
-Sub_X_TO_Q_ana.f90 \
-Calc_Tab_dnQflex.f90
+sub_propagation.f90

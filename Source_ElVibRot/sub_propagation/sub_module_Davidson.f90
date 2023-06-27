@@ -131,6 +131,8 @@ CONTAINS
 
       logical           :: With_Grid,With_Basis,Hmin_OR_Hmax
       logical           :: exit_Davidson
+      logical           :: Forced_sym_Hamil = .FALSE.
+      logical           :: sym_Hamil
 
       !----- for debuging --------------------------------------------------
       integer :: err_mem,memory
@@ -172,6 +174,7 @@ CONTAINS
           write(out_unitp,*) 'Poly_Transfo:   ',para_H%para_ReadOp%Poly_Transfo
         ENDIF
 
+        sym_Hamil = (Forced_sym_Hamil .OR. para_H%sym_Hamil)
         para_Davidson%max_ene = para_H%para_ReadOp%Poly_Transfo(0)
         DO i=1,para_H%para_ReadOp%degree_Transfo
           para_Davidson%max_ene = para_Davidson%max_ene + &
@@ -302,7 +305,7 @@ CONTAINS
         !CALL time_perso('MakeH done')
 
         ! if symmetric
-        CALL sub_hermitic_H(H,ndim,non_hermitic,para_H%sym_Hamil)
+        CALL sub_hermitic_H(H,ndim,non_hermitic,sym_Hamil)
         IF (debug) CALL Write_Mat(H,out_unitp,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
@@ -314,7 +317,7 @@ CONTAINS
 51          format(' Hamiltonien: ',f16.12,' cm-1')
         END IF
 
-        IF (para_H%sym_Hamil) THEN
+        IF (sym_Hamil) THEN
           epsi = max(para_Davidson%conv_resi,                &
                    TEN**para_Davidson%conv_hermitian *       &
                                                non_hermitic)
@@ -339,7 +342,7 @@ CONTAINS
 
         ! write(out_unitp,*) 'ndim',ndim
         ! write(out_unitp,*) 'shape ..',shape(H),shape(Vec),shape(Ene),shape(trav)
-        IF (para_H%sym_Hamil) THEN
+        IF (sym_Hamil) THEN
           ! CALL diagonalization(H,Ene(1:ndim),Vec,ndim,3,1,.FALSE.)
           ! consider the MPI of diagonalization
           CALL diagonalization(H,Ene(1:ndim),Vec,ndim,3,1,.True.)

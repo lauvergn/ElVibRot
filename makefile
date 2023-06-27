@@ -256,6 +256,11 @@ OBJ0 += QMRPACK_lib.o
 OBJ=$(addprefix $(OBJ_DIR)/, $(OBJ0))
 $(info ************ OBJ: $(OBJ))
 #
+OBJ0_EXT= sub_system.o calc_f2_f1Q.o Sub_X_TO_Q_ana.o Calc_Tab_dnQflex.o
+OBJ_EXT=$(addprefix $(OBJ_DIR)/, $(OBJ0_EXT))
+$(info ************ OBJ_EXT: $(OBJ_EXT))
+
+#
 #===============================================
 #============= Several mains ===================
 #===============================================
@@ -280,8 +285,8 @@ vib:
 	./scripts/make_vib.sh $(LOC_path) $(FFC) $(extf)
 	chmod a+x vib
 #
-$(VIBEXE): $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_DIR)/sub_system.o $(LIBA) $(EXTLib)
-	$(FFC) $(FFLAGS) -o $(VIBEXE) $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_DIR)/sub_system.o $(LIBA) $(FLIB)
+$(VIBEXE): $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_EXT) $(LIBA) $(EXTLib)
+	$(FFC) $(FFLAGS) -o $(VIBEXE) $(OBJ_DIR)/$(VIBMAIN).o $(LIBA) $(OBJ_EXT) $(FLIB)
 	@echo EVR-T
 #===============================================
 #============= TESTS ===========================
