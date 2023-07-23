@@ -338,6 +338,7 @@ cleanall : clean rm_extlib
 	rm -f TESTS/res* TESTS/*log
 	cd UnitTests ; ./clean
 	cd Examples ; ./clean
+	cd Working_tests ; ./clean
 	@echo "  done all cleaning"
 #===============================================
 #================ zip and copy the directory ===

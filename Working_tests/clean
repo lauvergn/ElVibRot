@@ -1,0 +1,8 @@
+
+
+for DIR in exa_SG-test exa_Tana-dist exa_TnumPoly-dist exa_TnumTana-dist examples_Tana exa_hcn-test
+do
+  cd $DIR
+  ./clean
+  cd ..
+done

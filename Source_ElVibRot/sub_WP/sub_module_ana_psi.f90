@@ -579,10 +579,10 @@ END SUBROUTINE sub_analyze_psi
 
         IF (psi%cplx) THEN
           CALL get_CVec_OF_psi_AT_ind_a(CVec_bie,psi,i_q,OldPara=OldPara)
-          Rho_i(:) = conjg(CVec_bie(:))*CVec_bie(:) * WrhonD
+          Rho_i(:) = conjg(CVec_bie(:))*CVec_bie(:)
         ELSE
           CALL get_RVec_OF_psi_AT_ind_a(Rho_i,psi,i_q,OldPara=OldPara)
-          Rho_i(:) = Rho_i(:)**2 * WrhonD
+          Rho_i(:) = Rho_i(:)**2
         END IF
 
         !- calculation of total density, Rho ----------------------------
@@ -591,10 +591,10 @@ END SUBROUTINE sub_analyze_psi
         DO i_ie=1,Psi%nb_bi*Psi%nb_be
         DO j_ie=1,Psi%nb_bi*Psi%nb_be
 
-          IF (Rho > ana_psi%coherence_epsi)                             &
-             Mij(1,i_ie,j_ie) = Mij(1,i_ie,j_ie) + Rho_i(i_ie)*Rho_i(j_ie) / Rho
-
-          Mij(2,i_ie,j_ie) = Mij(2,i_ie,j_ie) + Rho_i(i_ie)*Rho_i(j_ie)
+          IF (Rho > ana_psi%coherence_epsi) THEN
+            Mij(1,i_ie,j_ie) = Mij(1,i_ie,j_ie) + Rho_i(i_ie)*Rho_i(j_ie) / Rho * WrhonD
+          END IF
+          Mij(2,i_ie,j_ie) = Mij(2,i_ie,j_ie) + Rho_i(i_ie)*Rho_i(j_ie)*WrhonD
 
         END DO
         END DO
@@ -618,7 +618,86 @@ END SUBROUTINE sub_analyze_psi
 !----------------------------------------------------------
 
       END SUBROUTINE sub_Rhoi_Rhoj_Over_Rho
-
+      SUBROUTINE sub_Rhoi_Rhoj_Over_Rho_old(Psi,Mij,ana_psi)
+        USE mod_system
+        USE mod_psi_set_alloc
+        USE mod_psi_B_TO_G
+        IMPLICIT NONE
+  
+        TYPE (param_psi)    , intent(inout) :: Psi
+        TYPE (param_ana_psi), intent(inout) :: ana_psi
+  
+  !------ value ---------------------------------------
+        real (kind=Rkind),    intent(inout) :: Mij(2,Psi%nb_bi*Psi%nb_be,Psi%nb_bi*Psi%nb_be)
+  
+  
+  !------ working variables ---------------------------------
+        TYPE(OldParam)       :: OldPara
+        integer              :: i,j,i_q,i_ie,j_ie,iqie
+        real (kind=Rkind)    :: WrhonD,Rho,Rho_i(Psi%nb_bi*Psi%nb_be)
+        complex (kind=Rkind) :: CVec_bie(psi%nb_bi*psi%nb_be)
+  
+  !----- for debuging --------------------------------------------------
+        character (len=*), parameter :: name_sub = 'sub_Rhoi_Rhoj_Over_Rho'
+        logical, parameter :: debug =.FALSE.
+        !logical, parameter :: debug =.TRUE.
+        !-----------------------------------------------------------
+        IF (debug) THEN
+          write(out_unitp,*) 'BEGINNING ',name_sub
+          flush(out_unitp)
+        END IF
+  !-----------------------------------------------------------
+  
+        IF (.NOT. ana_psi%GridDone) CALL sub_PsiBasisRep_TO_GridRep(Psi)
+  
+        Mij(:,:,:)  = ZERO
+  
+  
+        DO i_q=1,Psi%nb_qa
+  
+          WrhonD =  Rec_WrhonD(Psi%BasisnD,i_q,OldPara=OldPara)
+  
+          IF (psi%cplx) THEN
+            CALL get_CVec_OF_psi_AT_ind_a(CVec_bie,psi,i_q,OldPara=OldPara)
+            Rho_i(:) = conjg(CVec_bie(:))*CVec_bie(:) * WrhonD
+          ELSE
+            CALL get_RVec_OF_psi_AT_ind_a(Rho_i,psi,i_q,OldPara=OldPara)
+            Rho_i(:) = Rho_i(:)**2 * WrhonD
+          END IF
+  
+          !- calculation of total density, Rho ----------------------------
+          Rho = sum(Rho_i)
+  
+          DO i_ie=1,Psi%nb_bi*Psi%nb_be
+          DO j_ie=1,Psi%nb_bi*Psi%nb_be
+  
+            IF (Rho > ana_psi%coherence_epsi)                             &
+               Mij(1,i_ie,j_ie) = Mij(1,i_ie,j_ie) + Rho_i(i_ie)*Rho_i(j_ie) / Rho
+  
+            Mij(2,i_ie,j_ie) = Mij(2,i_ie,j_ie) + Rho_i(i_ie)*Rho_i(j_ie)
+  
+          END DO
+          END DO
+  
+        END DO
+  
+  
+  !----------------------------------------------------------
+        IF (debug) THEN
+  
+          DO i_ie=1,Psi%nb_bi*Psi%nb_be
+          DO j_ie=i_ie+1,Psi%nb_bi*Psi%nb_be
+  
+           write(out_unitp,*) 'Mij ',i_ie,j_ie,Mij(:,i_ie,j_ie)
+  
+          END DO
+          END DO
+  
+          write(out_unitp,*) 'END ',name_sub
+        END IF
+  !----------------------------------------------------------
+  
+        END SUBROUTINE sub_Rhoi_Rhoj_Over_Rho_old
 !================================================================
 !
 !     means of Qact1(i) psi  : <psi|Qact(i)|psi>
