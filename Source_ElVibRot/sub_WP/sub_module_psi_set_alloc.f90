@@ -55,6 +55,9 @@
         TYPE (Basis),          pointer       :: Basis2n       => null()   ! .TRUE. pointer
         integer                              :: symab         = -1
 
+        !-- for the basis set for analysis only ----------------------------
+        TYPE (param_AllBasis), pointer       :: para_AllBasis_ana => null()   ! .TRUE. pointer
+
         logical       :: init             = .FALSE.   ! (F) all constantes are initialized
         logical       :: cplx             = .FALSE.   ! (T) if T => psi is complex (use of Cvec)
                                                       ! otherwise psi is real (use of Rvec)
@@ -158,19 +161,22 @@
           FINAL              :: dealloc_all_psi
         END TYPE param_psi
 
- PUBLIC :: param_psi,Set_psi_With_index,Set_Random_psi,copy_psi2TOpsi1
- PUBLIC :: ecri_init_psi,ecri_psi
- PUBLIC :: get_nb_be_FROM_psi,get_nb_bi_FROM_psi
- PUBLIC :: alloc_array,dealloc_array,alloc_NParray,dealloc_NParray
- PUBLIC :: alloc_psi,dealloc_psi
+  PUBLIC :: param_psi,init_psi,Set_psi_With_index,Set_Random_psi,copy_psi2TOpsi1
+  PUBLIC :: ecri_init_psi,ecri_psi
+  PUBLIC :: get_nb_be_FROM_psi,get_nb_bi_FROM_psi
+  PUBLIC :: alloc_array,dealloc_array,alloc_NParray,dealloc_NParray
+  PUBLIC :: alloc_psi,dealloc_psi
 
- PUBLIC :: get_RVec_OF_psi_AT_ind_a,get_CVec_OF_psi_AT_ind_a
- PUBLIC :: set_RVec_OF_psi_AT_ind_a,set_CVec_OF_psi_AT_ind_a
- PUBLIC :: get_RMat_OF_psi_AT_ind_a,get_CMat_OF_psi_AT_ind_a
- PUBLIC :: set_RMat_OF_psi_AT_ind_a,set_CMat_OF_psi_AT_ind_a
- !> subroutine for working on full Smolyak rep.
- PUBLIC :: psi_plus_SR_MPI,psi_minus_SR_MPI,psi_times_SR_MPI
+  PUBLIC :: get_RVec_OF_psi_AT_ind_a,get_CVec_OF_psi_AT_ind_a
+  PUBLIC :: set_RVec_OF_psi_AT_ind_a,set_CVec_OF_psi_AT_ind_a
+  PUBLIC :: get_RMat_OF_psi_AT_ind_a,get_CMat_OF_psi_AT_ind_a
+  PUBLIC :: set_RMat_OF_psi_AT_ind_a,set_CMat_OF_psi_AT_ind_a
+  !> subroutine for working on full Smolyak rep.
+  PUBLIC :: psi_plus_SR_MPI,psi_minus_SR_MPI,psi_times_SR_MPI
 
+  INTERFACE init_psi
+    MODULE PROCEDURE init_psi_t
+  END INTERFACE
       INTERFACE alloc_array
         MODULE PROCEDURE alloc_array_OF_Psidim1
       END INTERFACE
@@ -214,6 +220,89 @@
 
  CONTAINS
 
+!=======================================================================================
+!     initialization of psi
+!=======================================================================================
+  SUBROUTINE init_psi_t(psi,para_AllBasis,cplx,para_AllBasis_ana)
+    USE mod_system
+    IMPLICIT NONE
+
+    !----- variables for the WP propagation ----------------------------
+    TYPE (param_psi), intent(inout)   :: psi
+    logical,          intent(in)      :: cplx
+
+    TYPE (param_AllBasis), target, intent(in)           :: para_AllBasis
+    TYPE (param_AllBasis), target, intent(in), optional :: para_AllBasis_ana
+
+    !----- for debuging --------------------------------------------------
+    !logical, parameter :: debug = .TRUE.
+    logical, parameter :: debug = .FALSE.
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unitp,*) 'BEGINNING init_psi_t : cplx',cplx
+    END IF
+
+    !-----------------------------------------------------------
+    !----- link the basis set ---------------------------------
+    psi%para_AllBasis => para_H%para_AllBasis
+ 
+    IF (associated(psi%para_AllBasis%BasisnD)) THEN
+       psi%BasisnD => psi%para_AllBasis%BasisnD
+    ELSE
+       write(out_unitp,*) ' ERROR in init_psi_t'
+       write(out_unitp,*) ' BasisnD CANNOT be associated'
+       write(out_unitp,*) ' asso psi%para_AllBasis%BasisnD',associated(psi%para_AllBasis%BasisnD)
+       write(out_unitp,*) ' CHECK the source'
+       STOP
+    END IF
+
+    IF (associated(psi%para_AllBasis%Basis2n)) THEN
+       psi%Basis2n => psi%para_AllBasis%Basis2n
+    ELSE
+       write(out_unitp,*) ' ERROR in init_psi_t'
+       write(out_unitp,*) ' BasisnD CANNOT be associated'
+       write(out_unitp,*) ' asso psi%para_AllBasis%Basis2n',associated(psi%para_AllBasis%Basis2n)
+       write(out_unitp,*) ' CHECK the source'
+       STOP
+    END IF
+  !-----------------------------------------------------------
+    IF (present(para_AllBasis_ana)) THEN
+      psi%para_AllBasis_ana => para_AllBasis_ana
+    ELSE
+      psi%para_AllBasis_ana => psi%para_AllBasis
+    END IF
+
+    psi%init          = .TRUE.
+    psi%cplx          = cplx
+
+    psi%nb_tot           = para_H%nb_tot
+    psi%nb_tot_contrac   = para_H%nb_tot
+    psi%nb_tot_uncontrac = para_H%nb_tot_ini
+
+
+    psi%nb_baie       = para_H%nb_baie
+    psi%nb_ba         = para_H%nb_ba
+    psi%nb_bi         = para_H%nb_bi
+    psi%nb_be         = para_H%nb_be
+    psi%nb_bRot       = para_H%nb_bRot
+
+    psi%nb_qa         = para_H%nb_qa
+    psi%nb_qaie       = para_H%nb_qaie
+
+    psi%nb_act1       = para_H%mole%nb_act1
+    psi%nb_act        = para_H%mole%nb_act
+
+    psi%nb_basis_act1 = max(1,psi%BasisnD%nb_basis)
+    psi%nb_basis      = psi%nb_basis_act1 + psi%Basis2n%nb_basis
+    psi%max_dim       = maxval( psi%BasisnD%nDindB%nDsize(:) )
+
+    psi%nb_TDParam    = get_nb_TDParam_FROM_basis(psi%BasisnD)
+
+  IF (debug) THEN
+    CALL ecri_init_psi(psi)
+    write(out_unitp,*) 'END init_psi_t'
+  END IF
+END SUBROUTINE init_psi_t
 !=======================================================================================
 !     allocation of psi
 !     deallocation of psi
@@ -584,6 +673,7 @@
         nullify(psi%Basis2n)
         nullify(psi%BasisnD)
         nullify(psi%para_AllBasis)
+        nullify(psi%para_AllBasis_ana)
 
         psi%init            = .FALSE.
         psi%cplx            = .FALSE.
@@ -897,6 +987,12 @@
          STOP
       END IF
 
+      IF (associated(psi2%para_AllBasis_ana)) THEN
+        psi1%para_AllBasis_ana => psi2%para_AllBasis_ana
+      ELSE
+        psi1%para_AllBasis_ana => psi1%para_AllBasis
+      END IF
+
       psi1%init             = psi2%init
       psi1%cplx             = psi2%cplx
 
@@ -1028,6 +1124,11 @@
          STOP
       END IF
 
+      IF (associated(psi2%para_AllBasis_ana)) THEN
+        psi1%para_AllBasis_ana => psi2%para_AllBasis_ana
+      ELSE
+        psi1%para_AllBasis_ana => psi1%para_AllBasis
+      END IF
 
       psi1%init = psi2%init
       psi1%cplx = psi2%cplx
@@ -3455,10 +3556,11 @@
 
       write(out_unitp,*) ' BEGINNING Write_init_psi'
 
-      write(out_unitp,*) 'para_AllBasis is linked?',associated(psi%para_AllBasis)
-      write(out_unitp,*) 'BasisnD       is linked?',associated(psi%BasisnD)
-      write(out_unitp,*) 'Basis2n       is linked?',associated(psi%Basis2n)
+      write(out_unitp,*) 'para_AllBasis     is linked?',associated(psi%para_AllBasis)
+      write(out_unitp,*) 'BasisnD           is linked?',associated(psi%BasisnD)
+      write(out_unitp,*) 'Basis2n           is linked?',associated(psi%Basis2n)
       write(out_unitp,*) 'symab, bits(symab)',WriteTOstring_symab(psi%symab)
+      write(out_unitp,*) 'para_AllBasis_ana is linked?',associated(psi%para_AllBasis_ana)
 
       write(out_unitp,*) 'init,cplx',psi%init,psi%cplx
 

@@ -41,19 +41,18 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_SetOp
-      USE mod_system
-      use mod_PrimOp, only: param_typeop, PrimOp_t, dealloc_typeop,     &
+  USE mod_system
+  USE mod_PrimOp, only: param_typeop, PrimOp_t, dealloc_typeop,     &
                             write_typeop, param_d0matop, init_d0matop,  &
                             dealloc_d0matop
 
-      USE mod_basis
-      USE mod_OpGrid
-      USE mod_ReadOp
-      IMPLICIT NONE
+  USE mod_basis
+  USE mod_OpGrid
+  USE mod_ReadOp
+  IMPLICIT NONE
 
 !------------------------------------------------------------------------------
-        ! type param_Op
-        TYPE, EXTENDS(param_TypeOp) :: param_Op
+  TYPE, EXTENDS(param_TypeOp) :: param_Op
 
           logical                        :: init_var      = .FALSE.
           logical                        :: alloc         = .FALSE.
@@ -146,31 +145,30 @@ MODULE mod_SetOp
           logical                        :: SplitH            = .FALSE. ! When true, the H is split in a diagonal part wich contains the KEO and also part of the potential (for HO basis set)
           real (kind=Rkind), allocatable :: SplitDiagB(:)               ! if SplitH=t, the Hamiltonian diagonal values on the basis set
 
-        END TYPE param_Op
+  END TYPE param_Op
+  TYPE param_AllOp
 
-!-------------------------------------------------------------------------------
-      !!@description: TODO
-      !!@param: TODO
-        TYPE param_AllOp
+    integer                  :: nb_Op     =  0
+    TYPE (param_Op), pointer :: tab_Op(:) => null()
 
-          integer                  :: nb_Op     =  0
-          TYPE (param_Op), pointer :: tab_Op(:) => null()
+  END TYPE param_AllOp
 
-        END TYPE param_AllOp
-!-------------------------------------------------------------------------------
+  INTERFACE alloc_array
+    MODULE PROCEDURE alloc_array_OF_Opdim1
+  END INTERFACE
 
-      INTERFACE alloc_array
-        MODULE PROCEDURE alloc_array_OF_Opdim1
-      END INTERFACE
+  INTERFACE dealloc_array
+     MODULE PROCEDURE dealloc_array_OF_Opdim1
+  END INTERFACE
 
-      INTERFACE dealloc_array
-        MODULE PROCEDURE dealloc_array_OF_Opdim1
-      END INTERFACE
+  INTERFACE init_psi
+    MODULE PROCEDURE init_psi_FROM_Op
+  END INTERFACE
 
-      PUBLIC :: Set_ZPE_OF_Op,Get_ZPE
+  PRIVATE :: init_psi_FROM_Op,dealloc_array_OF_Opdim1,alloc_array_OF_Opdim1
+  PUBLIC :: Set_ZPE_OF_Op,Get_ZPE,init_psi
 
-
-      CONTAINS
+CONTAINS
 
 !=======================================================================================
 !
@@ -1632,7 +1630,7 @@ END SUBROUTINE alloc_MatOp
 !=======================================================================================
 !     initialization of psi
 !=======================================================================================
-      SUBROUTINE init_psi(psi,para_H,cplx)
+  SUBROUTINE init_psi_FROM_Op(psi,para_H,cplx,para_AllBasis_ana)
       USE mod_system
       USE mod_psi, ONLY : param_psi,ecri_init_psi
       IMPLICIT NONE
@@ -1642,21 +1640,22 @@ END SUBROUTINE alloc_MatOp
       logical,          intent(in)      :: cplx
 
 !----- Operator to link BasisnD, Basis2n ---------------------
-      TYPE (param_Op),  intent(in)      :: para_H
+      TYPE (param_Op),               intent(in)           :: para_H
+      TYPE (param_AllBasis), target, intent(in), optional :: para_AllBasis_ana
 
 !----- for debuging --------------------------------------------------
        !logical, parameter :: debug = .TRUE.
        logical, parameter :: debug = .FALSE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING init_psi : cplx',cplx
+        write(out_unitp,*) 'BEGINNING init_psi_FROM_Op : cplx',cplx
       END IF
 !-----------------------------------------------------------
 !----- link the basis set ---------------------------------
      IF (associated(para_H%para_AllBasis)) THEN
        psi%para_AllBasis => para_H%para_AllBasis
      ELSE
-       write(out_unitp,*) ' ERROR in init_psi'
+       write(out_unitp,*) ' ERROR in init_psi_FROM_Op'
        write(out_unitp,*) ' BasisnD CANNOT be associated'
        write(out_unitp,*) ' asso para_H%para_AllBasis',associated(para_H%para_AllBasis)
        write(out_unitp,*) ' CHECK the source'
@@ -1665,7 +1664,7 @@ END SUBROUTINE alloc_MatOp
       IF (associated(psi%para_AllBasis%BasisnD)) THEN
          psi%BasisnD => psi%para_AllBasis%BasisnD
       ELSE
-         write(out_unitp,*) ' ERROR in init_psi'
+         write(out_unitp,*) ' ERROR in init_psi_FROM_Op'
          write(out_unitp,*) ' BasisnD CANNOT be associated'
          write(out_unitp,*) ' asso psi%para_AllBasis%BasisnD',associated(psi%para_AllBasis%BasisnD)
          write(out_unitp,*) ' CHECK the source'
@@ -1675,13 +1674,18 @@ END SUBROUTINE alloc_MatOp
       IF (associated(psi%para_AllBasis%Basis2n)) THEN
          psi%Basis2n => psi%para_AllBasis%Basis2n
       ELSE
-         write(out_unitp,*) ' ERROR in init_psi'
+         write(out_unitp,*) ' ERROR in init_psi_FROM_Op'
          write(out_unitp,*) ' BasisnD CANNOT be associated'
          write(out_unitp,*) ' asso psi%para_AllBasis%Basis2n',associated(psi%para_AllBasis%Basis2n)
          write(out_unitp,*) ' CHECK the source'
          STOP
       END IF
 !-----------------------------------------------------------
+      IF (present(para_AllBasis_ana)) THEN
+        psi%para_AllBasis_ana => para_AllBasis_ana
+      ELSE
+        psi%para_AllBasis_ana => psi%para_AllBasis
+      END IF
 
       psi%init          = .TRUE.
       psi%cplx          = cplx
@@ -1711,9 +1715,8 @@ END SUBROUTINE alloc_MatOp
 
       IF (debug) THEN
         CALL ecri_init_psi(psi)
-        write(out_unitp,*) 'END init_psi'
+        write(out_unitp,*) 'END init_psi_FROM_Op'
       END IF
-      END SUBROUTINE init_psi
-!=======================================================================================
+  END SUBROUTINE init_psi_FROM_Op
 
 END MODULE mod_SetOp
