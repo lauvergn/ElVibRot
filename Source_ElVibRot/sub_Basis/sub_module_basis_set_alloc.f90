@@ -83,11 +83,8 @@ MODULE mod_basis_set_alloc
           real (kind=Rkind), allocatable :: EneH0(:)     ! EeneH0(nb) : EeneH0(ib)=<d0b(:,ib) I H0 I d0b(:,ib)>
 
           TYPE (Type_dnMat)              :: dnRGB     ! basis functions d0b(nq,nb) ....
-          TYPE (Type_dnCplxMat)          :: dnCGB     ! basis functions d0cb(nq,nb)
           TYPE (Type_dnMat)              :: dnRBG     ! basis functions td0b(nb,nq)  (transpose)
-          TYPE (Type_dnCplxMat)          :: dnCBG     ! basis functions td0cb(nb,nq) (transpose)
           TYPE (Type_dnMat)              :: dnRBGwrho ! basis functions td0b(nq,nb)  (transpose+wrho)
-          TYPE (Type_dnCplxMat)          :: dnCBGwrho ! basis functions td0cb(nq,nb) (transpose+wrho)
 
 
           ! the projection of d1b and d2b => d0b
@@ -95,13 +92,12 @@ MODULE mod_basis_set_alloc
           logical                        :: dnBBRep_done = .FALSE. ! (F) If we calculate the BasisRep representation
 
           TYPE (Type_dnMat)              :: dnRBB         ! matrices which enables to tranform d./dQ d2./dQ2 on the basis
-          TYPE (Type_dnCplxMat)          :: dnCBB         ! matrices which enables to tranform d./dQ d2./dQ2 on the basis
 
           logical                        :: dnGGRep      = .FALSE. ! (T) If we calculate the dnRGG
           logical                        :: dnGGRep_done = .FALSE. ! (F) If we calculate the dnRGG
           TYPE (Type_dnMat)              :: dnRGG ! matrices which enables to tranform d./dQ d2./dQ2 on the grid
 
-          logical                        :: cplx = .FALSE. !  .T. if the basis set is complex (def .F.)
+          !logical                        :: cplx = .FALSE. !  .T. if the basis set is complex (def .F.)
 
           TYPE (Type_dnMat)              :: dnPara_OF_RGB ! derivatives with respect to the Basis set parameters (Q0, scaleQ)
           TYPE (Type_dnMat)              :: dnPara_OF_RBB ! derivatives with respect to the Basis set parameters (Q0, scaleQ)
@@ -288,7 +284,6 @@ MODULE mod_basis_set_alloc
       PUBLIC  get_wrho_OF_basis, get_wrho_AT_iq_OF_basis
       PUBLIC  Get_MatdnRGG, Get_MatdnRGB
       PUBLIC  Get_MatdnRBB, Get2_MatdnRBB
-      PUBLIC  Get_MatdnCGB, Get_MatdnCBB
       PUBLIC  Get2_MatdnRGB, Get2_MatdnRBG
       PUBLIC  Get_MATdnPara_OF_RGB,Get_MATdnPara_OF_RBB,Get2_MATdnPara_OF_RBB
       PUBLIC  Set_nq_OF_basis, get_nq_FROM_basis, get_nqa_FROM_basis, get_nb_FROM_basis
@@ -454,23 +449,10 @@ CONTAINS
            basis_set%tab_ndim_index(:,:) = 0
          END IF
 
-         IF (basis_set%cplx) THEN
+         CALL alloc_dnMat(basis_set%dnRGB,nq,basis_set%nb,basis_set%ndim,nderiv=nderiv_loc)
 
-           CALL alloc_dnCplxMat(basis_set%dnCGB,                        &
-                                nq,basis_set%nb,basis_set%ndim,nderiv=nderiv_loc)
+         CALL alloc_dnMat(basis_set%dnRBG,basis_set%nb,nq,basis_set%ndim,nderiv=0)
 
-           CALL alloc_dnCplxMat(basis_set%dnCBG,                        &
-                                basis_set%nb,nq,basis_set%ndim,nderiv=0)
-
-         ELSE
-
-           CALL alloc_dnMat(basis_set%dnRGB,                            &
-                                nq,basis_set%nb,basis_set%ndim,nderiv=nderiv_loc)
-
-           CALL alloc_dnMat(basis_set%dnRBG,                            &
-                                basis_set%nb,nq,basis_set%ndim,nderiv=0)
-
-         END IF
          IF (debug) write(out_unitp,*) 'END ',name_sub
          flush(out_unitp)
 
@@ -500,12 +482,6 @@ CONTAINS
          CALL dealloc_dnMat(basis_set%dnRBGwrho)
          CALL dealloc_dnMat(basis_set%dnRBB)
          CALL dealloc_dnMat(basis_set%dnRGG)
-
-         CALL dealloc_dnCplxMat(basis_set%dnCGB)
-         CALL dealloc_dnCplxMat(basis_set%dnCBG)
-         CALL dealloc_dnCplxMat(basis_set%dnCBGwrho)
-         CALL dealloc_dnCplxMat(basis_set%dnCBB)
-         !CALL dealloc_dnCplxMat(basis_set%dnCGG) !not yet in the type
 
          IF (debug) write(out_unitp,*) 'END ',name_sub
          flush(out_unitp)
@@ -876,7 +852,6 @@ CONTAINS
          basis_set%dnBBRep      = .FALSE.
          basis_set%dnBBRep_done = .FALSE.
          CALL dealloc_dnMat(basis_set%dnRBB)
-         CALL dealloc_dnCplxMat(basis_set%dnCBB)
 
          CALL dealloc_dnMat(basis_set%dnPara_OF_RGB)
          CALL dealloc_dnMat(basis_set%dnPara_OF_RBB)
@@ -886,8 +861,6 @@ CONTAINS
          IF (allocated(basis_set%TD_scaleQ))    THEN
            CALL dealloc_NParray(basis_set%TD_scaleQ,"basis_set%TD_scaleQ",name_sub)
          END IF
-
-         basis_set%cplx  = .FALSE.
 
          basis_set%Nested        = 0
          basis_set%nq_max_Nested = -1
@@ -1533,16 +1506,6 @@ CONTAINS
              basis_set%dnRGB%nderiv = 0
            END IF
 
-           IF (associated(basis_set%dnCGB%d1)) THEN
-             CALL dealloc_array(basis_set%dnCGB%d1,'basis_set%dnCGB%d1',name_sub)
-             basis_set%dnCGB%nderiv = 0
-           END IF
-
-           IF (associated(basis_set%dnCGB%d2)) THEN
-             CALL dealloc_array(basis_set%dnCGB%d2,'basis_set%dnCGB%d2',name_sub)
-             basis_set%dnCGB%nderiv = 0
-           END IF
-
          END IF
          IF (print_level > -1) write(out_unitp,*) 'clean all the tab_basis'
 
@@ -1642,7 +1605,6 @@ CONTAINS
 
         basis_set1%nq_max_Nested     = basis_set2%nq_max_Nested
         basis_set1%Nested            = basis_set2%Nested
-        basis_set1%cplx              = basis_set2%cplx
 
         basis_set1%check_basis       = basis_set2%check_basis
         basis_set1%check_nq_OF_basis = basis_set2%check_nq_OF_basis
@@ -1836,21 +1798,15 @@ CONTAINS
           basis_set1%dsft = basis_set2%dsft
 
           IF (basis_set2%dnRGB%alloc) basis_set1%dnRGB = basis_set2%dnRGB
-          IF (basis_set2%dnCGB%alloc) basis_set1%dnCGB = basis_set2%dnCGB
-
           IF (basis_set2%dnRBG%alloc) basis_set1%dnRBG = basis_set2%dnRBG
-          IF (basis_set2%dnCBG%alloc) basis_set1%dnCBG = basis_set2%dnCBG
-
 
           basis_set1%dnBBRep_done = basis_set2%dnBBRep_done
-          IF (basis_set2%dnCBB%alloc) basis_set1%dnCBB = basis_set2%dnCBB
           IF (basis_set2%dnRBB%alloc) basis_set1%dnRBB = basis_set1%dnRBB
 
           basis_set1%dnGGRep_done = basis_set2%dnGGRep_done
           IF (basis_set2%dnRGG%alloc) basis_set1%dnRGG = basis_set2%dnRGG
 
           IF (basis_set2%dnRBGwrho%alloc) basis_set1%dnRBGwrho = basis_set2%dnRBGwrho
-          IF (basis_set2%dnCBGwrho%alloc) basis_set1%dnCBGwrho = basis_set2%dnCBGwrho
 
           if ( allocated(basis_set2%TD_Q0) ) then
             !CALL alloc_NParray(basis_set1%TD_Q0,shape(basis_set2%TD_Q0),        &
@@ -2150,51 +2106,6 @@ CONTAINS
 !-----------------------------------------------------------
       END FUNCTION Get2_MatdnRBG
 
-      SUBROUTINE Get_MatdnCGB(basis_set,CMatdnb,dnba_ind)
-      USE mod_system
-      IMPLICIT NONE
-
-      TYPE (basis),intent(in)           :: basis_set
-      complex(kind=Rkind),intent(inout) :: CMatdnb(:,:)
-      integer, intent(in)               :: dnba_ind(2)
-
-
-      integer :: nq
-!----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-      character (len=*), parameter :: name_sub='Get_MatdnCGB'
-!-----------------------------------------------------------
-      IF (.NOT. basis_set%packed) RETURN
-      nq = get_nq_FROM_basis(basis_set)
-      IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nq',nq
-      END IF
-!-----------------------------------------------------------
-    IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
-      CMatdnb = Identity_Mat(basis_set%nb)
-    ELSE
-      IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN
-        CMatdnb(:,:) = basis_set%dnCGB%d0(:,:)
-      ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
-        CMatdnb(:,:) = basis_set%dnCGB%d1(:,:,dnba_ind(2))
-      ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
-        CMatdnb(:,:) = basis_set%dnCGB%d1(:,:,dnba_ind(1))
-      ELSE ! 2d derivative
-        CMatdnb(:,:) = basis_set%dnCGB%d2(:,:,dnba_ind(1),dnba_ind(2))
-      END IF
-    END IF
-
-
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!-----------------------------------------------------------
-      END SUBROUTINE Get_MatdnCGB
-
       SUBROUTINE Get_MatdnRBB(basis_set,MatRBB,dnba_ind)
       USE mod_system
       IMPLICIT NONE
@@ -2453,229 +2364,248 @@ SUBROUTINE Get2_MATdnPara_OF_RBB(basis_set,MatRBB,dnba_ind)
 !-----------------------------------------------------------
 END SUBROUTINE Get2_MATdnPara_OF_RBB
 
-      SUBROUTINE Get_MatdnCBB(basis_set,MatCBB,dnba_ind)
-      USE mod_system
-      IMPLICIT NONE
 
-      TYPE (basis),intent(in)           :: basis_set
-      complex(kind=Rkind),intent(inout) :: MatCBB(:,:)
-      integer, intent(in)               :: dnba_ind(2)
+  SUBROUTINE RB_TO_RG_basis(B,G,base,der)
+    USE mod_system
+    IMPLICIT NONE
+      
+    real (kind=Rkind), intent(in)           :: B(:)
+    real (kind=Rkind), intent(inout)        :: G(:)
+  
+    TYPE (basis),      intent(in), target   :: base
+    integer,           intent(in), optional :: der(2)
 
-      integer :: nb
+    integer :: nb_basis,nb_B,nq,der_basis(2)
+    real (kind=Rkind), pointer :: Mat(:,:)
 
-!----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-      character (len=*), parameter :: name_sub='Get_MatdnCBB'
-!-----------------------------------------------------------
-      IF (.NOT. basis_set%packed) RETURN
-      nb = basis_set%nb
-      IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb',nb
-        write(out_unitp,*) 'shape(MatCBB)',shape(MatCBB)
-        write(out_unitp,*) 'alloc dnCBB',basis_set%dnCBB%alloc
-        flush(out_unitp)
+    !----- for debuging --------------------------------------------------
+    logical, parameter :: debug = .FALSE.
+    !logical, parameter :: debug = .TRUE.
+    !-----------------------------------------------------------
+    nq       = get_nq_FROM_basis(base)
+    nb_basis = base%nb
+    nb_B     = size(B)
+
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unitp,*) 'BEGINNING RB_TO_RG_basis'
+      write(out_unitp,*) 'nb_basis,nb_B',nb_basis,nb_B
+      write(out_unitp,*) 'nq',nq
+      write(out_unitp,*) 'B',B(:)
+    END IF
+    !-----------------------------------------------------------
+
+    IF (NewBasisEl .AND. base%ndim == 0) THEN
+      G(:) = B
+    ELSE
+      IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
+        write(out_unitp,*) ' ERROR in RB_TO_RG_basis'
+        write(out_unitp,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
+        write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+        STOP ' ERROR in RB_TO_RG_basis: inconsistent sizes'
       END IF
-!-----------------------------------------------------------
+      nb_mult_BTOG = nb_mult_BTOG + int(nb_B*nq,kind=ILkind)
 
-      IF (.NOT. basis_set%dnCBB%alloc) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'basis_set%dnCBB is not allocated!!'
-        write(out_unitp,*) 'CHECK the fortran source'
-        STOP
+      IF (present(der)) THEN
+        der_basis = base%Tabder_Qdyn_TO_Qbasis(der(:))
+      ELSE
+        der_basis = 0
       END IF
 
-      IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN
-        MatCBB = Identity_Mat(nb)
-      ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
-        MatCBB(:,:) = basis_set%dnCBB%d1(:,:,dnba_ind(2))
-      ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
-        MatCBB(:,:) = basis_set%dnCBB%d1(:,:,dnba_ind(1))
-      ELSE ! 2d derivative
-        MatCBB(:,:) = basis_set%dnCBB%d2(:,:,dnba_ind(1),dnba_ind(2))
+      IF (der_basis(1) == 0 .AND. der_basis(2) == 0) THEN
+        Mat => base%dnRGB%d0(:,1:nb_B)
+      ELSE IF (der_basis(1) > 0 .AND. der_basis(2) == 0) THEN
+        Mat => base%dnRGB%d1(:,1:nb_B,der_basis(1))
+      ELSE IF (der_basis(1) == 0 .AND. der_basis(2) > 0) THEN
+        Mat => base%dnRGB%d1(:,1:nb_B,der_basis(2))
+      ELSE ! der_basis(1) > 0 and der_basis(2) > 0
+        Mat => base%dnRGB%d2(:,1:nb_B,der_basis(1),der_basis(2))
       END IF
 
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'MatCBB',dnba_ind
-        CALL write_Mat(MatCBB,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
+      G = matmul(Mat,B)
+
+    END IF
+
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unitp,*) 'G',G(:)
+      write(out_unitp,*) 'END RB_TO_RG_basis'
+    END IF
+    !-----------------------------------------------------------
+  END SUBROUTINE RB_TO_RG_basis
+  SUBROUTINE RG_TO_RB_basis(G,B,base)
+    USE mod_system
+    IMPLICIT NONE
+
+    real (kind=Rkind), intent(in)    :: G(:)
+    real (kind=Rkind), intent(inout) :: B(:)
+  
+    TYPE (basis), intent(in)         :: base
+  
+    integer :: nb_basis,nb_B,nq
+    !----- for debuging --------------------------------------------------
+    logical, parameter :: debug = .FALSE.
+    !logical, parameter :: debug = .TRUE.
+    !-----------------------------------------------------------
+    nq       = get_nq_FROM_basis(base)
+    nb_basis = base%nb
+    nb_B    = size(B)
+
+    IF (debug) THEN
+      write(out_unitp,*) 'BEGINNING RG_TO_RB_basis'
+      write(out_unitp,*) 'nb_basis,nb_B',nb_basis,nb_B
+      write(out_unitp,*) 'nq',nq
+      write(out_unitp,*) 'G',G(:)
+    END IF
+    !-----------------------------------------------------------
+
+    IF (NewBasisEl .AND. base%ndim == 0) THEN
+      B(:) = G
+    ELSE
+
+      IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
+        write(out_unitp,*) ' ERROR in RG_TO_RB_basis'
+        write(out_unitp,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
+        write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+        STOP ' ERROR in RG_TO_RB_basis: inconsistent sizes'
       END IF
-!-----------------------------------------------------------
-      END SUBROUTINE Get_MatdnCBB
+      nb_mult_GTOB = nb_mult_GTOB + int(nb_B*nq,kind=ILkind)
+
+      B(:) = matmul(base%dnRBGwrho%d0(1:nb_B,:),G)
+    END IF
+
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unitp,*) 'B',B(:)
+      write(out_unitp,*) 'END RG_TO_RB_basis'
+    END IF
+    !-----------------------------------------------------------
+
+  END SUBROUTINE RG_TO_RB_basis
+  SUBROUTINE CB_TO_CG_basis(B,G,base,der)
+    USE mod_system
+    IMPLICIT NONE
+      
+    complex (kind=Rkind), intent(in)           :: B(:)
+    complex (kind=Rkind), intent(inout)        :: G(:)
+  
+    TYPE (basis),         intent(in)           :: base
+    integer,              intent(in), optional :: der(2)
 
 
-      SUBROUTINE RB_TO_RG_basis(RB,RG,base)
-        USE mod_system
-        IMPLICIT NONE
-      
-        !---------------------------------------------------------------------
-        !---------- variables passees en argument ----------------------------
-        real (kind=Rkind), intent(in)    :: RB(:)
-        real (kind=Rkind), intent(inout) :: RG(:)
-      
-        TYPE (basis), intent(in)         :: base
-      
-        integer :: nb,nq
-        !----- for debuging --------------------------------------------------
-        logical, parameter :: debug = .FALSE.
-        !logical, parameter :: debug = .TRUE.
-        !-----------------------------------------------------------
-        nq = get_nq_FROM_basis(base)
-        nb = base%nb
+    integer :: nb_basis,nb_B,nq,der_basis(2)
+    real (kind=Rkind), pointer :: Mat(:,:)
 
-        IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING RB_TO_RG_basis'
-          write(out_unitp,*) 'nb,nq',nb,nq
-          write(out_unitp,*) 'RB',RB(:)
-        END IF
-        !-----------------------------------------------------------
-      
-        IF (nb < size(RB) .OR. nq /= size(RG)) THEN
-          write(out_unitp,*) ' ERROR in RB_TO_RG_basis'
-          write(out_unitp,*) ' nb is inconsistent with size(RB)',nb,size(RB)
-          write(out_unitp,*) ' nq is inconsistent with size(RG)',nq,size(RG)
-          STOP ' ERROR in RB_TO_RG_basis: inconsistent sizes'
-        END IF
-      
-        RG = matmul(base%dnRGB%d0(:,1:nb),RB(1:nb))
-      
-      !-----------------------------------------------------------
-        IF (debug) THEN
-          write(out_unitp,*) 'RG',RG(:)
-          write(out_unitp,*) 'END RB_TO_RG_basis'
-        END IF
-      !-----------------------------------------------------------
-      END SUBROUTINE RB_TO_RG_basis
-      SUBROUTINE RG_TO_RB_basis(RG,RB,base)
-        USE mod_system
-        IMPLICIT NONE
-      
-        !---------------------------------------------------------------------
-        !---------- variables passees en argument ----------------------------
-        real (kind=Rkind), intent(in)    :: RG(:)
-        real (kind=Rkind), intent(inout) :: RB(:)
-      
-        TYPE (basis), intent(in)         :: base
-      
-        integer :: nb,nq
-        !----- for debuging --------------------------------------------------
-        logical, parameter :: debug = .FALSE.
-        !logical, parameter :: debug = .TRUE.
-        !-----------------------------------------------------------
-        nq = get_nq_FROM_basis(base)
-        nb = base%nb
-        IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING RG_TO_RB_basis'
-          write(out_unitp,*) 'nb,nq',nb,nq
-          write(out_unitp,*) 'RG',RG(:)
-        END IF
-        !-----------------------------------------------------------
-      
-        IF (nb < size(RB) .OR. nq /= size(RG)) THEN
-          write(out_unitp,*) ' ERROR in RG_TO_RB_basis'
-          write(out_unitp,*) ' nb is inconsistent with size(RB)',nb,size(RB)
-          write(out_unitp,*) ' nq is inconsistent with size(RG)',nq,size(RG)
-          STOP ' ERROR in RG_TO_RB_basis: inconsistent sizes'
-        END IF
-      
-        RB(1:nb) = matmul(base%dnRBGwrho%d0(1:nb,:),RG)
-      
-      !-----------------------------------------------------------
-        IF (debug) THEN
-          write(out_unitp,*) 'RB',RB(:)
-          write(out_unitp,*) 'END RG_TO_RB_basis'
-        END IF
-      !-----------------------------------------------------------
-      
-      END SUBROUTINE RG_TO_RB_basis
-      SUBROUTINE CB_TO_CG_basis(CB,CG,base)
-        USE mod_system
-        IMPLICIT NONE
-      
-        !---------------------------------------------------------------------
-        !---------- variables passees en argument ----------------------------
-        complex (kind=Rkind), intent(in)    :: CB(:)
-        complex (kind=Rkind), intent(inout) :: CG(:)
-      
-        TYPE (basis), intent(in)            :: base
-      
-        integer :: nb,nq
-        !----- for debuging --------------------------------------------------
-        logical, parameter :: debug = .FALSE.
-        !logical, parameter :: debug = .TRUE.
-        !-----------------------------------------------------------
-        nq = get_nq_FROM_basis(base)
-        nb = base%nb
-        IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING CB_TO_CG_basis'
-          write(out_unitp,*) 'nb,nq',nb,nq
-          write(out_unitp,*) 'CB',CB(:)
-        END IF
-        !-----------------------------------------------------------
-      
-        IF (nb < size(CB) .OR. nq /= size(CG)) THEN
-          write(out_unitp,*) ' ERROR in CB_TO_CG_basis'
-          write(out_unitp,*) ' nb is inconsistent with size(CB)',nb,size(CB)
-          write(out_unitp,*) ' nq is inconsistent with size(CG)',nq,size(CG)
-          STOP ' ERROR in RB_TO_RG_basis: inconsistent sizes'
-        END IF
-      
-        CG = matmul(base%dnRGB%d0(:,1:nb),CB(1:nb))
-      
-      !-----------------------------------------------------------
-        IF (debug) THEN
-          write(out_unitp,*) 'CG',CG(:)
-          write(out_unitp,*) 'END CB_TO_CG_basis'
-        END IF
-      !-----------------------------------------------------------
-      
-      END SUBROUTINE CB_TO_CG_basis
-      SUBROUTINE CG_TO_CB_basis(CG,CB,base)
-        USE mod_system
-        IMPLICIT NONE
-      
-        !---------------------------------------------------------------------
-        !---------- variables passees en argument ----------------------------
-        complex (kind=Rkind), intent(in)    :: CG(:)
-        complex (kind=Rkind), intent(inout) :: CB(:)
-      
-        TYPE (basis), intent(in)            :: base
-      
-        integer :: nb,nq
-        !----- for debuging --------------------------------------------------
-        logical, parameter :: debug = .FALSE.
-        !logical, parameter :: debug = .TRUE.
-        !-----------------------------------------------------------
-        nq = get_nq_FROM_basis(base)
-        nb = base%nb
-        IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING CG_TO_CB_basis'
-          write(out_unitp,*) 'nb,nq',nb,nq
-          write(out_unitp,*) 'CG',CG(:)
-        END IF
-        !-----------------------------------------------------------
-      
-        IF (nb < size(CB) .OR. nq /= size(CG)) THEN
-          write(out_unitp,*) ' ERROR in CG_TO_CB_basis'
-          write(out_unitp,*) ' nb is inconsistent with size(CB)',nb,size(CB)
-          write(out_unitp,*) ' nq is inconsistent with size(CG)',nq,size(CG)
-          STOP ' ERROR in CG_TO_CB_basis: inconsistent sizes'
-        END IF
-      
-        CB(1:nb) = matmul(base%dnRBGwrho%d0(1:nb,:),CG)
-      
-      !-----------------------------------------------------------
-        IF (debug) THEN
-          write(out_unitp,*) 'CB',CB(:)
-          write(out_unitp,*) 'END CG_TO_CB_basis'
-        END IF
-      !-----------------------------------------------------------
-      
-      END SUBROUTINE CG_TO_CB_basis
+    !----- for debuging --------------------------------------------------
+    logical, parameter :: debug = .FALSE.
+    !logical, parameter :: debug = .TRUE.
+    !-----------------------------------------------------------
+    nq       = get_nq_FROM_basis(base)
+    nb_basis = base%nb
+    nb_B     = size(B)
 
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unitp,*) 'BEGINNING CB_TO_CG_basis'
+      write(out_unitp,*) 'nb_basis,nb_B',nb_basis,nb_B
+      write(out_unitp,*) 'nq',nq
+      write(out_unitp,*) 'B',B(:)
+    END IF
+    !-----------------------------------------------------------
+
+    IF (NewBasisEl .AND. base%ndim == 0) THEN
+      G(:) = B
+    ELSE
+      IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
+        write(out_unitp,*) ' ERROR in CB_TO_CG_basis'
+        write(out_unitp,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
+        write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+        STOP ' ERROR in CB_TO_CG_basis: inconsistent sizes'
+      END IF
+      nb_mult_BTOG = nb_mult_BTOG + int(nb_B*nq,kind=ILkind)
+
+
+      IF (present(der)) THEN
+        der_basis = base%Tabder_Qdyn_TO_Qbasis(der(:))
+      ELSE
+        der_basis = 0
+      END IF
+
+      IF (der_basis(1) == 0 .AND. der_basis(2) == 0) THEN
+        Mat => base%dnRGB%d0(:,1:nb_B)
+      ELSE IF (der_basis(1) > 0 .AND. der_basis(2) == 0) THEN
+        Mat => base%dnRGB%d1(:,1:nb_B,der_basis(1))
+      ELSE IF (der_basis(1) == 0 .AND. der_basis(2) > 0) THEN
+        Mat => base%dnRGB%d1(:,1:nb_B,der_basis(2))
+      ELSE ! der_basis(1) > 0 and der_basis(2) > 0
+        Mat => base%dnRGB%d2(:,1:nb_B,der_basis(1),der_basis(2))
+      END IF
+
+      G = matmul(Mat,B)
+
+    END IF
+
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unitp,*) 'G',G(:)
+      write(out_unitp,*) 'END CB_TO_CG_basis'
+    END IF
+    !-----------------------------------------------------------
+  END SUBROUTINE CB_TO_CG_basis
+  SUBROUTINE CG_TO_CB_basis(G,B,base)
+    USE mod_system
+    IMPLICIT NONE
+
+    complex (kind=Rkind), intent(in)    :: G(:)
+    complex (kind=Rkind), intent(inout) :: B(:)
+  
+    TYPE (basis), intent(in)            :: base
+  
+    integer :: nb_basis,nb_B,nq
+    !----- for debuging --------------------------------------------------
+    logical, parameter :: debug = .FALSE.
+    !logical, parameter :: debug = .TRUE.
+    !-----------------------------------------------------------
+    nq       = get_nq_FROM_basis(base)
+    nb_basis = base%nb
+    nb_B     = size(B)
+
+    IF (debug) THEN
+      write(out_unitp,*) 'BEGINNING CG_TO_CB_basis'
+      write(out_unitp,*) 'nb_basis,nb_B',nb_basis,nb_B
+      write(out_unitp,*) 'nq',nq
+      write(out_unitp,*) 'G',G(:)
+    END IF
+    !-----------------------------------------------------------
+
+    IF (NewBasisEl .AND. base%ndim == 0) THEN
+      B(:) = G
+    ELSE
+
+      IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
+        write(out_unitp,*) ' ERROR in CG_TO_CB_basis'
+        write(out_unitp,*) ' nnb_basis is inconsistent with nb_B',nb_basis,nb_B
+        write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+        STOP ' ERROR in CG_TO_CB_basis: inconsistent sizes'
+      END IF
+      nb_mult_GTOB = nb_mult_GTOB + int(nb_B*nq,kind=ILkind)
+
+      B(:) = matmul(base%dnRBGwrho%d0(1:nb_B,:),G)
+
+      !DO ib=1,nb
+      !  B(ib) = sum( G(:) * base%dnRBGwrho%d0(:,ib) )
+      !END DO
+
+    END IF
+
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unitp,*) 'B',B(:)
+      write(out_unitp,*) 'END CG_TO_CB_basis'
+    END IF
+    !-----------------------------------------------------------
+
+  END SUBROUTINE CG_TO_CB_basis
 
 !================================================================
 !       write the type basis
@@ -2761,7 +2691,6 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
        write(out_unitp,*) Rec_line,'type,name',basis_set%type,basis_set%name
        write(out_unitp,*)
-       write(out_unitp,*) Rec_line,'cplx ',basis_set%cplx
        write(out_unitp,*) Rec_line,'dnBBRep,dnBBRep_done',basis_set%dnBBRep,basis_set%dnBBRep_done
 
        write(out_unitp,*)
@@ -2961,11 +2890,6 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
          write(out_unitp,*) Rec_line,'dnRBG'
          CALL Write_dnSVM(basis_set%dnRBG)
 
-         write(out_unitp,*) Rec_line,'dnCGB'
-         CALL Write_dnSVM(basis_set%dnCGB)
-         write(out_unitp,*) Rec_line,'dnCBG'
-         CALL Write_dnSVM(basis_set%dnCBG)
-
          write(out_unitp,*) Rec_line,'dnGGRep:      ',basis_set%dnGGRep
          write(out_unitp,*) Rec_line,'dnGGRep_done: ',basis_set%dnGGRep_done
          write(out_unitp,*) Rec_line,'alloc dnRGG:  ',basis_set%dnRGG%alloc
@@ -2973,8 +2897,6 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
          write(out_unitp,*) Rec_line,'dnRBB'
          CALL Write_dnMat(basis_set%dnRBB)
-         write(out_unitp,*) Rec_line,'dnCBB'
-         CALL Write_dnCplxMat(basis_set%dnCBB)
 
          write(out_unitp,*) Rec_line,'------------------------------------------------'
          write(out_unitp,*) Rec_line,'- for Time-Dependent parameters ----------------'
@@ -3082,7 +3004,6 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
        write(out_unitp,*) Rec_line,'type,name',basis_set%type,basis_set%name
        write(out_unitp,*)
-       write(out_unitp,*) Rec_line,'cplx ',basis_set%cplx
        write(out_unitp,*) Rec_line,'dnBBRep,dnBBRep_done',basis_set%dnBBRep,basis_set%dnBBRep_done
        write(out_unitp,*)
 
@@ -3123,9 +3044,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        write(out_unitp,*) Rec_line,'dnGGRep_done: ',basis_set%dnGGRep_done
        write(out_unitp,*) Rec_line,'alloc dnRGG:  ',basis_set%dnRGG%alloc
        write(out_unitp,*) Rec_line,'alloc dnRGB:  ',basis_set%dnRGB%alloc
-       write(out_unitp,*) Rec_line,'alloc dnCGB:  ',basis_set%dnCGB%alloc
        write(out_unitp,*) Rec_line,'alloc dnRBB:  ',basis_set%dnRBB%alloc
-       write(out_unitp,*) Rec_line,'alloc dnCBB:  ',basis_set%dnCBB%alloc
 
 
 

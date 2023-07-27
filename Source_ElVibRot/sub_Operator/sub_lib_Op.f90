@@ -103,17 +103,6 @@
 
 
 !-----------------------------------------------------------
-!     test if the basis is real
-!     ------------------------------------------------------
-      IF (BasisnD%cplx) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) ' You are using the REAL subroutine '
-         write(out_unitp,*) ' for the d0b calculation, but the basis is COMPLEX'
-         STOP
-      END IF
-!-----------------------------------------------------------
-
-!-----------------------------------------------------------
       IF (d0MatOp%cplx) THEN
         d0MatOp%ImVal(:,:)    = d0MatOp%ImVal(:,:) * WnD
       END IF

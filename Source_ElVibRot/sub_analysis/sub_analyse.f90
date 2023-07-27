@@ -565,13 +565,6 @@ CONTAINS
       END IF
 !-----------------------------------------------------------
 
-      IF (BasisnD%cplx) THEN
-         write(out_unitp,*) ' ERROR in write_psi'
-         write(out_unitp,*) ' the basis is complex'
-         STOP
-      END IF
-
-
 !-----------------------------------------------------------
       write(out_unitp,*)
       write(out_unitp,*) 'eigenvectors on a grid',nb_psi

@@ -75,9 +75,6 @@
         real (kind=Rkind), allocatable   :: RB(:)
         real (kind=Rkind), allocatable   :: RG(:)
 
-        !real (kind=Rkind), allocatable   :: d0b(:,:)
-        !real (kind=Rkind), allocatable   :: w(:)
-
         integer                          :: nnb,nb2,ib,ib2,newnb2
 
         integer                          :: nnq,nq2,iq,iq2,nqi,nbi
@@ -99,34 +96,9 @@
           write(out_unitp,*) 'BEGINNING ',name_sub
           write(out_unitp,*) 'RVecG(:)',RVecG(:)
         END IF
-        IF (basis_set%cplx) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' the basis is complex but the'
-          write(out_unitp,*) ' the vector is real !!'
-          STOP
-        END IF
-
 
         IF (basis_set%packed_done) THEN
-          IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
-             RvecB(:) = RVecG
-          ELSE
-
-            nb_mult_GTOB = nb_mult_GTOB + int(nb,kind=ILkind)*size(RVecG,kind=ILkind)
-          !write(out_unitp,*) 'nb_mult_GTOB,nb,size(RVecG)',nb_mult_BTOG,nb,size(RVecG)
-
-!          write(out_unitp,*) 'nq,nb',nq,nb
-!
-!          write(out_unitp,*) 'asso d0b',associated(basis_set%dnRBGwrho%d0)
-!          write(out_unitp,*) 'shape d0b',shape(basis_set%dnRBGwrho%d0)
-!          write(out_unitp,*) 'shape RVecG',shape(RVecG)
-!          write(out_unitp,*) 'shape RVecB',shape(RVecB)
-!          flush(out_unitp)
-
-             CALL RG_TO_RB_basis(RVecG,RvecB,basis_set)
-             !RvecB(:) = matmul( basis_set%dnRBGwrho%d0,RVecG)
-           END IF
-
+          CALL RG_TO_RB_basis(RVecG,RvecB,basis_set)
         ELSE ! basis_set%nb_basis MUST BE > 0
           IF (basis_set%nb_basis == 0 ) STOP ' ERROR with packed!!!'
 
@@ -174,18 +146,9 @@
                   ibb2 = ibb2 + newnb2
 
                   DO iq=1,nnq
-
                     CALL RG_TO_RB_basis(RTempG(iq,:,ib),RTempB(iq,ibb1:ibb2),  &
                                         basis_set%tab_Pbasis(ibasis)%Pbasis)
-
-                    !RTempB(iq,ibb1:ibb2) = matmul(      &
-                    !  basis_set%tab_Pbasis(ibasis)%Pbasis%dnRBGwrho%d0(1:newnb2,:), &
-                    !                              RTempG(iq,:,ib))
-
-                    nb_mult_GTOB = nb_mult_GTOB + int(newnb2,kind=ILkind)*size(RTempG(iq,:,ib),kind=ILkind)
-                    !write(out_unitp,*) 'nb_mult_GTOB,nb,size(RVecG)',nb_mult_GTOB,newnb2,size(RG)
                   END DO
-
                   ibb1 = ibb1 + newnb2
                 END DO
 
@@ -342,27 +305,8 @@
         flush(out_unitp)
       END IF
 
-        IF (basis_set%cplx .AND. basis_set%packed_done) THEN
-          IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
-            CVecB(:) = CVecG(:)
-          ELSE
-            CVecG(:) = CVecG(:) * cmplx(get_wrho_OF_basis(basis_set),kind=Rkind)
-            DO ib=1,nb
-              CVecB(ib) = sum( CVecG(:) * basis_set%dnCGB%d0(:,ib) )
-            END DO
-            !CVecB(1:nb) = matmul(CVecG(:),basis_set%dnCGB%d0(:,1:nb))
-          END IF
-
-        ELSE IF (.NOT. basis_set%cplx .AND. basis_set%packed_done) THEN
-          IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
-            CVecB(:) = CVecG(:)
-          ELSE
-            CVecG(:) = CVecG(:) * get_wrho_OF_basis(basis_set)
-            DO ib=1,nb
-              CVecB(ib) = sum( CVecG(:) * cmplx(basis_set%dnRGB%d0(:,ib),kind=Rkind) )
-            END DO
-            !CVecB(1:nb) = matmul(CVecG(:),basis_set%dnRGB%d0(:,1:nb))
-          END IF
+        IF (basis_set%packed_done) THEN
+          CALL CG_TO_CB_basis(CVecG,CvecB,basis_set)
         ELSE
           IF (basis_set%nb_basis == 0 ) STOP ' ERROR with packed!!!'
 
@@ -401,12 +345,10 @@
 
               IF (basis_set%tab_Pbasis(ibasis)%Pbasis%packed) THEN
 
-                IF (basis_set%tab_Pbasis(ibasis)%Pbasis%cplx) THEN
-                  CALL alloc_NParray(d0cb,[nq2,nb2],"d0cb",name_sub)
-                  CALL Get_MatdnCGB(basis_set%tab_Pbasis(ibasis)%Pbasis,d0cb,der00)
+                  !CALL alloc_NParray(d0b,[nq2,nb2],"d0cb",name_sub)
+                  !CALL Get_MatdnRGB(basis_set%tab_Pbasis(ibasis)%Pbasis,d0b,der00)
 
-                  w = get_wrho_OF_basis(basis_set%tab_Pbasis(ibasis)%Pbasis)
-
+                  !w = get_wrho_OF_basis(basis_set%tab_Pbasis(ibasis)%Pbasis)
 
                   ibb1 = 1
                   ibb2 = 0
@@ -416,41 +358,17 @@
 
                     DO iq=1,nnq
 
-                      CG(:) = CTempG(iq,:,ib)*cmplx(w,kind=Rkind)
-                      CTempB(iq,ibb1:ibb2) = matmul(CG(:),d0cb(:,1:newnb2))
+                      !CG(:) = CTempG(iq,:,ib)*cmplx(w,kind=Rkind)
+                      !CTempB(iq,ibb1:ibb2) = matmul(CG(:),d0b(:,1:newnb2))
+                      CALL CG_TO_CB_basis(CTempG(iq,:,ib),CTempB(iq,ibb1:ibb2),basis_set%tab_Pbasis(ibasis)%Pbasis)
 
                     END DO
 
                     ibb1 = ibb1 + newnb2
                   END DO
 
-                  CALL dealloc_NParray(d0cb,"d0cb",name_sub)
-                  CALL dealloc_NParray(w,"w",name_sub)
-                ELSE
-                  CALL alloc_NParray(d0b,[nq2,nb2],"d0cb",name_sub)
-                  CALL Get_MatdnRGB(basis_set%tab_Pbasis(ibasis)%Pbasis,d0b,der00)
-
-                  w = get_wrho_OF_basis(basis_set%tab_Pbasis(ibasis)%Pbasis)
-
-                  ibb1 = 1
-                  ibb2 = 0
-                  DO ib=1,nnb
-                    newnb2 = basis_set%Tab_OF_Tabnb2(ibasis)%vec(ib)
-                    ibb2 = ibb2 + newnb2
-
-                    DO iq=1,nnq
-
-                      CG(:) = CTempG(iq,:,ib)*cmplx(w,kind=Rkind)
-                      CTempB(iq,ibb1:ibb2) = matmul(CG(:),d0b(:,1:newnb2))
-
-                    END DO
-
-                    ibb1 = ibb1 + newnb2
-                  END DO
-
-                  CALL dealloc_NParray(d0b,"d0cb",name_sub)
-                  CALL dealloc_NParray(w,"w",name_sub)
-                END IF
+                  !CALL dealloc_NParray(d0b,"d0cb",name_sub)
+                  !CALL dealloc_NParray(w,"w",name_sub)
 
               ELSE
 
@@ -527,10 +445,6 @@
 
             CALL dealloc_NParray(RVecB,'RVecB',name_sub)
             CALL dealloc_NParray(RVecG,'RVecG',name_sub)
-
-
-            !write(out_unitp,*) ' ERROR in ',name_sub
-            !STOP 'SparseGrid_type=2'
 
           CASE (4) ! Sparse basis (Smolyak 4th implementation)
 
@@ -656,13 +570,6 @@
           tab_der_loc(:) = 0
         END IF
         WHERE (tab_der_loc < 0) tab_der_loc = 0
-
-        IF (basis_set%cplx) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' the basis is complex but the'
-          write(out_unitp,*) ' the vector is real !!'
-          STOP
-        END IF
 
         IF (BasisTOGrid_omp == 0) THEN
           nb_thread = 1
@@ -919,50 +826,8 @@
           tab_der_loc(:) = 0
         END IF
         WHERE (tab_der_loc < 0) tab_der_loc = 0
-
-        IF (basis_set%cplx) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' the basis is complex but the'
-          write(out_unitp,*) ' the vector is real !!'
-          STOP
-        END IF
-
-        IF (basis_set%cplx .AND. basis_set%packed_done) THEN
-
-          dnba_ind(:) = basis_set%Tabder_Qdyn_TO_Qbasis(tab_der_loc(:))
-
-          IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN ! dnba_ind(:)=0 => no derivative
-            CVecG(:) = matmul(basis_set%dnCGB%d0,CVecB)
-          ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
-            IF (basis_set%dnBBRep_done) THEN
-              CALL alloc_NParray(CB,[nb],"CB",name_sub)
-              CB(:) = matmul(basis_set%dnCBB%d1(:,1:nb,dnba_ind(2)),CVecB(1:nb))
-              CVecG(:) = matmul(basis_set%dnCGB%d0(:,1:nb),CB)
-              CALL dealloc_NParray(CB,"CB",name_sub)
-            ELSE
-              CVecG(:) = matmul(basis_set%dnCGB%d1(:,1:nb,dnba_ind(2)),CVecB(1:nb))
-            END IF
-          ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
-            IF (basis_set%dnBBRep_done) THEN
-              CALL alloc_NParray(CB,[nb],"CB",name_sub)
-              CB(:) = matmul(basis_set%dnCBB%d1(:,1:nb,dnba_ind(1)),CVecB(1:nb))
-              CVecG(:) = matmul(basis_set%dnCGB%d0(:,1:nb),CB)
-              CALL dealloc_NParray(CB,"CB",name_sub)
-            ELSE
-              CVecG(:) = matmul(basis_set%dnCGB%d1(:,1:nb,dnba_ind(1)),CVecB(1:nb))
-            END IF
-          ELSE ! second derivative
-            IF (basis_set%dnBBRep_done) THEN
-              CALL alloc_NParray(CB,[nb],"CB",name_sub)
-              CB(:) = matmul(basis_set%dnCBB%d2(:,1:nb,dnba_ind(1),dnba_ind(2)),CVecB(1:nb))
-              CVecG(:) = matmul(basis_set%dnCGB%d0(:,1:nb),CB)
-              CALL dealloc_NParray(CB,"CB",name_sub)
-            ELSE
-              CVecG(:) = matmul(basis_set%dnCGB%d2(:,1:nb,dnba_ind(1),dnba_ind(2)),CVecB(1:nb))
-            END IF
-          END IF
-
-        ELSE IF (.NOT. basis_set%cplx .AND. basis_set%packed_done) THEN
+ 
+        IF (basis_set%packed_done) THEN
 
           dnba_ind(:) = basis_set%Tabder_Qdyn_TO_Qbasis(tab_der_loc(:))
 
@@ -1028,25 +893,6 @@
               CALL alloc_NParray(CTempG,[nnq,nq2,nnb],"CTempG",name_sub)
 
               IF (basis_set%tab_Pbasis(ibasis)%Pbasis%packed) THEN
-                IF (basis_set%tab_Pbasis(ibasis)%Pbasis%cplx) THEN
-                  dnba_ind(:) = basis_set%tab_Pbasis(ibasis)%Pbasis%Tabder_Qdyn_TO_Qbasis(tab_der_loc(:))
-
-                  CALL alloc_NParray(dncb,[nq2,nb2],"dncb",name_sub)
-                  CALL Get_MatdnCGB(basis_set%tab_Pbasis(ibasis)%Pbasis,dncb,dnba_ind)
-
-                  ibb1 = 1
-                  ibb2 = 0
-                  DO ib=1,nnb
-                    newnb2 = basis_set%Tab_OF_Tabnb2(ibasis)%vec(ib)
-                    ibb2 = ibb2 + newnb2
-                    DO iq=1,nnq
-                      CTempG(iq,:,ib) = matmul(dnb(:,1:newnb2),CTempB(iq,ibb1:ibb2))
-                    END DO
-                    ibb1 = ibb1 + newnb2
-                  END DO
-
-                  CALL dealloc_NParray(dnb,"d0b",name_sub)
-                ELSE
                   dnba_ind(:) = basis_set%tab_Pbasis(ibasis)%Pbasis%Tabder_Qdyn_TO_Qbasis(tab_der_loc(:))
 
                   CALL alloc_NParray(dnb,[nq2,nb2],"dnb",name_sub)
@@ -1064,7 +910,6 @@
                   END DO
 
                   CALL dealloc_NParray(dnb,"d0b",name_sub)
-                END IF
               ELSE
                 ibb1 = 1
                 ibb2 = 0
@@ -1256,13 +1101,6 @@
         END IF
         IF (debug) write(out_unitp,*) 'tab_der_loc',tab_der_loc
         WHERE (tab_der_loc < 0) tab_der_loc = 0
-
-        IF (basis_set%cplx) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' the basis is complex but the'
-          write(out_unitp,*) ' the vector is real !!'
-          STOP
-        END IF
 
         IF (BasisTOGrid_omp == 0) THEN
           nb_thread = 1
@@ -1482,13 +1320,6 @@
           tab_der_loc(:) = 0
         END IF
         WHERE (tab_der_loc < 0) tab_der_loc = 0
-
-        IF (basis_set%cplx) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' the basis is complex but the'
-          write(out_unitp,*) ' the vector is real !!'
-          STOP
-        END IF
 
         IF (BasisTOGrid_omp == 0) THEN
           nb_thread = 1
@@ -1733,26 +1564,7 @@
         END IF
         WHERE (tab_der_loc < 0) tab_der_loc = 0
 
-        IF (basis_set%cplx) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' the basis is complex but the'
-          write(out_unitp,*) ' the vector is real !!'
-          STOP
-        END IF
-
-        IF (basis_set%cplx .AND. basis_set%packed_done) THEN
-          STOP ' in : DerivOp_TO_CVecB cplx basis not yet'
-          dnba_ind(:) = basis_set%Tabder_Qdyn_TO_Qbasis(tab_der_loc(:))
-
-          IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN ! dnba_ind(:)=0 => no derivative
-            CVecBout(:) = CVecBin
-          ELSE
-            !CALL Get2_MatdnCBB(basis_set,OpCBB,dnba_ind)
-            CVecBout(1:nb) = matmul(OpCBB(1:nb,1:nb),CVecBin(1:nb))
-            deallocate(OpCBB)
-          END IF
-
-        ELSE IF (.NOT. basis_set%cplx .AND. basis_set%packed_done) THEN
+        IF (basis_set%packed_done) THEN
 
           dnba_ind(:) = basis_set%Tabder_Qdyn_TO_Qbasis(tab_der_loc(:))
 
@@ -1944,13 +1756,6 @@ SUBROUTINE RVecBC_TO_RvecB(RVecBC,RvecB,nbc,nb,basis_set)
     write(out_unitp,*) 'BEGINNING ',name_sub
     write(out_unitp,*) 'size RVecBC(:)',size(RVecBC)
   END IF
-  IF (basis_set%cplx) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' the basis is complex but the'
-    write(out_unitp,*) ' the vector is real !!'
-    STOP
-  END IF
-
 
   IF (basis_set%packed_done) THEN
 
@@ -2045,13 +1850,6 @@ SUBROUTINE RVecB_TO_RvecBC(RvecB,RVecBC,nb,nbc,basis_set)
     write(out_unitp,*) 'BEGINNING ',name_sub
     write(out_unitp,*) 'size RVecB(:)',size(RVecB)
   END IF
-  IF (basis_set%cplx) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' the basis is complex but the'
-    write(out_unitp,*) ' the vector is real !!'
-    STOP
-  END IF
-
 
   IF (basis_set%packed_done) THEN
 
@@ -2149,13 +1947,6 @@ SUBROUTINE CVecBC_TO_CvecB(CVecBC,CvecB,nbc,nb,basis_set)
     write(out_unitp,*) 'BEGINNING ',name_sub
     write(out_unitp,*) 'size CvecBC(:)',size(CvecBC)
   END IF
-  IF (basis_set%cplx) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' the basis is complex but the'
-    write(out_unitp,*) ' the vector is real !!'
-    STOP
-  END IF
-
 
   IF (basis_set%packed_done) THEN
 
@@ -2250,13 +2041,6 @@ SUBROUTINE CVecB_TO_CvecBC(CvecB,CvecBC,nb,nbc,basis_set)
     write(out_unitp,*) 'BEGINNING ',name_sub
     write(out_unitp,*) 'size CvecB(:)',size(CvecB)
   END IF
-  IF (basis_set%cplx) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' the basis is complex but the'
-    write(out_unitp,*) ' the vector is real !!'
-    STOP
-  END IF
-
 
   IF (basis_set%packed_done) THEN
 

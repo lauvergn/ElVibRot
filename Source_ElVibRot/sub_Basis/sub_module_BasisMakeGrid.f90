@@ -749,13 +749,6 @@ GOTO 99
         STOP
        END IF
 
-      IF (base%cplx) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' I cannot contract a COMPLEX basis set !'
-        write(out_unitp,*) ' Not yet implemented'
-        STOP
-      END IF
-
       IF (Get_symabOFSymAbelianOFBasis_AT_ib(base,1) /= -1) THEN
         write(out_unitp,*) ' ERROR in ',name_sub
         write(out_unitp,*) ' I cannot use the symmetry'
@@ -914,9 +907,6 @@ GOTO 99
       END IF
 !---------------------------------------------------------------------
 
-      IF (basis_temp%cplx) THEN
-        STOP 'ortho_basis in complex: not yet!'
-      ELSE
         nq = get_nq_FROM_basis(basis_temp)
         CALL alloc_NParray(tbasiswrho,[basis_temp%nb,nq],"tbasiswrho",name_sub)
 
@@ -970,8 +960,6 @@ GOTO 99
           CALL dealloc_NParray(basis_temp%Rvec,'basis_temp%Rvec',name_sub)
         END IF
 
-      END IF
-
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
@@ -1008,10 +996,6 @@ GOTO 99
 
        CALL check_ortho_basis(basis_temp,.FALSE.)
 
-      IF (basis_temp%cplx) THEN
-        STOP 'ortho_basis in complex: not yet!'
-      ELSE
-
         DO i=1,basis_temp%nb
           DO j=1,i-1
             Sij = dot_product(basis_temp%dnRGB%d0(:,i)*basis_temp%wrho(:),   &
@@ -1033,9 +1017,6 @@ GOTO 99
           basis_temp%dnRGB%d1(:,i,:)   = basis_temp%dnRGB%d1(:,i,:) / Sii
           basis_temp%dnRGB%d2(:,i,:,:) = basis_temp%dnRGB%d2(:,i,:,:) / Sii
         END DO
-
-      END IF
-
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
@@ -1081,12 +1062,6 @@ GOTO 99
         STOP
       END IF
 
-      IF (basis_temp%cplx) THEN
-        write(out_unitp,*) ' ERROR in',name_sub
-        write(out_unitp,*) ' This transformation is not possible for complexe basis'
-        STOP
-      ELSE
-
         nq = get_nq_FROM_basis(basis_temp)
         CALL alloc_NParray(tbasiswrhox,[basis_temp%nb,nq],"tbasiswrhox",name_sub)
 
@@ -1097,7 +1072,6 @@ GOTO 99
         matX_basis(:,:) = matmul(tbasiswrhox,basis_temp%dnRGB%d0)
         CALL dealloc_NParray(tbasiswrhox,"tbasiswrho",name_sub)
         !CALL Write_Mat(matX_basis,out_unitp,5)
-      END IF
 
 !---------------------------------------------------------------------
       IF (debug) THEN
@@ -1141,11 +1115,6 @@ GOTO 99
         STOP
       END IF
 
-      IF (basis_temp%cplx) THEN
-        write(out_unitp,*) ' ERROR in',name_sub
-        write(out_unitp,*) ' This transformation is not possible for complexe basis'
-        STOP
-      ELSE
         nq = get_nq_FROM_basis(basis_temp)
         CALL alloc_NParray(tbasiswrhox,[basis_temp%nb,nq],"tbasiswrhox",name_sub)
 
@@ -1157,7 +1126,6 @@ GOTO 99
 
         CALL dealloc_NParray(tbasiswrhox,"tbasiswrho",name_sub)
         !CALL Write_Mat(matX_basis,out_unitp,5)
-      END IF
 
 !---------------------------------------------------------------------
       IF (debug) THEN
@@ -1199,11 +1167,7 @@ GOTO 99
         write(out_unitp,*)
       END IF
 !---------------------------------------------------------------------
-      IF (basis_temp%cplx) THEN
-        write(out_unitp,*) ' ERROR in',name_sub
-        write(out_unitp,*) ' This transformation is not possible for complexe basis'
-        STOP
-      END IF
+ 
       CALL alloc_MatOFdnS(MatOFdnSX,basis_temp%ndim,1)
       CALL sub_ZERO_TO_MatOFdnS(MatOFdnSX)
       R0 = ONE/real(basis_temp%ndim,kind=Rkind)
@@ -1302,20 +1266,6 @@ STOP
 
       basis_temp%wrho(:) = sqrt(basis_temp%wrho(:))
 
-      IF (basis_temp%cplx) THEN
-        DO i=1,basis_temp%nb
-          basis_temp%dnCGB%d0(:,i)         = basis_temp%dnCGB%d0(:,i)    *&
-                                    cmplx(basis_temp%wrho(:),kind=Rkind)
-          DO j=1,basis_temp%ndim
-            basis_temp%dnCGB%d1(:,i,j)     = basis_temp%dnCGB%d1(:,i,j)   *&
-                                     cmplx(basis_temp%wrho(:),kind=Rkind)
-            DO k=1,basis_temp%ndim
-              basis_temp%dnCGB%d2(:,i,j,k) = basis_temp%dnCGB%d2(:,i,j,k) *&
-                                       cmplx(basis_temp%wrho(:),kind=Rkind)
-            END DO
-          END DO
-        END DO
-      ELSE
         DO i=1,basis_temp%nb
           basis_temp%dnRGB%d0(:,i) = basis_temp%dnRGB%d0(:,i) * basis_temp%wrho(:)
           DO j=1,basis_temp%ndim
@@ -1325,7 +1275,6 @@ STOP
             END DO
           END DO
         END DO
-      END IF
       basis_temp%w(:) = ONE
       basis_temp%wrho(:) = ONE
 

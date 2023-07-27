@@ -573,17 +573,6 @@ MODULE mod_basis
           write(out_unitp,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
                                      basis_temp%Q0,basis_temp%scaleQ
         END IF
-      CASE ("ft")
-        basis_temp%type = 60
-        CALL sub_quadra_FT(basis_temp,nosym,nstep,nb_shift,tab_shift)
-
-        IF (.NOT. basis_temp%xPOGridRep_done) THEN ! because the scaling factors are already calculated
-          basis_temp%Q0     = (basis_temp%B+basis_temp%A)*HALF
-          basis_temp%scaleQ = (pi+pi)/(basis_temp%B-basis_temp%A)
-          write(out_unitp,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
-                                     basis_temp%Q0,basis_temp%scaleQ
-        END IF
-
 
       CASE ("boxab","boxabnosym")
         basis_temp%type = 50
@@ -664,7 +653,6 @@ MODULE mod_basis
         write(out_unitp,*) ' 30 : Fourier Series                      : cos ou sin ou fourier'
         write(out_unitp,*) ' 40 : Fourier Series [A B]                : cosAB'
         write(out_unitp,*) ' 40 : Fourier Series [A B]                : cosABnosym'
-        write(out_unitp,*) ' 60 : Fourier Transform [A B]             : FT'
         write(out_unitp,*) ' 50 : Particle-in-a-box[A B]              : boxAB'
         write(out_unitp,*) ' 50 : Particle-in-a-box[A B]              : boxABnosym'
         write(out_unitp,*) ' 50 : Sinc DVR in [A B]                   : SincDVR'
@@ -870,9 +858,6 @@ MODULE mod_basis
       CASE ("cosab","cosabnosym" )
         STOP
 
-      CASE ("ft")
-        STOP
-
       CASE ("boxab","boxabnosym")
 
        xx = mod(x*real(ib,kind=Rkind),pi+pi)
@@ -974,15 +959,6 @@ MODULE mod_basis
 
       basis_set%packed            = .TRUE.
       basis_set%packed_done       = .TRUE.
-
-
-      IF (basis_set%cplx) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' I cannot contract a COMPLEX basis set !'
-        write(out_unitp,*) ' Not yet implemented'
-        STOP
-      END IF
-
 
       nb_bc = basis_set%nbc
       nb_b  = basis_set%nb
@@ -1109,7 +1085,7 @@ MODULE mod_basis
       !-------------------------------------------------
 
       !-------------------------------------------------
-      !-- secondly, the basis d0b,d1b,d2b or d0b, dnRBB dnCBB
+      !-- secondly, the basis d0b,d1b,d2b or d0b, dnRBB
       !write(out_unitp,*) ' matmul contra'
       nq = get_nq_FROM_basis(basis_set)
 
@@ -1387,11 +1363,6 @@ MODULE mod_basis
               basis_set%dnRGB%d0(:,ib) = basis_set%dnRGB%d0(:,jb)
               basis_set%dnRGB%d0(:,jb) = bi(:)
             END IF
-            IF (associated(basis_set%dnCGB%d0)) THEN
-              cbi(:)                   = basis_set%dnCGB%d0(:,ib)
-              basis_set%dnCGB%d0(:,ib) = basis_set%dnCGB%d0(:,jb)
-              basis_set%dnCGB%d0(:,jb) = cbi(:)
-            END IF
 
             IF (associated(basis_set%dnRGB%d1)) THEN
               DO i=1,basis_set%ndim
@@ -1408,23 +1379,6 @@ MODULE mod_basis
                 biF(:)                     = basis_set%dnRBB%d1(ib,:,i)
                 basis_set%dnRBB%d1(ib,:,i) = basis_set%dnRBB%d1(jb,:,i)
                 basis_set%dnRBB%d1(jb,:,i) = biF(:)
-              END DO
-            END IF
-            IF (associated(basis_set%dnCGB%d1)) THEN
-              DO i=1,basis_set%ndim
-                cbi(:)                     = basis_set%dnCGB%d1(:,ib,i)
-                basis_set%dnCGB%d1(:,ib,i) = basis_set%dnCGB%d1(:,jb,i)
-                basis_set%dnCGB%d1(:,jb,i) = cbi(:)
-              END DO
-            END IF
-           IF (basis_set%dnCBB%alloc) THEN
-              DO i=1,basis_set%ndim
-                cbiF(:)                    = basis_set%dnCBB%d1(:,ib,i)
-                basis_set%dnCBB%d1(:,ib,i) = basis_set%dnCBB%d1(:,jb,i)
-                basis_set%dnCBB%d1(:,jb,i) = cbiF(:)
-                cbiF(:)                    = basis_set%dnCBB%d1(ib,:,i)
-                basis_set%dnCBB%d1(ib,:,i) = basis_set%dnCBB%d1(jb,:,i)
-                basis_set%dnCBB%d1(jb,:,i) = cbiF(:)
               END DO
             END IF
 
@@ -1446,27 +1400,6 @@ MODULE mod_basis
                 biF(:)                       = basis_set%dnRBB%d2(ib,:,i,j)
                 basis_set%dnRBB%d2(ib,:,i,j) = basis_set%dnRBB%d2(jb,:,i,j)
                 basis_set%dnRBB%d2(jb,:,i,j) = biF(:)
-              END DO
-              END DO
-            END IF
-            IF (associated(basis_set%dnCGB%d2)) THEN
-              DO i=1,basis_set%ndim
-              DO j=1,basis_set%ndim
-                cbi(:)                       = basis_set%dnCGB%d2(:,ib,i,j)
-                basis_set%dnCGB%d2(:,ib,i,j) = basis_set%dnCGB%d2(:,jb,i,j)
-                basis_set%dnCGB%d2(:,jb,i,j) = cbi(:)
-              END DO
-              END DO
-            END IF
-           IF (basis_set%dnCBB%alloc) THEN
-              DO i=1,basis_set%ndim
-              DO j=1,basis_set%ndim
-                cbiF(:)                      = basis_set%dnCBB%d2(:,ib,i,j)
-                basis_set%dnCBB%d2(:,ib,i,j) = basis_set%dnCBB%d2(:,jb,i,j)
-                basis_set%dnCBB%d2(:,jb,i,j) = cbiF(:)
-                cbiF(:)                      = basis_set%dnCBB%d2(ib,:,i,j)
-                basis_set%dnCBB%d2(ib,:,i,j) = basis_set%dnCBB%d2(jb,:,i,j)
-                basis_set%dnCBB%d2(jb,:,i,j) = cbiF(:)
               END DO
               END DO
             END IF
@@ -1610,17 +1543,6 @@ MODULE mod_basis
         basis_sc%w(:)            = basis_sc%w(:)          * scale_inv
         basis_sc%wrho(:)         = basis_sc%wrho(:)       * scale_inv
 
-        IF (basis_sc%cplx) THEN
-          basis_sc%dnCGB%d0(:,:)       = basis_sc%dnCGB%d0(:,:)     * cmplx(scale_d0b,kind=Rkind)
-          DO i=1,basis_sc%ndim
-            basis_sc%dnCGB%d1(:,:,i)   = basis_sc%dnCGB%d1(:,:,i)   * cmplx(scale_d1b(i),kind=Rkind)
-          END DO
-          DO i=1,basis_sc%ndim
-          DO j=1,basis_sc%ndim
-            basis_sc%dnCGB%d2(:,:,i,j) = basis_sc%dnCGB%d2(:,:,i,j) * cmplx(scale_d2b(i,j),kind=Rkind)
-          END DO
-          END DO
-        ELSE
           basis_sc%dnRGB%d0(:,:)        = basis_sc%dnRGB%d0(:,:)      * scale_d0b
           DO i=1,basis_sc%ndim
             basis_sc%dnRGB%d1(:,:,i)    = basis_sc%dnRGB%d1(:,:,i)    * scale_d1b(i)
@@ -1630,8 +1552,6 @@ MODULE mod_basis
             basis_sc%dnRGB%d2(:,:,i,j)  = basis_sc%dnRGB%d2(:,:,i,j)  * scale_d2b(i,j)
           END DO
           END DO
-        END IF
-
       END IF
 
 !---------------------------------------------------------------------
@@ -1685,39 +1605,7 @@ MODULE mod_basis
 
       IF (.NOT. basis_set%packed_done .OR. .NOT. basis_set%dnBBRep) RETURN
 
-      IF (basis_set%cplx) THEN
-         CALL alloc_dnCplxMat(basis_set%dnCBB,basis_set%nb,basis_set%nb,nb_var_deriv=basis_set%ndim,nderiv=2)
-
-        CALL alloc_NParray(d0cbwrho,[nq,basis_set%nb],'d0cbwrho',name_sub)
-
-        DO iq=1,nq
-          wrho = Rec_WrhonD(basis_set,iq)
-          DO ib=1,basis_set%nb
-            d0cbwrho(iq,ib) = Rec_d0cbnD(basis_set,iq,ib) * wrho
-          END DO
-        END DO
-
-        basis_set%dnCBB%d1(:,:,:)   = CZERO
-        basis_set%dnCBB%d2(:,:,:,:) = CZERO
-
-        DO ib=1,basis_set%nb
-        DO iq=1,nq
-
-          CALL Rec_d0d1d2cbnD(d0c,d1c(:),d2c(:,:),basis_set,iq,ib)
-          DO jb=1,basis_set%nb
-
-            basis_set%dnCBB%d1(jb,ib,:)   = basis_set%dnCBB%d1(jb,ib,:) + &
-                                        d0cbwrho(iq,jb) * d1c(:)
-            basis_set%dnCBB%d2(jb,ib,:,:) = basis_set%dnCBB%d2(jb,ib,:,:)+&
-                                      d0cbwrho(iq,jb) * d2c(:,:)
-
-          END DO
-        END DO
-        END DO
-        CALL dealloc_NParray(d0cbwrho,'d0cbwrho',name_sub)
-
-      ELSE
-        CALL alloc_dnMat(basis_set%dnRBB,basis_set%nb,basis_set%nb,nb_var_deriv=basis_set%ndim,nderiv=2)
+      CALL alloc_dnMat(basis_set%dnRBB,basis_set%nb,basis_set%nb,nb_var_deriv=basis_set%ndim,nderiv=2)
 
         CALL alloc_NParray(d0bwrho,[nq,basis_set%nb],'d0bwrho',name_sub)
 
@@ -1748,18 +1636,12 @@ MODULE mod_basis
         END DO
         CALL dealloc_NParray(d0bwrho,'d0bwrho',name_sub)
 
-      END IF
       basis_set%dnBBRep_done = .TRUE.
 
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        IF (basis_set%cplx) THEN
-          CALL Write_dnCplxMat(basis_set%dnCBB)
-        ELSE
-          CALL Write_dnMat(basis_set%dnRBB)
-        END IF
-
+        CALL Write_dnMat(basis_set%dnRBB)
         !CALL RecWrite_basis(basis_set)
         write(out_unitp,*) 'END ',name_sub
       END IF
@@ -1816,9 +1698,6 @@ MODULE mod_basis
         STOP 'sub_dnGB_TO_dnPara_OF_GB: ndim > 1 not yet'
       END IF
 
-      IF (basis_set%cplx) THEN
-        STOP 'sub_dnGB_TO_dnPara_OF_GB: cplx not yet'
-      ELSE
         CALL alloc_dnMat(basis_set%dnPara_OF_RGB,nq,basis_set%nb,               &
                          nb_var_deriv=nb_TD,nderiv=2)
 
@@ -1957,16 +1836,9 @@ MODULE mod_basis
         CALL dealloc_NParray(xi,'xi',name_sub)
         CALL dealloc_NParray(xj,'xj',name_sub)
 
-      END IF
-
-
 !-----------------------------------------------------------
       IF (debug) THEN
-        IF (basis_set%cplx) THEN
-          STOP 'sub_dnGB_TO_dnPara_OF_GB: cplx not yet'
-        ELSE
-          CALL Write_dnMat(basis_set%dnPara_OF_RGB)
-        END IF
+        CALL Write_dnMat(basis_set%dnPara_OF_RGB)
         !CALL RecWrite_basis(basis_set)
         write(out_unitp,*) 'END ',name_sub
       END IF
@@ -2010,10 +1882,6 @@ MODULE mod_basis
       END IF
 !-----------------------------------------------------------
 
-
-      IF (basis_set%cplx) THEN
-        STOP 'sub_dnPara_OF_dnGB_TO_dnPara_OF_BB: cplx not yet'
-      ELSE
         CALL alloc_dnMat(basis_set%dnPara_OF_RBB,basis_set%nb,basis_set%nb,     &
                          nb_var_deriv=nb_TD,nderiv=2)
 
@@ -2053,16 +1921,9 @@ MODULE mod_basis
         CALL dealloc_NParray(d1,'d1',name_sub)
         CALL dealloc_NParray(d2,'d2',name_sub)
 
-      END IF
-
-
 !-----------------------------------------------------------
       IF (debug) THEN
-        IF (basis_set%cplx) THEN
-          STOP 'sub_dnPara_OF_dnGB_TO_dnPara_OF_BB: cplx not yet'
-        ELSE
-          CALL Write_dnMat(basis_set%dnPara_OF_RBB)
-        END IF
+        CALL Write_dnMat(basis_set%dnPara_OF_RBB)
         !CALL RecWrite_basis(basis_set)
         write(out_unitp,*) 'END ',name_sub
       END IF
@@ -2098,18 +1959,7 @@ MODULE mod_basis
   IF (.NOT. basis_set%packed_done) RETURN
 
   IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
-    IF (basis_set%cplx) THEN
-
-      CALL dealloc_dnCplxMat(basis_set%dnCBG)
-      CALL alloc_dnCplxMat(basis_set%dnCBG,basis_set%nb,basis_set%nb,nb_var_deriv=basis_set%ndim,nderiv=0)
-      basis_set%dnCBG%d0 = Identity_Mat(basis_set%nb)
-
-      CALL dealloc_dnCplxMat(basis_set%dnCBGwrho)
-      CALL alloc_dnCplxMat(basis_set%dnCBGwrho,basis_set%nb,basis_set%nb,nb_var_deriv=basis_set%ndim,nderiv=0)
-      basis_set%dnCBGwrho%d0 = Identity_Mat(basis_set%nb)
-
-    ELSE
-
+ 
       CALL dealloc_dnMat(basis_set%dnRBG)
       CALL alloc_dnMat(basis_set%dnRBG,basis_set%nb,basis_set%nb,nb_var_deriv=basis_set%ndim,nderiv=0)
 
@@ -2120,25 +1970,7 @@ MODULE mod_basis
 
       basis_set%dnRBGwrho%d0 = Identity_Mat(basis_set%nb)
 
-    END IF
   ELSE
-
-
-      IF (basis_set%cplx) THEN
-
-        CALL dealloc_dnCplxMat(basis_set%dnCBG)
-        CALL alloc_dnCplxMat(basis_set%dnCBG,basis_set%nb,nq,nb_var_deriv=basis_set%ndim,nderiv=0)
-
-        basis_set%dnCBG%d0     = transpose(basis_set%dnCGB%d0)
-
-        CALL dealloc_dnCplxMat(basis_set%dnCBGwrho)
-        CALL alloc_dnCplxMat(basis_set%dnCBGwrho,basis_set%nb,nq,nb_var_deriv=basis_set%ndim,nderiv=0)
-
-        DO ib=1,get_nb_FROM_basis(basis_set)
-          basis_set%dnCBGwrho%d0(ib,:) = basis_set%dnCGB%d0(:,ib) * cmplx(basis_set%wrho,kind=Rkind)
-        END DO
-
-      ELSE
 
         CALL dealloc_dnMat(basis_set%dnRBG)
 
@@ -2154,16 +1986,11 @@ MODULE mod_basis
           basis_set%dnRBGwrho%d0(ib,:) = basis_set%dnRGB%d0(:,ib) * basis_set%wrho
         END DO
 
-      END IF
   END IF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        IF (basis_set%cplx) THEN
-          CALL Write_dnCplxMat(basis_set%dnCGB)
-        ELSE
-          CALL Write_dnMat(basis_set%dnRGB)
-        END IF
+        CALL Write_dnMat(basis_set%dnRGB)
         write(out_unitp,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
@@ -2255,11 +2082,6 @@ MODULE mod_basis
 !-----------------------------------------------------------
 
       IF (.NOT. basis_set%packed_done) RETURN
-
-      IF (basis_set%cplx) THEN
-        STOP ' STOP in sub_dnGB_TO_dnGG, cplx impossible'
-      ELSE
-
 
         CALL alloc_dnMat(basis_set%dnRGG,nq,nq,nb_var_deriv=basis_set%ndim,nderiv=2)
 
@@ -2455,8 +2277,6 @@ MODULE mod_basis
 
         CALL dealloc_NParray(d0b_pseudoInv,'d0b_pseudoInv',name_sub)
         CALL dealloc_NParray(Check_bGB,'Check_bGB',name_sub)
-
-      END IF
 
       basis_set%dnGGRep_done = .TRUE.
 
@@ -3004,18 +2824,6 @@ END SUBROUTINE pack_basis_old
       END IF
       max_Sii = ZERO
       max_Sij = ZERO
-      IF (basis_temp%cplx) THEN
-        DO i=1,basis_temp%nb
-          Sii = dot_product(basis_temp%dnCGB%d0(:,i)*basis_temp%wrho(:),    &
-                            basis_temp%dnCGB%d0(:,i) ) -CONE
-          IF (abs(Sii) .GT. max_Sii) max_Sii = abs(Sii)
-          DO j=i+1,basis_temp%nb
-            Sij = dot_product(basis_temp%dnCGB%d0(:,i)*basis_temp%wrho(:),  &
-                              basis_temp%dnCGB%d0(:,j))
-            IF (abs(Sij) .GT. max_Sij) max_Sij = abs(Sij)
-          END DO
-        END DO
-      ELSE
         CALL alloc_NParray(tbasiswrho,[basis_temp%nb,nq],             &
                           'tbasiswrho',name_sub)
 
@@ -3042,9 +2850,6 @@ END SUBROUTINE pack_basis_old
 
         CALL dealloc_NParray(tbasiswrho,'tbasiswrho',name_sub)
         CALL dealloc_NParray(matS,'matS',name_sub)
-
-      END IF
-
 
       IF (max_Sii > ONETENTH**5 .OR. max_Sij > ONETENTH**5) THEN
         write(out_unitp,*) ' ERROR in ',name_sub
@@ -4418,83 +4223,6 @@ END SUBROUTINE pack_basis_old
 !     -------------------------------------------------------
 
       END FUNCTION Rec_d0bnD_AT_Q
-      RECURSIVE FUNCTION Rec_d0cbnD(BasisnD,iq,ib) result(d0cbnD)
-      USE mod_system
-      implicit none
-
-!----- variables for the Basis and quadrature points -----------------
-      TYPE (Basis)              :: BasisnD
-      integer, intent(in)       :: iq
-      integer, intent(in)       :: ib
-      complex (kind=Rkind)      :: d0cbnD
-
-!------ working variables ---------------------------------
-      integer       :: i_SG,iq_SG,nq
-      integer       :: i
-      integer :: nDvalG(BasisnD%nDindG%ndim)
-      integer :: nDvalB(BasisnD%nDindB%ndim)
-
-!----- for debuging --------------------------------------------------
-      logical, parameter :: debug = .FALSE.
-!     logical, parameter :: debug = .TRUE.
-      character (len=*), parameter :: name_sub = 'Rec_d0cbnD'
-!-----------------------------------------------------------
-       IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-       END IF
-!-----------------------------------------------------------
-
-       IF (BasisnD%packed_done) THEN
-         d0cbnD = BasisnD%dnCGB%d0(iq,ib)
-       ELSE ! BasisnD%nb_basis MUST BE > 0
-         IF (BasisnD%nb_basis == 0 ) STOP ' ERROR with packed in Rec_d0cbnD!!!'
-
-         SELECT CASE (BasisnD%SparseGrid_type)
-         CASE (0) ! Direct product
-           CALL calc_nDindex(BasisnD%nDindG,iq,nDvalG)
-           CALL calc_nDindex(BasisnD%nDindB,ib,nDvalB)
-           d0cbnD   = CONE
-           DO i=1,BasisnD%nb_basis
-             d0cbnD = d0cbnD * Rec_d0cbnD(BasisnD%tab_Pbasis(i)%Pbasis, &
-                                          nDvalG(i),nDvalB(i))
-           END DO
-
-         CASE (1) ! Sparse basis (Smolyak 1st implementation)
-           iq_SG = iq
-           DO i_SG=1,BasisnD%nb_SG
-             nq = get_nq_FROM_basis(BasisnD%tab_PbasisSG(i_SG)%Pbasis)
-             IF (iq_SG <= nq) EXIT
-             iq_SG = iq_SG - nq
-           END DO
-           d0cbnD = Rec_d0cbnD(BasisnD%tab_PbasisSG(i_SG)%Pbasis,iq_SG,ib)
-
-         CASE (2) ! Sparse basis (Smolyak 2d  implementation)
-           write(out_unitp,*) ' ERROR in',name_sub
-           STOP 'Rec_d0cbnD: SparseGrid_type=2'
-
-         CASE (4) ! Sparse basis (Smolyak 4th implementation)
-           write(out_unitp,*) ' ERROR in',name_sub
-           STOP 'Rec_d0cbnD: SparseGrid_type=4'
-
-         CASE DEFAULT
-           write(out_unitp,*) ' ERROR in',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
-           STOP
-         END SELECT
-
-       END IF
-
-!     -------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0bnD',d0cbnD
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!     -------------------------------------------------------
-
-      END FUNCTION Rec_d0cbnD
 !=====================================================================
 !
 !  calculation of d0bnD d1bnD(:) and d2bnD(:,:)
@@ -4805,184 +4533,7 @@ END SUBROUTINE pack_basis_old
 
       END SUBROUTINE Rec_d0d1d2bnD
 
-      RECURSIVE SUBROUTINE Rec_d0d1d2cbnD(d0cb,d1cb,d2cb,BasisnD,iq,ib)
-      USE mod_system
-      implicit none
 
-!----- variables for the Basis and quadrature points -----------------
-      TYPE (Basis) :: BasisnD
-
-      integer              :: iq,ib,ndim
-      complex (kind=Rkind) :: d0cb
-      complex (kind=Rkind) :: d1cb(BasisnD%ndim)
-      complex (kind=Rkind) :: d2cb(BasisnD%ndim,BasisnD%ndim)
-
-!------ working variables ---------------------------------
-      integer           :: i_SG,iq_SG,nq
-      integer           :: i,j,i0,i1
-      integer           :: iqi,ibi,ndimi
-      complex (kind=Rkind) :: d0cbi
-      complex (kind=Rkind), allocatable :: d1cbi(:)
-      complex (kind=Rkind), allocatable :: d2cbi(:,:)
-      real (kind=Rkind) :: d0bi
-      real (kind=Rkind), allocatable :: d1bi(:)
-      real (kind=Rkind), allocatable :: d2bi(:,:)
-      integer :: nDvalG(BasisnD%nDindG%ndim)
-      integer :: nDvalB(BasisnD%nDindB%ndim)
-
-!----- for debuging --------------------------------------------------
-       integer :: err_mem,memory
-       logical, parameter :: debug = .FALSE.
-!       logical, parameter :: debug = .TRUE.
-      character (len=*), parameter :: name_sub = 'Rec_d0d1d2cbnD'
-
-!-----------------------------------------------------------
-       IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'iq,ib',iq,ib
-       END IF
-!-----------------------------------------------------------
-
-       IF (BasisnD%packed_done) THEN
-         d0cb      = BasisnD%dnCGB%d0(iq,ib)
-         IF (associated(BasisnD%dnCGB%d1) .AND. associated(BasisnD%dnCGB%d2)) THEN
-           d1cb(:)   = BasisnD%dnCGB%d1(iq,ib,:)
-           d2cb(:,:) = BasisnD%dnCGB%d2(iq,ib,:,:)
-         ELSE
-           DO i=1,BasisnD%ndim
-             d1cb(i) = dot_product(BasisnD%dnCGB%d0(iq,:),BasisnD%dnCBB%d1(:,ib,i))
-           END DO
-           DO i=1,BasisnD%ndim
-           DO j=1,BasisnD%ndim
-             d2cb(i,j) = dot_product(BasisnD%dnCGB%d0(iq,:),BasisnD%dnCBB%d2(:,ib,i,j))
-           END DO
-           END DO
-         END IF
-       ELSE ! BasisnD%nb_basis MUST BE > 0
-         IF (BasisnD%nb_basis == 0 ) STOP ' ERROR with packed in Rec_d0d1d2cbnD!!!'
-
-         SELECT CASE (BasisnD%SparseGrid_type)
-         CASE (0) ! Direct product
-           CALL calc_nDindex(BasisnD%nDindG,iq,nDvalG)
-           CALL calc_nDindex(BasisnD%nDindB,ib,nDvalB)
-           d0cb      = CONE
-           d1cb(:)   = CONE
-           d2cb(:,:) = CONE
-           i0 = 0
-           ndim = BasisnD%ndim
-           DO i=1,BasisnD%nb_basis
-             i1 = i0 + BasisnD%tab_Pbasis(i)%Pbasis%ndim
-             iqi   = nDvalG(i)
-             ibi   = nDvalB(i)
-             ndimi = BasisnD%tab_Pbasis(i)%Pbasis%ndim
-             IF (BasisnD%tab_Pbasis(i)%Pbasis%cplx) THEN
-               CALL alloc_NParray(d1cbi,[ndimi],'d1cbi',name_sub)
-               CALL alloc_NParray(d2cbi,[ndimi,ndimi],'d2cbi',name_sub)
-
-               CALL Rec_d0d1d2cbnD(d0cbi,d1cbi,d2cbi,BasisnD%tab_Pbasis(i)%Pbasis,iqi,ibi)
-               ! no derivative
-               d0cb = d0cb * d0cbi
-               ! first derivatives
-               d1cb(1:i0)      = d1cb(1:i0) * d0cbi
-               d1cb(i0+1:i1)   = d1cb(i0+1:i1) * d1cbi(:)
-               d1cb(i1+1:ndim) = d1cb(i1+1:ndim) * d0cbi
-               ! second derivatives
-               d2cb(1:i0,1:i0)      = d2cb(1:i0,1:i0) * d0cbi
-               d2cb(1:i0,i1+1:ndim) = d2cb(1:i0,i1+1:ndim) * d0cbi
-               DO j=1,i0
-                 d2cb(j,i0+1:i1)    = d2cb(j,i0+1:i1) * d1cbi(:)
-               END DO
-
-               DO j=1,ndimi
-                 d2cb(i0+j,1:i0)      = d2cb(i0+j,1:i0) * d1cbi(j)
-                 d2cb(i0+j,i1+1:ndim) = d2cb(i0+j,i1+1:ndim) * d1cbi(j)
-               END DO
-               d2cb(i0+1:i1,i0+1:i1)  = d2cb(i0+1:i1,i0+1:i1) * d2cbi(:,:)
-
-               d2cb(i1+1:ndim,1:i0)      = d2cb(i1+1:ndim,1:i0) * d0cbi
-               DO j=i1+1,ndim
-                 d2cb(j,i0+1:i1)         = d2cb(j,i0+1:i1) * d1cbi(:)
-               END DO
-               d2cb(i1+1:ndim,i1+1:ndim) = d2cb(i1+1:ndim,i1+1:ndim) * d0cbi
-
-               CALL dealloc_NParray(d1cbi,'d1cbi',name_sub)
-               CALL dealloc_NParray(d2cbi,'d2cbi',name_sub)
-             ELSE
-               CALL alloc_NParray(d1bi,[ndimi],      'd1bi',name_sub)
-               CALL alloc_NParray(d2bi,[ndimi,ndimi],'d2bi',name_sub)
-
-               CALL Rec_d0d1d2bnD(d0bi,d1bi,d2bi,BasisnD%tab_Pbasis(i)%Pbasis,iqi,ibi)
-               ! no derivative
-               d0cb = d0cb * cmplx(d0bi,kind=Rkind)
-               ! first derivatives
-               d1cb(1:i0)      = d1cb(1:i0) * cmplx(d0bi,kind=Rkind)
-               d1cb(i0+1:i1)   = d1cb(i0+1:i1) * cmplx(d1bi(:),kind=Rkind)
-               d1cb(i1+1:ndim) = d1cb(i1+1:ndim) * cmplx(d0bi,kind=Rkind)
-               ! second derivatives
-               d2cb(1:i0,1:i0)      = d2cb(1:i0,1:i0) * cmplx(d0bi,kind=Rkind)
-               d2cb(1:i0,i1+1:ndim) = d2cb(1:i0,i1+1:ndim) * cmplx(d0bi,kind=Rkind)
-               DO j=1,i0
-                 d2cb(j,i0+1:i1)    = d2cb(j,i0+1:i1) * cmplx(d1bi(:),kind=Rkind)
-               END DO
-
-               DO j=1,ndimi
-                 d2cb(i0+j,1:i0)      = d2cb(i0+j,1:i0) * cmplx(d1bi(j),kind=Rkind)
-                 d2cb(i0+j,i1+1:ndim) = d2cb(i0+j,i1+1:ndim) * cmplx(d1bi(j),kind=Rkind)
-               END DO
-               d2cb(i0+1:i1,i0+1:i1)  = d2cb(i0+1:i1,i0+1:i1) * cmplx(d2bi(:,:),kind=Rkind)
-
-               d2cb(i1+1:ndim,1:i0)      = d2cb(i1+1:ndim,1:i0) * cmplx(d0bi,kind=Rkind)
-               DO j=i1+1,ndim
-                 d2cb(j,i0+1:i1)         = d2cb(j,i0+1:i1) * cmplx(d1bi(:),kind=Rkind)
-               END DO
-               d2cb(i1+1:ndim,i1+1:ndim) = d2cb(i1+1:ndim,i1+1:ndim) * cmplx(d0bi,kind=Rkind)
-
-               CALL dealloc_NParray(d1bi,'d1bi',name_sub)
-               CALL dealloc_NParray(d2bi,'d2bi',name_sub)
-             END IF
-             i0 = i1
-           END DO
-
-         CASE (1) ! Sparse basis (Smolyak 1st implementation)
-           iq_SG = iq
-           DO i_SG=1,BasisnD%nb_SG
-             nq = get_nq_FROM_basis(BasisnD%tab_PbasisSG(i_SG)%Pbasis)
-             IF (iq_SG <= nq) EXIT
-             iq_SG = iq_SG - nq
-           END DO
-           CALL Rec_d0d1d2cbnD(d0cb,d1cb,d2cb,                          &
-                              BasisnD%tab_PbasisSG(i_SG)%Pbasis,iq_SG,ib)
-
-         CASE (2) ! Sparse basis (Smolyak 2d  implementation)
-           write(out_unitp,*) ' ERROR in',name_sub
-           STOP 'Rec_d0d1d2cbnD: SparseGrid_type=2'
-
-         CASE (4) ! Sparse basis (Smolyak 4th implementation)
-           write(out_unitp,*) ' ERROR in',name_sub
-           STOP 'Rec_d0d1d2cbnD: SparseGrid_type=4'
-
-         CASE DEFAULT
-           write(out_unitp,*) ' ERROR in',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
-           STOP
-         END SELECT
-
-       END IF
-
-!     -------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0cb',d0cb
-        write(out_unitp,*) ' d1cb',d1cb
-        write(out_unitp,*) ' d2cb',d2cb
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!     -------------------------------------------------------
-
-
-      END SUBROUTINE Rec_d0d1d2cbnD
       SUBROUTINE calc_d0b(d0b,BasisnD,iq)
       USE mod_system
       IMPLICIT NONE
@@ -5009,18 +4560,6 @@ END SUBROUTINE pack_basis_old
        END IF
 !-----------------------------------------------------------
 
-
-!-----------------------------------------------------------
-!     test if the basis is real
-!     ------------------------------------------------------
-      IF (BasisnD%cplx) THEN
-         write(out_unitp,*) ' ERROR in calc_d0b'
-         write(out_unitp,*) ' You are using the REAL subroutine '
-         write(out_unitp,*) ' for the d0b calculation, but the basis is COMPLEX'
-         STOP
-      END IF
-!-----------------------------------------------------------
-
 !-----------------------------------------------------------
 !     -----------------------------------------------------
 !     transfert de d0b_k
@@ -5044,65 +4583,6 @@ END SUBROUTINE pack_basis_old
 !     -------------------------------------------------------
 
       END SUBROUTINE calc_d0b
-!=====================================================================
-!
-!  and d0b(Q,ib) calculations for the nD quadrature point
-!  in complex
-!
-!=====================================================================
-      SUBROUTINE calc_d0cb(d0cb,BasisnD,iq)
-      USE mod_system
-      IMPLICIT NONE
-
-!----- for the basis set ----------------------------------------------
-      TYPE (Basis) :: BasisnD
-
-!------ nD basis set for the k point of the nD quadrature points --
-      complex (kind=Rkind) :: d0cb(BasisnD%nb)
-
-!------ working variables ---------------------------------
-      integer       :: ib,iq
-
-!----- for debuging --------------------------------------------------
-      logical, parameter :: debug = .FALSE.
-!     logical, parameter :: debug = .TRUE.
-!---------------------------------------------------------------------
-       IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING calc_d0cb'
-         write(out_unitp,*) 'nb_ba',BasisnD%nb
-       END IF
-!-----------------------------------------------------------
-
-!-----------------------------------------------------------
-!     test if the basis is complex
-!     ------------------------------------------------------
-      IF ( .NOT. BasisnD%cplx) THEN
-         write(out_unitp,*) ' ERROR in calc_d0cb'
-         write(out_unitp,*) ' You are using the COMPLEX subroutine '
-         write(out_unitp,*) ' for the d0b calculation, but the basis is REAL'
-         STOP
-      END IF
-!-----------------------------------------------------------
-
-      DO ib=1,BasisnD%nb
-       d0cb(ib) = Rec_d0cbnD(BasisnD,iq,ib)
-      END DO
-!     -----------------------------------------------------
-!-----------------------------------------------------------
-
-
-!-----------------------------------------------------------
-!     -------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0cb',BasisnD%nb
-        CALL Write_Vec(d0cb,out_unitp,8)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END calc_d0cb'
-      END IF
-!     -------------------------------------------------------
-
-      END SUBROUTINE calc_d0cb
 
       !!@description: TODO
       !!@param: TODO

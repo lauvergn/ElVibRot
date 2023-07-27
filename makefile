@@ -635,9 +635,6 @@ $(OBJ_DIR)/sub_quadra_dfst.o : \
 $(OBJ_DIR)/sub_quadra_fourier.o : \
           $(mod_system) \
           $(mod_basis)
-$(OBJ_DIR)/sub_quadra_ft.o : \
-          $(mod_system) \
-          $(mod_basis)
 $(OBJ_DIR)/sub_quadra_herm.o : \
           $(mod_system) \
           $(mod_basis) \

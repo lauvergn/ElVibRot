@@ -195,8 +195,6 @@
       BasisnD_loc%active            = .TRUE.
       IF(MPI_id==0) THEN
         write(out_unitp,*)
-        IF (BasisnD_loc%cplx)       write(out_unitp,*) 'BasisnD is COMPLEX'
-        IF (.NOT. BasisnD_loc%cplx) write(out_unitp,*) 'BasisnD is REAL'
         write(out_unitp,*)
         write(out_unitp,*) 'Number of active basis sets:',BasisnD_loc%nb_basis
       ENDIF
@@ -812,7 +810,6 @@
       basis_temp%POGridRep_polyortho      = POGridRep_polyortho
       basis_temp%read_contrac_file        = read_contrac_file
       basis_temp%file_contrac%name        = name_contrac_file
-      basis_temp%cplx                     = cplx
       basis_temp%nb_basis                 = nb_basis
 
 

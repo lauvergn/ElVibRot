@@ -91,18 +91,6 @@
 !-----------------------------------------------------------------------
      nb_basis                       = basis_DP%nb_basis
      IF (debug) basis_DP%print_info_OF_basisDP = .TRUE.
-     !--- check if the basis is complex => STOP -----------------------
-     DO i=1,basis_DP%nb_basis
-        basis_DP%cplx = basis_DP%tab_Pbasis(i)%Pbasis%cplx
-        IF (basis_DP%cplx) EXIT
-     END DO
-
-
-
-      IF (basis_DP%cplx) THEN
-        write(out_unitp,*) ' STOP the basis is complex!!'
-        STOP
-      END IF
 
       !--- check if primitive_done=.TRUE. -----------------------
       DO i=1,basis_DP%nb_basis

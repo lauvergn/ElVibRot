@@ -155,10 +155,6 @@
       write(out_unitp,*) '-------------------------------------------------'
       write(out_unitp,*) '    Basis: Sparse Basis'
       write(out_unitp,*) 'nb_basis,L_SparseGrid',nb_basis,L_SparseGrid
-      IF (SparseBasis%cplx) THEN
-        write(out_unitp,*) ' STOP the basis is complex!!'
-        STOP
-      END IF
 
 !----------------------------------------------------------------------------
 !     1st: calculation of grid points and weight for the 1D-grid
