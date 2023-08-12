@@ -859,6 +859,6 @@ CONTAINS
         ENDDO
 
 51      format(100(e16.6))
-      ENDSUBROUTINE
+      END SUBROUTINE
 
 END MODULE mod_fullanalysis

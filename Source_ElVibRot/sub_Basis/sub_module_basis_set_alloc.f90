@@ -282,9 +282,7 @@ MODULE mod_basis_set_alloc
       PUBLIC  get_rho_OF_basis, get_rho_AT_iq_OF_basis
       PUBLIC  get_w_OF_basis, get_w_AT_iq_OF_basis
       PUBLIC  get_wrho_OF_basis, get_wrho_AT_iq_OF_basis
-      PUBLIC  Get_MatdnRGG, Get_MatdnRGB
-      PUBLIC  Get_MatdnRBB, Get2_MatdnRBB
-      PUBLIC  Get2_MatdnRGB, Get2_MatdnRBG
+      PUBLIC  Get3_MatdnRGG
       PUBLIC  Get_MATdnPara_OF_RGB,Get_MATdnPara_OF_RBB,Get2_MATdnPara_OF_RBB
       PUBLIC  Set_nq_OF_basis, get_nq_FROM_basis, get_nqa_FROM_basis, get_nb_FROM_basis
       PUBLIC  get_tab_nq_OF_Qact, get_nb_bi_FROM_AllBasis
@@ -1924,291 +1922,62 @@ CONTAINS
 
       END SUBROUTINE basis2TObasis1
 
-      SUBROUTINE Get_MatdnRGG(basis_set,MatRGG,dnba_ind)
-      USE mod_system
-      IMPLICIT NONE
+  SUBROUTINE Get3_MatdnRGG(basis_set,MatRGG,dnba_ind)
+    USE mod_system
+    IMPLICIT NONE
 
-      TYPE (basis),intent(in)        :: basis_set
-      real(kind=Rkind),intent(inout) :: MatRGG(:,:)
-      integer, intent(in)            :: dnba_ind(2)
+    TYPE (basis),     target,   intent(in)    :: basis_set
+    real(kind=Rkind), pointer,  intent(inout) :: MatRGG(:,:)
+    integer,                    intent(in)    :: dnba_ind(2)
 
-      integer :: nq
+    integer :: nq
 !----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-      character (len=*), parameter :: name_sub='Get_MatdnRGG'
+    integer :: err_mem,memory
+    logical, parameter :: debug=.FALSE.
+    !logical, parameter :: debug=.TRUE.
+    character (len=*), parameter :: name_sub='Get3_MatdnRGG'
 !-----------------------------------------------------------
-      IF (.NOT. basis_set%packed) RETURN
-      nq = get_nq_FROM_basis(basis_set)
+    IF (.NOT. basis_set%packed) RETURN
+    nq = get_nq_FROM_basis(basis_set)
 
-      IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'ndim',basis_set%ndim
-        write(out_unitp,*) 'dnba_ind',dnba_ind
-        write(out_unitp,*) 'nq',nq
-        write(out_unitp,*) 'shape(MatRGG)',shape(MatRGG)
-        write(out_unitp,*) 'alloc dnRGG',basis_set%dnRGG%alloc
-        CALL write_dnSVM(basis_set%dnRGG)
-        flush(out_unitp)
-      END IF
-!-----------------------------------------------------------
-
-      IF (.NOT. basis_set%dnRGG%alloc) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'basis_set%dnRGG is not allocated!!'
-        write(out_unitp,*) 'CHECK the fortran source'
-        STOP
-      END IF
-
-      IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN
-        MatRGG(:,:) = Identity_Mat(nq)
-      ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
-        MatRGG(:,:) = basis_set%dnRGG%d1(:,:,dnba_ind(2))
-      ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
-        MatRGG(:,:) = basis_set%dnRGG%d1(:,:,dnba_ind(1))
-      ELSE ! 2d derivative
-        MatRGG(:,:) = basis_set%dnRGG%d2(:,:,dnba_ind(1),dnba_ind(2))
-      END IF
-
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'MatRGG',dnba_ind
-        CALL write_Mat(MatRGG,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!-----------------------------------------------------------
-      END SUBROUTINE Get_MatdnRGG
-
-      SUBROUTINE Get_MatdnRGB(basis_set,RMatdnb,dnba_ind)
-      USE mod_system
-      IMPLICIT NONE
-
-      TYPE (basis),intent(in)        :: basis_set
-      real(kind=Rkind),intent(inout) :: RMatdnb(:,:)
-      integer, intent(in)            :: dnba_ind(2)
-
-
-      integer :: nq
-!----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-      character (len=*), parameter :: name_sub='Get_MatdnRGB'
-!-----------------------------------------------------------
-      IF (.NOT. basis_set%packed) RETURN
-      nq = get_nq_FROM_basis(basis_set)
-      IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nq',nq
-      END IF
+    IF (debug) THEN
+      write(out_unitp,*) 'BEGINNING ',name_sub
+      write(out_unitp,*) 'ndim',basis_set%ndim
+      write(out_unitp,*) 'dnba_ind',dnba_ind
+      write(out_unitp,*) 'nq',nq
+      write(out_unitp,*) 'shape(MatRGG)',shape(MatRGG)
+      write(out_unitp,*) 'alloc dnRGG',basis_set%dnRGG%alloc
+      CALL write_dnSVM(basis_set%dnRGG)
+      flush(out_unitp)
+    END IF
 !-----------------------------------------------------------
 
-    IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
-      RMatdnb = Identity_Mat(basis_set%nb)
-    ELSE
-      IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN
-        RMatdnb(:,:) = basis_set%dnRGB%d0(:,:)
-      ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
-        RMatdnb(:,:) = basis_set%dnRGB%d1(:,:,dnba_ind(2))
-      ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
-        RMatdnb(:,:) = basis_set%dnRGB%d1(:,:,dnba_ind(1))
-      ELSE ! 2d derivative
-        RMatdnb(:,:) = basis_set%dnRGB%d2(:,:,dnba_ind(1),dnba_ind(2))
-      END IF
+    IF (.NOT. basis_set%dnRGG%alloc) THEN
+      write(out_unitp,*) 'ERROR in ',name_sub
+      write(out_unitp,*) 'basis_set%dnRGG is not allocated!!'
+      write(out_unitp,*) 'CHECK the fortran source'
+      STOP
     END IF
 
-
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!-----------------------------------------------------------
-      END SUBROUTINE Get_MatdnRGB
-      FUNCTION Get2_MatdnRGB(basis_set,dnba_ind) RESULT (RMatdnb)
-      USE mod_system
-      IMPLICIT NONE
-
-      TYPE (basis),intent(in)        :: basis_set
-      real(kind=Rkind), allocatable  :: RMatdnb(:,:)
-      integer, intent(in)            :: dnba_ind(2)
-
-
-      integer :: nq
-!----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-      character (len=*), parameter :: name_sub='Get2_MatdnRGB'
-!-----------------------------------------------------------
-      IF (.NOT. basis_set%packed) RETURN
-      nq = get_nq_FROM_basis(basis_set)
-      IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nq',nq
-      END IF
-!-----------------------------------------------------------
-
-    IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
-      RMatdnb = Identity_Mat(basis_set%nb)
-    ELSE
-      IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN
-        RMatdnb = basis_set%dnRGB%d0(:,:)
-      ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
-        RMatdnb = basis_set%dnRGB%d1(:,:,dnba_ind(2))
-      ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
-        RMatdnb = basis_set%dnRGB%d1(:,:,dnba_ind(1))
-      ELSE ! 2d derivative
-        RMatdnb = basis_set%dnRGB%d2(:,:,dnba_ind(1),dnba_ind(2))
-      END IF
-    END IF
-
-
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!-----------------------------------------------------------
-      END FUNCTION Get2_MatdnRGB
-
-      FUNCTION Get2_MatdnRBG(basis_set) RESULT (RMatdnb)
-      USE mod_system
-      IMPLICIT NONE
-
-      TYPE (basis),intent(in)        :: basis_set
-      real(kind=Rkind), allocatable  :: RMatdnb(:,:)
-
-
-      integer :: nq
-!----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-      character (len=*), parameter :: name_sub='Get2_MatdnRBG'
-!-----------------------------------------------------------
-      IF (.NOT. basis_set%packed) RETURN
-      nq = get_nq_FROM_basis(basis_set)
-      IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nq',nq
-      END IF
-!-----------------------------------------------------------
-    IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
-      RMatdnb = Identity_Mat(basis_set%nb)
-    ELSE
-      RMatdnb = basis_set%dnRBG%d0(:,:)
+    IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN
+      MatRGG => basis_set%dnRGG%d0
+    ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
+      MatRGG => basis_set%dnRGG%d1(:,:,dnba_ind(2))
+    ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
+      MatRGG => basis_set%dnRGG%d1(:,:,dnba_ind(1))
+    ELSE ! 2d derivative
+      MatRGG => basis_set%dnRGG%d2(:,:,dnba_ind(1),dnba_ind(2))
     END IF
 
 !-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-      END IF
+    IF (debug) THEN
+      write(out_unitp,*) 'MatRGG',dnba_ind
+      CALL write_Mat(MatRGG,out_unitp,5)
+      write(out_unitp,*) 'END ',name_sub
+    END IF
 !-----------------------------------------------------------
-      END FUNCTION Get2_MatdnRBG
+  END SUBROUTINE Get3_MatdnRGG
 
-      SUBROUTINE Get_MatdnRBB(basis_set,MatRBB,dnba_ind)
-      USE mod_system
-      IMPLICIT NONE
-
-      TYPE (basis),intent(in)        :: basis_set
-      real(kind=Rkind),intent(inout) :: MatRBB(:,:)
-      integer, intent(in)            :: dnba_ind(2)
-
-      integer :: nb
-
-!----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-      character (len=*), parameter :: name_sub='Get_MatdnRBB'
-!-----------------------------------------------------------
-      IF (.NOT. basis_set%packed) RETURN
-      nb = basis_set%nb
-      IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb',nb
-        write(out_unitp,*) 'shape(MatRBB)',shape(MatRBB)
-        write(out_unitp,*) 'alloc dnRBB',basis_set%dnRBB%alloc
-        flush(out_unitp)
-      END IF
-!-----------------------------------------------------------
-
-      IF (.NOT. basis_set%dnRBB%alloc) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'basis_set%dnRBB is not allocated!!'
-        write(out_unitp,*) 'CHECK the fortran source'
-        STOP
-      END IF
-
-      IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN
-        MatRBB(:,:) = Identity_Mat(nb)
-      ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
-        MatRBB(:,:) = basis_set%dnRBB%d1(:,:,dnba_ind(2))
-      ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
-        MatRBB(:,:) = basis_set%dnRBB%d1(:,:,dnba_ind(1))
-      ELSE ! 2d derivative
-        MatRBB(:,:) = basis_set%dnRBB%d2(:,:,dnba_ind(1),dnba_ind(2))
-      END IF
-
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'MatRBB',dnba_ind
-        CALL write_Mat(MatRBB,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!-----------------------------------------------------------
-      END SUBROUTINE Get_MatdnRBB
-  SUBROUTINE Get2_MatdnRBB(basis_set,MatRBB,dnba_ind)
-      USE mod_system
-      IMPLICIT NONE
-
-      TYPE (basis),                   intent(in)    :: basis_set
-      real(kind=Rkind), allocatable,  intent(inout) :: MatRBB(:,:)
-      integer,                        intent(in)    :: dnba_ind(2)
-
-      integer :: nb
-
-!----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-      character (len=*), parameter :: name_sub='Get2_MatdnRBB'
-!-----------------------------------------------------------
-      IF (.NOT. basis_set%packed) RETURN
-      IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb',basis_set%nb
-        write(out_unitp,*) 'shape(MatRBB)',shape(MatRBB)
-        write(out_unitp,*) 'alloc dnRBB',basis_set%dnRBB%alloc
-        flush(out_unitp)
-      END IF
-!-----------------------------------------------------------
-
-      IF (.NOT. basis_set%dnRBB%alloc) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'basis_set%dnRBB is not allocated!!'
-        write(out_unitp,*) 'CHECK the fortran source'
-        STOP
-      END IF
-
-      IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN
-        MatRBB = Identity_Mat(basis_set%nb)
-      ELSE IF (dnba_ind(1) == 0) THEN ! first derivative
-        MatRBB = basis_set%dnRBB%d1(:,:,dnba_ind(2))
-      ELSE IF (dnba_ind(2) == 0) THEN ! first derivative
-        MatRBB = basis_set%dnRBB%d1(:,:,dnba_ind(1))
-      ELSE ! 2d derivative
-        MatRBB = basis_set%dnRBB%d2(:,:,dnba_ind(1),dnba_ind(2))
-      END IF
-
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unitp,*) 'MatRBB',dnba_ind
-        CALL write_Mat(MatRBB,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
-      END IF
-!-----------------------------------------------------------
-  END SUBROUTINE Get2_MatdnRBB
   SUBROUTINE Get_MATdnPara_OF_RGB(basis_set,MatRGB,dnba_ind)
       USE mod_system
       IMPLICIT NONE
@@ -2376,7 +2145,8 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     integer,           intent(in), optional :: der(2)
 
     integer :: nb_basis,nb_B,nq,der_basis(2)
-    real (kind=Rkind), pointer :: Mat(:,:)
+    real (kind=Rkind), pointer       :: Mat(:,:)
+    real (kind=Rkind), allocatable   :: Binter(:)
 
     !----- for debuging --------------------------------------------------
     logical, parameter :: debug = .FALSE.
@@ -2412,17 +2182,38 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
         der_basis = 0
       END IF
 
-      IF (der_basis(1) == 0 .AND. der_basis(2) == 0) THEN
-        Mat => base%dnRGB%d0(:,1:nb_B)
-      ELSE IF (der_basis(1) > 0 .AND. der_basis(2) == 0) THEN
-        Mat => base%dnRGB%d1(:,1:nb_B,der_basis(1))
-      ELSE IF (der_basis(1) == 0 .AND. der_basis(2) > 0) THEN
-        Mat => base%dnRGB%d1(:,1:nb_B,der_basis(2))
-      ELSE ! der_basis(1) > 0 and der_basis(2) > 0
-        Mat => base%dnRGB%d2(:,1:nb_B,der_basis(1),der_basis(2))
-      END IF
+      IF (base%dnBBRep_done) THEN
+        IF (der_basis(1) == 0 .AND. der_basis(2) == 0) THEN
+          Binter = B
+        ELSE IF (der_basis(1) > 0 .AND. der_basis(2) == 0) THEN
+          Mat => base%dnRBB%d1(:,:,der_basis(1))
+          Binter = matmul(Mat,B)
+        ELSE IF (der_basis(1) == 0 .AND. der_basis(2) > 0) THEN
+          Mat => base%dnRBB%d1(:,:,der_basis(2))
+          Binter = matmul(Mat,B)
+        ELSE ! der_basis(1) > 0 and der_basis(2) > 0
+          Mat => base%dnRBB%d2(:,:,der_basis(1),der_basis(2))
+          Binter = matmul(Mat,B)
+        END IF
 
-      G = matmul(Mat,B)
+        Mat => base%dnRGB%d0(:,1:nb_B)
+        G = matmul(Mat,Binter)
+
+        deallocate(Binter)
+
+      ELSE
+        IF (der_basis(1) == 0 .AND. der_basis(2) == 0) THEN
+          Mat => base%dnRGB%d0(:,1:nb_B)
+        ELSE IF (der_basis(1) > 0 .AND. der_basis(2) == 0) THEN
+          Mat => base%dnRGB%d1(:,1:nb_B,der_basis(1))
+        ELSE IF (der_basis(1) == 0 .AND. der_basis(2) > 0) THEN
+          Mat => base%dnRGB%d1(:,1:nb_B,der_basis(2))
+        ELSE ! der_basis(1) > 0 and der_basis(2) > 0
+          Mat => base%dnRGB%d2(:,1:nb_B,der_basis(1),der_basis(2))
+        END IF
+
+        G = matmul(Mat,B)
+      END IF
 
     END IF
 
@@ -2495,6 +2286,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
     integer :: nb_basis,nb_B,nq,der_basis(2)
     real (kind=Rkind), pointer :: Mat(:,:)
+    complex (kind=Rkind), allocatable        :: Binter(:)
 
     !----- for debuging --------------------------------------------------
     logical, parameter :: debug = .FALSE.
@@ -2531,17 +2323,38 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
         der_basis = 0
       END IF
 
-      IF (der_basis(1) == 0 .AND. der_basis(2) == 0) THEN
-        Mat => base%dnRGB%d0(:,1:nb_B)
-      ELSE IF (der_basis(1) > 0 .AND. der_basis(2) == 0) THEN
-        Mat => base%dnRGB%d1(:,1:nb_B,der_basis(1))
-      ELSE IF (der_basis(1) == 0 .AND. der_basis(2) > 0) THEN
-        Mat => base%dnRGB%d1(:,1:nb_B,der_basis(2))
-      ELSE ! der_basis(1) > 0 and der_basis(2) > 0
-        Mat => base%dnRGB%d2(:,1:nb_B,der_basis(1),der_basis(2))
-      END IF
+      IF (base%dnBBRep_done) THEN
+        IF (der_basis(1) == 0 .AND. der_basis(2) == 0) THEN
+          Binter = B
+        ELSE IF (der_basis(1) > 0 .AND. der_basis(2) == 0) THEN
+          Mat => base%dnRBB%d1(:,:,der_basis(1))
+          Binter = matmul(Mat,B)
+        ELSE IF (der_basis(1) == 0 .AND. der_basis(2) > 0) THEN
+          Mat => base%dnRBB%d1(:,:,der_basis(2))
+          Binter = matmul(Mat,B)
+        ELSE ! der_basis(1) > 0 and der_basis(2) > 0
+          Mat => base%dnRBB%d2(:,:,der_basis(1),der_basis(2))
+          Binter = matmul(Mat,B)
+        END IF
 
-      G = matmul(Mat,B)
+        Mat => base%dnRGB%d0(:,1:nb_B)
+        G = matmul(Mat,Binter)
+
+        deallocate(Binter)
+
+      ELSE
+        IF (der_basis(1) == 0 .AND. der_basis(2) == 0) THEN
+          Mat => base%dnRGB%d0(:,1:nb_B)
+        ELSE IF (der_basis(1) > 0 .AND. der_basis(2) == 0) THEN
+          Mat => base%dnRGB%d1(:,1:nb_B,der_basis(1))
+        ELSE IF (der_basis(1) == 0 .AND. der_basis(2) > 0) THEN
+          Mat => base%dnRGB%d1(:,1:nb_B,der_basis(2))
+        ELSE ! der_basis(1) > 0 and der_basis(2) > 0
+          Mat => base%dnRGB%d2(:,1:nb_B,der_basis(1),der_basis(2))
+        END IF
+
+        G = matmul(Mat,B)
+      END IF
 
     END IF
 

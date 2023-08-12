@@ -2456,17 +2456,7 @@ real(kind=Rkind), allocatable      :: RG(:,:),RB(:,:)
 
     DO ib=1,nnb
     DO iq=1,nnq
-       RTempG(iq,:,ib) = matmul(tab_ba(tab_l(i),i)%dnRGB%d0,RTempB(iq,:,ib))
-       !dgemv (TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY)
-       ! Y = ALPHA * A.X + BETA * Y (if TRANS='n')
-       ! Y = ALPHA * A^t.X + BETA * Y (if TRANS='t')
-
-       !CALL dgemv('n',nq2,nb2,ONE,tab_ba(tab_l(i),i)%dnRGB%d0, &
-       !           nq2,RTempB(iq,:,ib),1,ZERO,RTempG(iq,:,ib),1)
-
-      !$OMP ATOMIC
-      nb_mult_BTOG = nb_mult_BTOG + int(nq2,kind=ILkind)*int(nb2,kind=ILkind)
-
+      CALL RB_TO_RG_basis(RTempB(iq,:,ib),RTempG(iq,:,ib),tab_ba(tab_l(i),i))
     END DO
     END DO
 
@@ -2548,15 +2538,7 @@ real(kind=Rkind), allocatable      :: RG(:,:),RB(:,:)
 
     DO iq=1,nnq
     DO ib=1,nnb
-!#if __LAPACK == 1
-!       CALL dgemv('n',nb2,nq2,ONE,tab_ba(tab_l(i),i)%dnRBGwrho%d0, &
-!                  nb2,RTempG(ib,:,iq),1,ZERO,RTempB(ib,:,iq),1)
-!#else
-       RTempB(ib,:,iq) = matmul(tab_ba(tab_l(i),i)%dnRBGwrho%d0 , RTempG(ib,:,iq))
-!#endif
-      !$OMP ATOMIC
-      nb_mult_GTOB = nb_mult_GTOB + int(nq2,kind=ILkind)*int(nb2,kind=ILkind)
-
+      CALL RG_TO_RB_basis(RTempG(ib,:,iq),RTempB(ib,:,iq),tab_ba(tab_l(i),i))
     END DO
     END DO
 
@@ -2698,7 +2680,7 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRep(R,tab_ba,tab_l,tab_nq,tab_der)
   integer :: tab_der_loc(2),dnba_ind(2),iQact_ba,k
   real (kind=Rkind), allocatable       :: RG1(:,:,:)
   real (kind=Rkind), allocatable       :: RG2(:,:,:)
-  real (kind=Rkind), allocatable       :: BGG(:,:)
+  real (kind=Rkind), pointer           :: BGG(:,:)
 
   integer                          :: ibasis,nq
 
@@ -2757,9 +2739,9 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRep(R,tab_ba,tab_l,tab_nq,tab_der)
 
          IF (tab_ba(tab_l(ibasis),ibasis)%packed) THEN
 
-           CALL alloc_NParray(BGG,[nq2,nq2],"BGG",name_sub)
+           !CALL alloc_NParray(BGG,[nq2,nq2],"BGG",name_sub)
 
-           CALL Get_MatdnRGG(tab_ba(tab_l(ibasis),ibasis),BGG,dnba_ind)
+           CALL Get3_MatdnRGG(tab_ba(tab_l(ibasis),ibasis),BGG,dnba_ind)
 
            DO iq3=1,nnq3
            DO iq1=1,nnq1
@@ -2767,7 +2749,7 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRep(R,tab_ba,tab_l,tab_nq,tab_der)
            END DO
            END DO
 
-           CALL dealloc_NParray(BGG,"BGG",name_sub)
+           !CALL dealloc_NParray(BGG,"BGG",name_sub)
 
          ELSE
            STOP 'not packed'
@@ -2805,7 +2787,7 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRepC(R,tab_ba,tab_l,tab_nq,tab_der)
   integer :: tab_der_loc(2),dnba_ind(2),iQact_ba,k
   complex (kind=Rkind), allocatable       :: RG1(:,:,:)
   complex (kind=Rkind), allocatable       :: RG2(:,:,:)
-  real (kind=Rkind), allocatable          :: BGG(:,:)
+  real (kind=Rkind),    pointer           :: BGG(:,:)
 
   integer                          :: ibasis,nq
 
@@ -2864,9 +2846,9 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRepC(R,tab_ba,tab_l,tab_nq,tab_der)
 
          IF (tab_ba(tab_l(ibasis),ibasis)%packed) THEN
 
-           CALL alloc_NParray(BGG,[nq2,nq2],"BGG",name_sub)
+           !CALL alloc_NParray(BGG,[nq2,nq2],"BGG",name_sub)
 
-           CALL Get_MatdnRGG(tab_ba(tab_l(ibasis),ibasis),BGG,dnba_ind)
+           CALL Get3_MatdnRGG(tab_ba(tab_l(ibasis),ibasis),BGG,dnba_ind)
 
            DO iq3=1,nnq3
            DO iq1=1,nnq1
@@ -2874,7 +2856,7 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRepC(R,tab_ba,tab_l,tab_nq,tab_der)
            END DO
            END DO
 
-           CALL dealloc_NParray(BGG,"BGG",name_sub)
+           !CALL dealloc_NParray(BGG,"BGG",name_sub)
 
          ELSE
            STOP 'not packed'

@@ -483,7 +483,6 @@ integer               :: tabnq(D)
 
 
 integer :: max_nq,max_nb,Lmax
-real(kind=Rkind), allocatable  :: gwc(:)
 real(kind=Rkind), allocatable  :: b(:)
 integer, allocatable  :: tab_ibbnew_AT_ibb(:)
 
@@ -571,9 +570,8 @@ DO iG=1,size(BgG)
   !$OMP   SHARED(tab_ibbnew_AT_ibb,nbb,nqq,LB,tabl,tabnq,nq) &
   !$OMP   SHARED(BgG,BgG_new,iG,iGm1,max_nq,max_nb) &
   !$OMP   SHARED(id,nb_mult_GTOB,tab_ba,ind_Basis,ind_Grid,WSG) &
-  !$OMP   PRIVATE(ibb,ibbNew,lbb,li,nb,iqq,iqqi,iqqf,b,gwc,iq) &
+  !$OMP   PRIVATE(ibb,ibbNew,lbb,li,nb,iqq,iqqi,iqqf,b,iq) &
   !$OMP   NUM_THREADS(BasisTOGrid_maxth)
-   CALL alloc_NParray(gwc,[max_nq],'gwc','BgG_TO_BbG')
    CALL alloc_NParray(b,  [max_nb],'b',  'BgG_TO_BbG')
   !$OMP   DO SCHEDULE(DYNAMIC)
   DO iqq=1,nqq
@@ -591,22 +589,10 @@ DO iG=1,size(BgG)
       nb     = min( tab_ba(li,iq)%nb , tab_ba(LB-lbb,id)%nb )
 
       li = tabl(1)
-
-      !gwc(1:nq) = BgG(iG)%RDP(ibb,iqqi+1:iqqf)*tab_ba(li,iq)%wrho(:)
-      gwc(1:nq) = BgG(iG)%RDP(ibb,iqqi+1:iqqf)* get_wrho_OF_basis(tab_ba(li,iq))
-      !write(out_unitp,*) 'wrho o',tab_ba(li,iq)%wrho(:)
-      !write(out_unitp,*) 'wrho n',get_wrho_OF_basis(tab_ba(li,iq))
+      CALL RG_TO_RB_basis(BgG(iG)%RDP(ibb,iqqi+1:iqqf),b(1:nb),tab_ba(li,iq))
 
       IF (id == 1) THEN
-        !b(1:nb)   = matmul(gwc(1:nq),tab_ba(li,iq)%dnRGB%d0(:,1:nb)) * WSG(iG)
-        DO ib=1,nb
-          b(ib) = dot_product(gwc(1:nq),tab_ba(li,iq)%dnRGB%d0(:,ib)) * WSG(iG)
-        END DO
-      ELSE
-        !b(1:nb)   = matmul(gwc(1:nq),tab_ba(li,iq)%dnRGB%d0(:,1:nb))
-        DO ib=1,nb
-          b(ib) = dot_product(gwc(1:nq),tab_ba(li,iq)%dnRGB%d0(:,ib))
-        END DO
+        b(1:nb) = b(1:nb) *  WSG(iG)
       END IF
 
 
@@ -615,14 +601,10 @@ DO iG=1,size(BgG)
         BgG_new(iGm1)%RDP(ibbNew+ib,iqq) = BgG_new(iGm1)%RDP(ibbNew+ib,iqq) + b(ib)
       END DO
 
-      !$OMP ATOMIC
-      nb_mult_GTOB = nb_mult_GTOB + int(nq,kind=ILKind)*int(nb,kind=ILKind)
-
     END DO
 
   END DO
   !$OMP   END DO
-   CALL dealloc_NParray(gwc,'gwc','BgG_TO_BbG')
    CALL dealloc_NParray(b,  'b',  'BgG_TO_BbG')
   !$OMP   END PARALLEL
 
@@ -666,7 +648,6 @@ integer               :: iG,iGm1,iG1,iG2,max_nb
 
 integer, allocatable  :: tab_ibbnew_AT_ibb(:)
 
-real(kind=Rkind), allocatable  :: b(:)
 logical, parameter :: debug = .FALSE.
 !logical, parameter :: debug = .TRUE.
 
@@ -698,9 +679,6 @@ IF (iGm1 /= size(BgG)) THEN
   STOP
 END IF
 
-
-
-!write(out_unitp,*) 'nb threads (BasisTOGrid_maxth):',BasisTOGrid_maxth
 
 iG2 = 0
 DO iGm1=1,size(BgG)
@@ -736,9 +714,8 @@ DO iG=iG1+1,iG2
   !$OMP   SHARED(tab_ibbnew_AT_ibb,nbb,nqq,nq,liq,LB,max_nb) &
   !$OMP   SHARED(BgG,BgG_new,iG,iGm1) &
   !$OMP   SHARED(id,nb_mult_BTOG,tab_ba,ind_Basis,ind_Grid) &
-  !$OMP   PRIVATE(ibb,ibbNew,lbb,li,nb,iqq,iqqi,iqqf,b) &
+  !$OMP   PRIVATE(ibb,ibbNew,lbb,li,nb,iqq,iqqi,iqqf) &
   !$OMP   NUM_THREADS(BasisTOGrid_maxth)
-  CALL alloc_NParray(b,[max_nb],'b','BbG_TO_BgG')
   !$OMP   DO SCHEDULE(DYNAMIC)
   DO iqq=1,nqq
     iqqi = (iqq-1)*nq
@@ -747,36 +724,17 @@ DO iG=iG1+1,iG2
     DO ibb=1,nbb
       ibbNew = tab_ibbnew_AT_ibb(ibb) ! local variable
 
-
       lbb = ind_Basis(id)%i_TO_l(ibb)
       li = min( liq , LB-lbb )
       nb = tab_ba(li,id)%nb
 
-      !write(out_unitp,*) 'iGm1,ibbNew,nb,iqq',iGm1,ibbNew,nb,iqq ; flush(out_unitp)
-      !write(out_unitp,*) 'shape BgG+RDP',shape(BgG) ; flush(out_unitp)
-      !write(out_unitp,*) 'shape BgG()%RDP',shape(BgG(iGm1)%RDP) ; flush(out_unitp)
-
-      b(1:nb)   = BgG(iGm1)%RDP(ibbNew+1:ibbNew+nb,iqq)
-
-      !DO iq=1,nq
-      !  BgG_new(iG)%RDP(ibb,iqqi+iq) = dot_product(tab_ba(liq,id)%dnRGB%d0(iq,1:nb),b(1:nb))
-      !END DO
-      DO iq=1,nq
-        BgG_new(iG)%RDP(ibb,iqqi+iq) = dot_product(tab_ba(liq,id)%dnRBG%d0(1:nb,iq),b(1:nb))
-      END DO
-      !BgG_new(iG)%RDP(ibb,iqqi+1:iqqf) = matmul(b(1:nb),tab_ba(liq,id)%dnRBG%d0(1:nb,1:nq))
-
-
-      !$OMP ATOMIC
-      nb_mult_BTOG = nb_mult_BTOG + int(nq,kind=ILKind)*int(nb,kind=ILKind)
-
-
+      CALL RB_TO_RG_basis(BgG(iGm1)%RDP(ibbNew+1:ibbNew+nb,iqq),&
+                          BgG_new(iG)%RDP(ibb,iqqi+1:iqqi+nq),tab_ba(liq,id))
     END DO
 
 
   END DO
   !$OMP   END DO
-   CALL dealloc_NParray(b,  'b',  'BgG_TO_BbG')
   !$OMP   END PARALLEL
 
   deallocate(tab_ibbnew_AT_ibb)
@@ -1135,7 +1093,7 @@ TYPE(TypeRDP),    allocatable :: WPG(:)
 
 integer,          allocatable :: tabnq(:)
 real(kind=Rkind), allocatable :: RGgG(:,:,:),Rg(:)
-real(kind=Rkind), allocatable :: BGG(:,:)
+real(kind=Rkind), pointer     :: B3GG(:,:)
 
 !-- for debuging --------------------------------------------------
 integer :: err_mem,memory
@@ -1195,7 +1153,7 @@ CALL Transfer_WP_TO_BgG(RvecG,WPG)
 !$OMP   DEFAULT(NONE) &
 !$OMP   SHARED(WPG,D,ind_Grid,tab_ba,iq1_d,iq2_d,dnba_ind1,dnba_ind2,nb_mult_OpPsi) &
 !$OMP   PRIVATE(iG,i,li,nqq,nq1,nq2,nq3,iq1,iq2,iq3,iqd,l2) &
-!$OMP   PRIVATE(tabnq,dnba_ind,RGgG,BGG) &
+!$OMP   PRIVATE(tabnq,dnba_ind,RGgG,B3GG) &
 !$OMP   NUM_THREADS(BasisTOGrid_maxth)
 allocate(tabnq(D))
 !$OMP   DO SCHEDULE(DYNAMIC)
@@ -1230,20 +1188,13 @@ DO iG=1,size(WPG)
   allocate(RGgG(nq1,nq2,nq3))
   RGgG(:,:,:) = reshape(WPG(iG)%RDP,[nq1,nq2,nq3])
 
+  CALL Get3_MatdnRGG(tab_ba(l2,iqd),B3GG,dnba_ind)
 
-  CALL alloc_NParray(BGG,[nq2,nq2],"BGG",name_sub)
-  CALL Get_MatdnRGG(tab_ba(l2,iqd),BGG,dnba_ind)
-
-  BGG = transpose(BGG)
   DO iq3=1,nq3
   DO iq1=1,nq1
-    RGgG(iq1,:,iq3) = matmul(RGgG(iq1,:,iq3),BGG)
+    RGgG(iq1,:,iq3) = matmul(B3GG,RGgG(iq1,:,iq3))
   END DO
   END DO
-
-
-  CALL dealloc_NParray(BGG,"BGG",name_sub)
-
 
   WPG(iG)%RDP = reshape(RGgG,[1,nqq])
   deallocate(RGgG)
@@ -1272,18 +1223,13 @@ DO iG=1,size(WPG)
   allocate(RGgG(nq1,nq2,nq3))
   RGgG(:,:,:) = reshape(WPG(iG)%RDP,[nq1,nq2,nq3])
 
-  CALL alloc_NParray(BGG,[nq2,nq2],"BGG",name_sub)
-  CALL Get_MatdnRGG(tab_ba(l2,iqd),BGG,dnba_ind)
+  CALL Get3_MatdnRGG(tab_ba(l2,iqd),B3GG,dnba_ind)
 
-  BGG = transpose(BGG)
   DO iq3=1,nq3
   DO iq1=1,nq1
-    RGgG(iq1,:,iq3) = matmul(RGgG(iq1,:,iq3),BGG)
+    RGgG(iq1,:,iq3) = matmul(B3GG,RGgG(iq1,:,iq3))
   END DO
   END DO
-
-  CALL dealloc_NParray(BGG,"BGG",name_sub)
-
 
   WPG(iG)%RDP = reshape(RGgG,[1,nqq])
   deallocate(RGgG)

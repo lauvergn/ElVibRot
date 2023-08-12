@@ -2,9 +2,9 @@
 
 General quantum dynamics code using curvilinear coordinates:
 1. Vibrational levels, intensities for floppy molecular systems
-2. Wave-packet propagation with or without time dependant Hamiltonian
+2. Wave-packet propagation with or without time dependent Hamiltonian
 3. Quantum gate and optimal control.
-4. Optimization with the given set of curvilinear coordiantes
+4. Optimization with the given set of curvilinear coordinates
 
 ## 1) Introduction
 
