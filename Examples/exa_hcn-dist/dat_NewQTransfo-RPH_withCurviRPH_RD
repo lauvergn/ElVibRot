@@ -42,7 +42,7 @@ sym  cos(a)      R     r    x    pi   dh
  1 21 21  0 0 0
 
  &Coord_transfo name_transfo='active' /
- 1 1 1    0 0 0
+ 1 1 100    0 0 0
 
  &minimum pot0=-0.499465823200 pot_itQtransfo=2 Hard=f /
 .9d0
