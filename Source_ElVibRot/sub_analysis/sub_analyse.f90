@@ -345,7 +345,7 @@ CONTAINS
 
       real (kind=Rkind) :: avMhu(3,3),TensorI(3,3),mat(3,3)
       real (kind=Rkind) :: trav1(3),mat1(3,3),dummy
-      integer           :: index(3)
+      integer           :: i,j,iOp,index(3)
       complex(kind=Rkind) :: avOp
 !----- for debuging --------------------------------------------------
       logical, parameter :: debug=.FALSE.
@@ -362,21 +362,37 @@ CONTAINS
 
        OpPsi = psi  ! for the initialization
 
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(6))
-       TensorI(1,1) = real(avOp,kind=Rkind)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(7))
-       TensorI(1,2) = real(avOp,kind=Rkind)
-       TensorI(2,1) = real(avOp,kind=Rkind)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(8))
-       TensorI(1,3) = real(avOp,kind=Rkind)
-       TensorI(3,1) = real(avOp,kind=Rkind)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(10))
-       TensorI(2,2) = real(avOp,kind=Rkind)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(11))
-       TensorI(2,3) = real(avOp,kind=Rkind)
-       TensorI(3,2) = real(avOp,kind=Rkind)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(14))
-       TensorI(3,3) = real(avOp,kind=Rkind)
+       i=1 ; j=1
+       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
+       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
+       TensorI(i,j) = real(avOp,kind=Rkind)
+       i=2 ; j=2
+       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
+       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
+       TensorI(i,j) = real(avOp,kind=Rkind)
+       i=3 ; j=3
+       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
+       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
+       TensorI(i,j) = real(avOp,kind=Rkind)
+
+       i=1 ; j=2
+       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
+       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
+       TensorI(i,j) = real(avOp,kind=Rkind)
+       TensorI(j,i) = real(avOp,kind=Rkind)
+
+       i=1 ; j=3
+       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
+       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
+       TensorI(i,j) = real(avOp,kind=Rkind)
+       TensorI(j,i) = real(avOp,kind=Rkind)
+
+
+       i=2 ; j=3
+       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
+       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
+       TensorI(i,j) = real(avOp,kind=Rkind)
+       TensorI(j,i) = real(avOp,kind=Rkind)
 
        IF (para_Tnum%Inertia) THEN
          write(out_unitp,*) iPsi,'TensorI',info
@@ -418,7 +434,101 @@ CONTAINS
 
 
         end subroutine sub_moyABC
+        SUBROUTINE sub_moyABC_old(Psi,iPsi,info,ABC,para_AllOp)
 
+          USE mod_system
+          USE mod_psi,      ONLY : param_psi,dealloc_psi
+          USE mod_Op
+          IMPLICIT NONE
+    
+          TYPE (param_psi)               :: Psi
+          integer                        :: iPsi
+          character (len=*)              :: info
+          real (kind=Rkind)              :: ABC(3)
+          TYPE (param_AllOp)             :: para_AllOp
+    
+    
+    
+    !----- for the CoordType and Tnum --------------------------------------
+          TYPE (param_psi)            :: OpPsi
+          TYPE (CoordType),pointer    :: mole      ! true pointer
+          TYPE (Tnum),pointer         :: para_Tnum ! true pointer
+    
+          real (kind=Rkind) :: avMhu(3,3),TensorI(3,3),mat(3,3)
+          real (kind=Rkind) :: trav1(3),mat1(3,3),dummy
+          integer           :: index(3)
+          complex(kind=Rkind) :: avOp
+    !----- for debuging --------------------------------------------------
+          logical, parameter :: debug=.FALSE.
+          !logical, parameter :: debug=.TRUE.
+    !-----------------------------------------------------------
+           IF (debug) THEN
+             write(out_unitp,*) 'BEGINNING sub_moyABC_old'
+             write(out_unitp,*) 'ipsi,info',iPsi,info
+           END IF
+    !-----------------------------------------------------------
+          mole       => para_AllOp%tab_Op(1)%mole
+          para_Tnum  => para_AllOp%tab_Op(1)%para_Tnum
+    
+    
+           OpPsi = psi  ! for the initialization
+    
+           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(6))
+           TensorI(1,1) = real(avOp,kind=Rkind)
+           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(7))
+           TensorI(1,2) = real(avOp,kind=Rkind)
+           TensorI(2,1) = real(avOp,kind=Rkind)
+           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(8))
+           TensorI(1,3) = real(avOp,kind=Rkind)
+           TensorI(3,1) = real(avOp,kind=Rkind)
+           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(10))
+           TensorI(2,2) = real(avOp,kind=Rkind)
+           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(11))
+           TensorI(2,3) = real(avOp,kind=Rkind)
+           TensorI(3,2) = real(avOp,kind=Rkind)
+           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(14))
+           TensorI(3,3) = real(avOp,kind=Rkind)
+    
+           IF (para_Tnum%Inertia) THEN
+             write(out_unitp,*) iPsi,'TensorI',info
+             write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
+             avMhu = inv_OF_Mat_TO(TensorI) * HALF
+           ELSE
+             avMhu = TensorI
+             mat   = TensorI
+    
+             TensorI = inv_OF_Mat_TO(mat)
+    
+             write(out_unitp,*) iPsi,'TensorI (invers of G)',info
+             write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
+           END IF
+    
+           write(out_unitp,*) iPsi,'avMhu',info
+           write(out_unitp,"(3(3(f15.9,1x),/))") avMhu(:,:)
+    
+           CALL diagonalization(avMhu,ABC(:),mat1,3,1,1,.FALSE.)
+           dummy = ABC(1)
+           ABC(1) = ABC(3)
+           ABC(3) = dummy
+    
+    
+           write(out_unitp,21) iPsi,' ABC (cm-1) at ',info,ABC(:) *         &
+                                              get_Conv_au_TO_unit('E','cm-1')
+           write(out_unitp,21) iPsi,' ABC (GHz) at ',info,ABC(:) *          &
+                                              get_Conv_au_TO_unit('E','GHz')
+     21    format(i4,2A,3f18.5)
+    
+           CALL dealloc_psi(OpPsi)
+    
+    
+    !----------------------------------------------------------
+            IF (debug) THEN
+              write(out_unitp,*) 'END sub_moyABC_old'
+            END IF
+    !----------------------------------------------------------
+    
+    
+            end subroutine sub_moyABC_old
 !================================================================
 !
 !     calculation of <psi | Mhu | psi>
