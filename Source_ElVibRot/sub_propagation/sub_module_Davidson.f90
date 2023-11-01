@@ -156,13 +156,16 @@ CONTAINS
       !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
       auTOene    = get_Conv_au_TO_WriteUnit('E',WriteUnit)
+      sym_Hamil  = (Forced_sym_Hamil .OR. para_H%sym_Hamil)
 
       IF(MPI_id==0) THEN
         write(out_unitp,*) 'all_lower_states',para_Davidson%all_lower_states
         write(out_unitp,*) 'lower_states    ',para_Davidson%lower_states
         write(out_unitp,*) 'project_WP0     ',para_Davidson%project_WP0
         write(out_unitp,*) 'NewVec_type     ',para_Davidson%NewVec_type
+        write(out_unitp,*) 'sym_Hamil       ',sym_Hamil
       ENDIF
+
 
       IF (para_Davidson%Op_Transfo .AND. para_H%para_ReadOp%Op_Transfo) THEN
 
@@ -174,7 +177,6 @@ CONTAINS
           write(out_unitp,*) 'Poly_Transfo:   ',para_H%para_ReadOp%Poly_Transfo
         ENDIF
 
-        sym_Hamil = (Forced_sym_Hamil .OR. para_H%sym_Hamil)
         para_Davidson%max_ene = para_H%para_ReadOp%Poly_Transfo(0)
         DO i=1,para_H%para_ReadOp%degree_Transfo
           para_Davidson%max_ene = para_Davidson%max_ene + &
@@ -306,7 +308,8 @@ CONTAINS
 
         ! if symmetric
         CALL sub_hermitic_H(H,ndim,non_hermitic,sym_Hamil)
-        IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        IF (debug) write(out_unitp,*) 'shape H',shape(H)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
           write(out_unitp,*) 'WARNING: non_hermitic is BIG'
@@ -351,6 +354,7 @@ CONTAINS
           ! CALL diagonalization(H,Ene(1:ndim),Vec,ndim,4,1,.FALSE.)
           CALL diagonalization(H,Ene(1:ndim),Vec,ndim,4,1,.True.)
         END IF
+        IF (debug) write(out_unitp,*) 'Ene',Ene(1:ndim)
 
         IF (it == 0 .OR. (it > 1 .AND.                                    &
               mod(it-1,para_Davidson%num_resetH) == 0) ) THEN
@@ -368,17 +372,18 @@ CONTAINS
         ! Save vec(:) on vec0(:)
         IF (debug) write(out_unitp,*) 'selec',it,ndim,ndim0
         IF (debug) flush(out_unitp)
-        CALL sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,min_Ene,  &
-                                 para_H%para_ReadOp%min_pot,            &
-                                 psi,psi0,Vec,Vec0,para_Davidson,it,.TRUE.)
-        !CALL time_perso('projec done')
-
         IF (para_H%para_ReadOp%Op_Transfo) THEN
-          CALL Set_ZPE_OF_Op(para_H,Ene(1:count(VecToBeIncluded)),forced=.TRUE.)
+          CALL Set_ZPE_OF_Op(para_H,Ene(1:ndim),forced=.TRUE.)
         ELSE
-          CALL Set_ZPE_OF_Op(para_H,Ene(1:count(VecToBeIncluded)),Ene_min=min_Ene,forced=.TRUE.)
+          CALL Set_ZPE_OF_Op(para_H,Ene(1:ndim),Ene_min=min_Ene,forced=.TRUE.)
         END IF
         ZPE = para_H%ZPE
+        IF (debug) write(out_unitp,*) 'ZPE',it,ZPE
+
+        CALL sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,min_Ene,  &
+                                 para_H%para_ReadOp%min_pot,ZPE,        &
+                                 psi,psi0,Vec,Vec0,para_Davidson,it,.TRUE.)
+        !CALL time_perso('projec done')
 
           IF (debug) write(out_unitp,*) 'selec',it,ndim,ndim0
           IF (debug) flush(out_unitp)
@@ -517,16 +522,16 @@ CONTAINS
           !----------------------------------------------------------
           !- save psi(:) on file
           IF (save_WP) THEN
-            CALL sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,        &
-                                     min_Ene,para_H%para_ReadOp%min_pot,  &
-                                     psi,psi0,Vec,Vec0,para_Davidson,it,.TRUE.)
-
             IF (para_H%para_ReadOp%Op_Transfo) THEN
               CALL Set_ZPE_OF_Op(para_H,Ene(1:count(VecToBeIncluded)),forced=.TRUE.)
             ELSE
               CALL Set_ZPE_OF_Op(para_H,Ene(1:count(VecToBeIncluded)),Ene_min=min_Ene,forced=.TRUE.)
             END IF
             ZPE = para_H%ZPE
+            CALL sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,           &
+                                     min_Ene,para_H%para_ReadOp%min_pot,ZPE, &
+                                     psi,psi0,Vec,Vec0,para_Davidson,it,.TRUE.)
+
             !CALL time_perso('projec done')
 
             write(out_unitp,*) 'save psi(:)',it,ndim,ndim0
@@ -1646,9 +1651,8 @@ END SUBROUTINE sub_NewVec_Davidson
 !=======================================================================================
 !     Sort Davidson
 !=======================================================================================
- SUBROUTINE sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,min_Ene,min_pot,   &
-                                psi,psi0,Vec,Vec0,para_Davidson,it,             &
-                                print_project)
+ SUBROUTINE sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,min_Ene,min_pot,ZPE,  &
+                                psi,psi0,Vec,Vec0,para_Davidson,it,print_project)
  USE mod_system
  USE mod_psi,     ONLY : param_psi,Overlap_psi1_psi2
  USE mod_propa,   ONLY : param_Davidson
@@ -1659,7 +1663,7 @@ END SUBROUTINE sub_NewVec_Davidson
  logical               :: print_project
 
  logical           :: VecToBeIncluded(:)
- real (kind=Rkind) :: min_Ene,min_pot,Ene(:)
+ real (kind=Rkind) :: min_Ene,min_pot,ZPE,Ene(:)
  integer           :: it,nb_diago,kmin
  TYPE (param_psi),intent(in)  :: psi(:),psi0(:) ! size max_WP
 
@@ -1680,15 +1684,16 @@ END SUBROUTINE sub_NewVec_Davidson
  !-----------------------------------------------------------
  IF (debug) THEN
    write(out_unitp,*) 'BEGINNING ',name_sub
+   write(out_unitp,*) ' lower_states',para_Davidson%lower_states
    write(out_unitp,*) ' ndim,ndim0',size(Vec,dim=1),size(Vec0,dim=1)
    write(out_unitp,*) ' nb_diago',nb_diago
    IF (allocated(Vec)) THEN
      write(out_unitp,*) 'Vec',shape(Vec)
-     CALL Write_Mat(Vec,out_unitp,5)
+     !CALL Write_Mat(Vec,out_unitp,5)
    END IF
    IF (allocated(Vec0)) THEN
      write(out_unitp,*) 'Vec0',shape(Vec0)
-     CALL Write_Mat(Vec0,out_unitp,5)
+     !CALL Write_Mat(Vec0,out_unitp,5)
    END IF
    write(out_unitp,*) 'Ene',Ene(1:ndim)
 
@@ -1762,18 +1767,24 @@ END SUBROUTINE sub_NewVec_Davidson
      VecToBeIncluded(1) = .TRUE.
    ELSE
      VecToBeIncluded(:) = .FALSE.
-     DO i=1,ndim
-       VecToBeIncluded(i) =(Ene(i) >= min_Ene .AND. count(VecToBeIncluded) < nb_diago )
-     END DO
-     IF (count(VecToBeIncluded) /= nb_diago) THEN
-       write(out_unitp,*) ' ERROR in ',name_sub,' from ', MPI_id
-       write(out_unitp,*) 'nb_diago ',nb_diago
-       write(out_unitp,*) 'VecToBeIncluded ',VecToBeIncluded
-       write(out_unitp,*) 'Ene(:) ',Ene
-       write(out_unitp,*) 'min_Ene ',min_Ene
-
-       write(out_unitp,*) ' number of VecToBeIncluded /= nb_diago'
-       STOP
+     IF (para_Davidson%all_lower_states) THEN
+      DO i=1,ndim
+        VecToBeIncluded(i) =(Ene(i) >= min_Ene .AND. Ene(i)-ZPE <= para_Davidson%Max_ene)
+      END DO
+     ELSE
+      DO i=1,ndim
+        VecToBeIncluded(i) =(Ene(i) >= min_Ene .AND. count(VecToBeIncluded) < nb_diago )
+      END DO
+      IF (count(VecToBeIncluded) /= nb_diago) THEN
+        write(out_unitp,*) ' ERROR in ',name_sub,' from ', MPI_id
+        write(out_unitp,*) 'nb_diago ',nb_diago
+        write(out_unitp,*) 'VecToBeIncluded ',VecToBeIncluded
+        write(out_unitp,*) 'Ene(:) ',Ene
+        write(out_unitp,*) 'min_Ene ',min_Ene
+ 
+        write(out_unitp,*) ' number of VecToBeIncluded /= nb_diago'
+        STOP
+      END IF
      END IF
    END IF
 
@@ -1801,8 +1812,11 @@ END SUBROUTINE sub_NewVec_Davidson
  END IF
 
  IF(MPI_id==0) Then
-   IF (debug .OR. print_project) write(out_unitp,*) 'VecToBeIncluded',it,VecToBeIncluded(1:ndim)
-   IF (debug .OR. print_project) write(out_unitp,*) 'End Vector projections'
+  IF (debug .OR. print_project) THEN 
+     write(out_unitp,*) 'number of VecToBeIncluded',it,count(VecToBeIncluded)
+     write(out_unitp,*) 'VecToBeIncluded',it,VecToBeIncluded(1:ndim)
+     write(out_unitp,*) 'End Vector projections'
+  END IF
  ENDIF
 
  !----------------------------------------------------------

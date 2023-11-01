@@ -100,6 +100,8 @@
 
         !-------------------------------------------------------------------------------
         ! set parallelization
+        Popenmp            = .FALSE.
+        Popenmpi           = .FALSE.
 #if(run_MPI)
         Popenmpi           = .TRUE.  !< True to run with MPI
         Popenmp            = .FALSE.
