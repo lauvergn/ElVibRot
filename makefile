@@ -289,7 +289,7 @@ vib:
 	./scripts/make_vib.sh $(LOC_path) $(FFC) $(extf)
 	chmod a+x vib
 #
-$(VIBEXE): $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_EXT) $(LIBA) $(EXTLib)
+$(VIBEXE): $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_EXT) $(LIBA) | $(EXTLib)
 	$(FFC) $(FFLAGS) -o $(VIBEXE) $(OBJ_DIR)/$(VIBMAIN).o $(LIBA) $(OBJ_EXT) $(FLIB)
 	@echo EVR-T
 #===============================================
@@ -304,7 +304,7 @@ ut Ut:
 #===============================================
 #============= Library: lib_FOR_EVRT.a  ========
 #===============================================
-$(LIBA): $(OBJ) $(EXTLib)
+$(LIBA): $(OBJ) | $(EXTLib)
 	@echo "  LIBA from OBJ files"
 	ar -cr $(LIBA) $(OBJ)
 	@echo "  done Library: "$(LIBA)
@@ -420,7 +420,7 @@ mk_extlibdir:
 #add dependence for parallelization
 #$(OBJ):                     $(EXTLib)
 #	@echo "OBJ with EXTLib"
-$(OBJ) : $(EXTLib)
+$(OBJ) : | $(EXTLib)
 
 #$(OBJ_DIR)/$(VIBMAIN).o:    $(LIBA)
 #	@echo "done VIBMAIN.o"
