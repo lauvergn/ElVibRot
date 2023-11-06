@@ -1038,6 +1038,8 @@
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       auTOenergy = get_Conv_au_TO_unit('E',' ',WorkingUnit=.FALSE.)
+      limit_I0 = maxval(Mat_Aif)/HUNDRED
+
       IF (debug) THEN
         write(out_unitp,*) 'BEGINNING sub_spectre'
         write(out_unitp,*) 'nb_ana',nb_ana
@@ -1054,7 +1056,6 @@
       END IF
 !-----------------------------------------------------------
 
-      limit_I0 = maxval(Mat_Aif)/HUNDRED
       pas      = Ewidth / TEN
       n        = (emax-emin)/pas
 
