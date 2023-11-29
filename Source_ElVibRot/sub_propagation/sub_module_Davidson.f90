@@ -372,19 +372,25 @@ CONTAINS
         ! Save vec(:) on vec0(:)
         IF (debug) write(out_unitp,*) 'selec',it,ndim,ndim0
         IF (debug) flush(out_unitp)
+        ! find the physical min_ene (to avoid holes)
+        IF (para_H%para_ReadOp%min_pot == huge(ONE)) THEN
+          min_Ene = -huge(ONE)
+        ELSE
+          min_Ene = para_H%para_ReadOp%min_pot
+        END IF
+        ZPE = huge(ONE)
         IF (para_H%para_ReadOp%Op_Transfo) THEN
           CALL Set_ZPE_OF_Op(para_H,Ene(1:ndim),forced=.TRUE.)
         ELSE
           CALL Set_ZPE_OF_Op(para_H,Ene(1:ndim),Ene_min=min_Ene,forced=.TRUE.)
         END IF
-        ZPE = para_H%ZPE
+        ZPE     = para_H%ZPE
         IF (debug) write(out_unitp,*) 'ZPE',it,ZPE
-
+        !write(out_unitp,*) 'min_Ene,min_pot,ZPE',it,min_Ene,para_H%para_ReadOp%min_pot,ZPE
         CALL sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,min_Ene,  &
                                  para_H%para_ReadOp%min_pot,ZPE,        &
                                  psi,psi0,Vec,Vec0,para_Davidson,it,.TRUE.)
         !CALL time_perso('projec done')
-
           IF (debug) write(out_unitp,*) 'selec',it,ndim,ndim0
           IF (debug) flush(out_unitp)
           ! CALL Write_Mat(Vec,out_unitp,5)
@@ -1685,7 +1691,8 @@ END SUBROUTINE sub_NewVec_Davidson
  IF (debug) THEN
    write(out_unitp,*) 'BEGINNING ',name_sub
    write(out_unitp,*) ' lower_states',para_Davidson%lower_states
-   write(out_unitp,*) ' ndim,ndim0',size(Vec,dim=1),size(Vec0,dim=1)
+   write(out_unitp,*) ' ndim ',size(Vec,dim=1)
+   IF (allocated(Vec0)) write(out_unitp,*) ' ndim0',size(Vec0,dim=1)
    write(out_unitp,*) ' nb_diago',nb_diago
    IF (allocated(Vec)) THEN
      write(out_unitp,*) 'Vec',shape(Vec)
@@ -1696,7 +1703,10 @@ END SUBROUTINE sub_NewVec_Davidson
      !CALL Write_Mat(Vec0,out_unitp,5)
    END IF
    write(out_unitp,*) 'Ene',Ene(1:ndim)
-
+   write(out_unitp,*) 'min_Ene',min_Ene
+   write(out_unitp,*) 'min_pot',min_pot
+   write(out_unitp,*) 'ZPE',ZPE
+   write(out_unitp,*) 'Max_ene',para_Davidson%Max_ene
  END IF
 
  ndim  = size(Vec,dim=1)

@@ -200,14 +200,13 @@
                         'para_AllBasis%Basis2n%nDindB',name_sub)
         IF (isort == 1) THEN ! sort with energy
           CALL init_nDindexPrim(para_AllBasis%Basis2n%nDindB,nb_inact21, &
-              tab_nb(1:nb_inact21),nDinit(1:nb_inact21),                 &
+                      nDsize=tab_nb(1:nb_inact21),nDinit=nDinit(1:nb_inact21), &
                       MaxNorm=convRWU_TO_R_WITH_WorkingUnit(max_ene_h),  &
                       type_OF_nDindex=0,With_nDindex=.FALSE.)
         ELSE IF (isort == 2) THEN ! sort with excitation
-          CALL init_nDindexPrim(para_AllBasis%Basis2n%nDindB,nb_inact21, &
-              tab_nb(1:nb_inact21),nDinit(1:nb_inact21),                 &
-                                       Lmax=max_excit,type_OF_nDindex=0, &
-                                       With_nDindex=.FALSE.)
+          CALL init_nDindexPrim(para_AllBasis%Basis2n%nDindB,nb_inact21,                 &
+                                nDsize=tab_nb(1:nb_inact21),nDinit=nDinit(1:nb_inact21), &
+                                Lmax=max_excit,type_OF_nDindex=0,With_nDindex=.FALSE.)
         ELSE
           write(out_unitp,*) ' ERROR in ',name_sub
           write(out_unitp,*) '   the isort value ',isort,' cannot be used.'
@@ -218,7 +217,7 @@
         !CALL Write_nDindex(para_AllBasis%Basis2n%nDindB)
 
         CALL init_nDindexPrim(para_AllBasis%Basis2n%nDindG,nb_inact21,  &
-             tab_nq(1:nb_inact21),type_OF_nDindex=0,With_nDindex=.FALSE.)
+                              nDsize=tab_nq(1:nb_inact21),type_OF_nDindex=0,With_nDindex=.FALSE.)
         !CALL Write_nDindex(para_AllBasis%Basis2n%nDindG)
 
         para_AllBasis%basis_ext2n%ADA               = ADA

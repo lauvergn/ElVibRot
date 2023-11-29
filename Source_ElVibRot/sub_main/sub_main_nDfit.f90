@@ -479,7 +479,7 @@ SUBROUTINE sub_nDGrid_nDfit()
         IF (debug) write(out_unitp,*) 'nDsize',nDsize(:)
         flush(out_unitp)
 
-        CALL init_nDindexPrim(para_nDGrid%nDindG,mole%nb_act,nDsize,    &
+        CALL init_nDindexPrim(para_nDGrid%nDindG,mole%nb_act,nDsize=nDsize,    &
                               nDweight=nDweight,type_OF_nDindex=0,      &
                               nDinit=nDinit,                            &
                               MaxNorm=MaxNorm,MinNorm=MinNorm,          &
