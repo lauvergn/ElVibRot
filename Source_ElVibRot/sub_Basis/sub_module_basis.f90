@@ -475,14 +475,11 @@ MODULE mod_basis
 
 
       SELECT CASE (word)
-
-
       CASE ("0")
         basis_temp%type = 0
         write(out_unitp,*) ' ERROR : in ',name_sub
         write(out_unitp,*) 'Basis "0" CANNOT be a primitive basis'
         STOP
-
 
       CASE ("direct_prod","sb","sg","sparse")
         basis_temp%type = 1
@@ -622,8 +619,8 @@ MODULE mod_basis
       CASE DEFAULT
         write(out_unitp,*) ' This basis is unknown: ',word
         write(out_unitp,*) ' The possibilities :'
-        write(out_unitp,*) '  0 : No basis!                           : 0'
-        write(out_unitp,*)
+        !write(out_unitp,*) '  0 : No basis!                           : 0'
+        !write(out_unitp,*)
         write(out_unitp,*) '  2 : Diabatic Electronic states          : El'
         write(out_unitp,*)
         write(out_unitp,*) '  1 : Direct product basis                : direct_prod'
