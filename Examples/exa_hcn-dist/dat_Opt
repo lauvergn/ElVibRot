@@ -9,7 +9,7 @@ DIR_pot=$DIR_vib/sub_pot
  cp $SYSTEM $DIR_pot/sub_system.f
 
 cd $DIR_vib
- make
+ make OPT=0
 cd $here
 
 #export OMP_NUM_THREADS=1
@@ -56,6 +56,6 @@ dh 0.0
  &analyse max_ana=40 max_ene=50000.d0 /
 
  &Optimization grad=t freq=f FinalEnergy=t Optimization_method='BFGS' Optimization_param='geometry' /
-   &BFGS max_iteration=100 /
+   &BFGS max_iteration=100 calc_hessian_always=t /
 
 **

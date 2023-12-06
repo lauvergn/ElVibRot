@@ -252,11 +252,17 @@
 !                                    para_H%para_ReadOp%PrimOp_t,Qact,   &
 !                                        para_Optimization%para_BFGS)
 
-      CASE ('bfgs') ! BFGS
-
-        CALL Sub_BFGS(BasisnD_Save,xOpt_min,SQ,nb_Opt,para_Tnum,mole,   &
-                      para_H%para_ReadOp%PrimOp_t,Qact,                 &
-                                             para_Optimization%para_BFGS)
+      CASE ('bfgs')
+        IF (para_Optimization%para_BFGS%calc_hessian_always) THEN
+          CALL Sub_Newton(BasisnD_Save,xOpt_min,SQ,nb_Opt,para_Tnum,mole,   &
+                          para_H%para_ReadOp%PrimOp_t,Qact,                 &
+                          para_Optimization%para_BFGS)
+        ELSE
+          CALL Sub_BFGS(BasisnD_Save,xOpt_min,SQ,nb_Opt,para_Tnum,mole,   &
+                        para_H%para_ReadOp%PrimOp_t,Qact,                 &
+                        para_Optimization%para_BFGS)
+        END IF
+ 
       CASE DEFAULT
         write(out_unitp,*) 'ERROR in sub_Optimization_OF_VibParam'
         write(out_unitp,*) 'Wrong Optimization_method: ',                 &
