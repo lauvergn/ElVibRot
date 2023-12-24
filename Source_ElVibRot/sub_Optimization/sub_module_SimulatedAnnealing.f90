@@ -165,7 +165,33 @@
         para_SimulatedAnnealing%Restart_Opt         =  Restart_Opt
 
       END SUBROUTINE Read_param_SimulatedAnnealing
+  SUBROUTINE dealloc_param_SimulatedAnnealing(para_SimulatedAnnealing)
+    TYPE (param_SimulatedAnnealing), intent(inout)   :: para_SimulatedAnnealing
+  
 
+    para_SimulatedAnnealing%nb_mc_tot           =  100000
+    para_SimulatedAnnealing%nb_mc_partial       =  100
+
+    para_SimulatedAnnealing%TempInit_type       =  1
+    para_SimulatedAnnealing%Tmax                = -ONE
+    para_SimulatedAnnealing%Tmin                =  ONETENTH**7
+    para_SimulatedAnnealing%DeltaT              =  ZERO
+
+    para_SimulatedAnnealing%RangeScal           =  0.8_Rkind
+    para_SimulatedAnnealing%RangeScalInit       =  1._Rkind
+
+    para_SimulatedAnnealing%With_RangeInit      = .FALSE.
+    para_SimulatedAnnealing%RangeInit           = 1._Rkind
+
+    para_SimulatedAnnealing%TempScheduling_type =  2 ! 1: linear, 2: geometrical ...
+    para_SimulatedAnnealing%ExpCoolParam        =  0.95_Rkind
+
+    para_SimulatedAnnealing%ResetTemp           = .TRUE.
+    para_SimulatedAnnealing%ResetTempScal       =  ONE/THREE
+
+    para_SimulatedAnnealing%Restart_Opt         =  0
+
+  END SUBROUTINE dealloc_param_SimulatedAnnealing
       SUBROUTINE Write_param_SimulatedAnnealing(para_SimulatedAnnealing)
       TYPE (param_SimulatedAnnealing), intent(in)   :: para_SimulatedAnnealing
 

@@ -62,16 +62,17 @@
       integer           :: nb_neg              = 0 ! number of negative hessian eigenvalues (calc_hessian_always=t)
       integer           :: max_Q_ForPrinting   = 11
 
-
-      real (kind=Rkind), pointer :: hessian_inv_init(:,:) => null()
+      real (kind=Rkind), allocatable :: TS_vector(:)
+      real (kind=Rkind), allocatable :: hessian_inv_init(:,:)
 
 
       END TYPE param_BFGS
 
       CONTAINS
 
-      SUBROUTINE Read_param_BFGS(para_BFGS)
+      SUBROUTINE Read_param_BFGS(para_BFGS,nb_Opt)
       TYPE (param_BFGS), intent(inout) :: para_BFGS
+      integer,           intent(in)    :: nb_Opt
 
       integer           :: max_iteration,max_Q_ForPrinting
 
@@ -82,15 +83,17 @@
       real (kind=Rkind) :: RMS_step
       logical           :: calc_hessian,read_hessian,calc_hessian_always
       integer           :: nb_neg
+      real (kind=Rkind) :: Norm2,TS_vector(nb_Opt)
 
 
       integer :: err_io
       NAMELIST /BFGS/ max_iteration,max_grad,RMS_grad,max_step,RMS_step,        &
                       calc_hessian,read_hessian,calc_hessian_always,nb_neg,     &
-                      max_Q_ForPrinting
+                      TS_vector,max_Q_ForPrinting
 
         max_iteration       = 10
         nb_neg              = 0
+        TS_vector           = ZERO
 
         max_grad            = 0.000015_Rkind
         RMS_grad            = 0.000010_Rkind
@@ -103,13 +106,20 @@
         max_Q_ForPrinting   = 11
 
         read(in_unitp,BFGS,IOSTAT=err_io)
-        IF (err_io /= 0) THEN
+        IF (err_io < 0) THEN
            write(out_unitp,*) ' ERROR in Read_param_BFGS'
            write(out_unitp,*) '  while reading the "BFGS" namelist'
            write(out_unitp,*) ' end of file or end of record'
            write(out_unitp,*) ' Check your data !!'
-           STOP
+           STOP ' ERROR in Read_param_BFGS while reading the "BFGS" namelist'
         END IF
+        IF (err_io < 0) THEN
+          write(out_unitp,*) ' ERROR in Read_param_BFGS'
+          write(out_unitp,*) '  while reading the "BFGS" namelist'
+          write(out_unitp,*) ' Probably you are using a wrong keyword'
+          write(out_unitp,*) ' Check your data !!'
+          STOP ' ERROR in Read_param_BFGS while reading the "BFGS" namelist'
+       END IF
         IF (print_level > 1) write(out_unitp,BFGS)
 
         IF (nb_neg > 0 .AND. .NOT. calc_hessian_always) THEN
@@ -139,6 +149,14 @@
         para_BFGS%calc_hessian_always = calc_hessian_always
         para_BFGS%nb_neg              = nb_neg
 
+        Norm2 = dot_product(TS_Vector,TS_Vector)
+        IF (Norm2 > ONETENTH**6) THEN
+          para_BFGS%TS_Vector = TS_Vector / sqrt(Norm2)
+        ELSE
+          para_BFGS%TS_Vector = TS_Vector
+          para_BFGS%TS_Vector = ZERO
+        END IF
+
       END SUBROUTINE Read_param_BFGS
 
       SUBROUTINE Write_param_BFGS(para_BFGS)
@@ -158,9 +176,30 @@
 
       write(out_unitp,*) '  END WRITE param_BFGS'
 
-      END SUBROUTINE Write_param_BFGS
+  END SUBROUTINE Write_param_BFGS
+  SUBROUTINE dealloc_param_BFGS(para_BFGS)
+        TYPE (param_BFGS), intent(inout)   :: para_BFGS
+  
+        para_BFGS%max_iteration       = 10
 
-      SUBROUTINE Sub_BFGS(BasisnD,xOpt_min,SQ,nb_Opt,                   &
+        para_BFGS%max_grad            = 0.000015_Rkind
+        para_BFGS%RMS_grad            = 0.000010_Rkind
+  
+        para_BFGS%max_step            = 0.000060_Rkind
+        para_BFGS%RMS_step            = 0.000040_Rkind
+        para_BFGS%largest_step        = 0.5_Rkind
+  
+        para_BFGS%calc_hessian        = .FALSE.
+        para_BFGS%read_hessian        = .FALSE.
+        para_BFGS%calc_hessian_always = .FALSE.
+        para_BFGS%nb_neg              = 0 ! number of negative hessian eigenvalues (calc_hessian_always=t)
+        para_BFGS%max_Q_ForPrinting   = 11
+
+        IF (allocated(para_BFGS%TS_vector))        deallocate(para_BFGS%TS_vector)
+        IF (allocated(para_BFGS%hessian_inv_init)) deallocate(para_BFGS%hessian_inv_init)
+
+  END SUBROUTINE dealloc_param_BFGS
+  SUBROUTINE Sub_BFGS(BasisnD,xOpt_min,SQ,nb_Opt,                   &
                           para_Tnum,mole,PrimOp,Qact,para_BFGS)
 
       USE mod_system
@@ -237,8 +276,8 @@
           write(out_unitp,*) ' The initial hessian is calculated'
           !-------- allocation -----------------------------------------------
           CALL Init_Tab_OF_dnMatOp(dnMatOp,nb_Opt,PrimOp%nb_elec,nderiv=2)
-          CALL alloc_array(para_BFGS%hessian_inv_init,[nb_Opt,nb_Opt],  &
-                          'para_BFGS%hessian_inv_init',name_sub)
+          CALL alloc_NParray(para_BFGS%hessian_inv_init,[nb_Opt,nb_Opt],  &
+                            'para_BFGS%hessian_inv_init',name_sub)
 
           IF (allocated(hessian)) THEN
             CALL dealloc_NParray(hessian,'hessian',name_sub)
@@ -272,8 +311,8 @@
         ELSE IF (para_BFGS%read_hessian) THEN
           write(out_unitp,*) ' The initial hessian is read in internal coordinates'
           !-------- allocation -----------------------------------------------
-          CALL alloc_array(para_BFGS%hessian_inv_init,[nb_Opt,nb_Opt],  &
-                          'para_BFGS%hessian_inv_init',name_sub)
+          CALL alloc_NParray(para_BFGS%hessian_inv_init,[nb_Opt,nb_Opt],  &
+                            'para_BFGS%hessian_inv_init',name_sub)
           IF (allocated(hessian)) THEN
             CALL dealloc_NParray(hessian,'hessian',name_sub)
           END IF
@@ -346,9 +385,11 @@
 
         !-------- deallocation ---------------------------------------------
         CALL dealloc_Tab_OF_dnMatOp(dnMatOp)
-        IF (associated(para_BFGS%hessian_inv_init)) THEN
-          CALL dealloc_array(para_BFGS%hessian_inv_init,                &
-                            'para_BFGS%hessian_inv_init',name_sub)
+        IF (allocated(para_BFGS%TS_vector)) THEN
+          CALL dealloc_NParray(para_BFGS%TS_vector,'para_BFGS%TS_vector',name_sub)
+        END IF
+        IF (allocated(para_BFGS%hessian_inv_init)) THEN
+          CALL dealloc_NParray(para_BFGS%hessian_inv_init,'para_BFGS%hessian_inv_init',name_sub)
         END IF
         !-------- end deallocation -----------------------------------------
 
@@ -436,7 +477,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
  write(out_unitp,*) ' Test on gradient convergence = ',test
  flush(out_unitp)
 
- IF (associated(para_BFGS%hessian_inv_init)) THEN
+ IF (allocated(para_BFGS%hessian_inv_init)) THEN
    write(out_unitp,*) ' The initial hessian is transferred'
    hessin(:,:) = para_BFGS%hessian_inv_init(:,:)
  ELSE
@@ -724,7 +765,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
   end subroutine
 !
 
-  SUBROUTINE Sub_Newton(BasisnD,xOpt_min,SQ,nb_Opt,para_Tnum,mole,PrimOp,Qact,para_BFGS)
+  SUBROUTINE Sub_Newton(BasisnD,xOpt_min,SQ,nb_Opt,para_Tnum,mole,PrimOp,Qopt,para_BFGS)
 
         USE mod_system
         USE mod_dnSVM
@@ -739,7 +780,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         TYPE (CoordType) :: mole
         TYPE (Tnum)    :: para_Tnum
         logical        :: Cart_Transfo_save
-        real (kind=Rkind), intent(inout) :: Qact(:)
+        real (kind=Rkind) :: Qact(mole%nb_var)
         
         
         !----- for the basis set ----------------------------------------------
@@ -766,39 +807,40 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         !----- for the optimization -------------------------------------------
         TYPE (param_BFGS) :: para_BFGS
         integer, intent(in) :: nb_Opt
+        real (kind=Rkind), intent(inout) :: Qopt(:)
+        logical :: TS_Vector
+
         real (kind=Rkind), intent(inout) :: xOpt_min(nb_Opt),SQ(nb_Opt)
-        real (kind=Rkind), allocatable :: grad(:),hess(:,:),diag(:),Vec(:,:),tVec(:,:),mDQit(:)
+        real (kind=Rkind), allocatable :: grad(:),hess(:,:),diag(:),Vec(:,:),Vec_ext(:,:),tVec(:,:),mDQit(:)
         real (kind=Rkind) :: Ene
-        real (kind=Rkind) :: max_grad,RMS_grad,max_disp,RMS_disp,norm_disp
+        real (kind=Rkind) :: max_grad,RMS_grad,max_disp,RMS_disp,norm_disp,Norm2
         logical :: conv
-        integer :: it,iq
+        integer :: it,iq,iqq,its
         !---------- working variables ----------------------------------------
         TYPE (param_dnMatOp) :: dnMatOp(1)
         integer              :: nderiv_alloc,nbcol,err
         
         !---------------------------------------------------------------------
-        !      logical,parameter :: debug= .FALSE.
-        logical,parameter :: debug= .TRUE.
+        logical,parameter :: debug= .FALSE.
+        !logical,parameter :: debug= .TRUE.
         character (len=*), parameter :: name_sub='Sub_Newton'
         !---------------------------------------------------------------------
         IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'xopt_min',xopt_min(:)
-        write(out_unitp,*)
+          write(out_unitp,*)
+          write(out_unitp,*) 'BEGINNING ',name_sub
+          write(out_unitp,*) 'xopt_min',xopt_min(:)
+          write(out_unitp,*)
+          write(out_unitp,*) 'mole%nb_act',mole%nb_act
+          write(out_unitp,*) 'RMS_grad',para_BFGS%RMS_grad
+          write(out_unitp,*) 'RMS_step',para_BFGS%RMS_step
+          write(out_unitp,*) 'max_iteration',para_BFGS%max_iteration
+          flush(out_unitp)
         END IF
         !---------------------------------------------------------------------
         
-        Qact(1:nb_Opt) = xopt_min(:)
-        
-        
-        write(out_unitp,*) 'Qact',Qact
-        !---------JML-------------------------------------
-        write(out_unitp,*) 'mole%nb_act',mole%nb_act
-        write(out_unitp,*) 'RMS_grad',para_BFGS%RMS_grad
-        write(out_unitp,*) 'RMS_step',para_BFGS%RMS_step
-        write(out_unitp,*) 'max_iteration',para_BFGS%max_iteration
-        
+        Qopt(1:nb_Opt) = xopt_min(:)
+        !write(out_unitp,*) 'Qopt',Qopt
+
         CALL Init_Tab_OF_dnMatOp(dnMatOp,nb_Opt,PrimOp%nb_elec,nderiv=2)
         CALL alloc_NParray(hess,[nb_Opt,nb_Opt],'hess',name_sub)
         CALL alloc_NParray(grad,[nb_Opt],       'grad',name_sub)
@@ -806,38 +848,77 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         CALL alloc_NParray(diag,[nb_Opt],       'diag',name_sub)
         write(out_unitp,*) '=================================================='
         DO it=0,para_BFGS%max_iteration
-        
+
+          CALL get_Qact0(Qact,mole%ActiveTransfo)
+          Qact(1:nb_Opt) = Qopt(:)
+          IF (debug) write(out_unitp,*) 'Qact',Qact
           CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp)
         
           !IF (debug) CALL Write_Tab_OF_dnMatOp(dnMatOp)
-        
           CALL Get_Grad_FROM_Tab_OF_dnMatOp(grad,dnMatOp)  
+          IF (debug) CALL Write_Vec(grad, out_unitp, 5, info='grad')
           CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess,dnMatOp) ! for the ground state
+          IF (debug) CALL Write_Mat(hess, out_unitp, 5, info='hess')
           Ene = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
-        
-          CALL diagonalization(hess,diag,Vec,nb_Opt)
-          write(out_unitp,*) 'diag',diag
-        
-          tvec = transpose(vec)
-          IF (para_BFGS%nb_neg == 0) THEN
-            DO iq=1,nb_Opt
-              Vec(:,iq) = Vec(:,iq) * abs(diag(iq))
-            END DO
-            hess = matmul(Vec,tVec)
-          ELSE IF (count(diag < ZERO) /= para_BFGS%nb_neg) THEN
-            write(out_unitp,*) 'ERROR in ',name_sub
-            write(out_unitp,*) '    Wrong number of negative hessian eigenvalues!'
-            write(out_unitp,*) '    Expected: ',para_BFGS%nb_neg
-            write(out_unitp,*) '    it has: ',count(diag < ZERO)
-            STOP 'ERROR in Sub_Newton: Wrong number of negative hessian eigenvalues'
+
+          IF (allocated(para_BFGS%TS_Vector)) THEN
+            TS_Vector = ( para_BFGS%nb_neg == 1 .AND. dot_product(para_BFGS%TS_Vector,para_BFGS%TS_Vector) > HALF )
+          ELSE
+            TS_Vector = .FALSE.
           END IF
-        
-        
+
+          IF (TS_Vector) THEN
+            ! make the new vectors
+            CALL alloc_NParray(vec_ext, [nb_Opt,nb_Opt+1],'vec_ext',name_sub)
+            CALL diagonalization(hess,diag,vec_ext(:,2:nb_Opt+1),nb_Opt)
+            vec_ext(:,1) = para_BFGS%TS_Vector
+            vec_ext(:,:) = Ortho_GramSchmidt(vec_ext)
+            IF (debug) CALL Write_Mat(vec_ext, out_unitp, 5, info='vec_ortho')
+            iqq = 0
+            DO iq=1,nb_Opt+1
+              IF (dot_product(vec_ext(:,iq),vec_ext(:,iq)) > HALF) THEN
+                iqq = iqq+1
+                vec(:,iqq) = vec_ext(:,iq)
+              END IF
+            END DO
+            CALL dealloc_NParray(vec_ext,'vec_ext',name_sub)
+
+            tvec = transpose(vec)
+
+            !new hessian on the vec
+            hess = matmul(tvec,matmul(hess,Vec))
+            !remove some coupling and change the sign of hess(its,its)
+            its = 1
+            Norm2 = -abs(hess(its,its))
+            hess(:,its)   = ZERO
+            hess(its,:)   = ZERO
+            hess(its,its) = Norm2
+            !transform the new hessian in the original basis
+            hess = matmul(vec,matmul(hess,tvec))
+          ELSE
+            CALL diagonalization(hess,diag,Vec,nb_Opt)
+            IF (debug) write(out_unitp,*) 'diag',diag ; flush(out_unitp)
+          
+            IF (para_BFGS%nb_neg == 0) THEN
+              tvec = transpose(vec)
+              DO iq=1,nb_Opt
+                Vec(:,iq) = Vec(:,iq) * abs(diag(iq))
+              END DO
+              hess = matmul(Vec,tVec)
+            ELSE IF (count(diag < ZERO) /= para_BFGS%nb_neg) THEN
+              write(out_unitp,*) 'ERROR in ',name_sub
+              write(out_unitp,*) '    Wrong number of negative hessian eigenvalues!'
+              write(out_unitp,*) '    Expected: ',para_BFGS%nb_neg
+              write(out_unitp,*) '    it has: ',count(diag < ZERO)
+              STOP 'ERROR in Sub_Newton: Wrong number of negative hessian eigenvalues'
+            END IF
+          END IF
           !write(out_unit,*) 'hess',hess
           !write(out_unit,*) 'hess?',matmul(Vec,tVec)
         
           mDQit = LinearSys_Solve(hess,grad)
-        
+          IF (debug) CALL Write_Vec(mDQit, out_unitp, 5, info='mDQit')
+
         
           max_grad = maxval(abs(grad))
           RMS_grad = sqrt(dot_product(grad,grad)/nb_Opt)
@@ -847,15 +928,17 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         
           write(out_unitp,*) '--------------------------------------------------'
           write(out_unitp,*) 'it,E',it,Ene
-        
-          conv = (max_grad <= para_BFGS%max_grad)
-          write(out_unitp,*) 'max_grad,treshold',max_grad,para_BFGS%max_grad,conv
-          conv = (RMS_grad <= para_BFGS%RMS_grad)
-          write(out_unitp,*) 'RMS_grad,treshold',RMS_grad,para_BFGS%RMS_grad,conv
-          conv = (max_disp <= para_BFGS%max_step)
-          write(out_unitp,*) 'max_disp,treshold',max_disp,para_BFGS%max_step,conv
-          conv = (RMS_disp <= para_BFGS%RMS_step)
-          write(out_unitp,*) 'RMS_disp,treshold',RMS_disp,para_BFGS%RMS_step,conv
+
+          IF (debug) THEN
+            conv = (max_grad <= para_BFGS%max_grad)
+            write(out_unitp,*) 'max_grad,treshold',max_grad,para_BFGS%max_grad,conv
+            conv = (RMS_grad <= para_BFGS%RMS_grad)
+            write(out_unitp,*) 'RMS_grad,treshold',RMS_grad,para_BFGS%RMS_grad,conv
+            conv = (max_disp <= para_BFGS%max_step)
+            write(out_unitp,*) 'max_disp,treshold',max_disp,para_BFGS%max_step,conv
+            conv = (RMS_disp <= para_BFGS%RMS_step)
+            write(out_unitp,*) 'RMS_disp,treshold',RMS_disp,para_BFGS%RMS_step,conv
+          END IF
         
           norm_disp = sqrt(dot_product(mDQit,mDQit))
           IF (norm_disp > para_BFGS%Largest_step) THEN
@@ -867,7 +950,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           END IF
         
           DO iq=1,nb_Opt
-            write(out_unitp,*) 'iq,Q(iq),grad(iq),DelatQ(iq)',iq,Qact(iq),grad(iq),-mDQit(iq)
+            write(out_unitp,*) 'iq,Q(iq),grad(iq),DelatQ(iq)',iq,Qopt(iq),grad(iq),-mDQit(iq)
           END DO
         
           conv = (max_grad <= para_BFGS%max_grad) .AND.                               &
@@ -875,7 +958,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
                  (max_disp <= para_BFGS%max_step) .AND.                               &
                  (RMS_disp <= para_BFGS%RMS_step)
         
-          Qact(1:nb_Opt) = Qact(1:nb_Opt)-mDQit
+          Qopt(1:nb_Opt) = Qopt(1:nb_Opt)-mDQit
         
           IF (conv) EXIT
         END DO
@@ -883,7 +966,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           write(out_unitp,*) 'Geometry optimization is converged?',conv
           write(out_unitp,*) 'Optimized geometry:'
           DO iq=1,nb_Opt
-            write(out_unitp,*) 'iq,Qact(iq),',iq,Qact(iq)
+            write(out_unitp,*) 'iq,Qopt(iq),',iq,Qopt(iq)
           END DO
         ELSE
           write(out_unitp,*) 'No optimization (Max_it=0)'
@@ -891,11 +974,11 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         write(out_unitp,*) '=================================================='
         flush(out_unitp)
         
-        xopt_min(:) = Qact(1:nb_Opt)
+        xopt_min(:) = Qopt(1:nb_Opt)
         
         !--------------------------------------------------
         ! this subroutine print the  matrix of derived type.
-        CALL Write_MatOFdnS(dnMatOp(1)%tab_dnMatOp(:,:,1))
+        IF (debug) CALL Write_MatOFdnS(dnMatOp(1)%tab_dnMatOp(:,:,1))
         !--------------------------------------------------
         
         
@@ -906,10 +989,11 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         
         !---------------------------------------------------------------------
         IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+          write(out_unitp,*) 'END ',name_sub
+          flush(out_unitp)
         END IF
         !---------------------------------------------------------------------
-        
-        
-        END SUBROUTINE Sub_Newton
+
+  END SUBROUTINE Sub_Newton
+
 END MODULE mod_BFGS

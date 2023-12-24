@@ -103,6 +103,7 @@
 
       real (kind=Rkind), allocatable :: freq(:),grad(:)
       real (kind=Rkind), allocatable :: Qact(:),Qdyn(:)
+      real (kind=Rkind), allocatable :: Qopt(:)
       TYPE (param_dnMatOp)           :: dnMatOp(1)
       character (len=Name_len)       :: name_dum
 
@@ -140,143 +141,27 @@
       write(out_unitp,*) '================================================='
       write(out_unitp,*)
 !=====================================================================
-      CALL alloc_NParray(Qact,[mole%nb_var],'Qact',name_sub)
-      CALL get_Qact0(Qact,mole%ActiveTransfo)
 
-      CALL Read_param_Optimization(para_Optimization)
-
+      CALL Read_param_Optimization(para_Optimization,mole,para_AllBasis%BasisnD,read_nml=.TRUE.)
       CALL Write_param_Optimization(para_Optimization)
 
-      CALL Set_ALL_para_FOR_optimization(mole,para_AllBasis%BasisnD,Qact,0)
-      nb_Opt = para_FOR_optimization%nb_OptParam
+      ! get the values from mole or Basis or Qopt ...
+      allocate(Qopt(para_Optimization%nb_Opt))
+      CALL Set_ALL_para_FOR_optimization(mole,para_AllBasis%BasisnD,Qopt,1)
 
-      IF (para_FOR_optimization%nb_OptParam < 1) THEN
-        write(out_unitp,*) 'ERROR in sub_Optimization_OF_VibParam'
-        write(out_unitp,*) 'Wrong number  nb_OptParam',nb_Opt
-        write(out_unitp,*) ' Check your data!!'
-        STOP
-      ELSE
-        write(out_unitp,*) 'para_FOR_optimization%nb_OptParam',nb_Opt
-        CALL alloc_NParray(para_FOR_optimization%Val_RVec,[nb_Opt],     &
-                        'para_FOR_optimization%Val_RVec',name_sub)
-        para_FOR_optimization%Val_RVec(:) = ZERO
-        CALL alloc_NParray(para_FOR_optimization%opt_RVec,[nb_Opt],     &
-                        'para_FOR_optimization%opt_RVec',name_sub)
-        para_FOR_optimization%opt_RVec(:) = 1
-      END IF
-
-      ! get the values from mole or Basis or Qact ...
-      CALL Set_ALL_para_FOR_optimization(mole,para_AllBasis%BasisnD,Qact,-1)
-
-      ! transfert xOpt to para_FOR_optimization%tab_OF_RVec(1)%P_RVec
-      CALL alloc_NParray(xOpt_min,[nb_Opt],'xOpt_min',name_sub)
-      CALL alloc_NParray(SQ,      [nb_Opt],'SQ',      name_sub)
-      CALL alloc_NParray(SQini,   [nb_Opt],'SQini',   name_sub)
-      CALL alloc_NParray(QA,      [nb_Opt],'QA',      name_sub)
-      CALL alloc_NParray(QB,      [nb_Opt],'QB',      name_sub)
-
-
-      SQ(:) = ZERO
-      IF (para_FOR_optimization%Optimization_param /= 'cubature') THEN
-        xOpt_min(:) = para_FOR_optimization%Val_RVec(:)
-        IF (para_Optimization%para_SimulatedAnnealing%With_RangeInit) THEN
-          SQ(:) = para_Optimization%para_SimulatedAnnealing%RangeInit
-        ELSE
-          SQ(:)       = ONETENTH * real(para_FOR_optimization%opt_RVec(:),kind=Rkind)
-        END IF
-      ELSE
-        IF (para_Optimization%para_SimulatedAnnealing%With_RangeInit) THEN
-          SQ(:) = para_Optimization%para_SimulatedAnnealing%RangeInit
-          xOpt_min(:) = ZERO
-        ELSE
-          SQ(:) = (maxval(para_AllBasis%BasisnD%x)-minval(para_AllBasis%BasisnD%x))
-          xOpt_min(:) = ZERO
-        END IF
-        CALL ReCentered_grid(reshape(xOpt_min,                          &
-            [para_AllBasis%BasisnD%ndim,para_AllBasis%BasisnD%nqc]),&
-                    para_AllBasis%BasisnD%ndim,para_AllBasis%BasisnD%nqc)
-        CALL ReOriented_grid(reshape(xOpt_min,                          &
-            [para_AllBasis%BasisnD%ndim,para_AllBasis%BasisnD%nqc]),&
-                    para_AllBasis%BasisnD%ndim,para_AllBasis%BasisnD%nqc)
-        IF (para_Optimization%ReadRange) THEN
-           DO i=1,size(QA)
-             read(in_unitp,*,IOSTAT=err_io) name_dum,QA(i),QB(i)
-             IF (err_io /= 0) THEN
-               write(out_unitp,*) ' WARNING in name_sub'
-               write(out_unitp,*) '  while reading the variable range'
-               write(out_unitp,*) ' Check your data !!'
-               STOP
-             END IF
-           END DO
-           SQ(:) = QA-QB
-        ELSE
-          QA(:) = xOpt_min(:) - SQ(:)
-          QB(:) = xOpt_min(:) + SQ(:)
-        END IF
-
-        BasisnD_Save%nb  = para_AllBasis%BasisnD%nb
-        BasisnD_Save%nbc = para_AllBasis%BasisnD%nbc
-        CALL Set_nq_OF_basis(para_AllBasis%BasisnD,para_AllBasis%BasisnD%nqc)
-        BasisnD_Save%nqc = para_AllBasis%BasisnD%nqc
-
-      END IF
-      SQini(:) = SQ(:)
-      !write(out_unitp,*) 'SQini(1:10)',SQini(1:min(10,size(SQini)))
-
-      SELECT CASE (para_Optimization%Optimization_method)
-      CASE ('simulatedannealing','sa') ! simulated annealing
-        DO i=0,para_Optimization%para_SimulatedAnnealing%Restart_Opt
-          SQ(:) = SQini(:) * para_Optimization%para_SimulatedAnnealing%RangeScalInit
-          !write(out_unitp,*) 'SQini(1:10)',SQini(1:min(10,size(SQ)))
-          !write(out_unitp,*) 'SQ(1:10)',SQ(1:min(10,size(SQ)))
-
-          IF (para_FOR_optimization%Optimization_param == 'cubature') THEN
-            CALL Sub_SimulatedAnnealing_cuba(BasisnD_Save,xOpt_min,     &
-                                             Norm_min,SQ,QA,QB,nb_Opt,  &
-                                             para_Tnum,mole,            &
-                                      para_H%para_ReadOp%PrimOp_t,Qact, &
-                              para_Optimization%para_SimulatedAnnealing)
-            SQini(:) = Norm_min*TEN**1
-          ELSE
-            CALL Sub_SimulatedAnnealing(BasisnD_Save,xOpt_min,Norm_min, &
-                                        SQ,nb_Opt,para_Tnum,mole,       &
-                                       para_H%para_ReadOp%PrimOp_t,Qact,&
-                              para_Optimization%para_SimulatedAnnealing)
-            SQini(:) = SQini(:) * para_Optimization%para_SimulatedAnnealing%RangeScal
-          END IF
-
-        END DO
-        write(out_unitp,*) 'Norm_min',i,Norm_min
-
-!        CALL Sub_BFGS(BasisnD_Save,xOpt_min,SQ,nb_Opt,para_Tnum,mole,   &
-!                                    para_H%para_ReadOp%PrimOp_t,Qact,   &
-!                                        para_Optimization%para_BFGS)
-
-      CASE ('bfgs')
-        IF (para_Optimization%para_BFGS%calc_hessian_always) THEN
-          CALL Sub_Newton(BasisnD_Save,xOpt_min,SQ,nb_Opt,para_Tnum,mole,   &
-                          para_H%para_ReadOp%PrimOp_t,Qact,                 &
-                          para_Optimization%para_BFGS)
-        ELSE
-          CALL Sub_BFGS(BasisnD_Save,xOpt_min,SQ,nb_Opt,para_Tnum,mole,   &
-                        para_H%para_ReadOp%PrimOp_t,Qact,                 &
-                        para_Optimization%para_BFGS)
-        END IF
- 
-      CASE DEFAULT
-        write(out_unitp,*) 'ERROR in sub_Optimization_OF_VibParam'
-        write(out_unitp,*) 'Wrong Optimization_method: ',                 &
-                                   para_Optimization%Optimization_method
-        write(out_unitp,*) ' Check your data!!'
-        STOP
-      END SELECT
+      CALL Sub_Optimization(para_AllBasis%BasisnD,     &
+                            para_Tnum,mole,para_H%para_ReadOp%PrimOp_t,&
+                            Qopt,para_Optimization)
 
       write(out_unitp,*) '============ FINAL ANLYSIS =================='
 
+      allocate(Qact(mole%nb_var))
+      CALL get_Qact0(Qact,mole%ActiveTransfo)
+      Qact(1:para_Optimization%nb_Opt) = Qopt
       IF (para_Optimization%FinalEnergy) THEN
         write(out_unitp,*) '============ ENERGY:'
         CALL set_print_level(0,force=.TRUE.)  ! print_level = 0
-        CALL Sub_Energ_OF_ParamBasis(Energ,xOpt_min,nb_Opt,BasisnD_Save,&
+        CALL Sub_Energ_OF_ParamBasis(Energ,para_Optimization%xOpt_min,para_Optimization%nb_Opt,BasisnD_Save,&
                                      para_Tnum,mole,                    &
                                      para_H%para_ReadOp%PrimOp_t,Qact)
         write(out_unitp,*) 'Optimal param',xOpt_min,' Energy',Energ
@@ -284,7 +169,7 @@
       END IF
       IF (para_Optimization%Freq) THEN
         write(out_unitp,*) '============ Freq:'
-        CALL alloc_NParray(freq,[nb_Opt],'freq',name_sub)
+        CALL alloc_NParray(freq,[para_Optimization%nb_Opt],'freq',name_sub)
         CALL sub_freq_AT_Qact(freq,Qact,para_Tnum,mole,                 &
                            para_H%para_ReadOp%PrimOp_t,print_freq=.TRUE.)
         CALL dealloc_NParray(freq,'freq',name_sub)
@@ -338,16 +223,8 @@
       write(out_unitp,*) '========= END FINAL ANLYSIS =================='
 
 
-      CALL dealloc_NParray(xOpt_min,'xOpt_min',name_sub)
-      CALL dealloc_NParray(SQ,'SQ',name_sub)
-      CALL dealloc_NParray(SQini,'SQini',name_sub)
-      CALL dealloc_NParray(QA,'QA',name_sub)
-      CALL dealloc_NParray(QB,'QB',name_sub)
-
-      CALL dealloc_NParray(para_FOR_optimization%Val_RVec,                &
-                        'para_FOR_optimization%Val_RVec',name_sub)
-      CALL dealloc_NParray(para_FOR_optimization%opt_RVec,                &
-                        'para_FOR_optimization%opt_RVec',name_sub)
+      CALL dealloc_NParray(para_FOR_optimization%Val_RVec,'para_FOR_optimization%Val_RVec',name_sub)
+      CALL dealloc_NParray(para_FOR_optimization%opt_RVec,'para_FOR_optimization%opt_RVec',name_sub)
 
 !=====================================================================
       CALL dealloc_table_at(const_phys%mendeleev)
@@ -367,9 +244,9 @@
 
       write(out_unitp,*) 'mem_tot',para_mem%mem_tot
 
-      END SUBROUTINE sub_Optimization_OF_VibParam
+  END SUBROUTINE sub_Optimization_OF_VibParam
 
-      SUBROUTINE Sub_Energ_OF_ParamBasis(Energ,xOpt,nb_Opt,BasisnD,     &
+  SUBROUTINE Sub_Energ_OF_ParamBasis(Energ,xOpt,nb_Opt,BasisnD,     &
                                          para_Tnum,mole,PrimOp,Qact)
       USE mod_system
       USE mod_nDindex
@@ -654,7 +531,6 @@
       SUBROUTINE Sub_Energ_FOR_cubature(Energ,xOpt,nb_Opt,BasisnD)
       USE mod_system
       USE mod_nDindex
-      !USE mod_Constant
       USE mod_basis
       USE BasisMakeGrid
       IMPLICIT NONE
