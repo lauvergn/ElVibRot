@@ -134,7 +134,7 @@ IMPLICIT NONE
   NAMELIST /CRP/Ene,DEne,nb_Ene,CRP_Type,                               &
                 KS_max_it,KS_accuracy,                                  &
                 LinSolv_Type,LinSolv_max_it,LinSolv_accuracy,           &
-                Preconditioner_Type,FluxOp_test,EigenVec_CAPs,                  &
+                Preconditioner_Type,FluxOp_test,EigenVec_CAPs,          &
                 Eckart,With_Eckart,Read_Channel
 
   Ene                 = REAL_WU(ZERO,'cm-1','E')

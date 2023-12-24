@@ -63,7 +63,7 @@
       integer  :: PSG4_omp,PSG4_maxth
       integer (kind=ILkind)  :: max_mem
       integer  :: printlevel,err
-      logical  :: test,EVR,cart,nDfit,nDGrid,mem_debug
+      logical  :: test,EVR,cart,nDfit,nDGrid,Opt_CAP_Basis,mem_debug
       logical  :: GridTOBasis_test,OpPsi_test,main_test
       character (len=Name_longlen)   :: EneFormat
       character (len=Name_longlen)   :: RMatFormat
@@ -91,7 +91,7 @@
                           cart,                                         &
                           GridTOBasis_test,OpPsi_test,                  &
                           optimization,nDfit,nDGrid,                    &
-                          main_test,                                    &
+                          main_test,Opt_CAP_Basis,                      &
 
                           EVRT_path,File_path,base_FileName,            &
                           Srep_MPI,MPI_scheme,MPI_mc,MPI_iGs_auto,      &
@@ -124,6 +124,7 @@
         nDGrid             = .FALSE.
         main_test          = .FALSE.
         optimization       = 0
+        Opt_CAP_Basis      = .FALSE.
 
         maxth              = 1
         !$ maxth           = omp_get_max_threads()
@@ -209,7 +210,7 @@
 
         EVR = .NOT. (analysis_only .OR. GridTOBasis_test .OR.            &
                      OpPsi_test .OR. cart .OR. main_test .OR. nDfit .OR. &
-                     nDGrid .OR. optimization /= 0 .OR. analysis_only)
+                     nDGrid .OR. Opt_CAP_Basis .OR. optimization /= 0 .OR. analysis_only)
 
         IF (printlevel > 1) write(out_unitp,system)
 
@@ -226,6 +227,7 @@
         para_EVRT_calc%nDfit            = nDfit
         para_EVRT_calc%nDGrid           = nDGrid
         para_EVRT_calc%main_test        = main_test
+        para_EVRT_calc%Opt_CAP_Basis    = Opt_CAP_Basis
 
         CALL set_print_level(printlevel,force=.TRUE.) ! print_level = printlevel ! print_level is in mod_system.mod
 
@@ -363,6 +365,11 @@
           IF(MPI_id==0) write(out_unitp,*) ' Smolyat test calculation'
           IF(MPI_id==0) write(out_unitp,*) '========================================='
           CALL sub_main_Smolyak_test()
+
+        ELSE IF (para_EVRT_calc%Opt_CAP_Basis) THEN
+          IF(MPI_id==0) write(out_unitp,*) ' Optimization of the CAP and basis parameters (CRP)'
+          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          CALL sub_Opt_CAP_basis()
 
         ELSE
           IF(MPI_id==0) write(out_unitp,*) ' ElVibRot calculation (default)'
