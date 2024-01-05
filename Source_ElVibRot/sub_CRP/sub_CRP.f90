@@ -1311,7 +1311,7 @@ SUBROUTINE calc_crp_p_lanczos(tab_Op,nb_Op,para_CRP,Ene,GuessVec)
          IF (debug) write(out_unitp,*) '# in KS iterations, h'
          IF (debug) CALL Write_Mat(h(1:nks,1:nks),out_unitp,5)
 
-         ! Orthogonalize vectors
+         ! Orthogonalize vectors (twice)
          IF (debug) write(out_unitp,*) '# in KS iterations: Orthogonalize the vectors'
          do mks = 0, nks-1
             y = dot_product(Krylov_vectors(:,mks),Krylov_vectors(:,nks))
@@ -1320,7 +1320,14 @@ SUBROUTINE calc_crp_p_lanczos(tab_Op,nb_Op,para_CRP,Ene,GuessVec)
          ! Normalize vector
          CALL ReNorm_CplxVec(Krylov_vectors(:,nks))
 
-         if (nks > 1) then
+         do mks = 0, nks-1
+          y = dot_product(Krylov_vectors(:,mks),Krylov_vectors(:,nks))
+          Krylov_vectors(:,nks) = Krylov_vectors(:,nks) - y * Krylov_vectors(:,mks)
+         end do
+         ! Normalize vector
+         CALL ReNorm_CplxVec(Krylov_vectors(:,nks))
+
+       if (nks > 1) then
 
             Eigvals(:) = ZERO
             IF (allocated(EVec)) CALL dealloc_NParray(EVec,'EVec',name_sub)
