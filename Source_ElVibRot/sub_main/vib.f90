@@ -1186,15 +1186,18 @@
 
         real (kind=Rkind), allocatable :: hess_TS(:,:),hess_R(:,:),hess_P(:,:)
         real (kind=Rkind), allocatable :: d0G_TS(:,:),d0G_R(:,:),d0G_P(:,:)
-        real (kind=Rkind) :: Ene_TS,Ene_P,Ene_R,Ene_Asymp,Ene_Col,E,LP,LR,mass
+        real (kind=Rkind) :: Ene_TS,Ene_P,Ene_R,Ene_Asymp,Ene_Col,E,LP,LR,mass,Lmin
         real (kind=Rkind) :: A,B
         real (kind=Rkind), parameter :: c = 2.62206_Rkind
 
         real (kind=Rkind) :: Ene
         TYPE (param_dnMatOp) :: dnMatOp(1)
+        type(REAL_WU) :: Ene_Col_min
+        integer :: nq_CAP_R,nq_CAP_P,nq,ibasis
 
-        !para_mem%mem_debug=.TRUE.
-     !---------------------------------------------------------------------
+      
+        namelist /CRP_Opt/ Ene_Col_min,Lmin
+        !---------------------------------------------------------------------
         logical,parameter :: debug= .FALSE.
         !logical,parameter :: debug= .TRUE.
         character (len=*), parameter :: name_sub = 'sub_Opt_CAP_basis'
@@ -1235,7 +1238,12 @@
         write(out_unitp,*) ' VIB: END ini_data'
         write(out_unitp,*) '================================================='
         write(out_unitp,*)
+
     !---------------------------------------------------------------------------------------
+    Lmin = -ONE
+    Ene_Col_min = REAL_WU(0.01_Rkind,'eV','E')  ! 0.1 eV
+    read(in_unitp,CRP_Opt)
+
     CALL alloc_NParray(Qact,   [mole%nb_var],'Qact',   name_sub)
     CALL alloc_NParray(Qdyn_TS,[mole%nb_var],'Qdyn_TS',name_sub)
     CALL alloc_NParray(Qdyn_R ,[mole%nb_var],'Qdyn_R', name_sub)
@@ -1382,9 +1390,10 @@
 
     write(out_unitp,*) '=================================================================='
     write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '======= CAP and basis parameters ================================='
+    write(out_unitp,*) '======= CAP, basis and other parameters =========================='
     write(out_unitp,*) '=================================================================='
-    Ene_Col    = 0.01_Rkind / get_Conv_au_TO_unit('E','eV')
+    !Ene_Col    = 0.01_Rkind / get_Conv_au_TO_unit('E','eV')
+    Ene_Col    = convRWU_TO_R_WITH_WorkingUnit(Ene_Col_min)
 
     IF (Ene_P < Ene_R) THEN
       Ene_Asymp  = Ene_R
@@ -1393,18 +1402,32 @@
       Ene_Asymp  = Ene_P
       write(out_unitp,*) " Higher asymptote (P): ",Qdyn_P(iQdyns),Ene_P
     END IF
-    write(out_unitp,*) " Higher asymptote: ",Ene_Asymp
+    write(out_unitp,*) " Higher asymptote (au):      ",Ene_Asymp
+    write(out_unitp,*) " Higher asymptote (eV):      ",Ene_Asymp * get_Conv_au_TO_unit('E','eV')
+    write(out_unitp,*) " TS / Higher asymptote (au): ",(Ene_TS-Ene_Asymp)
+    write(out_unitp,*) " TS / Higher asymptote (eV): ",(Ene_TS-Ene_Asymp) * get_Conv_au_TO_unit('E','eV')
+    write(out_unitp,*) '------------------------------------------------------------------'
+    write(out_unitp,*) " New pot0 (&minimum namelist): "
+    write(out_unitp,*) "    pot0=",para_H%pot0+Ene_Asymp
+    write(out_unitp,*) '------------------------------------------------------------------'
+    DO ibasis=1,size(para_AllBasis%BasisnD%tab_Pbasis)
+      IF (para_AllBasis%BasisnD%tab_Pbasis(ibasis)%Pbasis%iQdyn(1) == iQdyns) THEN
+        nq = get_nq_FROM_basis(para_AllBasis%BasisnD%tab_Pbasis(ibasis)%Pbasis)
+      END IF
+    END DO
+    write(out_unitp,*) 'nq for s basis',nq
+    write(out_unitp,*) '------------------------------------------------------------------'
 
     ! for the product
     mass = ONE/d0G_P(iQs,iQs)
     E = Ene_Asymp-Ene_P + Ene_Col
-    LP = TWO*PI/sqrt(TWO*mass*E)
+    LP = max(TWO*PI/sqrt(TWO*mass*E),Lmin)
     ! for the reactif
     mass = ONE/d0G_R(iQs,iQs)
     E = Ene_Asymp-Ene_R + Ene_Col
-    LR = TWO*PI/sqrt(TWO*mass*E)
+    LR = max(TWO*PI/sqrt(TWO*mass*E),Lmin)
 
-    ! CAP parameters
+    ! Basis parameters
     DO iact=1,mole%nb_act
       IF (iact == iQs) THEN
         IF (Qdyn_R(iQdyns) < 0) THEN
@@ -1414,9 +1437,12 @@
           A = Qdyn_P(iQdyns) - c*LP
           B = Qdyn_R(iQdyns) + c*LR
         END IF
+        nq_CAP_P = int((c*LP)/(B-A)*nq)
+        nq_CAP_R = int((c*LR)/(B-A)*nq)
+        write(out_unitp,*) 'Numbers of grid points in the CAP regions (R,P)',nq_CAP_R,nq_CAP_P
         write(out_unitp,'(a,i0,a,f7.2,a,f7.2,a)') "&basis_nD iQdyn=",iQdyns," name='boxAB'  A=",A," B=",B," nb=$nb nq=$nq /"
       ELSE
-        write(out_unitp,'(a,i0,a,3(f9.2,a))') "&basis_nD iQact=",iact," name='HO' Q0=",Qdyn_TS(iact), &
+        write(out_unitp,'(a,i0,a,3(f10.3,a))') "&basis_nD iQact=",iact," name='HO' Q0=",Qdyn_TS(iact), &
                       " k_HO=",hess_TS(iact,iact)," m_HO=",ONE/d0G_TS(iact,iact)," nb=$nb2 nq=$nq2 /"
       END IF
     END DO
@@ -1461,9 +1487,7 @@
         CALL dealloc_param_propa(para_propa)
   
         CALL dealloc_AllBasis(para_AllBasis)
-  
-        write(out_unitp,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
-        write(out_unitp,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
+
         write(out_unitp,*) '================================================'
         IF(openmpi) THEN
           write(out_unitp,*) ' sub_Opt_CAP_basis AU REVOIR!!!', ' from ', MPI_id
