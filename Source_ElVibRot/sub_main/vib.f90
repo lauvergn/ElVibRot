@@ -1174,7 +1174,7 @@
         real (kind=Rkind) :: part_func ! function
   
   
-        integer :: iOp_CAPR,iOp_CAPP,iQs,iQopt,iQdyns,iact
+        integer :: iOp_CAPR,iOp_CAPP,iQs,iQopt,iQdyns,iact,iQdyn
         integer :: nb_Opt
         real (kind=Rkind), allocatable :: Qopt(:)
 
@@ -1266,7 +1266,8 @@
       STOP 'ERROR in sub_Opt_CAP_basis: Two different s coordinates are not possible'
     END IF
     iqS = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%ind_Q
-    write(out_unitp,*) 'iQs',iqS
+    iQdyns = mole%liste_QactTOQdyn(iQs)
+    write(out_unitp,*) 'iQs,iQdyns',iqS,iQdyns
     write(out_unitp,*)
     write(out_unitp,*)
     write(out_unitp,*) '=================================================================='
@@ -1309,33 +1310,36 @@
     write(out_unitp,*) '======= Reactif geometry optimisation ============================'
     write(out_unitp,*) '=================================================================='
     ! optimisation for CAP (iOp_CAPR) (without s)
-    CALL dealloc_param_Optimization(para_Optimization)
-    iQdyns = mole%liste_QactTOQdyn(iQs)
-    mole_100 = mole
-    mole_100%ActiveTransfo%list_act_OF_Qdyn(iqS) = 100
-    mole_100%opt_Qdyn(iQdyns) = 0
-    CALL type_var_analysis_OF_CoordType(mole_100,print_lev=.FALSE.)
-    CALL get_Qact0(Qact,mole_100%ActiveTransfo)
-    iQs =  mole_100%liste_QactTOQdyn(iQdyns)
+    CALL get_Qact0(Qact,mole%ActiveTransfo)
+    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,mole%ActiveTransfo) ! here with mole
+    Qdyn_R(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%Q0
 
-    para_Optimization%Optimization_method = 'bfgs'
-    para_Optimization%Optimization_param = 'coordbasis'
-    para_Optimization%para_BFGS%nb_neg = 0
-    para_Optimization%para_BFGS%calc_hessian_always = .TRUE.
+    IF (mole%nb_act > 1) THEN
+      mole_100 = mole
+      mole_100%ActiveTransfo%list_act_OF_Qdyn(iQdyns) = 100
+      mole_100%opt_Qdyn(iQdyns) = 0
+      mole_100%ActiveTransfo%Qdyn0(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%Q0
+      CALL type_var_analysis_OF_CoordType(mole_100,print_lev=.FALSE.)
 
-    CALL Read_param_Optimization(para_Optimization,mole_100,para_AllBasis%BasisnD,read_nml=.FALSE.)
-    IF (debug) CALL Write_param_Optimization(para_Optimization)
+      CALL dealloc_param_Optimization(para_Optimization)
+      para_Optimization%Optimization_method = 'bfgs'
+      para_Optimization%Optimization_param  = 'coordbasis'
+      para_Optimization%para_BFGS%nb_neg    = 0
+      para_Optimization%para_BFGS%calc_hessian_always = .TRUE.
 
-    Qact(iqS) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%Q0
-    mole_100%ActiveTransfo%Qact0(iqS)    = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%Q0
-    mole_100%ActiveTransfo%Qdyn0(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%Q0
-    QR = Qact(1:mole_100%nb_act)
+      CALL Read_param_Optimization(para_Optimization,mole_100,para_AllBasis%BasisnD,read_nml=.FALSE.)
+      IF (debug) CALL Write_param_Optimization(para_Optimization)
 
-    CALL Sub_Optimization(para_AllBasis%BasisnD,para_Tnum,mole_100,para_H%para_ReadOp%PrimOp_t, &
-                          QR,para_Optimization)
-    write(out_unitp,*) 'QR',QR
-    Qact(1:mole_100%nb_act) = QR(:)
-    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,mole_100%ActiveTransfo) ! here with mole_100
+      CALL get_Qact0(Qact,mole_100%ActiveTransfo)
+      QR = Qact(1:mole_100%nb_act)
+      IF (debug) write(out_unitp,*) 'QR (initial value)',QR
+
+      CALL Sub_Optimization(para_AllBasis%BasisnD,para_Tnum,mole_100,para_H%para_ReadOp%PrimOp_t, &
+                            QR,para_Optimization)
+      write(out_unitp,*) 'QR (optimized)',QR
+      Qact(1:mole_100%nb_act) = QR(:)
+      CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,mole_100%ActiveTransfo) ! here with mole_100
+    END IF
     CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Qdyn_R,Qact,mole%ActiveTransfo)  !    then with mole
     write(out_unitp,*) 'Qact_R',Qact
     write(out_unitp,*) 'Qdyn_R',Qdyn_R
@@ -1359,17 +1363,25 @@
     write(out_unitp,*) '=================================================================='
     write(out_unitp,*) '======= Product geometry optimisation ============================'
     write(out_unitp,*) '=================================================================='
+    CALL get_Qact0(Qact,mole%ActiveTransfo)
+    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,mole%ActiveTransfo) ! here with mole
+    Qdyn_P(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(2)%Q0
 
-    Qact(iqS) = para_AllOp%tab_Op(iOp_CAPP)%para_ReadOp%tab_CAP(2)%Q0
-    mole_100%ActiveTransfo%Qact0(iqS)    = para_AllOp%tab_Op(iOp_CAPP)%para_ReadOp%tab_CAP(2)%Q0
-    mole_100%ActiveTransfo%Qdyn0(iQdyns) = para_AllOp%tab_Op(iOp_CAPP)%para_ReadOp%tab_CAP(2)%Q0
-    QP = Qact(1:mole_100%nb_act)
+    IF (mole%nb_act > 1) THEN
+      mole_100%ActiveTransfo%Qdyn0(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(2)%Q0
+      CALL type_var_analysis_OF_CoordType(mole_100,print_lev=.FALSE.)
 
-    CALL Sub_Optimization(para_AllBasis%BasisnD,para_Tnum,mole_100,para_H%para_ReadOp%PrimOp_t, &
-                          QP,para_Optimization)
-    write(out_unitp,*) 'QP',QP
-    Qact(1:mole_100%nb_act) = QP(:)
-    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,mole_100%ActiveTransfo) ! here with mole_100
+      CALL get_Qact0(Qact,mole_100%ActiveTransfo)
+      QP = Qact(1:mole_100%nb_act)
+      IF (debug) write(out_unitp,*) 'QP (initial value)',QP
+
+      CALL Sub_Optimization(para_AllBasis%BasisnD,para_Tnum,mole_100,para_H%para_ReadOp%PrimOp_t, &
+                            QP,para_Optimization)
+      write(out_unitp,*) 'QP',QP
+      Qact(1:mole_100%nb_act) = QP(:)
+      CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,mole_100%ActiveTransfo) ! here with mole_100
+    END IF
+
     CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Qdyn_P,Qact,mole%ActiveTransfo)  !    then with mole
     write(out_unitp,*) 'Qact_P',Qact
     write(out_unitp,*) 'Qdyn_P',Qdyn_P
@@ -1387,12 +1399,10 @@
     CALL get_d0GG(Qact,para_Tnum,mole,d0G_P,def=.TRUE.)
     CALL Write_Mat(d0G_P, out_unitp, 5, info='d0G_P')
 
-
     write(out_unitp,*) '=================================================================='
     write(out_unitp,*) '=================================================================='
     write(out_unitp,*) '======= CAP, basis and other parameters =========================='
     write(out_unitp,*) '=================================================================='
-    !Ene_Col    = 0.01_Rkind / get_Conv_au_TO_unit('E','eV')
     Ene_Col    = convRWU_TO_R_WITH_WorkingUnit(Ene_Col_min)
 
     IF (Ene_P < Ene_R) THEN
@@ -1410,11 +1420,15 @@
     write(out_unitp,*) " New pot0 (&minimum namelist): "
     write(out_unitp,*) "    pot0=",para_H%pot0+Ene_Asymp
     write(out_unitp,*) '------------------------------------------------------------------'
-    DO ibasis=1,size(para_AllBasis%BasisnD%tab_Pbasis)
-      IF (para_AllBasis%BasisnD%tab_Pbasis(ibasis)%Pbasis%iQdyn(1) == iQdyns) THEN
-        nq = get_nq_FROM_basis(para_AllBasis%BasisnD%tab_Pbasis(ibasis)%Pbasis)
-      END IF
-    END DO
+    IF (associated(para_AllBasis%BasisnD%tab_Pbasis)) THEN
+      DO ibasis=1,size(para_AllBasis%BasisnD%tab_Pbasis)
+        IF (para_AllBasis%BasisnD%tab_Pbasis(ibasis)%Pbasis%iQdyn(1) == iQdyns) THEN
+          nq = get_nq_FROM_basis(para_AllBasis%BasisnD%tab_Pbasis(ibasis)%Pbasis)
+        END IF
+      END DO
+    ELSE
+      nq = get_nq_FROM_basis(para_AllBasis%BasisnD)
+    END IF
     write(out_unitp,*) 'nq for s basis',nq
     write(out_unitp,*) '------------------------------------------------------------------'
 
@@ -1429,6 +1443,8 @@
 
     ! Basis parameters
     DO iact=1,mole%nb_act
+      iQdyn = mole%liste_QactTOQdyn(iact)
+
       IF (iact == iQs) THEN
         IF (Qdyn_R(iQdyns) < 0) THEN
           A = Qdyn_R(iQdyns) - c*LR
@@ -1440,9 +1456,9 @@
         nq_CAP_P = int((c*LP)/(B-A)*nq)
         nq_CAP_R = int((c*LR)/(B-A)*nq)
         write(out_unitp,*) 'Numbers of grid points in the CAP regions (R,P)',nq_CAP_R,nq_CAP_P
-        write(out_unitp,'(a,i0,a,f7.2,a,f7.2,a)') "&basis_nD iQdyn=",iQdyns," name='boxAB'  A=",A," B=",B," nb=$nb nq=$nq /"
+        write(out_unitp,'(a,i0,a,f7.2,a,f7.2,a)') "&basis_nD iQdyn=",iQdyn," name='boxAB'  A=",A," B=",B," nb=$nb nq=$nq /"
       ELSE
-        write(out_unitp,'(a,i0,a,3(f10.3,a))') "&basis_nD iQact=",iact," name='HO' Q0=",Qdyn_TS(iact), &
+        write(out_unitp,'(a,i0,a,3(f10.3,a))') "&basis_nD iQdyn=",iQdyn," name='HO' Q0=",Qdyn_TS(iact), &
                       " k_HO=",hess_TS(iact,iact)," m_HO=",ONE/d0G_TS(iact,iact)," nb=$nb2 nq=$nq2 /"
       END IF
     END DO

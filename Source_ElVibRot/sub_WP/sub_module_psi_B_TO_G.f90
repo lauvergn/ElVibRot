@@ -81,8 +81,8 @@ CONTAINS
         write(out_unitp,*) 'asso BasisnD ',associated(psi%BasisnD)
         write(out_unitp,*) 'nb_basis',psi%BasisnD%nb_basis
         write(out_unitp,*)
-        write(out_unitp,*) 'psi BasisRep'
-        CALL ecri_psi(ZERO,psi)
+        !write(out_unitp,*) 'psi BasisRep'
+        !CALL ecri_psi(ZERO,psi,ecri_BasisRep=.TRUE.,ecri_GridRep=.FALSE.)
       END IF
 !-----------------------------------------------------------
 
@@ -155,8 +155,8 @@ CONTAINS
 !----------------------------------------------------------
       IF (debug) THEN
          write(out_unitp,*)
-         write(out_unitp,*) 'psiGridRep'
-         CALL ecri_psi(ZERO,psi,out_unitp,.TRUE.,.FALSE.)
+         !write(out_unitp,*) 'psiGridRep'
+         !CALL ecri_psi(ZERO,psi,out_unitp,ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
          write(out_unitp,*)
          write(out_unitp,*) ' END in ',name_sub
       END IF
