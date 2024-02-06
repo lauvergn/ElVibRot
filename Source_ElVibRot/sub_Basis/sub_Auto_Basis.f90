@@ -197,6 +197,7 @@
       END IF
       IF (print_level > 1 ) write(out_unitp,*) 'nrho in ',name_sub,para_AllBasis%BasisnD%nrho(:)
       IF (print_level > -1) write(out_unitp,*) '==================================================='
+      CALL RecWriteMiniMini_basis(para_AllBasis%BasisnD)
 
       END SUBROUTINE Auto_basis
 !=======================================================================================

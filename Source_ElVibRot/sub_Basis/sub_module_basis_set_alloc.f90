@@ -275,9 +275,10 @@ MODULE mod_basis_set_alloc
       END INTERFACE
 
       PUBLIC  basis, alloc_init_basis, dealloc_basis, clean_basis, &
-              basis2TObasis1, RecWrite_basis, RecWriteMini_basis,  &
+              basis2TObasis1,  &
               alloc_dnb_OF_basis, dealloc_dnb_OF_basis,            &
               alloc_xw_OF_basis, dealloc_xw_OF_basis
+      PUBLIC  RecWrite_basis, RecWriteMini_basis, RecWriteMiniMini_basis
       PUBLIC  get_x_OF_basis, get_x_AT_iq_OF_basis
       PUBLIC  get_rho_OF_basis, get_rho_AT_iq_OF_basis
       PUBLIC  get_w_OF_basis, get_w_AT_iq_OF_basis
@@ -2943,6 +2944,135 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        deallocate(Rec_line)
        END SUBROUTINE RecWriteMini_basis
 
+       RECURSIVE SUBROUTINE RecWriteMiniMini_basis(basis_set)
+       USE mod_system
+       USE mod_nDindex
+       IMPLICIT NONE
+ 
+        TYPE (basis), intent(in) :: basis_set
+ 
+        integer               :: i,i_SG
+        integer, allocatable  :: tab_l(:)
+
+        character(len=:), allocatable     :: Rec_line
+ 
+        character (len=*), parameter :: Rec_tab = '===='
+        integer, save                :: iRec = -1
+ 
+        iRec = iRec + 1
+ 
+        Rec_line = ''
+        DO i=1,iRec
+          Rec_line = Rec_line // Rec_tab
+        END DO
+        Rec_line = Rec_line // '=RecMini' // TO_string(iRec) // '='
+ 
+ 
+ 
+        write(out_unitp,*) Rec_line,'BEGINNING RecWriteMiniMini_basis',iRec
+        write(out_unitp,*)
+        write(out_unitp,*) Rec_line,'ndim',basis_set%ndim
+        write(out_unitp,*) Rec_line,'nb,nq',basis_set%nb,get_nq_FROM_basis(basis_set)
+ 
+        !CALL Write_Basis_Grid_Param(basis_set%Basis_Grid_Para,Rec_line) 
+ 
+ 
+        write(out_unitp,*) Rec_line,'type,name',basis_set%type,basis_set%name
+ 
+        IF ( allocated(basis_set%iQdyn) ) THEN
+          write(out_unitp,*) Rec_line,'iQdyn',basis_set%iQdyn(1:basis_set%ndim)
+        ELSE
+          write(out_unitp,*) Rec_line,'iQdyn is not allocated'
+        END IF
+        write(out_unitp,*)
+
+        IF (basis_set%nb_basis <= 0) THEN
+          IF ( allocated(basis_set%A) ) THEN
+            write(out_unitp,*) Rec_line,'A',basis_set%A(1:basis_set%ndim)
+          END IF
+          IF ( allocated(basis_set%B) ) THEN
+            write(out_unitp,*) Rec_line,'B',basis_set%B(1:basis_set%ndim)
+          END IF
+          IF ( allocated(basis_set%Q0) ) THEN
+            write(out_unitp,*) Rec_line,'Q0',basis_set%Q0(1:basis_set%ndim)
+          END IF
+          IF ( allocated(basis_set%scaleQ) ) THEN
+            write(out_unitp,*) Rec_line,'scaleQ',basis_set%scaleQ(1:basis_set%ndim)
+          END IF
+          write(out_unitp,*)
+        END IF
+
+        IF (.NOT. basis_set%packed .AND. basis_set%nb_basis > 0) THEN
+          write(out_unitp,*) Rec_line,'------------------------------------------------'
+          write(out_unitp,*) Rec_line,'------------------------------------------------'
+          SELECT CASE (basis_set%SparseGrid_type)
+          CASE (0)
+            write(out_unitp,*) Rec_line,'  Direct product basis, nb_basis:',basis_set%nb_basis
+            IF ( associated(basis_set%tab_Pbasis) ) THEN
+              DO i=1,basis_set%nb_basis
+                write(out_unitp,*) Rec_line,'  tab_Pbasis:',i
+                CALL RecWriteMiniMini_basis(basis_set%tab_Pbasis(i)%Pbasis)
+              END DO
+            ELSE
+              write(out_unitp,*) Rec_line,' basis_set%tab_Pbasis(:) is not associated'
+            END IF
+          CASE (1,2)
+            write(out_unitp,*) Rec_line,'  SparseGrid_type',basis_set%SparseGrid_type,': not yet'
+            write(out_unitp,*) Rec_line,'  Sparse grid/basis, nb_basis',basis_set%nb_basis
+
+            IF (associated(basis_set%tab_PbasisSG)) THEN
+              allocate(tab_l(basis_set%nb_basis))
+              CALL init_nDval_OF_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l)
+              DO i_SG=1,basis_set%nb_SG
+                CALL ADD_ONE_TO_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l,iG=i_SG)
+                write(out_unitp,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
+                write(out_unitp,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
+                CALL RecWriteMiniMini_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
+              END DO
+              deallocate(tab_l)
+            ELSE
+              write(out_unitp,*) Rec_line,' basis_set%tab_PbasisSG(:) is not associated'
+            END IF
+          CASE (4)
+            write(out_unitp,*) Rec_line,'  SparseGrid_type',basis_set%SparseGrid_type
+            write(out_unitp,*) Rec_line,'  Sparse grid/basis, nb_basis',basis_set%nb_basis
+            IF (associated(basis_set%tab_PbasisSG)) THEN
+              allocate(tab_l(basis_set%nb_basis))
+              CALL init_nDval_OF_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l)
+              DO i_SG=1,basis_set%nb_SG
+                CALL ADD_ONE_TO_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l,iG=i_SG)
+                write(out_unitp,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
+                write(out_unitp,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
+                CALL RecWriteMiniMini_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
+              END DO
+              deallocate(tab_l)
+            ELSE
+              write(out_unitp,*) Rec_line,' basis_set%tab_PbasisSG(:) is not associated'
+              allocate(tab_l(basis_set%nb_basis))
+              CALL init_nDval_OF_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l)
+              DO i_SG=1,basis_set%nb_SG
+                CALL ADD_ONE_TO_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l,iG=i_SG)
+                write(out_unitp,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
+                write(out_unitp,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
+              END DO
+              deallocate(tab_l)
+            END IF
+          END SELECT
+          IF (basis_set%SparseGrid_type == 0) THEN
+
+          ELSE
+            write(out_unitp,*) Rec_line,'------------------------------------------------'
+            write(out_unitp,*) Rec_line,'------------------------------------------------'
+
+          END IF
+          write(out_unitp,*) Rec_line,'------------------------------------------------'
+        END IF
+ 
+        write(out_unitp,*) Rec_line,'END RecWriteMiniMini_basis',iRec
+        iRec = iRec - 1
+ 
+        deallocate(Rec_line)
+        END SUBROUTINE RecWriteMiniMini_basis
 !=======================================================================
 !
 !      para_AllBasis subroutines

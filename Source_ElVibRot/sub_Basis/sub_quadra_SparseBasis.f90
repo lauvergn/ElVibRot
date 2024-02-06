@@ -251,7 +251,6 @@
                                basis_SG%tab_basisPrimSG(ib,L),          &
                                para_ReadOp)
 
-            !CALL RecWriteMini_basis(basis_SG%tab_basisPrimSG(ib,L) )
           END DO
 
           IF (basis_SG%print_info_OF_basisDP .AND. print_level > -1) THEN
@@ -368,13 +367,10 @@
 
           basis_SG%tab_PbasisSG(i_SG)%Pbasis%tab_Pbasis(ib)%Pbasis => &
                    basis_SG%tab_basisPrimSG(ib,L)
-          !CALL RecWriteMini_basis(basis_SG%tab_PbasisSG(i_SG)%Pbasis%tab_Pbasis(ib)%Pbasis)
 
         END DO
         basis_SG%tab_PbasisSG(i_SG)%Pbasis%tab_basis_done   = .TRUE.
         basis_SG%tab_PbasisSG(i_SG)%Pbasis%tab_basis_linked = .TRUE.
-
-        !CALL RecWriteMini_basis(basis_SG%tab_PbasisSG(i_SG)%Pbasis)
 
         !basis_SG%tab_PbasisSG(i_SG)%Pbasis%print_info_OF_basisDP = .TRUE.
 
@@ -550,8 +546,6 @@
         write(out_unitp,*) '================================================='
       END IF
       flush(out_unitp)
-
-      !CALL RecWriteMini_basis(basis_SG)
 
 !-----------------------------------------------------------
       IF (debug) THEN
@@ -1040,10 +1034,10 @@
       DO ib=1,basis_SG%nb_basis
         DO L=0,Lmax
 
-          IF (debug) THEN
+          !IF (debug) THEN
             write(out_unitp,*) '================================================='
             write(out_unitp,*) '===L,ib: ',L,ib,'==============='
-          END IF
+          !END IF
 
           CALL basis2TObasis1(basis_SG%tab_basisPrimSG(L,ib),                   &
                                        basis_SG%tab_Pbasis(ib)%Pbasis)

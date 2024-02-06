@@ -437,7 +437,6 @@
  !
  !       CALL Auto_basis(para_Tnum,mole,para_AllBasis,para_ReadOp)
  !       write(out_unitp,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
- !       !CALL RecWriteMini_basis(para_AllBasis%BasisnD)
  ! stop
 
       IF (para_AllBasis%BasisnD%SparseGrid_type == 4) THEN
