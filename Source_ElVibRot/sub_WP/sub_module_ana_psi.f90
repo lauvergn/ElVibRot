@@ -160,6 +160,8 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
   END IF
   IF (adia .AND. .NOT. ana_psi%GridDone) STOP 'adia=t and GridDone=f'
 
+  !write(6,*) ' in sub_analyze_psi: 0' ; flush(6)
+
   ! save the GridRep and BasisRep values to be able to deallocate the unused representation
   Grid  = psi%GridRep
   Basis = psi%BasisRep
@@ -202,16 +204,23 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
 
     psi_line = 'norm^2-WP ' // info // ' ' //                                   &
                             RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.)
+    ! write(6,*) ' in sub_analyze_psi: 1' ; flush(6)
 
     ! add the energy
     iE = int(log10(abs(E)+ONETENTH**8)) ! to avoid zero
     GridDone = ana_psi%GridDone
-    CALL modif_ana_psi(ana_psi,EFormat='f' // TO_string(15-iE) // '.' // TO_string(7-iE) )
+    IF (15-iE < 5 .OR. 7-iE < 0) THEN
+      CALL modif_ana_psi(ana_psi,EFormat='e15.5')
+    ELSE
+      CALL modif_ana_psi(ana_psi,EFormat='f' // TO_string(15-iE) // '.' // TO_string(7-iE) )
+    END IF
     ana_psi%GridDone = GridDone
 
     !write(6,*) E,iE,'ana_psi%Eformat: ',ana_psi%Eformat
+    !write(6,*) ' in sub_analyze_psi: 2' ; flush(6)
 
     psi_line = psi_line // ' ' // real_TO_char(E,Rformat=ana_psi%Eformat)
+    !write(6,*) ' in sub_analyze_psi: 2.5' ; flush(6)
 
     ! add the field (if necessary)
     IF (ana_psi%With_field) THEN
@@ -434,6 +443,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
 
   ! enable to deallocate the unsed representation.
   CALL alloc_psi(psi,BasisRep=Basis,GridRep=Grid)
+  !write(6,*) ' in sub_analyze_psi: f' ; flush(6)
 
   IF (debug) THEN
     write(out_unitp,*) 'END ',name_sub
