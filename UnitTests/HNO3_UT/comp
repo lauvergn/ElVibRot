@@ -1,18 +1,11 @@
 #!/bin/bash
-
- SYSTEM=sub_system_HNO3_ccsdt.f
-
-
- cp HESS-fit/inter_0-vtz HESS-fit/inter_0
-
+ 
 here=`pwd`
-
 DIR_vib=../..
-DIR_pot=$DIR_vib/sub_pot
-
- cp $SYSTEM $DIR_pot/sub_system.f
 
 cd $DIR_vib
- make &> $here/comp.log
-cd $here
+ #rm -f vib.exe /Users/lauvergn/git/Tnum-Tana/lib*.a /Users/lauvergn/git/QuantumModelLib/lib*.a
+ #make OPT=1 QML_DIR=/Users/lauvergn/git/QuantumModelLib TNUMTANA_DIR=/Users/lauvergn/git/Tnum-Tana &> $here/comp.log
 
+ test -f vib.exe || (echo "vib.exe does not exist => make" ; make &> $here/comp.log)
+cd $here

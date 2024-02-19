@@ -30,6 +30,7 @@ fi
 
 ./calc_1+8D $test_size >> run_tests.log
 
+./calc_9D $test_size >> run_tests.log
 
 
 nb_err=`grep -c "ERROR" run_tests.log`

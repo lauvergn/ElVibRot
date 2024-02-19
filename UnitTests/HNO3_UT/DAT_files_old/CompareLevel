@@ -1,5 +1,15 @@
 #!/bin/bash
 
+##compOK=`tail -1 comp.log | grep -c OK `
+compOK=`grep -c 'EVR OK' comp.log `
+if [ $compOK = '1' ]
+then
+ echo " ElVibRot compilation: OK"
+else
+ echo " ElVibRot compilation: ERROR"
+ exit
+fi
+
 epsi=$4
 if [ -z $epsi ]
 then

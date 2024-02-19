@@ -22,22 +22,7 @@ then
  echo " Big tests"
 fi
 
-
- SYSTEM=sub_system_HNO3_ccsdt.f
-
-
- cp HESS-fit/inter_0-vtz HESS-fit/inter_0
-
-here=`pwd`
-
-DIR_vib=../..
-DIR_pot=$DIR_vib/sub_pot
-
- cp $SYSTEM $DIR_pot/sub_system.f
-
-cd $DIR_vib
- make &> $here/comp.log
-cd $here
+./comp
 
 
 ./DAT_files/dat_HNO3_ccsdt-cHAC 0 3
@@ -54,7 +39,7 @@ fi
 
 if [ $test_size = 'big' ]
 then
- # this is too long, we use the Davidsonversion
+ # this is too long, we use the Davidson version
  #./DAT_files/dat_HNO3_ccsdt-cHAC 3 5
  #./CompareLevel res_HNO3_cHAC_Norm3-L5 Table4_PCCP2010-1+8D.txt 4
  ./DAT_files/dat_HNO3_ccsdt-cHAC_DavRead 3 5

@@ -1,3 +1,0 @@
-ExtLib=/Users/lauvergn/git/Ext_Lib
-
-make OPT=0  ExtLibDIR=$ExtLib
