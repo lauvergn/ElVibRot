@@ -114,6 +114,7 @@
           real (kind=Rkind) :: Ewidth         ! 1. in cm-1
           real (kind=Rkind) :: nEstep         ! 10
           logical           :: l_lorentz = .TRUE.      ! (T) if F => gaussian
+          real (kind=Rkind) :: Min_relativeI0
 
           TYPE (File_t) :: file_spectrum,file_intensity
           TYPE (File_t) :: file_resart_int
@@ -439,18 +440,19 @@
       TYPE(REAL_WU) :: Emin,Emax,Ewidth
 
       integer       :: nEstep
+      real (kind=Rkind) :: Min_relativeI0
 
       character (len=Line_len) :: file_spectrum,file_intensity
       character (len=Line_len) :: file_resart_int
 
       integer       :: nb_t
 
-      NAMELIST /intensity/Temp,l_Aif,l_Int,l_IntVR,l_Tau,l_md,l_md2,    &
-                          l_CrossSec,                                   &
-                          pola_xyz,                                     &
-                          ABC,JJmax,Inertia,                            &
-                          dip_Qact,                                     &
-                          Emin,Emax,Ewidth,nEstep,l_lorentz,            &
+      NAMELIST /intensity/Temp,l_Aif,l_Int,l_IntVR,l_Tau,l_md,l_md2,        &
+                          l_CrossSec,                                       &
+                          pola_xyz,                                         &
+                          ABC,JJmax,Inertia,                                &
+                          dip_Qact,                                         &
+                          Emin,Emax,Ewidth,nEstep,l_lorentz,Min_relativeI0, &
                           file_spectrum,file_intensity,file_resart_int
 
 
@@ -458,25 +460,25 @@
       write(out_unitp,*) ' INTENSITY PARAMETERS'
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 
-        l_Int       = .TRUE.
-        l_CrossSec  = .FALSE.
-        l_IntVR     = .FALSE.
-        l_Aif       = .FALSE.
-        l_Tau       = .FALSE.
-        l_md        = .FALSE.
-        l_md2       = .FALSE.
-        dip_Qact    = .FALSE.
-        pola_xyz(:) = .TRUE.
-        Temp        = 298.15_Rkind
-        ABC(:)      = ZERO
-        JJmax       = 100
-        Inertia     = .FALSE.
-
-        l_lorentz   = .TRUE.
-        Emin        = REAL_WU(ZERO,'cm-1','E')
-        Emax        = REAL_WU(ZERO,'cm-1','E')
-        Ewidth      = REAL_WU(ONE ,'cm-1','E')
-        nEstep      = 10
+        l_Int           = .TRUE.
+        l_CrossSec      = .FALSE.
+        l_IntVR         = .FALSE.
+        l_Aif           = .FALSE.
+        l_Tau           = .FALSE.
+        l_md            = .FALSE.
+        l_md2           = .FALSE.
+        dip_Qact        = .FALSE.
+        pola_xyz(:)     = .TRUE.
+        Temp            = 298.15_Rkind
+        ABC(:)          = ZERO
+        JJmax           = 100
+        Inertia         = .FALSE.
+        l_lorentz       = .TRUE.
+        Emin            = REAL_WU(ZERO,'cm-1','E')
+        Emax            = REAL_WU(ZERO,'cm-1','E')
+        Ewidth          = REAL_WU(ONE ,'cm-1','E')
+        nEstep          = 10
+        Min_relativeI0  = 0.01_Rkind
 
         file_spectrum   = 'spectrum'
         file_intensity  = 'intensity'
@@ -497,13 +499,19 @@
           write(out_unitp,*) '     l_IntVR=t or'
           write(out_unitp,*) '     l_Aif=t or'
           write(out_unitp,*) '     l_Tau=t'
-          write(out_unitp,*) ' but l_Int,l_IntVR,l_Aif,l_Tau:',         &
-                                   l_Int,l_CrossSec,l_IntVR,l_Aif,l_Tau
-          STOP
+          write(out_unitp,*) ' but l_Int,l_IntVR,l_Aif,l_Tau:',l_Int,l_CrossSec,l_IntVR,l_Aif,l_Tau
+          STOP 'ERROR in read_intensity: chose ONE option among l_Int, l_CrossSec ...'
         END IF
 
         IF (print_level > 0) write(out_unitp,intensity)
         write(out_unitp,*)
+        Min_relativeI0 = max(ZERO,Min_relativeI0)
+        IF (Min_relativeI0 > ONE ) THEN
+          write(out_unitp,*) ' ERROR in read_intensity'
+          write(out_unitp,*) '  Min_relativeI0 MUST be smaller than ONE'
+          write(out_unitp,*) '  Min_relativeI0',Min_relativeI0
+          STOP 'ERROR in read_intensity: Min_relativeI0 MUST be smaller than ONE'
+        END IF
 
         para_intensity%l_Int       = l_Int
         para_intensity%l_CrossSec  = l_CrossSec
@@ -521,11 +529,12 @@
 
         para_intensity%dip_Qact  = dip_Qact
 
-        para_intensity%l_lorentz   = l_lorentz
-        para_intensity%Emin        = convRWU_TO_R_WITH_WorkingUnit(Emin)
-        para_intensity%Emax        = convRWU_TO_R_WITH_WorkingUnit(Emax)
-        para_intensity%Ewidth      = convRWU_TO_R_WITH_WorkingUnit(Ewidth)
-        para_intensity%nEstep      = nEstep
+        para_intensity%l_lorentz      = l_lorentz
+        para_intensity%Emin           = convRWU_TO_R_WITH_WorkingUnit(Emin)
+        para_intensity%Emax           = convRWU_TO_R_WITH_WorkingUnit(Emax)
+        para_intensity%Ewidth         = convRWU_TO_R_WITH_WorkingUnit(Ewidth)
+        para_intensity%nEstep         = nEstep
+        para_intensity%Min_relativeI0 = Min_relativeI0
 
 
         para_intensity%file_spectrum%name   = file_spectrum

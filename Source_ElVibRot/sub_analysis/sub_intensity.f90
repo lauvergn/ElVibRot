@@ -277,7 +277,7 @@
 
       ELSE IF (para_intensity%l_Int) THEN
         write(out_unitp,*) 'intensity (with dipolar moments)'
-!       add temperature
+        ! add temperature
         zpe = minval(para_H%Rdiag)
         Q=part_func(para_H%Rdiag,nb_aie,para_intensity%Temp)
         write(out_unitp,*)
@@ -322,7 +322,7 @@
           RWU_Write(REAL_WU(emax,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
         CALL sub_spectre(Mat_Aif,para_H%Rdiag,nb_ana,                   &
-                         Ewidth,emin,emax,para_intensity%file_spectrum)
+                         Ewidth,emin,emax,para_intensity%file_spectrum,para_intensity%Min_relativeI0)
 
       ELSE IF (para_intensity%l_IntVR) THEN
         emin = para_intensity%Emin
@@ -935,16 +935,19 @@
         write(out_unitp,*)
       END IF
 !-----------------------------------------------------------
+      IF (Temp == ZERO) THEN
+        Q = ONE
+      ELSE
+        RWU_Temp = REAL_WU(Temp,'°K','E')
+        Etemp    = convRWU_TO_R_WITH_WorkingUnit(RWU_Temp)
 
-      RWU_Temp = REAL_WU(Temp,'°K','E')
-      Etemp    = convRWU_TO_R_WITH_WorkingUnit(RWU_Temp)
+        zpe = minval(ene)
 
-      zpe = minval(ene)
-
-      Q = ZERO
-      DO i=1,nb_aie
-        Q = Q + exp(-(ene(i)-zpe)/Etemp)
-      END DO
+        Q = ZERO
+        DO i=1,nb_aie
+          Q = Q + exp(-(ene(i)-zpe)/Etemp)
+        END DO
+      END IF
 
 
       part_func = Q
@@ -990,11 +993,18 @@
         write(out_unitp,*) 'Temperature (K) :',Temp
       END IF
 !-----------------------------------------------------------
+      IF (Temp == ZERO) THEN
+        IF (enei == ene0) THEN
+            pop2_i = ONE
+        ELSE
+            pop2_i = ZERO
+        END IF
+      ELSE
+        RWU_Temp = REAL_WU(Temp,'°K','E')
+        Etemp    = convRWU_TO_R_WITH_WorkingUnit(RWU_Temp)
 
-      RWU_Temp = REAL_WU(Temp,'°K','E')
-      Etemp    = convRWU_TO_R_WITH_WorkingUnit(RWU_Temp)
-
-      pop2_i = exp(-(enei-ene0)/Etemp)
+        pop2_i = exp(-(enei-ene0)/Etemp)
+      END IF
 
 !----------------------------------------------------------
       IF (debug) THEN
@@ -1010,21 +1020,23 @@
 !
 !================================================================
       SUBROUTINE sub_spectre(Mat_Aif,ene,nb_ana,                        &
-                             Ewidth,emin,emax,file_spectrum)
+                             Ewidth,emin,emax,file_spectrum,Min_relativeI0)
       USE mod_system
       use mod_Constant, only: REAL_WU,get_Conv_au_TO_unit,RWU_Write
       IMPLICIT NONE
 
-      integer           :: nb_ana
-      real (kind=Rkind) :: Mat_Aif(nb_ana,nb_ana)
-      real (kind=Rkind) :: ene(nb_ana)
-
-      real (kind=Rkind) :: Ewidth,emin,emax,pas
-
+      integer,           intent(in) :: nb_ana
+      real (kind=Rkind), intent(in) :: Mat_Aif(nb_ana,nb_ana)
+      real (kind=Rkind), intent(in) :: ene(nb_ana)
+      real (kind=Rkind), intent(in) :: Ewidth,emin,emax
+      real (kind=Rkind), intent(in) :: Min_relativeI0
       TYPE (File_t) :: file_spectrum
+
       integer           :: nio
       integer           :: n
-      real (kind=Rkind),allocatable :: spectre(:)
+      real (kind=Rkind), allocatable :: spectre(:)
+      real (kind=Rkind) :: pas
+
 
 
       real (kind=Rkind) :: e,e0,I0,limit_I0 = ZERO
@@ -1038,7 +1050,7 @@
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       auTOenergy = get_Conv_au_TO_unit('E',' ',WorkingUnit=.FALSE.)
-      limit_I0 = maxval(Mat_Aif)/HUNDRED
+      limit_I0 = maxval(Mat_Aif)*Min_relativeI0
 
       IF (debug) THEN
         write(out_unitp,*) 'BEGINNING sub_spectre'
@@ -1058,6 +1070,8 @@
 
       pas      = Ewidth / TEN
       n        = (emax-emin)/pas
+ 
+
 
       CALL alloc_NParray(spectre,[n],"spectre","sub_spectre")
 
