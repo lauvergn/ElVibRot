@@ -326,6 +326,9 @@ $(OBJ_DIR)/%.o: %.f90
 $(OBJ_DIR)/%.o: %.f
 	@echo "  compile: " $<
 	$(FFC) $(FFLAGS) -o $@ -c $<
+$(OBJ_DIR)/sub_system.o: sub_pot/sub_system.$(extf)
+	@echo "  compile: " $<
+	$(FFC) $(FFLAGS) -o $@ -c $<
 #===============================================
 #================ cleaning =====================
 .PHONY: clean cleanall

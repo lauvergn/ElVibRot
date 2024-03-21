@@ -33,8 +33,6 @@
       real (kind=Rkind) :: rho
 
 
-      integer :: nb_Func,ndimFunc
-      real (kind=Rkind), allocatable :: d0Func(:),d1Func(:,:)
 !-------------------------------------------------------------------------
 
 !----- for debuging --------------------------------------------------
@@ -56,20 +54,15 @@
        END IF
 !-----------------------------------------------------------
 
-      CALL get_Qmodel_nb_Func_ndimFunc(nb_Func,ndimFunc)
-      allocate(d0Func(nb_Func))
-      allocate(d1Func(ndimFunc,nb_Func))
-      IF (ndimFunc /= 1 .OR. nb_Func /= 5) STOP 'pb with QML'
-
-      CALL get_Qmodel_d0d1Func(d0Func,d1Func,Qsym0(1:1),nb_Func,ndimFunc)
-
-      Tdef2(:,:) = -HALF * d0Func(5)
-      Tdef1(:)   = -HALF * d1Func(1,5)
+      Tdef2(:,:) = ZERO
+      Tdef1(:)   = ZERO
       vep        = ZERO
-      rho        = ONE
+      rho        = ZERO
       Tcor2(:,:) = ZERO
       Tcor1(:)   = ZERO
       Trot(:,:)  = ZERO
+
+      STOP 'The subroutine calc_f2_f1Q_ana MUST be make.'
 
 !-----------------------------------------------------------
       IF (debug .OR. para_Tnum%WriteT) THEN
