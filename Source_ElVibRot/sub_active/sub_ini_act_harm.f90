@@ -297,7 +297,7 @@
 
 
       IF (.NOT. para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid .AND.    &
-         print_level > 0 .AND. para_AllOp%tab_Op(1)%nb_qa < max_nb_G_FOR_print) THEN
+         print_level > 0 .AND. para_AllOp%tab_Op(1)%nb_qa > max_nb_G_FOR_print) THEN
         write(out_unitp,'(a)') 'Grid (%): [--0-10-20-30-40-50-60-70-80-90-100]'
         write(out_unitp,'(a)',ADVANCE='no') 'Grid (%): ['
         flush(out_unitp)
@@ -305,13 +305,14 @@
 
       max_Sii = ZERO
       max_Sij = ZERO
-
+      
 !$OMP   PARALLEL &
 !$OMP   DEFAULT(NONE) &
 !$OMP   SHARED(para_AllOp,max_Sii,max_Sij,iqf) &
 !$OMP   PRIVATE(iq,out_unitp,freq_only,OldPara) &
 !$OMP   NUM_THREADS(Grid_maxth)
-      CALL dealloc_OldParam(OldPara)
+        CALL dealloc_OldParam(OldPara)
+!$OMP   BARRIER
 
 !$OMP   DO SCHEDULE(STATIC)
         DO iq=1,iqf-1
@@ -322,8 +323,8 @@
         END DO
 !$OMP   END DO
 
-      CALL dealloc_OldParam(OldPara)
-
+        CALL dealloc_OldParam(OldPara)
+!$OMP   BARRIER
 
 !$OMP   DO SCHEDULE(STATIC)
         DO iq=max(1,iqf),para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Last_GridPoint
@@ -332,15 +333,14 @@
           CALL sub_HSOp_inact(iq,freq_only,para_AllOp,max_Sii,max_Sij,  &
                para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid,OldPara)
 
-
         END DO
 !$OMP   END DO
         CALL dealloc_OldParam(OldPara)
 
 !$OMP   END PARALLEL
 
-      IF (.NOT. para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid .AND.  &
-         print_level > 0 .AND. para_AllOp%tab_Op(1)%nb_qa < max_nb_G_FOR_print) THEN
+        IF (.NOT. para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid .AND.  &
+         print_level > 0 .AND. para_AllOp%tab_Op(1)%nb_qa > max_nb_G_FOR_print) THEN
          IF(MPI_id==0) write(out_unitp,'(a)',ADVANCE='yes') '----]'
       END IF
 
@@ -362,6 +362,7 @@
       !-------------------------------------------------------------------
 
  999  CONTINUE
+      flush(out_unitp)
 
       !-------------------------------------------------------------------
       !- Analysis of the grid (zero or constant terms)
@@ -550,5 +551,5 @@
     write(out_unitp,*) 'END ',name_sub
   END IF
   !-------------------------------------------------------------------
-
+  
   END SUBROUTINE Tune_grid
