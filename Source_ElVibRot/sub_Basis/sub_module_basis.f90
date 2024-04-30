@@ -541,6 +541,9 @@ MODULE mod_basis
       CASE ("hobox","hmbox")
         basis_temp%type = 21
         CALL sub_quadra_hermitebox(basis_temp,-1)
+      CASE ("hoab","hmab")
+        basis_temp%type = 21
+        CALL sub_quadra_hermiteAB(basis_temp,-1)
       CASE ("cuba_ho","cuba_hm","cuba_hermite")
         basis_temp%type = 2000
         err_grid = .TRUE.
@@ -637,7 +640,8 @@ MODULE mod_basis
         write(out_unitp,*) ' 20 : Hermite Poly.                       : HO or Hm or hermite'
         write(out_unitp,*) ' 200: Hermite Poly. (even)                : HO_0 or Hm_0'
         write(out_unitp,*) ' 201: Hermite Poly. (odd)                 : HO_1 or Hm_1'
-        write(out_unitp,*) ' 21 : PHermite Poly. + points from boxAB  : HObox or Hmbox'
+        write(out_unitp,*) ' 21 : Hermite Poly. + points from boxAB   : HObox or Hmbox'
+        write(out_unitp,*) ' 22 : Hermite Poly. + variable transfo    : HOAB'
         write(out_unitp,*) ' 2000:Hermite Poly. + cubature (nD)       : cuba_HO or cuba_Hm or cuba_hermite'
 
         write(out_unitp,*)

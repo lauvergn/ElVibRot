@@ -56,7 +56,7 @@
       logical                       :: deriv
       integer                       :: i,iq,nq,nb_nosym
       logical                       :: Print_basis
-      TYPE (File_t)             :: herm_file
+      TYPE (File_t)                 :: herm_file
       integer                       :: idum,nio,err_io
       real(kind=Rkind)              :: wdum
       logical, parameter            :: WithRead = .TRUE.
@@ -244,6 +244,77 @@
 !-----------------------------------------------------------
 
       end subroutine sub_quadra_hermite
+
+  SUBROUTINE sub_quadra_hermiteAB(base,paire)
+    USE mod_system
+    USE mod_basis
+    USE ADdnSVM_m
+    IMPLICIT NONE
+  
+    !---------- variables passees en argument ----------------------------
+    TYPE (basis), intent(inout) :: base
+    integer,      intent(in)    :: paire
+  
+    integer           :: nq,iq,ib
+    real (kind=Rkind) :: d0u,d0x,d1u(1),d2u(1,1)
+    TYPE (dnS_t)      :: x,u,dnf,dnbu
+    !----- for debuging --------------------------------------------------
+    character (len=*), parameter :: name_sub='sub_quadra_hermiteAB'
+    logical, parameter :: debug = .TRUE.
+    !logical, parameter :: debug = .FALSE.
+    !-----------------------------------------------------------
+    nq = get_nq_FROM_basis(base)
+
+    IF (debug) THEN
+      write(out_unitp,*) 'BEGINNING ',name_sub
+      write(out_unitp,*) 'nb',base%nb
+      write(out_unitp,*) 'nq',nq
+    END IF
+    !-----------------------------------------------------------
+
+    ! first call the usual HO basis
+    CALL sub_quadra_hermite(base,paire)
+    
+    DO iq=1,nq
+      ! first the new grid point
+      d0u = base%x(1,iq) ! the grid point in in the ]-inf,+inf[ range
+      base%x(1,iq) = (base%B(1)-base%A(1))*HALF * tanh(d0u) + (base%B(1)+base%A(1))*HALF 
+      d0x = base%x(1,iq) ! the grid point in the ]A,B[ range
+
+      ! 2d the new weight x rho ! Warning the new rho is added in wrho
+      x = variable(d0x,nVar=1,nderiv=3)
+      u = atanh((x+x-base%A(1)-base%B(1))/(base%B(1)-base%A(1)))
+      IF (abs(get_d0(u) - d0u) > ONETENTH**9) STOP 'ERROR get_d0(u) /= d0u'
+
+      !base%wrho(iq) = base%wrho(iq) * d1u(1)
+
+      !basis derivatives
+      !base%dnRGB%d2(iq,:,1,1) = (d2u(1,1)* base%dnRGB%d1(iq,:,1) + d1u(1)**2 * base%dnRGB%d2(iq,:,1,1))
+      !base%dnRGB%d1(iq,:,1)   = d1u(1)  * base%dnRGB%d1(iq,:,1)
+
+      DO ib=1,base%nb
+        CALL set_dnS(dnf,d0=base%dnRGB%d0(iq,ib),       &
+          d1=[base%dnRGB%d1(iq,ib,1)], &
+          d2=reshape([base%dnRGB%d2(iq,ib,1,1)],shape=[1,1]))
+
+        dnbu = dnF_OF_dnS(dnf,u)*sqrt(deriv(u,ider=1))
+        base%dnRGB%d0(iq,ib)     = get_d0(dnbu)
+        base%dnRGB%d1(iq,ib,:)   = get_d1(dnbu)
+        base%dnRGB%d2(iq,ib,:,:) = get_d2(dnbu)
+
+        !base%dnRGB%d2(iq,ib,1,1) = d2u(1,1)* base%dnRGB%d1(iq,ib,1) + d1u(1)**2 * base%dnRGB%d2(iq,ib,1,1)
+        !base%dnRGB%d1(iq,ib,1)   = d1u(1)  * base%dnRGB%d1(iq,ib,1)
+      END DO
+    END DO
+
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      CALL RecWrite_basis(base,write_all=.TRUE.)
+      write(out_unitp,*) 'END ',name_sub
+    END IF
+    !-----------------------------------------------------------
+
+  end subroutine sub_quadra_hermiteAB
 
       SUBROUTINE sub_quadra_hermite_half(base)
 
