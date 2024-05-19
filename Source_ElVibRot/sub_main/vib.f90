@@ -2053,6 +2053,9 @@ para_mem%mem_debug = .FALSE.
 Make_Mat_save = para_H%Make_Mat
 para_H%Make_Mat = .FALSE.
 
+ ! force SG4_maxth to SG4_maxth_init to be able to tune it several times
+SG4_maxth = SG4_maxth_init
+
 nb_psi_loc = nb_psi
 IF (cplx) nb_psi_loc = 1
 

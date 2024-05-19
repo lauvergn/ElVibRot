@@ -306,6 +306,12 @@
            END IF
 
         END IF
+        MatOp_maxth_init        = MatOp_maxth
+        OpPsi_maxth_init        = OpPsi_maxth
+        BasisTOGrid_maxth_init  = BasisTOGrid_maxth
+        Grid_maxth_init         = Grid_maxth
+        CRP_maxth_init          = CRP_maxth
+        SG4_maxth_init          = SG4_maxth
 
         write(out_unitp,*) '========================================='
         write(out_unitp,*) 'OpenMP parameters:',openmp
