@@ -58,7 +58,7 @@
       USE mod_nDindex
       USE mod_Constant,  only: REAL_WU, convRWU_TO_R_WITH_WorkingUnit
       use mod_Coord_KEO, only: CoordType, alloc_array, dealloc_array,   &
-                               set_rphtransfo, Tnum
+                               set_rphtransfo, Tnum, Init_degenerate_freq
       USE mod_basis
       USE mod_Op
       IMPLICIT NONE
@@ -269,6 +269,8 @@
                             H0_sym,H0_sym,Qinact2n_sym(1:nb_inact21),   &
                             Qinact2n_eq(1:nb_inact21,1:nb_inact21),     &
                             QMLib=QMLib,list_QMLMapping=mole%ActiveTransfo%list_QMLMapping)
+
+        CALL Init_degenerate_freq(mole%RPHTransfo_inact2n%degenerate_freq,nb_inact21)
 
       ELSE IF (nb_inact21 > 0 .AND. associated(mole%RPHTransfo)) THEN
         STOP 'In read_inactive: this option is not used anymore ?'
