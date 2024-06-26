@@ -2046,7 +2046,7 @@ MODULE mod_basis
       real(kind=Rkind), allocatable :: d0bxd0bT_inv(:,:)  ! (qb,nq)
       real(kind=Rkind), allocatable :: d0b_pseudoInv(:,:) ! (nb,nq)
       real(kind=Rkind), allocatable :: Check_bGB(:,:)     ! (nb,nq)
-      real(kind=Rkind) :: Max_err_Check_bGB
+      real(kind=Rkind) :: Max_err_Check_bGB,Max_err_d1GG2md2GG
 
 
       !logical :: SVD = .TRUE.
@@ -2055,8 +2055,8 @@ MODULE mod_basis
       logical :: PseudoInverse = .TRUE.
       real(kind=Rkind) :: epsi,wmin
       logical :: pseudo_inv_OK
-      logical :: Check = .TRUE.
-      !logical :: Check = .FALSE.
+      !logical :: Check = .TRUE.
+      logical :: Check = .FALSE.
 
 !---------------------------------------------------------------------
 
@@ -2130,21 +2130,21 @@ MODULE mod_basis
               d0bxd0bT(:,i) = VecP(:,i)/valP(i)
             END DO
 
-!           pseudo_inv_OK = .FALSE.
-!           DO
-!             IF (pseudo_inv_OK) EXIT
-!             IF (debug) write(out_unitp,*) 'diago : count non zero',count(valP > epsi)
-!             IF (count(valP > epsi) > nb) THEN
-!               epsi = epsi * TWO
-!             ELSE
-!               pseudo_inv_OK = .TRUE.
-!             END IF
-!           END DO
+            !  pseudo_inv_OK = .FALSE.
+            !  DO
+            !    IF (pseudo_inv_OK) EXIT
+            !    IF (debug) write(out_unitp,*) 'diago : count non zero',count(valP > epsi)
+            !    IF (count(valP > epsi) > nb) THEN
+            !      epsi = epsi * TWO
+            !    ELSE
+            !      pseudo_inv_OK = .TRUE.
+            !    END IF
+            !  END DO
 
-!           d0bxd0bT(:,:) = ZERO
-!           DO i=1,nq
-!             IF (abs(valP(i)) > epsi) d0bxd0bT(:,i) = VecP(:,i)/valP(i)
-!           END DO
+            !  d0bxd0bT(:,:) = ZERO
+            !  DO i=1,nq
+            !    IF (abs(valP(i)) > epsi) d0bxd0bT(:,i) = VecP(:,i)/valP(i)
+            !  END DO
             d0bxd0bT_inv = matmul(d0bxd0bT,transpose(VecP))
             !CALL Write_VecMat(matmul(d0bxd0bT,d0bxd0bT_inv),out_unitp,5)
             !CALL Write_VecMat(matmul(d0bxd0bT_inv,d0bxd0bT),out_unitp,5)
@@ -2230,6 +2230,27 @@ MODULE mod_basis
         END IF
 
         IF (Check) THEN
+
+          write(out_unitp,*) '-------------------------------------------'
+          write(out_unitp,*) 'Check d1GG^2 - d2GG, nb,nq',nb,nq
+          DO i=1,basis_set%ndim
+          DO j=1,basis_set%ndim
+            Check_bGB = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))
+            IF (debug) CALL Write_VecMat(Check_bGB,out_unitp,5,info='d1GG^2')
+            IF (debug) CALL Write_VecMat(basis_set%dnRGG%d2(:,:,i,j),out_unitp,5,info='d2GG')
+
+            Check_bGB = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))-basis_set%dnRGG%d2(:,:,i,j)
+            IF (debug) CALL Write_VecMat(Check_bGB,out_unitp,5,info='d1GG^2 - d2GG')
+
+            Max_err_d1GG2md2GG = maxval(abs(Check_bGB))
+            !IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
+              write(out_unitp,'(a,4x,i0,x,i0,x,e9.2)') 'Check d1GG^2 - d2GG',i,j,maxval(abs(Check_bGB))
+            !END IF
+            flush(out_unitp)
+            !basis_set%dnRGG%d2(:,:,i,j) = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))
+          END DO
+          END DO
+
           IF (debug) THEN
             write(out_unitp,*) '-------------------------------------------'
             write(out_unitp,*) 'Check dnRGG, nb,nq',nb,nq
@@ -2239,7 +2260,7 @@ MODULE mod_basis
           Max_err_Check_bGB = maxval(abs(Check_bGB))
           IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
             write(out_unitp,'(a,4x,e9.2)') 'Check_bGB%d0',maxval(abs(Check_bGB))
-            !CALL Write_VecMat(Check_bGB,out_unitp,5)
+            CALL Write_VecMat(Check_bGB,out_unitp,5)
           END IF
           flush(out_unitp)
 
@@ -2248,7 +2269,7 @@ MODULE mod_basis
             Max_err_Check_bGB = max(Max_err_Check_bGB,maxval(abs(Check_bGB)))
             IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
               write(out_unitp,'(a,1x,i0,2x,e9.2)') 'Check_bGB%d1',i,maxval(abs(Check_bGB))
-              !CALL Write_VecMat(Check_bGB,out_unitp,5)
+              CALL Write_VecMat(Check_bGB,out_unitp,5)
             END IF
           END DO
           flush(out_unitp)
@@ -2259,7 +2280,7 @@ MODULE mod_basis
             Max_err_Check_bGB = max(Max_err_Check_bGB,maxval(abs(Check_bGB)))
             IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
               write(out_unitp,'(a,1x,i0,1x,i0,e9.2)') 'Check_bGB%d2',i,j,maxval(abs(Check_bGB))
-              !CALL Write_VecMat(Check_bGB,out_unitp,5)
+              CALL Write_VecMat(Check_bGB,out_unitp,5)
             END IF
           END DO
           END DO
@@ -2271,6 +2292,7 @@ MODULE mod_basis
             write(out_unitp,'(a,e9.2)') 'Max_err_Check_bGB is too large! ',Max_err_Check_bGB
             STOP
           END IF
+           
         END IF
 
         CALL dealloc_NParray(d0bxd0bT,'d0bxd0bT',name_sub)
@@ -2288,6 +2310,7 @@ MODULE mod_basis
         flush(out_unitp)
       END IF
 !-----------------------------------------------------------
+      !stop 'coucou sub_dnGB_TO_dnGG'
       END SUBROUTINE sub_dnGB_TO_dnGG
 
       SUBROUTINE pack_basis(basis_set,sortX)

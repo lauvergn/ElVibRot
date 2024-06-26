@@ -378,6 +378,7 @@
         CALL init_ana_psi(para_ana%ana_psi,ana_level=ana_level,                    &
                           num_psi=0,propa=propa,T=ZERO,                            &
                           Boltzmann_pop=.TRUE.,Temp=Temp,                          &
+                          AvQ=.TRUE., &
                           adia=psi_adia,                                           &
                           AvScalOp=AvScalOp,AvHiterm=AvHiterm,AvPi=AvPi,AvOp=AvOp, &
                           Write_psi2_Grid=.FALSE.,                                 &
