@@ -291,7 +291,9 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
       USE mod_Constant
       USE mod_psi,    ONLY : param_psi,alloc_psi,alloc_array,dealloc_array, &
                             renorm_psi,norm2_psi,sub_PsiBasisRep_TO_GridRep,&
-                             sub_analyze_tab_psi,ecri_psi,sub_read_psi0
+                             sub_analyze_tab_psi,ecri_psi
+      
+      USE mod_WP0
       USE mod_Op
       USE mod_field
       USE mod_propa
@@ -810,7 +812,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
            CALL build_field(T,WP,nb_WP,para_field_new,Obj0,             &
                             para_Dip,para_propa)
 
-        print_WP = (print_Op .AND. mod(it,para_propa%n_WPecri) == 0)
+        print_WP = (print_Op .AND. mod(it,para_propa%WriteWP_nDeltaT) == 0)
 
         IF (print_Op .OR. debug) THEN
           CALL sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,para_field=para_propa%para_field)

@@ -68,7 +68,7 @@ sym rSiN rH+ RH-    aH+ aH- phi
 
  &analyse max_ana=20 max_ene=20000.d0 print=f propa=t /
  &propa
-        n_WPecri=1 type_WPpropa=100
+        WriteWP_nDeltaT=1 type_WPpropa=100
         lect_WP0FBR=f
  /
  &defWP0 Qeq=3.1 sigma=0.3 imp_k=0.0 /

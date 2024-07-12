@@ -46,7 +46,6 @@
 
   CONTAINS
 
-
 !=======================================================================================
 !
 !     Symmetrization (with abelian group) of psi in BasisRep

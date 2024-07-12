@@ -80,6 +80,7 @@ CONTAINS
       n = para_Op%nb_tot
       IF (debug) THEN
         write(out_unitp,*) 'BEGINNING sub_MatOp',para_Op%n_Op
+        write(out_unitp,*) 'print_level in sub_MatOp',print_level
         write(out_unitp,*) 'nb_act1,nb_var',para_Op%mole%nb_act1,       &
                                    para_Op%mole%nb_var
         write(out_unitp,*) 'read MatOp',para_Op%n_Op,para_Op%read_Op
@@ -90,7 +91,6 @@ CONTAINS
 !        IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unitp,5)
       END IF
 !-----------------------------------------------------------
-
     RealTime = Delta_RealTime(MatOp_Time)
 
     para_Op%Make_mat = .FALSE.

@@ -66,7 +66,7 @@ dh 0.0
  &analyse max_ana=20 max_ene=20000. "cm-1" print=f propa=t /
  &propa
         WPTmax=10.d0 WPdeltaT=1.d0 nb_micro=1
-        n_WPecri = 1 WPpsi2 =t WPpsi=f
+        WriteWP_nDeltaT = 1 WPpsi2 =t WPpsi=f
         type_WPpropa=2 max_poly=5000 npoly=300 poly_tol=1.d-18
         DHmax=0.0d0 auto_Hmax=f
         WP0n_h=1 lect_WP0FBR=f

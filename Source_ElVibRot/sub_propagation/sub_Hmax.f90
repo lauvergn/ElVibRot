@@ -381,7 +381,7 @@ relax = .TRUE.
         para_propa_loc%para_poly%DHmax        = ZERO
 
         para_propa_loc%write_iter        = (print_level > 1)
-        para_propa_loc%n_WPecri          = 1
+        para_propa_loc%WriteWP_nDeltaT   = 1
         para_propa_loc%WPpsi2            = .FALSE.
         para_propa_loc%WPpsi             = .FALSE.
         para_propa_loc%file_autocorr%name= 'WP_auto'

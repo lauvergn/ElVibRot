@@ -58,7 +58,7 @@ sym  cos(a)      R     r    x    pi   dh
  &propa
         WPTmax=100.d0 WPdeltaT=1.d0 nb_micro=1
 
-        n_WPecri=2 WPpsi2=t WPpsi=t write_DVR=t write_FBR=t
+        WriteWP_nDeltaT=2 WPpsi2=t WPpsi=t write_DVR=t write_FBR=t
 
         type_WPpropa=2 max_poly=5000 npoly=300 poly_tol=1.d-20
         DHmax=0.0d0 auto_Hmax=t

@@ -84,7 +84,7 @@ X 1 2
 
 &analyse max_ene=50. 'au' print=f print_psi=0 propa=t /
 
-&propa WPTmax=1.d0  WPdeltaT=0.5d0  nb_micro=1 n_WPecri=1 WPpsi2 =f  WPpsi=f  
+&propa WPTmax=1.d0  WPdeltaT=0.5d0  nb_micro=1 WriteWP_nDeltaT=1 WPpsi2 =f  WPpsi=f  
        name_WPpropa='$typepropa' max_poly=10000 npoly=300 poly_tol=1.d-10 DHmax=0.0d0 auto_Hmax=f 
        New_Read_WP0=t TFnexp2=24 TFmaxE=5.0 'eV' TFminE=-3245.98 'cm-1'
 

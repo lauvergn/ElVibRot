@@ -57,7 +57,7 @@ sym  cos(a)      R     r    x    pi   dh
  &analyse max_ana=20 print=f propa=t /
  &propa
         WPTmax=1000.d0 WPdeltaT=10.d0 
-        n_WPecri=1 WPpsi2=f WPpsi=t
+        WriteWP_nDeltaT=1 WPpsi2=f WPpsi=t
         type_WPpropa=22 max_poly=5000 npoly=300 poly_tol=1.d-16
         DHmax=0.0d0 auto_Hmax=f
         WP0n_h=1 lect_WP0FBR=f

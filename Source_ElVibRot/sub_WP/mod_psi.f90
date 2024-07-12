@@ -63,6 +63,7 @@ CONTAINS
       USE mod_param_WP0
       USE mod_ana_psi
       USE mod_psi_io
+      USE mod_WP0
       USE mod_MPI_aux
       IMPLICIT NONE
 

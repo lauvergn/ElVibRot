@@ -63,7 +63,7 @@ dh 0.0
  &propa
         WPTmax=20. 'fs' WPdeltaT=1. 'fs' nb_micro=1
 
-        n_WPecri=1 WPpsi2=t WPpsi=t Write_WPAdia=t
+        WriteWP_nDeltaT=1 WPpsi2=t WPpsi=t Write_WPAdia=t
 
         type_WPpropa=1 poly_tol=1.d-12 auto_Hmax=f
 

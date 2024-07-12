@@ -607,16 +607,6 @@ CONTAINS
             IF (allocated(H))  THEN
               CALL dealloc_NParray(H,"H",name_sub)
             END IF
-          ELSE
-  !          IF (para_H%para_ReadOp%Op_Transfo) THEN
-  !            CALL Set_ZPE_OF_Op(para_H,Ene(1:count(VecToBeIncluded)),forced=.TRUE.)
-  !          ELSE
-  !            CALL Set_ZPE_OF_Op(para_H,Ene(1:count(VecToBeIncluded)),Ene_min=min_Ene,forced=.TRUE.)
-  !          END IF
-  !          ZPE = para_H%ZPE
-  !
-  !          CALL sub_save_LCpsi(psi,Vec,ndim0,nb_diago,para_propa%file_WP)
-  !          CALL time_perso('save_LCpsi done')
           END IF ! for save_WP
           !- save psi(:) on file
           !----------------------------------------------------------
@@ -768,8 +758,9 @@ CONTAINS
  USE mod_system
  USE mod_psi,     ONLY : param_psi,alloc_psi,norm2_psi,renorm_psi,      &
                    Set_symab_OF_psiBasisRep,sub_PsiBasisRep_TO_GridRep, &
-                   sub_read_psi0,param_WP0,Set_Random_psi,ecri_init_psi
+                   param_WP0,Set_Random_psi,ecri_init_psi
 
+ USE mod_WP0
  USE mod_propa,   ONLY : param_Davidson
  IMPLICIT NONE
 

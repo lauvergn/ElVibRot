@@ -164,6 +164,10 @@ CONTAINS
 
       ! For the header of the file
       nb_psi        = count((ene(:)-para_H%ZPE) <= para_ana%max_ene)
+      !write(out_unitp,*) 'nb_psi',nb_psi
+      !write(out_unitp,*) 'ZPE,max_ene',para_H%ZPE,para_ana%max_ene
+
+
       IF(MPI_id==0) CALL Write_header_saveFile_psi(tab_Psi,nb_psi,file_WPspectral)
 
       ! write the energy level + save the psi

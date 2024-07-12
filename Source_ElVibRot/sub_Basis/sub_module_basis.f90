@@ -554,6 +554,13 @@ MODULE mod_basis
         basis_temp%type = 80
         CALL sub_quadra_hermite_half(basis_temp,0)
 
+      CASE ("hol-","hml-")
+        basis_temp%type = 80
+        CALL sub_quadra_hermite_halfLeft(basis_temp,1)
+      CASE ("hor-","hmr-")
+        basis_temp%type = 80
+        CALL sub_quadra_hermite_halfRight(basis_temp,1)
+
       CASE ("lm","laguerre")
         basis_temp%type = 90
         CALL sub_quadra_laguerre(basis_temp)

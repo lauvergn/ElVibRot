@@ -69,7 +69,7 @@ sym  cos(a)      R     r    x    pi   dh
           coherence=1 /
  &propa
         WPTmax=100.d0 WPdeltaT=1.d0
-        n_WPecri=1 WPpsi2=f WPpsi=f
+        WriteWP_nDeltaT=1 WPpsi2=f WPpsi=f
         name_WPpropa='$typepropa' max_poly=5000 npoly=300 poly_tol=1.d-15
         DHmax=0.0d0 auto_Hmax=t
 

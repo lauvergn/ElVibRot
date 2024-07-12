@@ -2124,6 +2124,7 @@ END SUBROUTINE Tune_SG4threads_HPsi
       USE mod_PrimOp
       USE mod_basis
       USE mod_psi
+      USE mod_WP0
 
       USE mod_Op
       USE mod_analysis

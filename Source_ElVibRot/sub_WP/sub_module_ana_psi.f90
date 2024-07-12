@@ -114,6 +114,7 @@ END SUBROUTINE sub_analyze_tab_Psi
 SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
   USE mod_system
   USE mod_psi_set_alloc
+  USE mod_psi_io
   USE mod_psi_B_TO_G
   IMPLICIT NONE
 
@@ -410,18 +411,26 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
         ELSE
           IF(MPI_id==0) CALL file_open2(name_filePsi,nioPsi,append=.TRUE.)
         END IF
-        IF(MPI_id==0) CALL ecri_psi(T=ana_psi%T,psi=psi,nioWP=nioPsi,   &
-                           ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.,   &
-                           ecri_psi2=.FALSE.)
+        IF(MPI_id==0) THEN 
+          CALL Write_Psi_nDBasis(Psi,nioPsi,iPsi=ana_psi%num_psi, &
+                                 epsi=ZERO,lformated=.TRUE.,version=2,T=ana_psi%T)
+          !CALL ecri_psi(T=ana_psi%T,psi=psi,nioWP=nioPsi,   &
+          !                 ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.,   &
+          !                 ecri_psi2=.FALSE.)
+        END IF
       ELSE
         IF (ana_psi%num_psi == 1) THEN
           IF(MPI_id==0) CALL file_open2(name_filePsi,nioPsi)
         ELSE
           IF(MPI_id==0) CALL file_open2(name_filePsi,nioPsi,append=.TRUE.)
         END IF
-        IF(MPI_id==0) CALL ecri_psi(psi=psi,nioWP=nioPsi,               &
-                           ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.,   &
-                           ecri_psi2=.FALSE.)
+        IF(MPI_id==0) THEN 
+          CALL Write_Psi_nDBasis(Psi,nioPsi,iPsi=ana_psi%num_psi, &
+                epsi=ZERO,lformated=.TRUE.,version=0)
+          !CALL ecri_psi(psi=psi,nioWP=nioPsi,   &
+          !                 ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.,   &
+          !                 ecri_psi2=.FALSE.)
+        END IF
       END IF
       IF(MPI_id==0) close(nioPsi) ! CALL file_close cannot be used
     END IF
@@ -1180,6 +1189,7 @@ END SUBROUTINE sub_analyze_psi
       real (kind=Rkind)     :: Rtemp,Qix
       real (kind=Rkind)     :: RVec_bie(psi%nb_bi*psi%nb_be)
       complex (kind=Rkind)  :: CVec_bie(psi%nb_bi*psi%nb_be)
+      real (kind=Rkind), allocatable     :: x(:)
 
       integer :: iq_act1,jq_act1,i,j,iq,ix,ix_TO_iQdyn
       integer :: nDval(psi%BasisnD%nDindG%ndim)
@@ -1192,6 +1202,8 @@ END SUBROUTINE sub_analyze_psi
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unitp,*) 'psi%basis'
+        CALL RecWrite_basis(psi%BasisnD)
         write(out_unitp,*) 'psi'
         CALL ecri_psi(psi=psi)
         write(out_unitp,*) 'ana_psi%ana_level',ana_psi%ana_level
@@ -1203,9 +1215,9 @@ END SUBROUTINE sub_analyze_psi
         IF (.NOT. ana_psi%GridDone) CALL sub_PsiBasisRep_TO_GridRep(psi)
 
         IF (ana_psi%Rho1D) THEN
-
-          !- loop on coordinates ----------------------------------
+          !- loop on the basis ----------------------------------
           DO i_basis_act1=1,psi%BasisnD%nb_basis
+            IF (psi%BasisnD%tab_Pbasis(i_basis_act1)%Pbasis%nb_basis > 1) CYCLE
 
             IF (adia) THEN
               state_name = make_EVRTFileName('RhoAdia1D_')
@@ -1284,25 +1296,28 @@ END SUBROUTINE sub_analyze_psi
                 rho1D(iq_act1,i_bi,i_be) = rho1D(iq_act1,i_bi,i_be) + RVec_bie(i_bie)
               END DO
               END DO
-            END DO
 
-            write(out_unitp,*) 'rho1D of ',ana_psi%num_psi,i_basis_act1
+            END DO
+            allocate(x(psi%BasisnD%tab_Pbasis(i_basis_act1)%Pbasis%ndim))
             IF (ana_psi%propa) THEN
               DO i=1,psi%BasisnD%nDindG%nDsize(i_basis_act1)
-                write(nioRho,*) ana_psi%T,i,                            &
-                  psi%BasisnD%tab_Pbasis(i_basis_act1)%Pbasis%x(:,i),rho1D(i,:,:)
+                CALL Rec_x(x,psi%BasisnD%tab_Pbasis(i_basis_act1)%Pbasis,i)
+                write(nioRho,*) ana_psi%T,i,x,rho1D(i,:,:)
               END DO
               write(nioRho,*)
             ELSE
+            
               DO i=1,psi%BasisnD%nDindG%nDsize(i_basis_act1)
-                write(nioRho,*) i,                                      &
-                  psi%BasisnD%tab_Pbasis(i_basis_act1)%Pbasis%x(:,i),rho1D(i,:,:)
+                CALL Rec_x(x,psi%BasisnD%tab_Pbasis(i_basis_act1)%Pbasis,i)
+                write(nioRho,*) i,x,rho1D(i,:,:)
               END DO
             END IF
+            deallocate(x)
 
             CALL dealloc_NParray(rho1D,'rho1D',name_sub)
             CALL file_close(file_Rho)
           END DO
+
         END IF
 
         IF (ana_psi%Rho2D) THEN

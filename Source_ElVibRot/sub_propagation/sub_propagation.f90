@@ -163,8 +163,8 @@ CONTAINS
         IF(keep_MPI) WP(1) = WP0(1)
       END IF
 
-      IF (para_propa%n_WPecri < 1) THEN !nothing written
-        para_propa%n_WPecri = 2 * int(para_propa%WPTmax/para_propa%WPdeltaT)
+      IF (para_propa%WriteWP_nDeltaT < 1) THEN !nothing written
+        para_propa%WriteWP_nDeltaT = 2 * int(para_propa%WPTmax/para_propa%WPdeltaT)
       END IF
 
 
@@ -894,10 +894,10 @@ CONTAINS
       DO WHILE ( (T - (para_propa%WPTmax-para_propa%WPdeltaT) <         &
                  para_propa%WPdeltaT/TEN**5) .AND. psi(1)%norm2 < para_propa%max_norm2)
 
-         IF (mod(it,para_propa%n_WPecri) == 0) THEN
+         IF (mod(it,para_propa%WriteWP_nDeltaT) == 0) THEN
            IF(MPI_id==0) THEN
-             para_propa%ana_psi%Write_psi2_Grid = (mod(it,para_propa%n_WPecri) == 0) .AND. para_propa%WPpsi2
-             para_propa%ana_psi%Write_psi_Grid  = (mod(it,para_propa%n_WPecri) == 0) .AND. para_propa%WPpsi
+             para_propa%ana_psi%Write_psi2_Grid = (mod(it,para_propa%WriteWP_nDeltaT) == 0) .AND. para_propa%WPpsi2
+             para_propa%ana_psi%Write_psi_Grid  = (mod(it,para_propa%WriteWP_nDeltaT) == 0) .AND. para_propa%WPpsi
            ENDIF
            CALL sub_analyze_WP_OpWP(T,psi,1,tab_Op,para_propa)
          ELSE
@@ -1071,8 +1071,8 @@ CONTAINS
 !------- propagation loop ---------------------------------
       DO WHILE (it <= it_max)
 
-        para_propa%ana_psi%Write_psi2_Grid = (mod(it,para_propa%n_WPecri) == 0) .AND. para_propa%WPpsi2
-        para_propa%ana_psi%Write_psi_Grid  = (mod(it,para_propa%n_WPecri) == 0) .AND. para_propa%WPpsi
+        para_propa%ana_psi%Write_psi2_Grid = (mod(it,para_propa%WriteWP_nDeltaT) == 0) .AND. para_propa%WPpsi2
+        para_propa%ana_psi%Write_psi_Grid  = (mod(it,para_propa%WriteWP_nDeltaT) == 0) .AND. para_propa%WPpsi
 
         CALL sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,para_field=para_propa%para_field)
 
@@ -1080,7 +1080,7 @@ CONTAINS
         avE(:) = avE(:) + WP(:)%CAvOp-E0(:)
 
 
-         print_Op_loc = print_Op .AND. mod(it,para_propa%n_WPecri) == 0
+         print_Op_loc = print_Op .AND. mod(it,para_propa%WriteWP_nDeltaT) == 0
          CALL march_gene(T,WP(:),WP(:),nb_WP,print_Op_loc,              &
                          para_H,para_propa,                             &
                          para_Dip,para_propa%para_field)

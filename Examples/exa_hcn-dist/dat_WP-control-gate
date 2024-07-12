@@ -58,7 +58,7 @@ sym  cos(a)      R     r    x    pi   dh
  &analyse max_ana=20 max_ene=20000. "cm-1" print=f propa=t control=t /
  &propa
         WPTmax=40000.d0 WPdeltaT=10.d0 
-        n_WPecri = 1 WPpsi2 =f WPpsi=t
+        WriteWP_nDeltaT = 1 WPpsi2 =f WPpsi=t
         type_WPpropa=24 npoly=1000 poly_tol=1.d-20
         spectral=t nb_vp_spec=10
  /
