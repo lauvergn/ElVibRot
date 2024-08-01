@@ -41,18 +41,17 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_ana_psi
-  USE mod_system
-  USE mod_nDindex
-  USE mod_Constant
-  USE mod_type_ana_psi
-  USE mod_basis
   IMPLICIT NONE
 
   PRIVATE
   PUBLIC :: sub_analyze_tab_psi,sub_analyze_psi
   PUBLIC :: Channel_weight,Channel_weight_contracHADA
   PUBLIC :: norm2_psi,renorm_psi_With_norm2,renorm_psi
+  PUBLIC :: string_t
 
+  TYPE string_t
+    character (len=:), allocatable :: str
+  END TYPE string_t
 CONTAINS
 
 !================================================================
@@ -65,6 +64,7 @@ CONTAINS
 SUBROUTINE sub_analyze_tab_Psi(tab_psi,ana_psi,adia,Write_psi)
   USE mod_system
   USE mod_psi_set_alloc
+  USE mod_type_ana_psi
   IMPLICIT NONE
 
   TYPE (param_psi),     intent(inout)        :: tab_psi(:)
@@ -111,18 +111,21 @@ SUBROUTINE sub_analyze_tab_Psi(tab_psi,ana_psi,adia,Write_psi)
 !----------------------------------------------------------
 END SUBROUTINE sub_analyze_tab_Psi
 
-SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
+SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
   USE mod_system
+  USE mod_Constant
   USE mod_psi_set_alloc
+  USE mod_type_ana_psi
   USE mod_psi_io
   USE mod_psi_B_TO_G
   IMPLICIT NONE
 
   !----- variables for the WP -------------------------------
-  TYPE (param_psi),     intent(inout)        :: psi
-  TYPE (param_ana_psi), intent(inout)        :: ana_psi
-  logical,              intent(in)           :: adia
-  logical,              intent(in), optional :: Write_psi
+  TYPE (param_psi),               intent(inout)           :: psi
+  TYPE (param_ana_psi),           intent(inout)           :: ana_psi
+  logical,                        intent(in)              :: adia
+  logical,                        intent(in),    optional :: Write_psi
+  character (len=:), allocatable, intent(inout), optional :: PsiAna
 
 
   integer                           :: iE,i,j,i_be,i_bi
@@ -137,6 +140,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
 
   character(len=:), allocatable     :: info
   character(len=:), allocatable     :: psi_line
+  character(len=:), allocatable     :: lines
 
   integer                           :: nioPsi
   character (len=Line_len)          :: name_filePsi      = " "     ! name of the file
@@ -188,6 +192,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
   !----------------------------------------------------------------------
   ! tab_WeightChannels
   IF (ana_psi%propa) THEN
+    !write(6,*) ' in sub_analyze_psi0: propa' ; flush(6)
 
     RWU_E  = REAL_WU(ana_psi%Ene,'au','E')
     E      = convRWU_TO_R_WITH_WritingUnit(RWU_E)
@@ -196,19 +201,19 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
 
     IF (adia) THEN
       CALL Channel_weight(tab_WeightChannels,psi,GridRep=.TRUE.,BasisRep=.FALSE.)
-      info = '#WPadia ' // TO_string(ana_psi%num_psi)
+      CALL SET_string(info,'#WPadia ',TO_string(ana_psi%num_psi))
     ELSE
       CALL Channel_weight(tab_WeightChannels,psi,GridRep=.FALSE.,BasisRep=.TRUE.)
-      info = '#WP ' // TO_string(ana_psi%num_psi)
+      CALL SET_string(info,'#WP ',TO_string(ana_psi%num_psi))
     END IF
     Psi_norm2 = sum(tab_WeightChannels)
 
-    psi_line = 'norm^2-WP ' // info // ' ' //                                   &
-                            RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.)
-    ! write(6,*) ' in sub_analyze_psi: 1' ; flush(6)
+    CALL SET_string(psi_line,'norm^2-WP ',info,' ',  &
+            RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.))
+     !write(6,*) ' in sub_analyze_psi: 1' ; flush(6)
 
     ! add the energy
-    iE = int(log10(abs(E)+ONETENTH**8)) ! to avoid zero
+    iE = int(log10(abs(E)+ONETENTH**8)) ! add 1e-8 to avoid zero
     GridDone = ana_psi%GridDone
     IF (15-iE < 5 .OR. 7-iE < 0) THEN
       CALL modif_ana_psi(ana_psi,EFormat='e15.5')
@@ -220,47 +225,50 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
     !write(6,*) E,iE,'ana_psi%Eformat: ',ana_psi%Eformat
     !write(6,*) ' in sub_analyze_psi: 2' ; flush(6)
 
-    psi_line = psi_line // ' ' // real_TO_char(E,Rformat=ana_psi%Eformat)
+    CALL ADD_TO_string(psi_line,' ',TO_string(E,Rformat=ana_psi%Eformat))
     !write(6,*) ' in sub_analyze_psi: 2.5' ; flush(6)
 
     ! add the field (if necessary)
     IF (ana_psi%With_field) THEN
-      psi_line = psi_line // ' ' // real_TO_char(ana_psi%field(1),Rformat='f8.5')
-      psi_line = psi_line // ' ' // real_TO_char(ana_psi%field(2),Rformat='f8.5')
-      psi_line = psi_line // ' ' // real_TO_char(ana_psi%field(3),Rformat='f8.5')
+      CALL ADD_TO_string(psi_line,' ',TO_string(ana_psi%field,Rformat='f8.5'))
     END IF
 
-    psi_line = psi_line // ' ' // real_TO_char(Psi_norm2,Rformat='f10.7')
+    CALL ADD_TO_string(psi_line,' ',TO_string(Psi_norm2,Rformat='f10.7'))
     DO i_be=1,psi%nb_be
-    DO i_bi=1,psi%nb_bi
-      w = tab_WeightChannels(i_bi,i_be)
-      psi_line = psi_line // ' ' // real_TO_char(w,Rformat='f10.7')
-    END DO
+      CALL ADD_TO_string(psi_line,' ',TO_string(tab_WeightChannels(:,i_be),Rformat='f10.7'))
     END DO
 
     write(out_unitp,*) psi_line
+    IF (present(PsiAna)) CALL ADD_TO_string(PsiAna,NEW_LINE('nl')) ! first line
 
     IF (ana_psi%Coherence > 0) THEN
       CALL alloc_NParray(Mij,[2, psi%nb_bi*psi%nb_be, psi%nb_bi*psi%nb_be],'Mij',name_sub)
 
       CALL sub_Rhoi_Rhoj_Over_Rho(psi,Mij,ana_psi)
 
-      psi_line = 'Mij ' // info // ' ' // real_TO_char(ana_psi%T,Rformat='f12.2')
+      CALL SET_string(psi_line,'Mij ',info,' ',TO_string(ana_psi%T,Rformat='f12.2'))
 
       DO i=1,size(Mij(1,:,1))
       DO j=i+1,size(Mij(1,:,1))
 
-        write(out_unitp,*) 'M-' // TO_string(i) // '-' //             &
-                           TO_string(j) // ' ' // info // ' ' //      &
-                    real_TO_char(ana_psi%T,Rformat='f12.2') // ': ' //  &
-                    real_TO_char(Mij(1,i,j),Rformat='f12.8'),' ',       &
-                    real_TO_char(Mij(2,i,j),Rformat='f12.8')
-
+        IF (present(PsiAna)) THEN
+          CALL ADD_TO_string(PsiAna,'M-',TO_string(i),'-',TO_string(j),' ',info,' ', &
+                             TO_string(ana_psi%T,Rformat='f12.2'),': ')
+          CALL ADD_TO_string(PsiAna,TO_string(Mij(1:2,i,j),Rformat='f12.8'), &
+                             NEW_LINE('nl'))
+        ELSE
+          write(out_unitp,*) 'M-' // TO_string(i) // '-' //                  &
+                            TO_string(j) // ' ' // info // ' ' //            &
+                            TO_string(ana_psi%T,Rformat='f12.2') // ': ' //  &
+                            TO_string(Mij(1,i,j),Rformat='f12.8'),' ',       &
+                            TO_string(Mij(2,i,j),Rformat='f12.8')
+        END IF
       END DO
       END DO
       CALL dealloc_NParray(Mij,'Mij',name_sub)
 
     END IF
+    !write(6,*) ' in sub_analyze_psif: propa' ; flush(6)
 
   ELSE ! not propa
     CALL Channel_weight(tab_WeightChannels,psi,                         &
@@ -272,58 +280,117 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
     E      = convRWU_TO_R_WITH_WritingUnit(RWU_E)
     DE     = convRWU_TO_R_WITH_WritingUnit(RWU_DE)
 
+    IF (present(PsiAna)) THEN
+      !$OMP  CRITICAL (sub_analyze_psi_CRIT)
+      CALL SET_string(PsiAna,'lev: ',TO_string(ana_psi%num_psi),' ', & 
+                         TO_string(Dominant_Channel(2)),' ',TO_string(psi%convAvOp))
+      CALL ADD_TO_string(PsiAna,' ',TO_string([E,DE,pop],Rformat=EneIO_format))
+      !$OMP  END CRITICAL (sub_analyze_psi_CRIT)
+    END IF                        
     IF (ana_psi%AvQ) THEN
       CALL alloc_NParray(moy_Qba,[2*Psi%BasisnD%ndim],"moy_Qba",name_sub)
       CALL sub_Qmoy(psi,moy_Qba,ana_psi)
 
-      IF (ana_psi%num_psi < 10000 .AND. Dominant_Channel(2) < 10000) THEN
-        lformat = trim('("lev: ",i4,i4,l3,' //              &
-                                   TO_string(3+size(moy_Qba)) //      &
-                       "(1x," // trim(adjustl(EneIO_format)) // "))")
+      IF (present(PsiAna)) THEN
+        !$OMP  CRITICAL (sub_analyze_psi_CRIT)
+        CALL ADD_TO_string(PsiAna,' ',TO_string(moy_Qba,Rformat=EneIO_format))
+        !$OMP  END CRITICAL (sub_analyze_psi_CRIT)
       ELSE
-        lformat = trim('("lev: ",i0,i0,l3,' //              &
-                                   TO_string(3+size(moy_Qba)) //      &
-                       "(1x," // trim(adjustl(EneIO_format)) // "))")
+        IF (ana_psi%num_psi < 10000 .AND. Dominant_Channel(2) < 10000) THEN
+          CALL SET_string(lformat,'("lev: ",i4,i4,l3,',TO_string(3+size(moy_Qba)),      &
+                                  '(1x,',trim(adjustl(EneIO_format)),'))')
+        ELSE
+          CALL SET_string(lformat,'("lev: ",i0,i0,l3,',TO_string(3+size(moy_Qba)),      &
+                                  '(1x,',trim(adjustl(EneIO_format)),'))')
+        END IF
+        write(out_unitp,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop,moy_Qba(:)
       END IF
-
-      write(out_unitp,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,  &
-                               E,DE,pop,moy_Qba(:)
 
       CALL dealloc_NParray(moy_Qba,"moy_Qba",name_sub)
     ELSE
 
       IF (ana_psi%num_psi < 10000 .AND. Dominant_Channel(2) < 10000) THEN
-        lformat = trim( '("lev: ",i4,i4,l3,3(1x,' // trim(adjustl(EneIO_format)) // '))' )
+        CALL SET_string(lformat,'("lev: ",i4,i4,l3,3(1x,',trim(adjustl(EneIO_format)),'))' )
       ELSE
-        lformat = trim( '("lev: ",i0,i0,l3,3(1x,' // trim(adjustl(EneIO_format)) // '))' )
+        CALL SET_string(lformat,'("lev: ",i0,i0,l3,3(1x,',trim(adjustl(EneIO_format)),'))' )
       END IF
 
-      write(out_unitp,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop
+      IF (.NOT. present(PsiAna)) write(out_unitp,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop
     END IF
 
-    info = trim( " " // real_TO_char(E,"f12.6" ) // " : ")
+    CALL SET_string(info," ",TO_string(E,"f12.6" ),' : ')
   END IF
+  IF (present(PsiAna)) THEN
+    !$OMP  CRITICAL (sub_analyze_psi_CRIT)
+    CALL ADD_TO_string(PsiAna,NEW_LINE('nl'))
+    !$OMP  END CRITICAL (sub_analyze_psi_CRIT)
+  END IF
+
   !----------------------------------------------------------------------
 
   !----------------------------------------------------------------------
-  flush(out_unitp)
 
   IF (psi%nb_bi > 1 .AND. .NOT. ana_psi%propa) THEN
-    lformat = trim( '("% HAC: ",' // TO_string(psi%nb_bi) // "(1x,f4.0) )" )
-    write(out_unitp,lformat) (tab_WeightChannels(i_bi,1)*TEN**2,i_bi=1,psi%nb_bi)
+    IF (present(PsiAna)) THEN
+      !$OMP  CRITICAL (sub_analyze_psi_CRIT)
+      CALL ADD_TO_string(PsiAna,'% HACbis: ',&
+        TO_string(tab_WeightChannels(:,1)*TEN**2,Rformat='f4.0',max_col=10),NEW_LINE('nl'))
+      !$OMP  END CRITICAL (sub_analyze_psi_CRIT)
+    ELSE
+      CALL SET_string(lformat,'("% HAC: ",',TO_string(psi%nb_bi),"(1x,f4.0) )" )
+      write(out_unitp,lformat) (tab_WeightChannels(i_bi,1)*TEN**2,i_bi=1,psi%nb_bi)
+      flush(out_unitp)
+    END IF
   END IF
 
-  IF (.NOT. adia) CALL calc_1Dweight(psi,ana_psi,tab_WeightChannels,20,real(ana_psi%num_psi,kind=Rkind),info,.TRUE.)
+  IF (.NOT. adia) THEN 
+    IF (present(PsiAna)) THEN 
+      CALL calc_1Dweight(psi,ana_psi,tab_WeightChannels,20,real(ana_psi%num_psi,kind=Rkind),info,.TRUE.,PsiAna)
+    ELSE
+      CALL calc_1Dweight(psi,ana_psi,tab_WeightChannels,20,real(ana_psi%num_psi,kind=Rkind),info,.TRUE.)
+    END IF
+  END IF
 
-  IF (.NOT. adia .AND. .NOT. ana_psi%propa) CALL calc_MaxCoef_psi(psi,ana_psi%T,info)
+  IF (.NOT. adia .AND. .NOT. ana_psi%propa) THEN 
+    IF (present(PsiAna)) THEN 
+      CALL calc_MaxCoef_psi(psi,ana_psi%T,info,PsiAna)
+    ELSE
+      CALL calc_MaxCoef_psi(psi,ana_psi%T,info,lines)
+      write(out_unitp,*) lines
+      flush(out_unitp)
+      deallocate(lines)
+    END IF
+  END IF
 
-  IF (ana_psi%propa) CALL psi_Qba_ie_psi(ana_psi%T,psi,ana_psi,info)
+  IF (ana_psi%propa) THEN
+    IF (present(PsiAna)) THEN
+      CALL psi_Qba_ie_psi(ana_psi%T,psi,ana_psi,info,PsiAna)
+    ELSE
+      CALL psi_Qba_ie_psi(ana_psi%T,psi,ana_psi,info,lines)
+      IF (allocated(lines)) THEN
+        write(out_unitp,*) lines
+        flush(out_unitp)
+        deallocate(lines)
+      END IF
+    END IF
+  END IF
 
   IF (allocated(psi%BasisnD%nDindG%nDsize)) THEN
-    CALL Rho1D_Rho2D_psi(psi,ana_psi,adia)
+    IF (present(PsiAna)) THEN
+      CALL Rho1D_Rho2D_psi(psi,ana_psi,adia,PsiAna)
+    ELSE
+      CALL Rho1D_Rho2D_psi(psi,ana_psi,adia)
+    END IF
     CALL write1D2D_psi(psi,ana_psi,adia)
   ELSE
-    write(out_unitp,*) ' WARNING Rho1D or Rho2D or 1Dcut or 2Dcut are not possible!'
+    IF (present(PsiAna)) THEN
+      !$OMP CRITICAL (sub_analyze_psi_CRIT)
+      CALL ADD_TO_string(PsiAna, &
+        ' WARNING Rho1D or Rho2D or 1Dcut or 2Dcut are not possible!',NEW_LINE('nl'))
+      !$OMP  END CRITICAL (sub_analyze_psi_CRIT)
+    ELSE
+      write(out_unitp,*) ' WARNING Rho1D or Rho2D or 1Dcut or 2Dcut are not possible!'
+    END IF
   END IF
 
   !---------------------------------------------------------------------------
@@ -332,7 +399,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
     IF (string_IS_empty(ana_psi%file_Psi%name)) THEN
       write(out_unitp,*) ' ERROR in ',name_sub
       write(out_unitp,*) ' The file name in "file_Psi%name" is empty !'
-      STOP
+      STOP 'ERROR in sub_analyze_psi: The file name in "file_Psi%name" is empty'
     END IF
 
     ! write one the grid
@@ -452,12 +519,10 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi)
 
   ! enable to deallocate the unsed representation.
   CALL alloc_psi(psi,BasisRep=Basis,GridRep=Grid)
-  !write(6,*) ' in sub_analyze_psi: f' ; flush(6)
 
   IF (debug) THEN
     write(out_unitp,*) 'END ',name_sub
   END IF
-  flush(out_unitp)
 
 END SUBROUTINE sub_analyze_psi
 !================================================================
@@ -468,7 +533,9 @@ END SUBROUTINE sub_analyze_psi
       SUBROUTINE sub_Qmoy(Psi,moy_Qba,ana_psi)
       USE mod_system
       USE mod_dnSVM
+      USE mod_basis
       USE mod_psi_set_alloc
+      USE mod_type_ana_psi
       USE mod_psi_B_TO_G
       IMPLICIT NONE
 
@@ -559,8 +626,10 @@ END SUBROUTINE sub_analyze_psi
 
       SUBROUTINE sub_Rhoi_Rhoj_Over_Rho(Psi,Mij,ana_psi)
       USE mod_system
+      USE mod_basis
       USE mod_psi_set_alloc
       USE mod_psi_B_TO_G
+      USE mod_type_ana_psi
       IMPLICIT NONE
 
       TYPE (param_psi)    , intent(inout) :: Psi
@@ -637,103 +706,26 @@ END SUBROUTINE sub_analyze_psi
 !----------------------------------------------------------
 
       END SUBROUTINE sub_Rhoi_Rhoj_Over_Rho
-      SUBROUTINE sub_Rhoi_Rhoj_Over_Rho_old(Psi,Mij,ana_psi)
-        USE mod_system
-        USE mod_psi_set_alloc
-        USE mod_psi_B_TO_G
-        IMPLICIT NONE
-  
-        TYPE (param_psi)    , intent(inout) :: Psi
-        TYPE (param_ana_psi), intent(inout) :: ana_psi
-  
-  !------ value ---------------------------------------
-        real (kind=Rkind),    intent(inout) :: Mij(2,Psi%nb_bi*Psi%nb_be,Psi%nb_bi*Psi%nb_be)
-  
-  
-  !------ working variables ---------------------------------
-        TYPE(OldParam)       :: OldPara
-        integer              :: i,j,i_q,i_ie,j_ie,iqie
-        real (kind=Rkind)    :: WrhonD,Rho,Rho_i(Psi%nb_bi*Psi%nb_be)
-        complex (kind=Rkind) :: CVec_bie(psi%nb_bi*psi%nb_be)
-  
-  !----- for debuging --------------------------------------------------
-        character (len=*), parameter :: name_sub = 'sub_Rhoi_Rhoj_Over_Rho'
-        logical, parameter :: debug =.FALSE.
-        !logical, parameter :: debug =.TRUE.
-        !-----------------------------------------------------------
-        IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING ',name_sub
-          flush(out_unitp)
-        END IF
-  !-----------------------------------------------------------
-  
-        IF (.NOT. ana_psi%GridDone) CALL sub_PsiBasisRep_TO_GridRep(Psi)
-  
-        Mij(:,:,:)  = ZERO
-  
-  
-        DO i_q=1,Psi%nb_qa
-  
-          WrhonD =  Rec_WrhonD(Psi%BasisnD,i_q,OldPara=OldPara)
-  
-          IF (psi%cplx) THEN
-            CALL get_CVec_OF_psi_AT_ind_a(CVec_bie,psi,i_q,OldPara=OldPara)
-            Rho_i(:) = conjg(CVec_bie(:))*CVec_bie(:) * WrhonD
-          ELSE
-            CALL get_RVec_OF_psi_AT_ind_a(Rho_i,psi,i_q,OldPara=OldPara)
-            Rho_i(:) = Rho_i(:)**2 * WrhonD
-          END IF
-  
-          !- calculation of total density, Rho ----------------------------
-          Rho = sum(Rho_i)
-  
-          DO i_ie=1,Psi%nb_bi*Psi%nb_be
-          DO j_ie=1,Psi%nb_bi*Psi%nb_be
-  
-            IF (Rho > ana_psi%coherence_epsi)                             &
-               Mij(1,i_ie,j_ie) = Mij(1,i_ie,j_ie) + Rho_i(i_ie)*Rho_i(j_ie) / Rho
-  
-            Mij(2,i_ie,j_ie) = Mij(2,i_ie,j_ie) + Rho_i(i_ie)*Rho_i(j_ie)
-  
-          END DO
-          END DO
-  
-        END DO
-  
-  
-  !----------------------------------------------------------
-        IF (debug) THEN
-  
-          DO i_ie=1,Psi%nb_bi*Psi%nb_be
-          DO j_ie=i_ie+1,Psi%nb_bi*Psi%nb_be
-  
-           write(out_unitp,*) 'Mij ',i_ie,j_ie,Mij(:,i_ie,j_ie)
-  
-          END DO
-          END DO
-  
-          write(out_unitp,*) 'END ',name_sub
-        END IF
-  !----------------------------------------------------------
-  
-        END SUBROUTINE sub_Rhoi_Rhoj_Over_Rho_old
+
 !================================================================
 !
 !     means of Qact1(i) psi  : <psi|Qact(i)|psi>
 !
 !================================================================
-  SUBROUTINE psi_Qba_ie_psi(T,psi,ana_psi,info)
+  SUBROUTINE psi_Qba_ie_psi(T,psi,ana_psi,info,PsiAna)
       USE mod_system
-      USE mod_param_SGType2
+      USE mod_basis
       USE mod_psi_set_alloc
+      USE mod_type_ana_psi
       USE mod_psi_B_TO_G
       IMPLICIT NONE
 
 !----- variables for the WP ----------------------------------------
-      TYPE (param_psi),     intent(inout)           :: psi
-      TYPE (param_ana_psi), intent(in)              :: ana_psi
-      character (len=*),    intent(in)              :: info
-      real (kind=Rkind),    intent(in)              :: T
+      TYPE (param_psi),               intent(inout) :: psi
+      TYPE (param_ana_psi),           intent(in)    :: ana_psi
+      character (len=*),              intent(in)    :: info
+      real (kind=Rkind),              intent(in)    :: T
+      character (len=:), allocatable, intent(inout) :: PsiAna
 
 !------ working variables ---------------------------------
       TYPE(OldParam)        :: OldPara
@@ -835,14 +827,33 @@ END SUBROUTINE sub_analyze_psi
       END DO
 
       DO i=1,psi%nb_act1
-        write(out_unitp,11) 'T <Q',TO_string(i),'>_ie ',info,T,Qmean_ie(i,:,:)
-        write(out_unitp,11) 'T <Q',TO_string(i),'>    ',info,T,Qmean(i)
+        !write(out_unitp,11) 'T <Q',TO_string(i),'>_ie ',info,T,Qmean_ie(i,:,:)
+        !write(out_unitp,11) 'T <Q',TO_string(i),'>    ',info,T,Qmean(i)
+  11    format(4a,' ',f0.5,100(' ',f0.4))
+
+        CALL ADD_TO_string(PsiAna,'T <Q',TO_string(i),'>_ie ',info,' ',TO_string(T,'f0.5'))
+        DO i_be=1,psi%nb_be
+          CALL ADD_TO_string(PsiAna,' ',TO_string(Qmean_ie(i,:,i_be),'f0.4'))
+        END DO
+        CALL ADD_TO_string(PsiAna,new_line('nl'))
+
+        CALL ADD_TO_string(PsiAna,'T <Q',TO_string(i),'>_ie ',info,' ',TO_string(T,'f0.5'), &
+                          ' ',TO_string(Qmean(i),'f0.4'),new_line('nl'))
       END DO
- 11   format(4a,' ',f0.5,100(' ',f0.4))
       DO i=1,psi%nb_act1
       DO j=i,psi%nb_act1
-        write(out_unitp,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>_ie ',info,T,Qmean2_ie(j,i,:,:)
-        write(out_unitp,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>    ',info,T,Qmean2(j,i)
+        !write(out_unitp,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>_ie ',info,T,Qmean2_ie(j,i,:,:)
+        !write(out_unitp,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>    ',info,T,Qmean2(j,i)
+
+        CALL ADD_TO_string(PsiAna,'T <Q',TO_string(j),'*Q',TO_string(i),'>_ie ',info,' ',TO_string(T,'f0.5'))
+
+        DO i_be=1,psi%nb_be
+          CALL ADD_TO_string(PsiAna,' ',TO_string(Qmean2_ie(j,i,:,i_be),'f0.4'))
+        END DO
+        CALL ADD_TO_string(PsiAna,new_line('nl'))
+
+        CALL ADD_TO_string(PsiAna,'T <Q',TO_string(i),'>_ie ',info,' ',TO_string(T,'f0.5'), &
+                           ' ',TO_string(Qmean2(j,i),'f0.4'),new_line('nl'))
       END DO
       END DO
  21   format(6a,' ',f0.5,100(' ',f0.4))
@@ -866,10 +877,12 @@ END SUBROUTINE sub_analyze_psi
       write(out_unitp,*) 'END ',name_sub
     END IF
   END SUBROUTINE psi_Qba_ie_psi
-      SUBROUTINE write1D2D_psi(psi,ana_psi,adia)
+  SUBROUTINE write1D2D_psi(psi,ana_psi,adia)
       USE mod_system
+      USE mod_basis
       USE mod_dnSVM
       USE mod_psi_set_alloc
+      USE mod_type_ana_psi
       USE mod_psi_B_TO_G
       IMPLICIT NONE
 
@@ -1058,8 +1071,7 @@ END SUBROUTINE sub_analyze_psi
           ELSE
             state_name = make_EVRTFileName('psi1D_')
           END IF
-          file_psi%name = state_name // TO_string(ana_psi%num_psi) // &
-                                                  '-' // TO_string(ib)
+          CALL SET_string(file_psi%name,state_name,TO_string(ana_psi%num_psi),'-',TO_string(ib))
 
           IF (ana_psi%propa .AND. ana_psi%T > ZERO) THEN
             CALL file_open(file_psi,nio,append=.TRUE.)
@@ -1098,8 +1110,8 @@ END SUBROUTINE sub_analyze_psi
           ELSE
             state_name = make_EVRTFileName('psi2D_')
           END IF
-          file_psi%name = state_name // TO_string(ana_psi%num_psi) // &
-                       '-' // TO_string(ib)  // '-' // TO_string(jb)
+          CALL SET_string(file_psi%name,state_name,TO_string(ana_psi%num_psi), &
+                          '-',TO_string(ib),'-',TO_string(jb))
 
           IF (ana_psi%propa .AND. ana_psi%T > ZERO) THEN
             CALL file_open(file_psi,nio,append=.TRUE.)
@@ -1162,19 +1174,22 @@ END SUBROUTINE sub_analyze_psi
 
 
       END SUBROUTINE write1D2D_psi
-      SUBROUTINE Rho1D_Rho2D_psi(psi,ana_psi,adia)
+      SUBROUTINE Rho1D_Rho2D_psi(psi,ana_psi,adia,PsiAna)
       USE mod_system
+      USE mod_basis
       USE mod_psi_set_alloc
       USE mod_psi_B_TO_G
+      USE mod_type_ana_psi
       IMPLICIT NONE
 !----- variables for the WP ----------------------------------------
-      TYPE (param_psi),     intent(inout) :: psi
-      TYPE (param_ana_psi), intent(inout) :: ana_psi
-      logical,              intent(in)    :: adia
+      TYPE (param_psi),               intent(inout)           :: psi
+      TYPE (param_ana_psi),           intent(inout)           :: ana_psi
+      logical,                        intent(in)              :: adia
+      character (len=:), allocatable, intent(inout), optional :: PsiAna
 
 
 !------ working variables ---------------------------------
-      TYPE (File_t)              :: file_Rho
+      TYPE (File_t)                  :: file_Rho
       integer                        :: i_basis_act1,j_basis_act1,nioRho
       real (kind=Rkind), allocatable :: rho2D(:,:,:,:)
       real (kind=Rkind), allocatable :: rho1D(:,:,:)
@@ -1208,7 +1223,6 @@ END SUBROUTINE sub_analyze_psi
         CALL ecri_psi(psi=psi)
         write(out_unitp,*) 'ana_psi%ana_level',ana_psi%ana_level
         write(out_unitp,*) 'ana_psi%Rho1D,ana_psi%Rho2D',ana_psi%Rho1D,ana_psi%Rho2D
-
       END IF
 !-----------------------------------------------------------
       IF (ana_psi%ana_level > 0 .AND. (ana_psi%Rho1D .OR. ana_psi%Rho2D)) THEN
@@ -1219,13 +1233,19 @@ END SUBROUTINE sub_analyze_psi
           DO i_basis_act1=1,psi%BasisnD%nb_basis
             IF (psi%BasisnD%tab_Pbasis(i_basis_act1)%Pbasis%nb_basis > 1) CYCLE
 
+            IF (present(PsiAna)) THEN
+              CALL ADD_TO_string(PsiAna,'rho1D of ',   &
+                   TO_string(ana_psi%num_psi),' ',TO_string(i_basis_act1))
+            ELSE
+              write(out_unitp,*) 'rho1D of ',ana_psi%num_psi,i_basis_act1
+            END IF
+
             IF (adia) THEN
               state_name = make_EVRTFileName('RhoAdia1D_')
             ELSE
               state_name = make_EVRTFileName('Rho1D_')
             END IF
-            file_Rho%name = state_name // TO_string(ana_psi%num_psi) // &
-                                    '-' // TO_string(i_basis_act1)
+            CALL SET_string(file_Rho%name,state_name,TO_string(ana_psi%num_psi),'-',TO_string(i_basis_act1))
             IF (ana_psi%propa .AND. ana_psi%T > ZERO) THEN
               CALL file_open(file_Rho,nioRho,append=.TRUE.)
             ELSE
@@ -1331,8 +1351,8 @@ END SUBROUTINE sub_analyze_psi
             ELSE
               state_name = make_EVRTFileName('Rho2D_')
             END IF
-            file_Rho%name = state_name // TO_string(ana_psi%num_psi) // &
-               '-' // TO_string(i_basis_act1) // '-' // TO_string(j_basis_act1)
+            CALL SET_string(file_Rho%name,state_name ,TO_string(ana_psi%num_psi), &
+                            '-',TO_string(i_basis_act1),'-',TO_string(j_basis_act1))
 
             IF (ana_psi%propa .AND. ana_psi%T > ZERO) THEN
               CALL file_open(file_Rho,nioRho,append=.TRUE.)
@@ -1408,7 +1428,12 @@ END SUBROUTINE sub_analyze_psi
               END DO
             END DO
 
-            write(out_unitp,*) 'rho2D of ',ana_psi%num_psi,i_basis_act1,j_basis_act1
+            IF (present(PsiAna)) THEN
+              CALL ADD_TO_string(PsiAna,'rho2D of ',TO_string(ana_psi%num_psi),' ', &
+                                 TO_string(i_basis_act1),' ',TO_string(j_basis_act1))
+            ELSE
+              write(out_unitp,*) 'rho2D of ',ana_psi%num_psi,i_basis_act1,j_basis_act1
+            END IF
             IF (ana_psi%propa) THEN
               DO i=1,psi%BasisnD%nDindG%nDsize(i_basis_act1)
               DO j=1,psi%BasisnD%nDindG%nDsize(j_basis_act1)
@@ -1456,22 +1481,24 @@ END SUBROUTINE sub_analyze_psi
 !      calc_1Dweight(psi)
 !
 !==============================================================
-      SUBROUTINE calc_1Dweight(psi,ana_psi,tab_WeightChannels,max_1D,T,info,print_w)
+  SUBROUTINE calc_1Dweight(psi,ana_psi,tab_WeightChannels,max_1D,T,info,print_w,PsiAna)
       USE mod_system
       USE mod_dnSVM
+      USE mod_basis
       USE mod_psi_set_alloc
+      USE mod_type_ana_psi
       IMPLICIT NONE
 
-!----- variables for the WP propagation ----------------------------
-      TYPE (param_psi)     :: psi
-      TYPE (param_ana_psi) :: ana_psi
-      real (kind=Rkind), allocatable :: tab_WeightChannels(:,:)
+      TYPE (param_psi),               intent(in)              :: psi
+      TYPE (param_ana_psi),           intent(inout)           :: ana_psi
+      real (kind=Rkind), allocatable, intent(in)              :: tab_WeightChannels(:,:)
+      integer,                        intent(in)              :: max_1D
+      real (kind=Rkind),              intent(in)              :: T ! time
+      character (len=*),              intent(in)              :: info
+      logical,                        intent(in)              :: print_w
+      character (len=:), allocatable, intent(inout), optional :: PsiAna
 
-      integer              :: max_1D
-      real (kind=Rkind)    :: T ! time
-      character (len=*)    :: info
-      logical              :: print_w
-
+      character (len=:), allocatable :: PsiAna_loc
 
 !----- for debuging --------------------------------------------------
       integer :: err_mem
@@ -1486,13 +1513,21 @@ END SUBROUTINE sub_analyze_psi
       END IF
 !-----------------------------------------------------------
 
-      !CALL Set_symab_OF_psiBasisRep(psi)
+      IF (present(PsiAna)) THEN
+        IF (psi%nb_baie*psi%nb_bRot == psi%nb_tot) THEN
+          CALL calc_1Dweight_act1(psi,ana_psi,max_1D,T,info,print_w,PsiAna)
+        END IF
 
-      IF (psi%nb_baie*psi%nb_bRot == psi%nb_tot) THEN
-        CALL calc_1Dweight_act1(psi,ana_psi,max_1D,T,info,print_w)
+        CALL calc_1Dweight_inact2n_elec(psi,ana_psi,tab_WeightChannels,max_1D,T,info,print_w,PsiAna)
+      ELSE
+        IF (psi%nb_baie*psi%nb_bRot == psi%nb_tot) THEN
+          CALL calc_1Dweight_act1(psi,ana_psi,max_1D,T,info,print_w,PsiAna_loc)
+        END IF
+
+        CALL calc_1Dweight_inact2n_elec(psi,ana_psi,tab_WeightChannels,max_1D,T,info,print_w,PsiAna_loc)
+        write(out_unitp,*) PsiAna_loc
+        deallocate(PsiAna_loc)
       END IF
-
-      CALL calc_1Dweight_inact2n_elec(psi,ana_psi,tab_WeightChannels,max_1D,T,info,print_w)
 
 !-----------------------------------------------------------
       IF (debug) THEN
@@ -1500,35 +1535,38 @@ END SUBROUTINE sub_analyze_psi
       END IF
 !-----------------------------------------------------------
 
-
       END SUBROUTINE calc_1Dweight
 
       SUBROUTINE calc_1Dweight_inact2n_elec(psi,ana_psi,tab_WeightChannels,&
-                                            max_1D,T,info,print_w)
+                                            max_1D,T,info,print_w,PsiAna)
       USE mod_system
       USE mod_nDindex
       USE mod_psi_set_alloc
+      USE mod_type_ana_psi
       IMPLICIT NONE
 
 !----- variables for the WP propagation ----------------------------
-      TYPE (param_psi)     :: psi
-      TYPE (param_ana_psi) :: ana_psi
+      TYPE (param_psi),               intent(in)     :: psi
+      TYPE (param_ana_psi),           intent(in)     :: ana_psi
+      real (kind=Rkind), allocatable, intent(in)     :: tab_WeightChannels(:,:)
+      integer,                        intent(in)     :: max_1D
+      real (kind=Rkind),              intent(in)     :: T ! time
+      character (len=*),              intent(in)     :: info
+      logical,                        intent(in)     :: print_w
+      character (len=:), allocatable, intent(inout)  :: PsiAna
 
       integer          :: max_herm
       real (kind=Rkind),allocatable :: weight1D(:,:)
       integer          :: tab(psi%Basis2n%nb_basis+1)
 
-     real (kind=Rkind), allocatable :: tab_WeightChannels(:,:)
       real (kind=Rkind),allocatable :: weight1Dact(:,:)
       real (kind=Rkind)    :: a
 
-      real (kind=Rkind)    :: T ! time
-      character (len=*)    :: info
-      logical          :: print_w
+
 
       integer              :: i,j,j_herm,beg_e
       integer              :: ie,ii,ib,ibie,iq,ibiq
-      integer              :: max_dim,max_1D
+      integer              :: max_dim
       integer, allocatable :: nDval(:)
 
 !----- for debuging --------------------------------------------------
@@ -1594,16 +1632,24 @@ END SUBROUTINE sub_analyze_psi
 
         IF (print_w .OR. debug) THEN
           DO i=1,psi%Basis2n%nb_basis
-            write(out_unitp,11) 'harm T W ',trim(info),i,T,             &
-                    weight1D(i,0:psi%Basis2n%tab_Pbasis(i)%Pbasis%nb-1)
+            !write(out_unitp,11) 'harm T W ',trim(info),i,T,             &
+            !        weight1D(i,0:psi%Basis2n%tab_Pbasis(i)%Pbasis%nb-1)
+            CALL ADD_TO_string(PsiAna,'harm T W ',trim(info),' ',TO_string(i), &
+                               ' ',TO_string(T,'f15.2'),' ',                   &
+                               TO_string(weight1D(i,0:psi%Basis2n%tab_Pbasis(i)%Pbasis%nb-1),'f6.3'), &
+                               new_line('nl'))
           END DO
           beg_e = 1
           IF (psi%Basis2n%nb_basis == 0) beg_e = 0
           i = psi%Basis2n%nb_basis+1
-          write(out_unitp,11) 'elec T W ',trim(info),i,T,               &
-                weight1D(i,beg_e:beg_e+psi%nb_be-1)
+          !write(out_unitp,11) 'elec T W ',trim(info),i,T,               &
+          !      weight1D(i,beg_e:beg_e+psi%nb_be-1)
 
  11       format(a,a,1x,i3,1x,f15.2,20(1x,f6.3))
+          CALL ADD_TO_string(PsiAna,'elec T W ',trim(info),' ',TO_string(i),  &
+                             ' ',TO_string(T,'f15.2'),' ',                    &
+                             ' ',TO_string(weight1D(i,beg_e:beg_e+psi%nb_be-1),'f6.3'), &
+                             new_line('nl'))
         END IF
       END IF
 
@@ -1617,19 +1663,19 @@ END SUBROUTINE sub_analyze_psi
 !-----------------------------------------------------------
 
 
+    END SUBROUTINE calc_1Dweight_inact2n_elec
 
-      END SUBROUTINE calc_1Dweight_inact2n_elec
-
-      SUBROUTINE calc_MaxCoef_psi(psi,T,info)
+    SUBROUTINE calc_MaxCoef_psi(psi,T,info,PsiAna)
       USE mod_system
+      USE mod_basis
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
 !----- variables for the WP propagation ----------------------------
-      TYPE (param_psi)     :: psi
-
-      real (kind=Rkind)    :: T ! time
-      character (len=*)    :: info
+      TYPE (param_psi),               intent(in)    :: psi
+      real (kind=Rkind),              intent(in)    :: T ! time
+      character (len=*),              intent(in)    :: info
+      character (len=:), allocatable, intent(inout) :: PsiAna
 
       real (kind=Rkind)  :: C,maxC1,maxC2
       integer            :: i_bhe,i_b,i_e,i_h,i_R
@@ -1638,6 +1684,7 @@ END SUBROUTINE sub_analyze_psi
       integer            :: i_e_maxC1,i_e_maxC2
       integer            :: i_h_maxC1,i_h_maxC2
       integer            :: ndim_index(psi%BasisnD%ndim)
+      character (len=:), allocatable :: First_info,Second_info
 
 
 !----- for debuging --------------------------------------------------
@@ -1653,6 +1700,9 @@ END SUBROUTINE sub_analyze_psi
 !-----------------------------------------------------------
       IF (psi%nb_baie*psi%nb_bRot /= psi%nb_tot .AND.                   &
           .NOT. psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) RETURN   ! should be spectral WP
+
+      CALL SET_string(First_info, 'First largest coefficient  ',TO_string(T),' ',trim(info),' ')
+      CALL SET_string(Second_info,'Second largest coefficient ',TO_string(T),' ',trim(info),' ')
 
       maxC1 = ZERO
       maxC2 = ZERO
@@ -1712,52 +1762,56 @@ END SUBROUTINE sub_analyze_psi
       END DO
       END DO
 
+      IF (.NOT. allocated(PsiAna)) PsiAna = ''
+
       IF (psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
 
         IF (psi%cplx) THEN
-          write(out_unitp,*) 'max1 psi%vecBasisRep ',T,trim(info),      &
-                         i_b_maxC1,i_h_maxC1,i_e_maxC1,psi%CvecB(i_bhe1)
-          IF (i_b_maxC2 > 0)                                            &
-               write(out_unitp,*) 'max2 psi%vecBasisRep ',T,trim(info), &
-                          i_b_maxC2,i_h_maxC2,i_e_maxC2,psi%CvecB(i_bhe2)
+          CALL ADD_TO_string(PsiAna,First_info, &
+              TO_string([i_b_maxC1,i_h_maxC1,i_e_maxC1]),' ',TO_string(psi%CvecB(i_bhe1)),new_line('nl'))
+          IF (i_b_maxC2 > 0) THEN
+            CALL ADD_TO_string(PsiAna,Second_info, &
+              TO_string([i_b_maxC2,i_h_maxC2,i_e_maxC2]),' ',TO_string(psi%CvecB(i_bhe2)),new_line('nl'))
+          END IF
         ELSE
-          write(out_unitp,*) 'max1 psi%vecBasisRep ',T,trim(info),      &
-                         i_b_maxC1,i_h_maxC1,i_e_maxC1,psi%RvecB(i_bhe1)
-          IF (i_b_maxC2 > 0)                                            &
-               write(out_unitp,*) 'max2 psi%vecBasisRep ',T,trim(info), &
-                          i_b_maxC2,i_h_maxC2,i_e_maxC2,psi%RvecB(i_bhe2)
+          CALL ADD_TO_string(PsiAna,First_info, &
+              TO_string([i_b_maxC1,i_h_maxC1,i_e_maxC1]),' ',TO_string(psi%RvecB(i_bhe1)),new_line('nl'))
+          
+          IF (i_b_maxC2 > 0) THEN
+            CALL ADD_TO_string(PsiAna,Second_info, &
+              TO_string([i_b_maxC2,i_h_maxC2,i_e_maxC2]),' ',TO_string(psi%RvecB(i_bhe2)),new_line('nl'))
+          END IF
         END IF
       ELSE
         IF (i_b_maxC1 < 1 .OR. i_b_maxC1 > psi%nb_ba) THEN
-          write(out_unitp,*) '   WARNING, i_b_maxC1 is out-of-range !! ',i_b_maxC1
-          write(out_unitp,*) '    it should > 0 and <= nb_ba'
+          CALL ADD_TO_string(PsiAna,'   WARNING, i_b_maxC1 is out-of-range !! ',TO_string(i_b_maxC1),new_line('nl'))
+          CALL ADD_TO_string(PsiAna,'    it should > 0 and <= nb_ba',new_line('nl'))
         ELSE
           CALL Rec_ndim_index(psi%BasisnD,ndim_index,i_b_maxC1)
           IF (psi%cplx) THEN
-            write(out_unitp,*) 'max1 psi%vecBasisRep ',T,trim(info),      &
-                        ndim_index(:),i_h_maxC1,i_e_maxC1,psi%CvecB(i_bhe1)
+            CALL ADD_TO_string(PsiAna,First_info,TO_string(ndim_index),' ', &
+              TO_string([i_h_maxC1,i_e_maxC1]),' ',TO_string(psi%CvecB(i_bhe1)),new_line('nl'))
 
-            IF (i_b_maxC2 > 0) THEN
+            IF (i_b_maxC2 > 0) THEN 
               CALL Rec_ndim_index(psi%BasisnD,ndim_index,i_b_maxC2)
-              write(out_unitp,*) 'max2 psi%vecBasisRep ',T,trim(info),    &
-                        ndim_index(:),i_h_maxC2,i_e_maxC2,psi%CvecB(i_bhe2)
+              CALL ADD_TO_string(PsiAna,Second_info,TO_string(ndim_index),' ', &
+                 TO_string([i_h_maxC2,i_e_maxC2]),' ',TO_string(psi%CvecB(i_bhe2)),new_line('nl'))
             END IF
           ELSE
-            write(out_unitp,*) 'max1 psi%vecBasisRep ',T,trim(info),      &
-                        ndim_index(:),i_h_maxC1,i_e_maxC1,psi%RvecB(i_bhe1)
+            CALL ADD_TO_string(PsiAna,First_info,TO_string(ndim_index),' ', &
+              TO_string([i_h_maxC1,i_e_maxC1]),' ',TO_string(psi%RvecB(i_bhe1)),new_line('nl'))
 
-            IF (i_b_maxC2 > 0) THEN
+            IF (i_b_maxC2 > 0) THEN 
               CALL Rec_ndim_index(psi%BasisnD,ndim_index,i_b_maxC2)
-              write(out_unitp,*) 'max2 psi%vecBasisRep ',T,trim(info),    &
-                        ndim_index(:),i_h_maxC2,i_e_maxC2,psi%RvecB(i_bhe2)
+              CALL ADD_TO_string(PsiAna,Second_info,TO_string(ndim_index),' ', &
+                 TO_string([i_h_maxC2,i_e_maxC2]),' ',TO_string(psi%RvecB(i_bhe2)),new_line('nl'))
             END IF
-
           END IF
         END IF
 
 
       END IF
-      write(out_unitp,*) 'Abelian symmetry (symab):',psi%symab
+      CALL ADD_TO_string(PsiAna,'Abelian symmetry (symab): ',TO_string(psi%symab),new_line('nl'))
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unitp,*) 'END ',name_sub
@@ -1766,7 +1820,7 @@ END SUBROUTINE sub_analyze_psi
 
       end subroutine calc_MaxCoef_psi
 
-  SUBROUTINE calc_1Dweight_act1(psi,ana_psi,max_1D,T,info,print_w)
+  SUBROUTINE calc_1Dweight_act1(psi,ana_psi,max_1D,T,info,print_w,PsiAna)
     USE mod_system
     USE mod_nDindex
     USE mod_psi_set_alloc
@@ -1775,18 +1829,21 @@ END SUBROUTINE sub_analyze_psi
     IMPLICIT NONE
 
 !----- variables for the WP propagation ----------------------------
-    TYPE (param_psi)     :: psi
-    TYPE (param_ana_psi) :: ana_psi
+    TYPE (param_psi),               intent(in)    :: psi
+    TYPE (param_ana_psi),           intent(inout) :: ana_psi
+    character (len=:), allocatable, intent(inout) :: PsiAna
+
+    character (len=*),              intent(in)    :: info
+    logical,                        intent(in)    :: print_w
+    real (kind=Rkind),              intent(in)    :: T ! time
+    integer,                        intent(in)    :: max_1D
+
 
     real (kind=Rkind), allocatable :: weight1Dact(:,:)
     real (kind=Rkind)    :: a
 
-    real (kind=Rkind)    :: T ! time
-    character (len=*)    :: info
-    logical          :: print_w
-
     integer          :: i,ie,ii,ib,ibie,iq,ibiq,n,ii_baie,if_baie
-    integer          :: max_dim,max_1D
+    integer          :: max_dim
     integer          :: max_indGr(psi%BasisnD%nDindB%ndim)
     integer          :: ndim_AT_ib(psi%BasisnD%nDindB%ndim)
     integer          :: nDval(psi%BasisnD%nDindB%ndim)
@@ -1811,19 +1868,17 @@ END SUBROUTINE sub_analyze_psi
       write(out_unitp,*) 'nb_inact2n',psi%Basis2n%nb_basis
       write(out_unitp,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
       write(out_unitp,*) 'nb_baie,nb_tot',psi%nb_baie,psi%nb_tot
+      flush(out_unitp)
     END IF
 !---------------------------------------------------------
-    flush(out_unitp)
     IF (psi%nb_baie /= psi%nb_tot) RETURN
-    !IF (ana_psi%adia) RETURN
 
     IF (allocated(Psi%BasisnD%nDindB%Tab_nDval)) THEN
       max_dim = maxval(Psi%BasisnD%nDindB%Tab_nDval)
     ELSE
       max_dim = maxval(psi%BasisnD%nDindB%nDsize(1:psi%BasisnD%nDindB%ndim))
     END IF
-    CALL alloc_NParray(weight1Dact,[psi%BasisnD%nDindB%ndim,max_dim], &
-                      "weight1Dact",name_sub)
+    CALL alloc_NParray(weight1Dact,[psi%BasisnD%nDindB%ndim,max_dim],"weight1Dact",name_sub)
 
     !---- RD analysis (for contrac_analysis=t) -------------------------
     ! initialization for RD analysis
@@ -1853,9 +1908,9 @@ END SUBROUTINE sub_analyze_psi
       weight1Dact(:,:) = ZERO
       ndim_AT_ib(:)    = 0
       IF (ie == 1 .AND. ii == 1) THEN
-        state_name = 'Grd Channel'
+        CALL SET_string(state_name,'Grd Channel')
       ELSE
-        state_name = 'State_Se' // TO_string(ie) // '_Cha' // TO_string(ii)
+        CALL SET_string(state_name,'State_Se', TO_string(ie),'_Cha',TO_string(ii))
       END IF
 
       IF (psi%cplx) THEN
@@ -1894,13 +1949,11 @@ END SUBROUTINE sub_analyze_psi
       IF (print_w .OR. debug) THEN
         DO iq=1,psi%BasisnD%nDindB%ndim
           IF (sum(weight1Dact(iq,1:ndim_AT_ib(iq)))-ONE > ONETENTH**7) THEN
-            write(out_unitp,21) state_name // ' Sum(RD)/=1',trim(info), &
-                              iq,T,sum(weight1Dact(iq,1:ndim_AT_ib(iq)))
+            CALL ADD_TO_string(PsiAna,state_name,' Sum(RD)/=1',trim(info),' ', &
+                 TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(T,'e10.3'),new_line('nl'))
           END IF
-          write(out_unitp,21) state_name // ' ',trim(info),iq,T,        &
-                            weight1Dact(iq,1:min(max_1D,ndim_AT_ib(iq)))
- 21       format(a,a,i3,1x,f17.4,300(1x,e10.3))
-          flush(out_unitp)
+          CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
+               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,:),'e10.3'),new_line('nl'))
 
           !---- RD analysis --------------------------------------------
           ! RD analysis
@@ -1916,18 +1969,20 @@ END SUBROUTINE sub_analyze_psi
 
               IF (allocated(CRD)) THEN
                 n = min(ndim_AT_ib(iq),size(CRD,dim=1))
-                write(out_unitp,21) state_name // 'new',trim(info),iq,T,  &
-                            real([(CRD(i,i),i=1,min(max_1D,n))],kind=Rkind)
-                flush(out_unitp)
+                weight1Dact(iq,1:n) = real([(CRD(i,i),i=1,n)],kind=Rkind)
+                CALL ADD_TO_string(PsiAna,state_name,' new',trim(info),' ', &
+                    TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,:),'e10.3'),new_line('nl'))
+                
                 CALL dealloc_NParray(CRD,'CRD',name_sub)
               END IF
 
               IF (allocated(CRDcontrac)) THEN
                 n = min(ndim_AT_ib(iq),size(CRDcontrac,dim=1))
                 weight1Dact(iq,1:n) = real([(CRDcontrac(i,i),i=1,n)],kind=Rkind)
-                write(out_unitp,21) state_name // 'c',trim(info),iq,T,  &
-                           weight1Dact(iq,1:min(max_1D,n))
-                flush(out_unitp)
+
+                CALL ADD_TO_string(PsiAna,state_name,' c',trim(info),' ', &
+                  TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,:),'e10.3'),new_line('nl'))
+
                 CALL dealloc_NParray(CRDcontrac,'CRDcontrac',name_sub)
               END IF
             ELSE
@@ -1944,9 +1999,10 @@ END SUBROUTINE sub_analyze_psi
               IF (allocated(RDcontrac)) THEN
                 n = min(ndim_AT_ib(iq),size(RDcontrac,dim=1))
                 weight1Dact(iq,1:n) = [(RDcontrac(i,i),i=1,n)]
-                write(out_unitp,21) state_name // 'c',trim(info),iq,T,  &
-                           weight1Dact(iq,1:min(max_1D,n))
-                flush(out_unitp)
+
+                CALL ADD_TO_string(PsiAna,state_name,' c',trim(info),' ', &
+                TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,:),'e10.3'),new_line('nl'))
+
                 CALL dealloc_NParray(RDcontrac,'RDcontrac',name_sub)
               END IF
             END IF
@@ -1957,15 +2013,8 @@ END SUBROUTINE sub_analyze_psi
 
           max_indGr(iq) = sum(maxloc(weight1Dact(iq,1:ndim_AT_ib(iq))))
         END DO
-
-        !write(out_unitp,'(a,a,20i4)') 'max_indGr at ',trim(info),max_indGr(:)
-        write(out_unitp,'(a,a)',advance='no') 'max_ind ' // state_name // ' at ',trim(info)
-        DO i=1,size(max_indGr)-1
-          write(out_unitp,'(1X,i0)',advance='no') max_indGr(i)
-        END DO
-        write(out_unitp,'(1X,i0)') max_indGr(size(max_indGr))
-
-        flush(out_unitp)
+        CALL ADD_TO_string(PsiAna,'max_ind ',state_name ,' at ',trim(info), &
+                           ' ',TO_string(max_indGr(1:size(max_indGr))),new_line('nl'))
       END IF
 
       !write(out_unitp,*) 'max_RedDensity
@@ -1980,10 +2029,9 @@ END SUBROUTINE sub_analyze_psi
           ana_psi%max_RedDensity(iq) = ana_psi%max_RedDensity(iq) + weight1Dact(iq,ib)*exp(-r2)
         END DO
       END DO
-      !write(out_unitp,*) 'max_RedDensity ',ana_psi%max_RedDensity(:)
-      CALL Write_Vec(ana_psi%max_RedDensity,out_unitp,6,Rformat='e9.2',info='max_RedDensity of ' // state_name)
-      flush(out_unitp)
 
+      CALL ADD_TO_string(PsiAna,'max_RedDensity of ',state_name,' ', &
+          TO_string(ana_psi%max_RedDensity(:),Rformat='e9.2'),new_line('nl'))
     END DO
     END DO
 
@@ -1992,7 +2040,9 @@ END SUBROUTINE sub_analyze_psi
 
 !-----------------------------------------------------------
     IF (debug) THEN
+      write(out_unitp,*) PsiAna
       write(out_unitp,*) 'END ',name_sub
+      flush(out_unitp)
     END IF
 !-----------------------------------------------------------
 
@@ -2334,6 +2384,7 @@ END SUBROUTINE sub_analyze_psi
   SUBROUTINE Channel_weight(tab_WeightChannels,psi,                 &
                             GridRep,BasisRep,Dominant_Channel)
   USE mod_system
+  USE mod_basis
   USE mod_psi_set_alloc
   IMPLICIT NONE
 
@@ -2780,6 +2831,7 @@ END SUBROUTINE Channel_weight_SG4_grid
 END SUBROUTINE Channel_weight_SG4_grid_old
 SUBROUTINE Channel_weight_SG4_basis(tab_WeightChannels,psi)
 USE mod_system
+USE mod_basis
 USE mod_psi_set_alloc
 USE mod_basis_BtoG_GtoB_SGType4
 USE mod_MPI_aux

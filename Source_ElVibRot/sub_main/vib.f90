@@ -1663,6 +1663,7 @@ para_mem%mem_debug = .FALSE.
 
       SUBROUTINE Sub_OpPsi_test(max_mem)
       USE mod_system
+      USE mod_Constant
       USE mod_Coord_KEO
       USE mod_PrimOp
       USE mod_basis
@@ -2120,6 +2121,7 @@ END SUBROUTINE Tune_SG4threads_HPsi
 
       SUBROUTINE sub_Analysis_Only(max_mem)
       USE mod_system
+      USE mod_Constant
       USE mod_Coord_KEO
       USE mod_PrimOp
       USE mod_basis

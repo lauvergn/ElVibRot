@@ -16,7 +16,6 @@ echo $SYSTEM
 
 cd $DIR_vib
   make  OPT=0
- #./link
 cd $here
 
 #export OMP_NUM_THREADS=1

@@ -232,13 +232,13 @@ SUBROUTINE calc_RD(para_RD,RvecB,printRD,RD,RDcontrac)
 TYPE (param_RD),                  intent(in)              :: para_RD
 real (kind=Rkind),                intent(in)              :: RvecB(:) ! RvecB(nb_tot)
 logical,                          intent(in),    optional :: printRD
-real (kind=Rkind),   allocatable, intent(inout), optional :: RD(:,:) ! reduced density matrix with the contracted basis set (nbc,nbc)
+real (kind=Rkind),   allocatable, intent(inout), optional :: RD(:,:)        ! reduced density matrix with the un-contracted basis set (nb,nb)
 real (kind=Rkind),   allocatable, intent(inout), optional :: RDcontrac(:,:) ! reduced density matrix with the contracted basis set (nbc,nbc)
 
 integer :: i,j,ibasis,IBb,JBb,IB,nbc
 
 real (kind=Rkind),  allocatable    :: RDcontrac_loc(:,:) ! reduced density matrix with the contracted basis set (nbc,nbc)
-real (kind=Rkind),  allocatable    :: RD_loc(:,:) ! reduced density matrix with the contracted basis set (nbc,nbc)
+real (kind=Rkind),  allocatable    :: RD_loc(:,:)        ! reduced density matrix with the un-contracted basis set (nb,nb)
 
 logical :: printRD_loc
 
@@ -303,7 +303,6 @@ character (len=*), parameter :: name_sub='calc_RD'
     END IF
 
     IF (present(RDcontrac)) CALL MOVE_ALLOC( TO=RDcontrac, FROM=RDcontrac_loc )
-
 
   END IF
 

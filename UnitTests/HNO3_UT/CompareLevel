@@ -60,4 +60,4 @@ echo The largest relative difference between levels of $file is : $d
 echo $d | LANG=C awk -v epsi=$epsi '{if ($1 > epsi) {print "    ERROR, relative diff > " epsi} else {print "    No PROBLEM, relative diff <= " epsi}}'
 
 
- rm $fNew $fOld
+rm $fNew $fOld

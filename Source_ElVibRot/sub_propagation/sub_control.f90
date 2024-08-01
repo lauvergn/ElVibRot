@@ -384,7 +384,8 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
         IF (para_propa%para_field%pola_xyz(iDip)) THEN
           write(out_unitp,*) 'Control with ',trim(para_AllOp%tab_Op(i)%name_Op),&
                             para_AllOp%tab_Op(i)%n_Op
-        END IF
+          flush(out_unitp)
+         END IF
       END DO
 
 
@@ -427,7 +428,6 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
           STOP
         END IF
       END DO
-
 
 !     --------------------------------------------------
       IF (para_propa%para_WP0%New_Read_WP0) THEN
@@ -493,7 +493,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 
 !      print_cont = .TRUE.
       print_cont =.FALSE.
-
+!STOP 'coucou'
 
       IF (para_propa%para_control%max_iter > 0) THEN
 !       - backward propagation of the target -------------

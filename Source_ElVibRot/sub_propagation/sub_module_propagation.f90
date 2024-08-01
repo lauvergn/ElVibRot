@@ -612,6 +612,7 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
   integer                            :: j,i,i_bi,i_be,i_bie,iOp
   complex (kind=Rkind)               :: ET  ! energy
   character (len=:),    allocatable  :: info
+  character (len=:),    allocatable  :: lines
 
   logical :: BasisRep,GridRep,adia_loc,Write_psi2_Grid,Write_psi_Grid
 
@@ -760,8 +761,10 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
 
       IF (para_propa%ana_psi%AvHiterm) THEN
         w1   = WP(i)
-        info = real_TO_char(T,Rformat='f12.2')
-        CALL sub_psiHitermPsi(w1,i,info,para_H)
+        info = TO_string(T,Rformat='f12.2')
+        CALL sub_psiHitermPsi(w1,i,info,para_H,lines)
+        write(out_unitp,*) lines
+        deallocate(lines)
       END IF
 
       IF (para_propa%ana_psi%AvOp) THEN
@@ -901,9 +904,9 @@ SUBROUTINE sub_analyze_mini_WP_OpWP(T,WP,nb_WP,para_H,ana_psi,adia,para_field)
     ! add the psi number + the time
     RWU_T = REAL_WU(T,'au','t')
 
-    !psi_line = 'norm^2-WP #WP ' // TO_string(i) // ' ' // real_TO_char(T,Rformat=ana_psi%Tformat)
-    psi_line = 'norm^2-WP #WP ' // TO_string(i) // ' ' //                     &
-                  RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.)
+    IF (allocated(psi_line)) deallocate(psi_line)
+    CALL ADD_TO_string(psi_line,'norm^2-WP #WP ',TO_string(i),' ',   &
+                       RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.))
 
 
     IF (With_ENE) THEN
@@ -919,26 +922,21 @@ SUBROUTINE sub_analyze_mini_WP_OpWP(T,WP,nb_WP,para_H,ana_psi,adia,para_field)
       iE = int(log10(abs(E)+ONETENTH**8)) ! 0.1**8 to avoid zero
       CALL modif_ana_psi(ana_psi,                                               &
                 EFormat='f' // TO_string(15-iE) // '.' // TO_string(7-iE) )
-      !write(6,*) E,iE,'ana_psi%Eformat: ',ana_psi%Eformat
-      psi_line = psi_line // ' ' // real_TO_char(E,Rformat=ana_psi%Eformat)
+
+      CALL ADD_TO_string(psi_line,' ',TO_string(E,Rformat=ana_psi%Eformat))
     ELSE
-      ! add the energy
-      psi_line = psi_line // ' ' // 'xxxxxxxx'
+      CALL ADD_TO_string(psi_line,' xxxxxxxx')
     END IF
 
     ! add the field (if necessary)
     IF (present(para_field)) THEN
       CALL sub_dnE(dnE,0,T,para_field)
-      psi_line = psi_line // ' ' // real_TO_char(dnE(1),Rformat='f8.5')
-      psi_line = psi_line // ' ' // real_TO_char(dnE(2),Rformat='f8.5')
-      psi_line = psi_line // ' ' // real_TO_char(dnE(3),Rformat='f8.5')
+      CALL ADD_TO_string(psi_line,' ',TO_string(dnE(:),Rformat='f8.5'))
     END IF
 
-    psi_line = psi_line // ' ' // real_TO_char(Psi_norm2,Rformat='f10.7')
+    CALL ADD_TO_string(psi_line,' ',TO_string(Psi_norm2,Rformat='f10.7'))
     DO i_be=1,WP(i)%nb_be
-    DO i_bi=1,WP(i)%nb_bi
-      IF(MPI_id==0) psi_line = psi_line // ' ' // real_TO_char(tab_WeightChannels(i_bi,i_be),Rformat='f10.7')
-    END DO
+      CALL ADD_TO_string(psi_line,' ',TO_string(tab_WeightChannels(:,i_be),Rformat='f10.7'))
     END DO
 
     IF(MPI_id==0) write(out_unitp,*) psi_line

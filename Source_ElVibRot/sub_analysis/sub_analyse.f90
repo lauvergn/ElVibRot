@@ -41,7 +41,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_fullanalysis
-USE mod_Constant
+  IMPLICIT NONE
 CONTAINS
 !================================================================
 !
@@ -51,6 +51,7 @@ CONTAINS
       SUBROUTINE sub_analyse(Tab_Psi,nb_psi_in,para_H,para_ana,         &
                              para_intensity,para_AllOp,const_phys)
       USE mod_system
+      USE mod_Constant
       USE mod_Coord_KEO
 
       USE mod_basis
@@ -62,6 +63,7 @@ CONTAINS
 
       USE mod_Op
       USE mod_analysis
+      USE mod_ana_psi
       IMPLICIT NONE
 
 !----- variables for the construction of H ----------------------------
@@ -69,12 +71,14 @@ CONTAINS
       TYPE (param_Op)     :: para_H
 
 !----- variables pour la namelist analyse ----------------------------
-      TYPE (param_ana)           :: para_ana
-      TYPE (param_intensity)     :: para_intensity
+      TYPE (param_ana)                  :: para_ana
+      TYPE (param_intensity)            :: para_intensity
+      TYPE (param_ana_psi), allocatable :: ana_psi(:)
+
 
 !----- for the CoordType and Tnum --------------------------------------
       TYPE (CoordType),pointer     :: mole
-      TYPE (Tnum),pointer        :: para_Tnum
+      TYPE (Tnum),pointer          :: para_Tnum
 
 !----- physical and mathematical constants ---------------------------
       TYPE (constant)            :: const_phys
@@ -91,10 +95,11 @@ CONTAINS
       real (kind=Rkind), allocatable :: ene(:)
       real (kind=Rkind), allocatable :: Mat_psi(:,:)
       character(len=:),  allocatable :: info
+      TYPE (string_t),   allocatable :: tab_PsiAna(:)
 
       logical                        :: cube = .FALSE.
 
-      integer                        :: i,nb_col,ib
+      integer                        :: i,nb_col,ib,maxth
       real (kind=Rkind)              :: Q,E,DE
       TYPE (File_t)                  :: file_WPspectral
       integer                        :: nioWP
@@ -171,10 +176,21 @@ CONTAINS
       IF(MPI_id==0) CALL Write_header_saveFile_psi(tab_Psi,nb_psi,file_WPspectral)
 
       ! write the energy level + save the psi
+      allocate(ana_psi(nb_psi_in))
+      allocate(tab_PsiAna(nb_psi_in))
+
       write(out_unitp,*) 'population at T, Q',para_ana%Temp,Q
       write(out_unitp,*) 'Energy level (',const_phys%ene_unit,') pop and means :'
       flush(out_unitp)
       DO i=1,nb_psi_in
+        ana_psi(i) = para_ana%ana_psi
+
+        ana_psi(i)%Ene     = ene(i)
+        ana_psi(i)%num_psi = i
+
+        ana_psi(i)%ZPE        = para_H%ZPE
+        ana_psi(i)%Part_Func  = Q
+        ana_psi(i)%Temp       = para_ana%Temp
 
         IF (ene(i)-para_H%ZPE > para_ana%max_ene) CYCLE
 
@@ -197,60 +213,82 @@ CONTAINS
       END DO
       IF(MPI_id==0) CALL file_close(file_WPspectral)
 
+
+      IF (.NOT. allocated(AllPsi_max_RedDensity)) THEN
+        CALL alloc_NParray(AllPsi_max_RedDensity,[BasisnD%nDindB%ndim],"AllPsi_max_RedDensity",name_sub)
+        AllPsi_max_RedDensity(:) = ZERO
+      END IF
+
+      maxth              = 1
+      !$ maxth           = omp_get_max_threads()
+
+      IF (.NOT. openmp) maxth = 1
+
       para_ana%ana_psi%ZPE        = para_H%ZPE
       para_ana%ana_psi%Part_Func  = Q
       para_ana%ana_psi%Temp       = para_ana%Temp
 
-      write(out_unitp,*) 'population at T, Q',para_ana%Temp,Q
-      write(out_unitp,*) 'Energy level (',const_phys%ene_unit,') pop and averages :'
-      flush(out_unitp)
+!$OMP   PARALLEL &
+!$OMP   DEFAULT(NONE) &
+!$OMP   SHARED(nb_psi_in,ene,para_H,para_AllOp,para_ana,tab_Psi,ana_psi,AllPsi_max_RedDensity,const_phys) &
+!$OMP   SHARED(out_unitp,para_intensity,tab_PsiAna) &
+!$OMP   PRIVATE(i,info) &
+!$OMP   NUM_THREADS(maxth)
 
+!$OMP   DO SCHEDULE(STATIC)
       DO i=1,nb_psi_in
 
-        IF (ene(i)-para_H%ZPE > para_ana%max_ene) CYCLE
+        IF (ana_psi(i)%Ene-ana_psi(i)%ZPE > para_ana%max_ene) CYCLE
 
         IF (.NOT. tab_Psi(i)%BasisRep) THEN
           CALL sub_PsiGridRep_TO_BasisRep(tab_Psi(i))
         END IF
-        para_ana%ana_psi%Ene     = ene(i)
-        para_ana%ana_psi%num_psi = i
 
-        info = trim( " " //                                 &
-           real_TO_char( ene(i)*const_phys%auTOenergy,"f12.6" ) // " : ")
+        CALL SET_string(info," ",TO_string(ene(i)*const_phys%auTOenergy,"f12.6")," : ")
+!write(6,*) 'coucou info: ',info ; flush(6)
+        CALL sub_analyze_psi(tab_Psi(i),ana_psi(i),adia=.FALSE.,PsiAna=tab_PsiAna(i)%str)
 
-        CALL sub_analyze_psi(tab_Psi(i),para_ana%ana_psi,adia=.FALSE.)
-
+        !$OMP CRITICAL (sub_analyse_CRIT)
         IF (allocated(para_ana%ana_psi%max_RedDensity)) THEN
-          IF (.NOT. allocated(AllPsi_max_RedDensity)) THEN
-            CALL alloc_NParray(AllPsi_max_RedDensity,shape(para_ana%ana_psi%max_RedDensity), &
-                              "AllPsi_max_RedDensity",name_sub)
-            AllPsi_max_RedDensity(:) = ZERO
-          END IF
-
           DO ib=1,size(AllPsi_max_RedDensity)
             AllPsi_max_RedDensity(ib) = max(AllPsi_max_RedDensity(ib),para_ana%ana_psi%max_RedDensity(ib))
           END DO
         END IF
+        !$OMP END CRITICAL (sub_analyse_CRIT)
 
         IF (para_ana%intensity .AND. para_intensity%l_IntVR) THEN
-          CALL sub_moyABC(tab_Psi(i),i,info,para_intensity%ABC(:,i),para_AllOp)
+          CALL sub_moyABC(tab_Psi(i),i,info,para_intensity%ABC(:,i),para_H,PsiAna=tab_PsiAna(i)%str)
         ELSE IF (para_AllOp%tab_Op(1)%para_ReadOp%nb_scalar_Op > 0 .AND. &
                  para_ana%ana_psi%AvScalOp) THEN
-          CALL sub_moyScalOp(tab_Psi(i),i,info,para_AllOp)
+          CALL sub_moyScalOp(tab_Psi(i),i,info,para_AllOp%tab_Op,PsiAna=tab_PsiAna(i)%str)
         END IF
 
         IF (para_ana%ana_psi%AvHiterm) THEN
-          CALL sub_psiHitermPsi(tab_Psi(i),i,info,para_H)
+          CALL sub_psiHitermPsi(tab_Psi(i),i,info,para_H,PsiAna=tab_PsiAna(i)%str)
         END IF
-
-        write(out_unitp,*)
 
         deallocate(info)
 
       END DO
+!$OMP   END DO
+!$OMP   END PARALLEL
+
+      write(out_unitp,*) '=============================================================='
+      write(out_unitp,*) '=============================================================='
+      write(out_unitp,*) '=============================================================='
+      write(out_unitp,*) 'population at T, Q',para_ana%Temp,Q
+      write(out_unitp,*) 'Energy level (',const_phys%ene_unit,') pop and averages :'
+      flush(out_unitp)
+      DO i=1,nb_psi_in
+        write(out_unitp,'(a)') tab_PsiAna(i)%str
+        flush(out_unitp)
+      END DO
+      write(out_unitp,*) '=============================================================='
+      write(out_unitp,*) '=============================================================='
+      write(out_unitp,*) '=============================================================='
+      flush(out_unitp)
 
       IF (allocated(AllPsi_max_RedDensity)) THEN
-
         CALL Write_Vec(AllPsi_max_RedDensity,out_unitp,6,Rformat='e10.3',info='For all psi max_RedDensity ')
         !write(out_unitp,*) 'For all psi max_RedDensity ',AllPsi_max_RedDensity(:)
         CALL dealloc_NParray(AllPsi_max_RedDensity,"AllPsi_max_RedDensity",name_sub)
@@ -315,308 +353,8 @@ CONTAINS
 !----------------------------------------------------------
 
 
-      END SUBROUTINE sub_analyse
-!================================================================
-!
-!     calculation of <psi | Mhu | psi>
-!
-!================================================================
+  END SUBROUTINE sub_analyse
 
-!================================================================
-!
-!     calculation of <psi | Mhu | psi>
-!
-!================================================================
-      SUBROUTINE sub_moyABC(Psi,iPsi,info,ABC,para_AllOp)
-
-      USE mod_system
-      USE mod_psi,      ONLY : param_psi,dealloc_psi
-      USE mod_Op
-      IMPLICIT NONE
-
-      TYPE (param_psi)               :: Psi
-      integer                        :: iPsi
-      character (len=*)              :: info
-      real (kind=Rkind)              :: ABC(3)
-      TYPE (param_AllOp)             :: para_AllOp
-
-
-
-!----- for the CoordType and Tnum --------------------------------------
-      TYPE (param_psi)            :: OpPsi
-      TYPE (CoordType),pointer    :: mole      ! true pointer
-      TYPE (Tnum),pointer         :: para_Tnum ! true pointer
-
-      real (kind=Rkind) :: avMhu(3,3),TensorI(3,3),mat(3,3)
-      real (kind=Rkind) :: trav1(3),mat1(3,3),dummy
-      integer           :: i,j,iOp,index(3)
-      complex(kind=Rkind) :: avOp
-!----- for debuging --------------------------------------------------
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-!-----------------------------------------------------------
-       IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING sub_moyABC'
-         write(out_unitp,*) 'ipsi,info',iPsi,info
-       END IF
-!-----------------------------------------------------------
-      mole       => para_AllOp%tab_Op(1)%mole
-      para_Tnum  => para_AllOp%tab_Op(1)%para_Tnum
-
-
-       OpPsi = psi  ! for the initialization
-
-       i=1 ; j=1
-       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
-       TensorI(i,j) = real(avOp,kind=Rkind)
-       i=2 ; j=2
-       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
-       TensorI(i,j) = real(avOp,kind=Rkind)
-       i=3 ; j=3
-       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
-       TensorI(i,j) = real(avOp,kind=Rkind)
-
-       i=1 ; j=2
-       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
-       TensorI(i,j) = real(avOp,kind=Rkind)
-       TensorI(j,i) = real(avOp,kind=Rkind)
-
-       i=1 ; j=3
-       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
-       TensorI(i,j) = real(avOp,kind=Rkind)
-       TensorI(j,i) = real(avOp,kind=Rkind)
-
-
-       i=2 ; j=3
-       iOp = para_AllOp%tab_Op(1)%derive_term_TO_iterm(-i,-j)
-       CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
-       TensorI(i,j) = real(avOp,kind=Rkind)
-       TensorI(j,i) = real(avOp,kind=Rkind)
-
-       IF (para_Tnum%Inertia) THEN
-         write(out_unitp,*) iPsi,'TensorI',info
-         write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
-         avMhu = inv_OF_Mat_TO(TensorI) * HALF
-       ELSE
-         avMhu = TensorI
-         mat   = TensorI
-
-         TensorI = inv_OF_Mat_TO(mat)
-
-         write(out_unitp,*) iPsi,'TensorI (invers of G)',info
-         write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
-       END IF
-
-       write(out_unitp,*) iPsi,'avMhu',info
-       write(out_unitp,"(3(3(f15.9,1x),/))") avMhu(:,:)
-
-       CALL diagonalization(avMhu,ABC(:),mat1,3,1,1,.FALSE.)
-       dummy = ABC(1)
-       ABC(1) = ABC(3)
-       ABC(3) = dummy
-
-
-       write(out_unitp,21) iPsi,' ABC (cm-1) at ',info,ABC(:) *         &
-                                          get_Conv_au_TO_unit('E','cm-1')
-       write(out_unitp,21) iPsi,' ABC (GHz) at ',info,ABC(:) *          &
-                                          get_Conv_au_TO_unit('E','GHz')
- 21    format(i4,2A,3f18.5)
-
-       CALL dealloc_psi(OpPsi)
-
-
-!----------------------------------------------------------
-        IF (debug) THEN
-          write(out_unitp,*) 'END sub_moyABC'
-        END IF
-!----------------------------------------------------------
-
-
-        end subroutine sub_moyABC
-        SUBROUTINE sub_moyABC_old(Psi,iPsi,info,ABC,para_AllOp)
-
-          USE mod_system
-          USE mod_psi,      ONLY : param_psi,dealloc_psi
-          USE mod_Op
-          IMPLICIT NONE
-    
-          TYPE (param_psi)               :: Psi
-          integer                        :: iPsi
-          character (len=*)              :: info
-          real (kind=Rkind)              :: ABC(3)
-          TYPE (param_AllOp)             :: para_AllOp
-    
-    
-    
-    !----- for the CoordType and Tnum --------------------------------------
-          TYPE (param_psi)            :: OpPsi
-          TYPE (CoordType),pointer    :: mole      ! true pointer
-          TYPE (Tnum),pointer         :: para_Tnum ! true pointer
-    
-          real (kind=Rkind) :: avMhu(3,3),TensorI(3,3),mat(3,3)
-          real (kind=Rkind) :: trav1(3),mat1(3,3),dummy
-          integer           :: index(3)
-          complex(kind=Rkind) :: avOp
-    !----- for debuging --------------------------------------------------
-          logical, parameter :: debug=.FALSE.
-          !logical, parameter :: debug=.TRUE.
-    !-----------------------------------------------------------
-           IF (debug) THEN
-             write(out_unitp,*) 'BEGINNING sub_moyABC_old'
-             write(out_unitp,*) 'ipsi,info',iPsi,info
-           END IF
-    !-----------------------------------------------------------
-          mole       => para_AllOp%tab_Op(1)%mole
-          para_Tnum  => para_AllOp%tab_Op(1)%para_Tnum
-    
-    
-           OpPsi = psi  ! for the initialization
-    
-           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(6))
-           TensorI(1,1) = real(avOp,kind=Rkind)
-           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(7))
-           TensorI(1,2) = real(avOp,kind=Rkind)
-           TensorI(2,1) = real(avOp,kind=Rkind)
-           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(8))
-           TensorI(1,3) = real(avOp,kind=Rkind)
-           TensorI(3,1) = real(avOp,kind=Rkind)
-           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(10))
-           TensorI(2,2) = real(avOp,kind=Rkind)
-           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(11))
-           TensorI(2,3) = real(avOp,kind=Rkind)
-           TensorI(3,2) = real(avOp,kind=Rkind)
-           CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(14))
-           TensorI(3,3) = real(avOp,kind=Rkind)
-    
-           IF (para_Tnum%Inertia) THEN
-             write(out_unitp,*) iPsi,'TensorI',info
-             write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
-             avMhu = inv_OF_Mat_TO(TensorI) * HALF
-           ELSE
-             avMhu = TensorI
-             mat   = TensorI
-    
-             TensorI = inv_OF_Mat_TO(mat)
-    
-             write(out_unitp,*) iPsi,'TensorI (invers of G)',info
-             write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
-           END IF
-    
-           write(out_unitp,*) iPsi,'avMhu',info
-           write(out_unitp,"(3(3(f15.9,1x),/))") avMhu(:,:)
-    
-           CALL diagonalization(avMhu,ABC(:),mat1,3,1,1,.FALSE.)
-           dummy = ABC(1)
-           ABC(1) = ABC(3)
-           ABC(3) = dummy
-    
-    
-           write(out_unitp,21) iPsi,' ABC (cm-1) at ',info,ABC(:) *         &
-                                              get_Conv_au_TO_unit('E','cm-1')
-           write(out_unitp,21) iPsi,' ABC (GHz) at ',info,ABC(:) *          &
-                                              get_Conv_au_TO_unit('E','GHz')
-     21    format(i4,2A,3f18.5)
-    
-           CALL dealloc_psi(OpPsi)
-    
-    
-    !----------------------------------------------------------
-            IF (debug) THEN
-              write(out_unitp,*) 'END sub_moyABC_old'
-            END IF
-    !----------------------------------------------------------
-    
-    
-            end subroutine sub_moyABC_old
-!================================================================
-!
-!     calculation of <psi | Mhu | psi>
-!
-!================================================================
-       SUBROUTINE sub_moyScalOp(Psi,iPsi,info,para_AllOp)
-
-      USE mod_system
-      USE mod_psi,      ONLY : param_psi,dealloc_psi
-      USE mod_Op
-      IMPLICIT NONE
-
-      TYPE (param_psi)               :: Psi
-      integer                        :: iPsi
-      character (len=*)              :: info
-      TYPE (param_AllOp)             :: para_AllOp
-
-
-
-      !----- local variables --------------------------------------
-      TYPE (param_psi)           :: OpPsi
-      TYPE (param_Op), pointer   :: ScalOp(:) => null() ! true pointer
-
-
-      real (kind=Rkind)   :: avScalOp(para_AllOp%tab_Op(1)%para_ReadOp%nb_scalar_Op)
-      complex(kind=Rkind) :: avOp
-      integer             :: iOp,nb_scalar_Op
-!----- for debuging --------------------------------------------------
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
-!-----------------------------------------------------------
-       nb_scalar_Op = para_AllOp%tab_Op(1)%para_ReadOp%nb_scalar_Op
-       IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING sub_moyScalOp'
-         write(out_unitp,*) 'ipsi,info',iPsi,info
-         write(out_unitp,*) 'nb_scalar_Op',nb_scalar_Op
-         DO iOp=1,size(para_AllOp%tab_Op)
-           write(out_unitp,*) iOp,'Save_MemGrid_done', &
-              para_AllOp%tab_Op(iOp)%para_ReadOp%para_FileGrid%Save_MemGrid_done
-         END DO
-       END IF
-!-----------------------------------------------------------
-
-      ScalOp(1:nb_scalar_Op) => para_AllOp%tab_Op(3:2+nb_scalar_Op)
-
-       OpPsi = psi  ! for the initialization
-
-       DO iOp=1,nb_scalar_Op
-
-         CALL sub_PsiOpPsi(avOp,Psi,OpPsi,ScalOp(iOp))
-         avScalOp(iOp) = real(avOp,kind=Rkind)
-
-       END DO
-
-       write(out_unitp,"(i0,2a,100(f15.9,1x))") iPsi,' avScalOp: ',info,avScalOp
-       flush(out_unitp)
-
-       !for H
-       IF (para_AllOp%tab_Op(1)%name_Op /= 'H') STOP 'wrong Operator !!'
-       !write(out_unitp,*) 'nb_Term',para_AllOp%tab_Op(1)%nb_Term ; flush(out_unitp)
-       DO iOp=1,para_AllOp%tab_Op(1)%nb_Term
-
-         CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_AllOp%tab_Op(1),iOp)
-         write(out_unitp,"(i0,a,i0,a,2(i0,1x),2a,f15.9,1x,f15.9)") iPsi,  &
-          ' H(',iOp,') der[',para_AllOp%tab_Op(1)%derive_termQact(:,iOp),&
-          ']: ',info,avOp
-
-         flush(out_unitp)
-
-       END DO
-
-       CALL dealloc_psi(OpPsi)
-       nullify(ScalOp)
-
-
-!----------------------------------------------------------
-        IF (debug) THEN
-          write(out_unitp,*) 'END sub_moyScalOp'
-          flush(out_unitp)
-        END IF
-!----------------------------------------------------------
-
-
-        end subroutine sub_moyScalOp
 !================================================================
 !
 !     write psi or psi^2 on the grid point

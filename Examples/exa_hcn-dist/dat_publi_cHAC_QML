@@ -25,7 +25,7 @@ pi=3.14159265358979323846264338327950288419716939937511d0
 #&minimum pot0=-0.499465823200 HarD=t /
 
 nice $DIR_vib/vib << ** >res
- &system popenmp=f printlevel=2 /
+ &system popenmp=t printlevel=2 /
  &constantes mass_version='HANDBOOK70ED' version='PUBLI2001' /
  &variables 
          zmat=T

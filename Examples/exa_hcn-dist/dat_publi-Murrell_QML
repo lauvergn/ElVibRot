@@ -9,7 +9,7 @@ DIR_vib=$here/../..
 
 
 cd $DIR_vib
- make
+ make OPT=0
 cd $here
 
  MH=1837.10882307318116

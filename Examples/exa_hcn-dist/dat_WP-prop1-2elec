@@ -7,7 +7,7 @@ DIR_pot=$DIR_vib/sub_pot
  cp $SYSTEM $DIR_pot/sub_system.f
 
 cd $DIR_vib
- make
+ make OPT=0
 cd $here
 
  x1=0.538516066
@@ -59,7 +59,9 @@ dh 0.0
  &actives test=f direct=2 /
  &analyse max_ana=20 max_ene=20000. "cm-1" print=f propa=t 
           print_psi=0 psi1D_Q0=t psi2D_Q0=t
-          Rho1D=t Rho2D=t Rho_type=1 coherence=1 ExactFact=1 /
+          Rho1D=t Rho2D=t Rho_type=1 
+          AvScalOp=t AvHiterm=t AvPi=t AvOp=t
+          coherence=1 ExactFact=1 /
 
  &propa
         WPTmax=10. 'fs' WPdeltaT=1. 'fs' nb_micro=1

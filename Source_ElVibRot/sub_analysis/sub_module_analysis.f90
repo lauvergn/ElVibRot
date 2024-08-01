@@ -43,10 +43,8 @@
 
       MODULE mod_analysis
       USE mod_system
-      use mod_Constant, only : real_wu, convRWU_TO_R_WITH_WorkingUnit,  &
-                               rwu_write, get_conv_au_to_unit
       USE mod_psi,      ONLY : param_ana_psi
-      USE mod_CRP
+      USE mod_CRP,      ONLY : param_CRP
       IMPLICIT NONE
         TYPE param_ana
           integer              :: max_ana     = -1        ! nb of level to be analyzed. If max_ana=-1, all level are analyzed.
@@ -125,8 +123,12 @@
 !===============================================================================
       SUBROUTINE read_analyse(para_ana,Qana,mole)
       USE mod_system
+      use mod_Constant, only : real_wu, convRWU_TO_R_WITH_WorkingUnit,  &
+                               rwu_write, get_conv_au_to_unit
       USE mod_Coord_KEO,  only : CoordType
       USE mod_psi,        ONLY : param_ana_psi,init_ana_psi,Write_ana_psi
+      USE mod_CRP,        ONLY : read_CRP
+
       IMPLICIT NONE
 
 !----- variables pour la namelist analyse ----------------------------
@@ -426,6 +428,8 @@
 
       SUBROUTINE read_intensity(para_intensity)
       USE mod_system
+      use mod_Constant, only : real_wu, convRWU_TO_R_WITH_WorkingUnit,  &
+                               rwu_write, get_conv_au_to_unit
       IMPLICIT NONE
 
       TYPE (param_intensity) :: para_intensity

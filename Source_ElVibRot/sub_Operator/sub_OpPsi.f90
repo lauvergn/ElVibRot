@@ -49,7 +49,7 @@ PUBLIC :: sub_PsiOpPsi,sub_OpPsi,sub_scaledOpPsi,sub_OpiPsi,sub_TabOpPsi
 PUBLIC :: sub_PsiDia_TO_PsiAdia_WITH_MemGrid
 !PUBLIC :: sub_TabOpPsi_OF_ONEDP_FOR_SGtype4
 !PUBLIC :: sub_TabOpPsi_OF_ONEGDP_WithOp_FOR_SGtype4
-PUBLIC :: sub_psiHitermPsi
+PUBLIC :: sub_psiHitermPsi,sub_moyABC,sub_moyScalOp
 PUBLIC :: sub_OpBasis_OneBF,sub_OpBasis_OneCBF
 
 CONTAINS
@@ -3331,59 +3331,274 @@ SUBROUTINE sub_PsiDia_TO_PsiAdia_WITH_MemGrid(Psi,para_H)
   !-----------------------------------------------------------
 
 END SUBROUTINE sub_PsiDia_TO_PsiAdia_WITH_MemGrid
-      SUBROUTINE sub_psiHitermPsi(Psi,iPsi,info,para_H)
-      USE mod_system
-      USE mod_SetOp,    ONLY : param_Op
-      USE mod_psi,      ONLY : param_psi,dealloc_psi
-      IMPLICIT NONE
+!================================================================
+!
+!     calculation of <psi | Mhu | psi>
+!
+!================================================================
+SUBROUTINE sub_moyABC(Psi,iPsi,info,ABC,para_H,PsiAna)
+  USE mod_system
+  USE mod_Constant
+  USE mod_Coord_KEO
+  USE mod_psi,      ONLY : param_psi,dealloc_psi
+  USE mod_SetOp,    ONLY : param_Op
+  IMPLICIT NONE
 
-      TYPE (param_psi)               :: Psi
-      integer                        :: iPsi
-      character (len=*)              :: info
-      TYPE (param_Op)                :: para_H
+  TYPE (param_psi),               intent(in)    :: Psi
+  integer,                        intent(in)    :: iPsi
+  character (len=*),              intent(in)    :: info
+  real (kind=Rkind),              intent(inout) :: ABC(3)
+  TYPE (param_Op),                intent(in)    :: para_H
+  character (len=:), allocatable, intent(inout) :: PsiAna
 
 
 
-      !----- local variables --------------------------------------
-      TYPE (param_psi)           :: OpPsi
+  !----- for the CoordType and Tnum --------------------------------------
+  TYPE (param_psi)            :: OpPsi
+  TYPE (Tnum),     pointer    :: para_Tnum ! true pointer
 
+  real (kind=Rkind)   :: avMhu(3,3),TensorI(3,3),mat(3,3)
+  real (kind=Rkind)   :: mat1(3,3),dummy,ABC_loc(3)
+  integer             :: i,j,iOp,index(3)
+  complex(kind=Rkind) :: avOp
 
-      complex(kind=Rkind) :: avOp
-      integer             :: iOp
-!----- for debuging --------------------------------------------------
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
+  !----- for debuging --------------------------------------------------
+  logical, parameter :: debug=.FALSE.
+  !logical, parameter :: debug=.TRUE.
+  !-----------------------------------------------------------
+  IF (debug) THEN
+    write(out_unitp,*) 'BEGINNING sub_moyABC'
+    write(out_unitp,*) 'ipsi,info',iPsi,info
+    flush(out_unitp)
+ END IF
 !-----------------------------------------------------------
-       IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING sub_psiHitermPsi'
-         write(out_unitp,*) 'ipsi,info',iPsi,info
-       END IF
-!-----------------------------------------------------------
+    IF (.NOT. allocated(PsiAna)) PsiAna = ''
 
-       OpPsi = psi  ! for the initialization
-
-       !for H
-       IF (para_H%name_Op /= 'H') STOP 'wrong Operator !!'
-       write(out_unitp,*) 'nb_Term',para_H%nb_Term ; flush(out_unitp)
-       DO iOp=1,para_H%nb_Term
-
-         CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_H,iOp)
-         write(out_unitp,"(i0,a,i0,a,2(i0,1x),2a,f15.9,1x,f15.9)") iPsi,  &
-          ' H(',iOp,') der[',para_H%derive_termQact(:,iOp),']: ',info,avOp
-
-         flush(out_unitp)
-
-       END DO
-
-       CALL dealloc_psi(OpPsi)
-
-!----------------------------------------------------------
-        IF (debug) THEN
-          write(out_unitp,*) 'END sub_psiHitermPsi'
-          flush(out_unitp)
-        END IF
-!----------------------------------------------------------
+    para_Tnum  => para_H%para_Tnum
 
 
-        end subroutine sub_psiHitermPsi
+    OpPsi = psi  ! for the initialization
+
+    i=1 ; j=1
+    iOp = para_H%derive_term_TO_iterm(-i,-j)
+    CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_H,iOp)
+    TensorI(i,j) = real(avOp,kind=Rkind)
+    i=2 ; j=2
+    iOp = para_H%derive_term_TO_iterm(-i,-j)
+    CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_H,iOp)
+    TensorI(i,j) = real(avOp,kind=Rkind)
+    i=3 ; j=3
+    iOp = para_H%derive_term_TO_iterm(-i,-j)
+    CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_H,iOp)
+    TensorI(i,j) = real(avOp,kind=Rkind)
+
+    i=1 ; j=2
+    iOp = para_H%derive_term_TO_iterm(-i,-j)
+    CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_H,iOp)
+    TensorI(i,j) = real(avOp,kind=Rkind)
+    TensorI(j,i) = real(avOp,kind=Rkind)
+
+    i=1 ; j=3
+    iOp = para_H%derive_term_TO_iterm(-i,-j)
+    CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_H,iOp)
+    TensorI(i,j) = real(avOp,kind=Rkind)
+    TensorI(j,i) = real(avOp,kind=Rkind)
+
+
+    i=2 ; j=3
+    iOp = para_H%derive_term_TO_iterm(-i,-j)
+    CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_H,iOp)
+    TensorI(i,j) = real(avOp,kind=Rkind)
+    TensorI(j,i) = real(avOp,kind=Rkind)
+
+    IF (para_Tnum%Inertia) THEN
+      IF (debug) write(out_unitp,*) iPsi,'TensorI',info
+      IF (debug) write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
+
+      CALL ADD_TO_string(PsiAna,'TensorI',info ,new_line('nl'), &
+                        TO_string(TensorI(:,1)),new_line('nl'), &
+                        TO_string(TensorI(:,2)),new_line('nl'), &
+                        TO_string(TensorI(:,3)),new_line('nl'))
+
+      avMhu = inv_OF_Mat_TO(TensorI) * HALF
+    ELSE
+      avMhu = TensorI
+      mat   = TensorI
+
+      TensorI = inv_OF_Mat_TO(mat)
+
+      IF (debug) write(out_unitp,*) iPsi,'TensorI (invers of G)',info
+      IF (debug) write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
+
+      CALL ADD_TO_string(PsiAna,'TensorI (invers of G)',info ,new_line('nl'), &
+                         TO_string(TensorI(:,1)),new_line('nl'), &
+                         TO_string(TensorI(:,2)),new_line('nl'), &
+                         TO_string(TensorI(:,3)),new_line('nl'))
+    END IF
+
+    IF (debug) write(out_unitp,*) iPsi,'avMhu',info
+    IF (debug) write(out_unitp,"(3(3(f15.9,1x),/))") avMhu(:,:)
+
+    CALL ADD_TO_string(PsiAna,'avMhu (part of G)',info ,new_line('nl'), &
+                      TO_string(TensorI(:,1)),new_line('nl'), &
+                      TO_string(TensorI(:,2)),new_line('nl'), &
+                      TO_string(TensorI(:,3)),new_line('nl')) 
+
+    CALL diagonalization(avMhu,ABC(:),mat1,3,1,1,.FALSE.)
+    dummy = ABC(1)
+    ABC(1) = ABC(3)
+    ABC(3) = dummy
+
+    ABC_loc  = ABC(:)*get_Conv_au_TO_unit('E','cm-1')
+    CALL ADD_TO_string(PsiAna,TO_string(iPsi),' ABC (cm-1) at ',info,TO_string(ABC_loc),new_line('nl'))
+    ABC_loc  = ABC(:)*get_Conv_au_TO_unit('E','GHz')
+    CALL ADD_TO_string(PsiAna,TO_string(iPsi),' ABC (Ghz) at ',info,TO_string(ABC_loc),new_line('nl'))
+
+    CALL dealloc_psi(OpPsi)
+
+
+  !----------------------------------------------------------
+  IF (debug) THEN
+    write(out_unitp,21) iPsi,' ABC (cm-1) at ',info,ABC(:) * get_Conv_au_TO_unit('E','cm-1')
+    write(out_unitp,21) iPsi,' ABC (GHz) at ',info,ABC(:) * get_Conv_au_TO_unit('E','GHz')
+21    format(i4,2A,3f18.5)
+    write(out_unitp,*) 'END sub_moyABC'
+    flush(out_unitp)
+  END IF
+  !----------------------------------------------------------
+
+END SUBROUTINE sub_moyABC
+!================================================================
+!
+!     calculation of <psi | ScalOp(:) | psi>
+!
+!================================================================
+SUBROUTINE sub_moyScalOp(Psi,iPsi,info,tab_Op,PsiAna)
+  USE mod_system
+  USE mod_psi,      ONLY : param_psi,dealloc_psi
+  USE mod_SetOp,    ONLY : param_Op
+  IMPLICIT NONE
+
+  TYPE (param_psi),               intent(in)    :: Psi
+  integer,                        intent(in)    :: iPsi
+  character (len=*),              intent(in)    :: info
+  TYPE (param_Op),   target,      intent(in)    :: tab_Op(:)
+  character (len=:), allocatable, intent(inout) :: PsiAna
+
+  !----- local variables --------------------------------------
+  TYPE (param_psi)           :: OpPsi
+  TYPE (param_Op), pointer   :: ScalOp(:) => null() ! true pointer
+
+
+  real (kind=Rkind)   :: avScalOp(tab_Op(1)%para_ReadOp%nb_scalar_Op)
+  complex(kind=Rkind) :: avOp
+  integer             :: iOp,nb_scalar_Op
+  !----- for debuging --------------------------------------------------
+  logical, parameter :: debug=.FALSE.
+  !logical, parameter :: debug=.TRUE.
+  !-----------------------------------------------------------
+  nb_scalar_Op = tab_Op(1)%para_ReadOp%nb_scalar_Op
+  IF (debug) THEN
+    write(out_unitp,*) 'BEGINNING sub_moyScalOp'
+    write(out_unitp,*) 'ipsi,info',iPsi,info
+    write(out_unitp,*) 'nb_scalar_Op',nb_scalar_Op
+    DO iOp=1,size(tab_Op)
+      write(out_unitp,*) iOp,'Save_MemGrid_done', &
+         tab_Op(iOp)%para_ReadOp%para_FileGrid%Save_MemGrid_done
+    END DO
+  END IF
+  !-----------------------------------------------------------
+
+  IF (.NOT. allocated(PsiAna)) PsiAna = ''
+  
+  ScalOp(1:nb_scalar_Op) => tab_Op(3:2+nb_scalar_Op)
+
+  OpPsi = psi  ! for the initialization
+
+  DO iOp=1,nb_scalar_Op
+
+    CALL sub_PsiOpPsi(avOp,Psi,OpPsi,ScalOp(iOp))
+    avScalOp(iOp) = real(avOp,kind=Rkind)
+
+  END DO
+  CALL ADD_TO_string(PsiAna,TO_string(iPsi),' avScalOp(3:',TO_string(2+nb_scalar_Op),'): ', &
+                     info,TO_string(avScalOp),new_line('nl'))
+
+  CALL dealloc_psi(OpPsi)
+  nullify(ScalOp)
+
+
+  !----------------------------------------------------------
+  IF (debug) THEN
+    write(out_unitp,"(i0,2a,100(f15.9,1x))") iPsi,' avScalOp: ',info,avScalOp
+    write(out_unitp,*) 'END sub_moyScalOp'
+    flush(out_unitp)
+  END IF
+  !----------------------------------------------------------
+
+
+end SUBROUTINE sub_moyScalOp
+SUBROUTINE sub_psiHitermPsi(Psi,iPsi,info,para_H,PsiAna)
+  USE mod_system
+  USE mod_SetOp,    ONLY : param_Op
+  USE mod_psi,      ONLY : param_psi,dealloc_psi
+  IMPLICIT NONE
+
+  TYPE (param_psi),               intent(in)    :: Psi
+  integer,                        intent(in)    :: iPsi
+  character (len=*),              intent(in)    :: info
+  TYPE (param_Op),                intent(in)    :: para_H
+  character (len=:), allocatable, intent(inout) :: PsiAna
+
+  !----- local variables --------------------------------------
+  TYPE (param_psi)    :: OpPsi
+  complex(kind=Rkind) :: avOp
+  integer             :: iOp
+
+  !----- for debuging --------------------------------------------------
+  logical, parameter :: debug=.FALSE.
+  !logical, parameter :: debug=.TRUE.
+  !-----------------------------------------------------------
+  IF (debug) THEN
+    write(out_unitp,*) 'BEGINNING sub_psiHitermPsi'
+    write(out_unitp,*) 'ipsi,info',iPsi,info
+    write(out_unitp,*) 'nb_Term',para_H%nb_Term
+    flush(out_unitp)
+  END IF
+  !-----------------------------------------------------------
+ 
+  IF (.NOT. allocated(PsiAna)) PsiAna = ''
+  OpPsi = psi  ! for the initialization
+
+  !for H
+  IF (para_H%name_Op /= 'H') THEN 
+    write(out_unitp,*) 'ERROR in sub_psiHitermPsi'
+    write(out_unitp,*) 'The operator is wrong.'
+    write(out_unitp,*) '  Expected: H'
+    write(out_unitp,*) '  We have: ',para_H%name_Op
+    flush(out_unitp)
+    STOP 'ERROR sub_psiHitermPsi: in wrong Operator !!'
+  END IF
+  DO iOp=1,para_H%nb_Term
+
+    CALL sub_PsiOpPsi(avOp,Psi,OpPsi,para_H,iOp)
+
+    CALL ADD_TO_string(PsiAna,TO_string(iPsi),' H(',TO_string(iOp),') der[', &
+                       TO_string(para_H%derive_termQact(:,iOp)),']: ',info ,' ')
+    CALL ADD_TO_string(PsiAna,TO_string(avOp%Re,'f15.9'),' ', &
+                       TO_string(avOp%Im,'f15.9'),new_line('nl'))
+  END DO
+
+  CALL dealloc_psi(OpPsi)
+
+  !----------------------------------------------------------
+  IF (debug) THEN
+    write(out_unitp,"(i0,a,i0,a,2(i0,1x),2a,f15.9,1x,f15.9)") iPsi,  &
+       ' H(',iOp,') der[',para_H%derive_termQact(:,iOp),']: ',info,avOp
+    write(out_unitp,*) 'END sub_psiHitermPsi'
+    flush(out_unitp)
+  END IF
+  !----------------------------------------------------------
+
+END subroutine sub_psiHitermPsi
 END MODULE mod_OpPsi

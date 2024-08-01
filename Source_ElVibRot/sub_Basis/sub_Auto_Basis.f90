@@ -1899,6 +1899,7 @@
 !=======================================================================================
   SUBROUTINE sub_MatOp_HADA(para_H,para_ana,para_intensity,para_AllOp,const_phys)
       USE mod_system
+      USE mod_Constant
       USE mod_nDindex
       USE mod_Op
       USE mod_psi,          ONLY : param_psi,alloc_psi,alloc_NParray,dealloc_NParray

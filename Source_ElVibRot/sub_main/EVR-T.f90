@@ -254,6 +254,7 @@
            Grid_maxth         = 1
            CRP_maxth          = 1
            SG4_maxth          = 1
+           maxth              = 1
 
            Tune_SG4_omp       = .FALSE.
            Tune_Grid_omp      = .FALSE.

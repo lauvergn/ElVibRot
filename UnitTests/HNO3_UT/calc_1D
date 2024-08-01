@@ -2,24 +2,24 @@
 
 ./comp
 
-./DAT_files/dat_HNO3_ccsdt-1D_rigid0
+./DAT_files/dat_HNO3_ccsdt-1D_rigid0 &> exe.log
 ./CompareLevel res_HNO3_rigid0 Table3_PCCP2010-1D.txt 3
 
-./DAT_files/dat_HNO3_ccsdt-1D_rigid100
+./DAT_files/dat_HNO3_ccsdt-1D_rigid100 &> exe.log
 ./CompareLevel res_HNO3_rigid100 1D_100_200.txt 3
 
-./DAT_files/dat_HNO3_ccsdt-1D_rigid100Publi
+./DAT_files/dat_HNO3_ccsdt-1D_rigid100Publi &> exe.log
 ./CompareLevel res_HNO3_rigid100publi Table3_PCCP2010-1D.txt 4
 
 
 
-./DAT_files/dat_HNO3_ccsdt-1D_flex20
+./DAT_files/dat_HNO3_ccsdt-1D_flex20 &> exe.log
 ./CompareLevel res_HNO3_flex20 Table3_PCCP2010-1D.txt 5
 
-./DAT_files/dat_HNO3_ccsdt-1D_flex200Publi
+./DAT_files/dat_HNO3_ccsdt-1D_flex200Publi &> exe.log
 ./CompareLevel res_HNO3_flex200Publi Table3_PCCP2010-1D.txt 6
 
-./DAT_files/dat_HNO3_ccsdt-1D_flex200
+./DAT_files/dat_HNO3_ccsdt-1D_flex200 &> exe.log
 ./CompareLevel res_HNO3_flex200 1D_100_200.txt 4
 
 

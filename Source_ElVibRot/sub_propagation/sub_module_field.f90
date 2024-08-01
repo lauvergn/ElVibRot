@@ -326,7 +326,7 @@
 !----- for debuging --------------------------------------------------
       integer :: err_mem,memory
       logical, parameter :: debug = .FALSE.
-!     logical, parameter :: debug = .TRUE.
+      !logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unitp,*) 'BEGINNING init_field_grid'
@@ -433,6 +433,7 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unitp,*) 'END init_field_grid'
+        flush(out_unitp)
       END IF
 !-----------------------------------------------------------
 
