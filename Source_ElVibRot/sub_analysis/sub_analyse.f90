@@ -99,7 +99,7 @@ CONTAINS
 
       logical                        :: cube = .FALSE.
 
-      integer                        :: i,nb_col,ib,maxth
+      integer                        :: i,nb_col,ib,maxth,iana
       real (kind=Rkind)              :: Q,E,DE
       TYPE (File_t)                  :: file_WPspectral
       integer                        :: nioWP
@@ -227,16 +227,21 @@ CONTAINS
       para_ana%ana_psi%ZPE        = para_H%ZPE
       para_ana%ana_psi%Part_Func  = Q
       para_ana%ana_psi%Temp       = para_ana%Temp
-
+      iana                        = 0
+      write(out_unitp,'(a)')              'Psi(:) analysis: (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+      write(out_unitp,'(a)',ADVANCE='no') 'Psi(:) analysis: (%): ['
+      flush(out_unitp)
 !$OMP   PARALLEL &
 !$OMP   DEFAULT(NONE) &
 !$OMP   SHARED(nb_psi_in,ene,para_H,para_AllOp,para_ana,tab_Psi,ana_psi,AllPsi_max_RedDensity,const_phys) &
-!$OMP   SHARED(out_unitp,para_intensity,tab_PsiAna) &
+!$OMP   SHARED(out_unitp,para_intensity,tab_PsiAna,iana,MPI_id) &
 !$OMP   PRIVATE(i,info) &
 !$OMP   NUM_THREADS(maxth)
 
 !$OMP   DO SCHEDULE(STATIC)
       DO i=1,nb_psi_in
+        !OMP ATOMIC
+        iana = iana + 1
 
         IF (ana_psi(i)%Ene-ana_psi(i)%ZPE > para_ana%max_ene) CYCLE
 
@@ -245,7 +250,7 @@ CONTAINS
         END IF
 
         CALL SET_string(info," ",TO_string(ene(i)*const_phys%auTOenergy,"f12.6")," : ")
-!write(6,*) 'coucou info: ',info ; flush(6)
+
         CALL sub_analyze_psi(tab_Psi(i),ana_psi(i),adia=.FALSE.,PsiAna=tab_PsiAna(i)%str)
 
         !$OMP CRITICAL (sub_analyse_CRIT)
@@ -269,9 +274,11 @@ CONTAINS
 
         deallocate(info)
 
+        IF (mod(iana,nb_psi_in) == 0 .AND. MPI_id == 0) write(out_unitp,'(a)',ADVANCE='no') '---'
       END DO
 !$OMP   END DO
 !$OMP   END PARALLEL
+      write(out_unitp,'(a)',ADVANCE='yes') '----]'
 
       write(out_unitp,*) '=============================================================='
       write(out_unitp,*) '=============================================================='

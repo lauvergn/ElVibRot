@@ -183,10 +183,18 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
 
   !----------------------------------------------------------------------
   ! Boltzmann population
-  IF (ana_psi%Boltzmann_pop .AND. ana_psi%Temp > ZERO .AND. ana_psi%Part_func > ZERO) THEN
-    RWU_Temp = REAL_WU(ana_psi%Temp,'°K','E')
-    Etemp    = convRWU_TO_R_WITH_WorkingUnit(RWU_Temp)
-    pop = exp(-(ana_psi%Ene-ana_psi%ZPE)/Etemp) / ana_psi%Part_func
+  IF (ana_psi%Boltzmann_pop) THEN
+    IF (ana_psi%Temp > ZERO .AND. ana_psi%Part_func > ZERO) THEN
+      RWU_Temp = REAL_WU(ana_psi%Temp,'°K','E')
+      Etemp    = convRWU_TO_R_WITH_WorkingUnit(RWU_Temp)
+      pop = exp(-(ana_psi%Ene-ana_psi%ZPE)/Etemp) / ana_psi%Part_func
+    ELSE
+      IF (abs(ana_psi%Ene-ana_psi%ZPE) < ONETENTH**10) THEN
+        pop = ONE
+      ELSE
+        pop = ZERO
+      END IF
+    END IF
   END IF
 
   !----------------------------------------------------------------------

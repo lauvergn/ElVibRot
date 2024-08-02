@@ -803,8 +803,8 @@ SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
 
 
 !----- for debuging --------------------------------------------------
-      !logical, parameter :: debug=.FALSE.
-      logical, parameter :: debug=.TRUE.
+      logical, parameter :: debug=.FALSE.
+      !logical, parameter :: debug=.TRUE.
       character (len=*), parameter :: name_sub='march_RK4'
 !-----------------------------------------------------------
       IF (debug) THEN
