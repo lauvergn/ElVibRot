@@ -2,18 +2,25 @@
 !===========================================================================
 !This file is part of ElVibRot.
 !
-!    ElVibRot is free software: you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by
-!    the Free Software Foundation, either version 3 of the License, or
-!    (at your option) any later version.
+! MIT License
 !
-!    ElVibRot is distributed in the hope that it will be useful,
-!    but WITHOUT ANY WARRANTY; without even the implied warranty of
-!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!    GNU General Public License for more details.
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
 !
-!    You should have received a copy of the GNU General Public License
-!    along with ElVibRot.  If not, see <http://www.gnu.org/licenses/>.
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
 !
 !    Copyright 2015 David Lauvergnat [1]
 !      with contributions of
@@ -24,13 +31,11 @@
 ![1]: Institut de Chimie Physique, UMR 8000, CNRS-Université Paris-Saclay, France
 ![2]: Institut de Química Computacional and Departament de Química,
 !        Universitat de Girona, Catalonia, Spain
-![3]: Department of Chemistry, Aarhus University, DK-8000 Aarhus C, Denmark
 ![4]: Maison de la Simulation USR 3441, CEA Saclay, France
 ![5]: Laboratoire Univers et Particule de Montpellier, UMR 5299,
 !         Université de Montpellier, France
 !
 !    ElVibRot includes:
-!        - Tnum-Tana under the GNU LGPL3 license
 !        - Somme subroutines of John Burkardt under GNU LGPL license
 !             http://people.sc.fsu.edu/~jburkardt/
 !        - Somme subroutines of SHTOOLS written by Mark A. Wieczorek under BSD license
@@ -40,25 +45,20 @@
 !
 !===========================================================================
 !===========================================================================
-      SUBROUTINE versionEVRT(write_version)
+      SUBROUTINE ElVibRot_version(write_version)
       USE mod_system
       IMPLICIT NONE
 
       logical :: write_version
 
       character (len=*), parameter :: EVR_name='ElVibRot'
-      character (len=*), parameter :: Tnum_name='Tnum'
-      character (len=*), parameter :: Tana_name='Tana'
 
 
 
       IF (write_version .AND. MPI_id==0) THEN
         write(out_unitp,*) '==============================================='
         write(out_unitp,*) '==============================================='
-        write(out_unitp,*) 'Working with ',                             &
-                   EVR_name,trim(adjustl(EVR_version)),'-',             &
-                   Tnum_name,trim(adjustl(Tnum_version)),'-',           &
-                   Tana_name,trim(adjustl(Tana_version))
+        write(out_unitp,*) 'Working with ',EVR_name,trim(adjustl(EVR_version))
 
         write(out_unitp,*) 'Compiled on "',trim(compile_host), '" the ',trim(compile_date)
         write(out_unitp,*) 'Compiler version: ',trim(compiler_ver)
@@ -76,24 +76,17 @@
         write(out_unitp,*) '     Ahai Chen (MPI) [1,4]'
         write(out_unitp,*) '     Lucien Dupuy (CRP) [5]'
 
-        write(out_unitp,*) EVR_name,' is under GNU LGPL3 license.'
+        write(out_unitp,*) EVR_name,' is under MIT license.'
         write(out_unitp,*)
 
-        write(out_unitp,*) Tnum_name,' is written David Lauvergnat [1]'
-        write(out_unitp,*) Tana_name,' is written by Mamadou Ndong [1] and David Lauvergnat [1]'
-        write(out_unitp,*) '  with contributions'
-        write(out_unitp,*) '      Emil Lund klinting (coupling with MidasCpp) [3]'
-
-        write(out_unitp,*) Tnum_name,' and ',Tana_name,' are under GNU LGPL3 license.'
         write(out_unitp,*)
         write(out_unitp,*) '[1]: Institut de Chimie Physique, UMR 8000, CNRS-Université Paris-Saclay, France'
         write(out_unitp,*) '[2]: Institut de Química Computacional and Departament de Química',&
                                    ' Universitat de Girona, Catalonia, Spain'
-        write(out_unitp,*) '[3]: Department of Chemistry, Aarhus University, DK-8000 Aarhus C, Denmark'
         write(out_unitp,*) '[4]: Maison de la Simulation USR 3441, CEA Saclay, France'
         write(out_unitp,*) '[5]: Laboratoire Univers et Particule de Montpellier, UMR 5299,', &
                                    ' Université de Montpellier, France'
         write(out_unitp,*) '==============================================='
         write(out_unitp,*) '==============================================='
       END IF
-      END SUBROUTINE versionEVRT
+      END SUBROUTINE ElVibRot_version
