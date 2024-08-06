@@ -43,15 +43,15 @@
 MODULE mod_basis_set_alloc
   use mod_system
 
-  use mod_dnSVM,   only: type_dnmat,type_dncplxmat,type_intvec,          &
+  use mod_dnSVM,   only: type_dnmat,type_dncplxmat,          &
                          alloc_array, alloc_dncplxmat, alloc_dnmat,      &
                          dealloc_dnmat, dealloc_dncplxmat, dealloc_array,&
-                         dealloc_intvec, sub_intvec1_to_intvec2,         &
                          write_dnsvm, write_dnmat, write_dncplxmat
   use mod_nDindex, only: type_ndindex, write_ndindex, dealloc_ndindex,  &
                          alloc_array, alloc_nparray,                    &
                          dealloc_nparray, dealloc_array
 
+  USE QDUtil_IntVec_m, ONLY : IntVec_t
   use mod_RotBasis_Param ! all
   use mod_Basis_Grid_Param
   USE mod_SymAbelian
@@ -176,7 +176,7 @@ MODULE mod_basis_set_alloc
           logical                        :: tab_basis_linked         = .FALSE. ! When it TRUE the tab_Pbasis(:)%Pbasis points to other basis
 
           TYPE (P_basis),     pointer    :: tab_Pbasis(:)            => null() !  tab_Pbasis(nb_basis)
-          TYPE (Type_IntVec), pointer    :: Tab_OF_Tabnb2(:)         => null() ! Tab_OF_Tabnb2(nb_basis), for SparseBasis or Pruned basis
+          TYPE (IntVec_t),    pointer    :: Tab_OF_Tabnb2(:)         => null() ! Tab_OF_Tabnb2(nb_basis), for SparseBasis or Pruned basis
           TYPE (Type_nDindex)            :: nDindG                             ! enable to use multidimensional index for the grid
           TYPE (Type_nDindex), pointer   :: nDindB                   => null() ! enable to use multidimensional index for the basis functions
           TYPE (Type_nDindex), allocatable :: nDindB_contracted                ! enable to use multidimensional index for the basis functions
@@ -684,6 +684,9 @@ CONTAINS
 
        END FUNCTION get_wrho_AT_iq_OF_basis
        SUBROUTINE alloc_tab_Pbasis_OF_basis(basis_set)
+        USE QDUtil_IntVec_m, ONLY : IntVec_t, dealloc_intvec
+        IMPLICIT NONE
+
          TYPE(basis), intent(inout) :: basis_set
 
          integer :: i
@@ -1748,8 +1751,7 @@ CONTAINS
                                               [basis_set2%nb_basis],        &
                             'basis_set1%Tab_OF_Tabnb2',name_sub)
             DO i=1,basis_set2%nb_basis
-              CALL sub_IntVec1_TO_IntVec2(basis_set2%Tab_OF_Tabnb2(i),          &
-                                          basis_set1%Tab_OF_Tabnb2(i))
+              basis_set1%Tab_OF_Tabnb2(i) = basis_set2%Tab_OF_Tabnb2(i)
             END DO
           END IF
         END IF
@@ -2571,8 +2573,8 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
          write(out_unitp,*) Rec_line,'------------------------------------------------'
          IF (associated(basis_set%Tab_OF_Tabnb2)) THEN
            DO i=1,basis_set%nb_basis
-             IF (associated(basis_set%Tab_OF_Tabnb2(i)%vec) ) THEN
-               write(out_unitp,*) Rec_line,'ibasis,nbb',i,basis_set%Tab_OF_Tabnb2(i)%nb_var_vec
+             IF (allocated(basis_set%Tab_OF_Tabnb2(i)%vec) ) THEN
+               write(out_unitp,*) Rec_line,'ibasis,nbb',i,get_Size(basis_set%Tab_OF_Tabnb2(i))
                write(out_unitp,*) Rec_line,'Tab_OF_Tabnb2(ibasis)',basis_set%Tab_OF_Tabnb2(i)%vec
              END IF
            END DO
@@ -2909,8 +2911,8 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        write(out_unitp,*) Rec_line,'asso Tab_OF_Tabnb2',associated(basis_set%Tab_OF_Tabnb2)
        IF (associated(basis_set%Tab_OF_Tabnb2)) THEN
          DO i=1,basis_set%nb_basis
-           write(out_unitp,*) Rec_line,'asso Tab_OF_Tabnb2(i)%vec',i,associated(basis_set%Tab_OF_Tabnb2(i)%vec)
-           write(out_unitp,*) Rec_line,'ibasis,nbb',i,basis_set%Tab_OF_Tabnb2(i)%nb_var_vec
+           write(out_unitp,*) Rec_line,'allo Tab_OF_Tabnb2(i)%vec',i,allocated(basis_set%Tab_OF_Tabnb2(i)%vec)
+           write(out_unitp,*) Rec_line,'ibasis,nbb',i,get_size(basis_set%Tab_OF_Tabnb2(i))
          END DO
        END IF
        write(out_unitp,*) Rec_line,'------------------------------------------------'

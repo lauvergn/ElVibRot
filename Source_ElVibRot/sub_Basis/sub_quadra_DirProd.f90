@@ -263,11 +263,10 @@
 
           ndim_OF_ib = basis_DP%tab_Pbasis(ib)%Pbasis%nDindB%max_nDI
           IF (debug) write(out_unitp,*) 'ib,ndim_OF_ib',ib,ndim_OF_ib
-          CALL alloc_dnSVM(basis_DP%nDindB%tab_nDNorm(ib),              &
-                                                  nb_var_vec=ndim_OF_ib)
-          basis_DP%nDindB%tab_nDNorm(ib)%d0(:) =                        &
+          CALL alloc_RealVec(basis_DP%nDindB%tab_nDNorm(ib),SizeVec=ndim_OF_ib)
+          basis_DP%nDindB%tab_nDNorm(ib)%vec(:) =                        &
                        basis_DP%tab_Pbasis(ib)%Pbasis%nDindB%Tab_Norm(:)
-          IF (debug) write(out_unitp,*) 'ib,tab_nDNorm(ib)%d0',ib,basis_DP%nDindB%tab_nDNorm(ib)%d0(:)
+          IF (debug) write(out_unitp,*) 'ib,tab_nDNorm(ib)%vec',ib,basis_DP%nDindB%tab_nDNorm(ib)%vec(:)
           flush(out_unitp)
 
         END DO
@@ -312,7 +311,7 @@
             basis_DP%Tab_OF_Tabnb2(ibasis)%vec(1) = maxval(basis_DP%nDindB%Tab_nDval(ibasis,:))
 
             nb2 = basis_DP%tab_Pbasis(ibasis)%Pbasis%nb
-            newnb2 = count(basis_DP%nDindB%Tab_nDNorm(ibasis)%d0(:) <= basis_DP%nDindB%MaxNorm)
+            newnb2 = count(basis_DP%nDindB%Tab_nDNorm(ibasis)%vec(:) <= basis_DP%nDindB%MaxNorm)
             !IF (nb2 /= newnb2) STOP 'ERROR nb2 /= newnb2'
 
           ELSE
@@ -345,7 +344,7 @@
           IF ((basis_DP%print_info_OF_basisDP .AND. print_level > -1) .OR. debug) &
                              write(out_unitp,'(a,i4,":",2i6)')          &
                              'ibasis,size(vec),sum(vec)',ibasis,        &
-                             basis_DP%Tab_OF_Tabnb2(ibasis)%nb_var_vec, &
+                             get_Size(basis_DP%Tab_OF_Tabnb2(ibasis)),  &
                              sum(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
           flush(out_unitp)
         END DO
@@ -363,7 +362,7 @@
           IF ((basis_DP%print_info_OF_basisDP .AND. print_level > -1).OR. debug) &
                              write(out_unitp,'(a,i4,":",2i6)')                   &
                              'ibasis,size(vec),sum(vec)',ibasis,        &
-                             basis_DP%Tab_OF_Tabnb2(ibasis)%nb_var_vec, &
+                             get_Size(basis_DP%Tab_OF_Tabnb2(ibasis)),  &
                              sum(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
           flush(out_unitp)
         END DO
@@ -374,7 +373,7 @@
         IF (ibasis == nb_basis) THEN
           nnb = basis_DP%nb
         ELSE
-          nnb = basis_DP%Tab_OF_Tabnb2(ibasis+1)%nb_var_vec
+          nnb = get_Size(basis_DP%Tab_OF_Tabnb2(ibasis+1))
         END IF
         IF (sum(basis_DP%Tab_OF_Tabnb2(ibasis)%vec) /= nnb) THEN
           write(out_unitp,*) 'ERROR in ',name_sub

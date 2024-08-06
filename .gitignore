@@ -18,7 +18,7 @@ sub_pot/sub_system.f90
 
 obj/*
 vib
-comp.log
+*.log
 *.exe
 *.a
 Examples/exa_PhysicalConstants/res*

@@ -1,4 +1,4 @@
-for lib in QDUtilLib AD_dnSVM QuantumModelLib ConstPhys FOR_EVRT Tnum-Tana
+for lib in QDUtilLib AD_dnSVM QuantumModelLib ConstPhys FOR_EVRT Tnum-Tana nDindex EVRT_dnSVM
 do
   echo "-----" $lib
   [ ! -d $lib ] && continue

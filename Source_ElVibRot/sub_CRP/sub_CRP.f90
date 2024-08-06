@@ -2626,7 +2626,7 @@ IMPLICIT NONE
 
   ! more general parameters for option=2
   TYPE (Type_nDindex)             :: nDindB_Channels
-  TYPE (Type_IntVec), allocatable :: tab_i_TO_l(:)
+  TYPE (IntVec_t), allocatable :: tab_i_TO_l(:)
   integer,            allocatable :: nbSize(:),tab_ib(:)
   integer                         :: LB,ib,nb,n
   real (kind=Rkind),  allocatable :: w(:)
@@ -2691,7 +2691,7 @@ IMPLICIT NONE
     allocate(tab_i_TO_l(para_H%para_AllBasis%BasisnD%nb_basis-1))
     DO ib=2,para_H%para_AllBasis%BasisnD%nb_basis
       nb = para_H%para_AllBasis%BasisnD%tab_basisPrimSG(LB,ib)%nb
-      CALL alloc_dnSVM(tab_i_TO_l(ib-1),nb)
+      CALL alloc_IntVec(tab_i_TO_l(ib-1),nb)
       IF (para_H%para_AllBasis%BasisnD%tab_basisPrimSG(LB,ib)%nb_basis < 1) THEN
         tab_i_TO_l(ib-1)%vec(:) = para_H%para_AllBasis%BasisnD%tab_basisPrimSG(LB,ib)%nDindB%Tab_L(:)
       ELSE
@@ -2722,7 +2722,7 @@ IMPLICIT NONE
 
 
     DO ib=1,size(tab_i_TO_l)
-      CALL dealloc_dnSVM(tab_i_TO_l(ib))
+      CALL dealloc_IntVec(tab_i_TO_l(ib))
     END DO
     deallocate(tab_i_TO_l)
 

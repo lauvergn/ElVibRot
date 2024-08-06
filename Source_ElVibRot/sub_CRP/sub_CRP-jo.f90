@@ -2643,7 +2643,7 @@ IMPLICIT NONE
 
   ! more general parameters for option=2
   TYPE (Type_nDindex)             :: nDindB_Channels
-  TYPE (Type_IntVec), allocatable :: tab_i_TO_l(:)
+  TYPE (IntVec_t), allocatable :: tab_i_TO_l(:)
   integer,            allocatable :: nbSize(:),tab_ib(:)
   integer                         :: LB,ib,nb,n
   real (kind=Rkind),  allocatable :: w(:)

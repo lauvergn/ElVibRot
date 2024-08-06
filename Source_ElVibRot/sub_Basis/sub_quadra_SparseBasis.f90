@@ -589,7 +589,7 @@
       integer             :: A,B,LG_L,LB_L,n
       integer             :: nDsize(basis_SG%nb_basis)
 
-      TYPE (Type_IntVec), allocatable :: tab_i_TO_l(:)
+      TYPE (IntVec_t), allocatable :: tab_i_TO_l(:)
       real (kind=Rkind), allocatable :: wrho(:)
 
       TYPE (Type_nDindex)        :: nDind_SmolyakRep_temp
@@ -729,7 +729,7 @@
 
       DO ib=1,basis_SG%nb_basis
         nb = basis_SG%tab_basisPrimSG(Lmax,ib)%nb
-        CALL alloc_dnSVM(tab_i_TO_l(ib),nb)
+        CALL alloc_IntVec(tab_i_TO_l(ib),nb)
         IF (basis_SG%tab_basisPrimSG(Lmax,ib)%nb_basis < 1) THEN
           tab_i_TO_l(ib)%vec(:) = basis_SG%tab_basisPrimSG(Lmax,ib)%nDindB%Tab_L(:)
         ELSE
@@ -901,7 +901,7 @@
       flush(out_unitp)
 
       DO ib=1,size(tab_i_TO_l)
-        CALL dealloc_dnSVM(tab_i_TO_l(ib))
+        CALL dealloc_IntVec(tab_i_TO_l(ib))
       END DO
       deallocate(tab_i_TO_l)
 
@@ -947,7 +947,7 @@
       real(kind=Rkind)      :: SG4_Mat_size,Mat_size
 
 
-      TYPE (Type_IntVec), allocatable :: tab_i_TO_l(:)
+      TYPE (IntVec_t), allocatable :: tab_i_TO_l(:)
       real (kind=Rkind),  allocatable :: wrho(:)
       logical,            allocatable :: skip_deltaL(:,:)
       integer       :: tab_l(basis_SG%nb_basis)
@@ -1146,7 +1146,7 @@
       allocate(tab_i_TO_l(basis_SG%nb_basis))
       DO ib=1,basis_SG%nb_basis
         nb = basis_SG%tab_basisPrimSG(Lmax,ib)%nb
-        CALL alloc_dnSVM(tab_i_TO_l(ib),nb)
+        CALL alloc_IntVec(tab_i_TO_l(ib),nb)
         IF (basis_SG%tab_basisPrimSG(Lmax,ib)%nb_basis < 1) THEN
           tab_i_TO_l(ib)%vec(:) = basis_SG%tab_basisPrimSG(Lmax,ib)%nDindB%Tab_L(:)
         ELSE
@@ -1179,7 +1179,7 @@
       basis_SG%nb = basis_SG%nDindB%Max_nDI
 
       DO ib=1,size(tab_i_TO_l)
-        CALL dealloc_dnSVM(tab_i_TO_l(ib))
+        CALL dealloc_IntVec(tab_i_TO_l(ib))
       END DO
       deallocate(tab_i_TO_l)
 

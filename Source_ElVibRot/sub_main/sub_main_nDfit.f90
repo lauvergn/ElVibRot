@@ -42,8 +42,9 @@
 !===========================================================================
 MODULE mod_nDGridFit
   USE mod_system
-  USE mod_nDindex, only : Type_nDindex
-  use mod_dnSVM,   only : Type_dnVec, type_IntVec
+  USE mod_nDindex,     only : Type_nDindex
+  use mod_dnSVM,       only : Type_dnVec
+  USE QDUtil_IntVec_m, ONLY : IntVec_t 
   IMPLICIT NONE
 
   TYPE param_nDGrid ! it mays change in the futur (more like "basis" type)
@@ -52,10 +53,10 @@ MODULE mod_nDGridFit
     real (kind=Rkind), allocatable  :: Q0(:)
 
     ! for Grid_v1
-    real (kind=Rkind), allocatable  :: stepQ(:)
+    real (kind=Rkind),  allocatable  :: stepQ(:)
     !for Grid_v2
     TYPE (Type_dnVec),  allocatable :: Tab_stepQ(:)
-    TYPE (Type_IntVec), allocatable :: tab_i_TO_l(:)
+    TYPE (IntVec_t),    allocatable :: tab_i_TO_l(:)
 
 
     TYPE (File_t)               :: Grid_FOR_Fit_file1
@@ -812,10 +813,11 @@ END SUBROUTINE sub_nDGrid_coupling0_v2
 
 SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
   USE mod_system
-  use mod_dnSVM,   only : Type_dnVec, type_IntVec, alloc_IntVec, alloc_dnVec
+  use mod_dnSVM,       only : Type_dnVec, alloc_dnVec
+  USE QDUtil_IntVec_m, ONLY : IntVec_t, alloc_IntVec
   USE mod_nDindex
-  USE mod_Constant,  only : get_Conv_au_TO_unit
-  USE mod_Coord_KEO, only : CoordType, Tnum, get_Qact0
+  USE mod_Constant,    only : get_Conv_au_TO_unit
+  USE mod_Coord_KEO,   only : CoordType, Tnum, get_Qact0
   USE mod_PrimOp
   IMPLICIT NONE
 
@@ -934,7 +936,7 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
       END IF
       IF (err_read /= 0) EXIT
     END DO
-    CALL alloc_IntVec(para_nDGrid%tab_i_TO_l(i),nb_var_vec=size(tab_i_TO_l))
+    CALL alloc_IntVec(para_nDGrid%tab_i_TO_l(i),SizeVec=size(tab_i_TO_l))
     para_nDGrid%tab_i_TO_l(i)%vec = tab_i_TO_l
 
     ! for Tab_stepQ

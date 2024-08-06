@@ -585,7 +585,7 @@
 
               nb2 = basis_set%tab_Pbasis(ibasis)%Pbasis%nb
               nq2 = get_nq_FROM_basis(basis_set%tab_Pbasis(ibasis)%Pbasis)
-              nnb = basis_set%Tab_OF_Tabnb2(ibasis)%nb_var_vec
+              nnb = get_size(basis_set%Tab_OF_Tabnb2(ibasis))
 
               CALL alloc_NParray(RTempB, [nnq,nbb],"RTempB",name_sub)
 
@@ -775,7 +775,7 @@
 
               nb2 = basis_set%tab_Pbasis(ibasis)%Pbasis%nb
               nq2 = get_nq_FROM_basis(basis_set%tab_Pbasis(ibasis)%Pbasis)
-              nnb = basis_set%Tab_OF_Tabnb2(ibasis)%nb_var_vec
+              nnb = get_size(basis_set%Tab_OF_Tabnb2(ibasis))
 
 !             write(out_unitp,*) 'B=>G ibasis,Tab_OF_Tabnb2',ibasis,              &
 !                                        basis_set%Tab_OF_Tabnb2(ibasis)%vec

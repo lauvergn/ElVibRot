@@ -83,6 +83,7 @@ CPPSHELL_LAPACK  = -D__LAPACK="$(LLAPACK)"
 ifeq ($(ExtLibDIR),)
   ExtLibDIR := $(LOC_path)/Ext_Lib
 endif
+
 QD_DIR            = $(ExtLibDIR)/QDUtilLib
 QDMOD_DIR         = $(QD_DIR)/OBJ/obj$(extlib_obj)
 QDLIBA            = $(QD_DIR)/libQD$(extlib_obj).a
@@ -94,6 +95,14 @@ ADLIBA            = $(AD_DIR)/libAD_dnSVM$(extlib_obj).a
 QML_DIR           = $(ExtLibDIR)/QuantumModelLib
 QMLMOD_DIR        = $(QML_DIR)/OBJ/obj$(extlib_obj)
 QMLLIBA           = $(QML_DIR)/libQMLib$(extlib_obj).a
+
+nDindex_DIR       = $(ExtLibDIR)/nDindex
+nDindexMOD_DIR    = $(nDindex_DIR)/OBJ/obj$(extlib_obj)
+nDindexLIBA       = $(nDindex_DIR)/libnDindex$(extlib_obj).a
+
+EVRTdnSVM_DIR     = $(ExtLibDIR)/EVRT_dnSVM
+EVRTdnSVMMOD_DIR  = $(EVRTdnSVM_DIR)/obj/obj$(extlib_obj)
+EVRTdnSVMLIBA     = $(EVRTdnSVM_DIR)/libEVRT_dnSVM$(extlib_obj).a
 
 FOREVRT_DIR       = $(ExtLibDIR)/FOR_EVRT
 FOREVRTMOD_DIR    = $(FOREVRT_DIR)/obj/obj$(extlibwi_obj)
@@ -110,7 +119,9 @@ TNUMTANALIBA      = $(TNUMTANA_DIR)/libTnum-Tana$(extlibwi_obj).a
 #EXTLib_pot        = /Users/lauvergn/trav/ElVibRot-work/exa_work/exa_C2H3p/TEST_EVRT/Lauvergnat_PA/tests/libpotFull.a
 EXTLib_pot        = 
 
-EXTLib     = $(EXTLib_pot) $(TNUMTANALIBA) $(CONSTPHYSLIBA) $(FOREVRTLIBA) $(QMLLIBA) $(ADLIBA) $(QDLIBA)
+EXTLib     = $(EXTLib_pot) $(TNUMTANALIBA) $(CONSTPHYSLIBA) $(FOREVRTLIBA) $(QDLIBA)  $(ADLIBA) $(EVRTdnSVMLIBA) $(nDindexLIBA) $(QMLLIBA)
+EXTMod     = -I$(TNUMTANAMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(nDindexMOD_DIR) \
+             -I$(EVRTdnSVMMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
 #===============================================================================
 #
 #===============================================================================
@@ -142,7 +153,7 @@ ifeq ($(F90),$(filter $(F90),gfortran gfortran-8))
   FFLAGS +=-J$(MOD_DIR)
 
   # where to look the .mod files
-  FFLAGS += -I$(TNUMTANAMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
+  FFLAGS += $(EXTMod)
 
   # some cpreprocessing
   FFLAGS += -cpp $(CPPSHELL)
@@ -175,11 +186,10 @@ endif
 #=================================================================================
 # ifort compillation v17 v18 with mkl
 #=================================================================================
-ifeq ($(FFC),ifort)
+ifeq ($(FFC),$(filter $(FFC),ifort ifx))
 
   # opt management
   ifeq ($(OOPT),1)
-      #F90FLAGS = -O -parallel -g -traceback
       FFLAGS = -O  -g -traceback -heap-arrays
   else
       FFLAGS = -O0 -check all -g -traceback
@@ -193,13 +203,17 @@ ifeq ($(FFC),ifort)
   # where to store the modules
   FFLAGS +=-module $(MOD_DIR)
 
-  # omp management
+ # omp management
   ifeq ($(OOMP),1)
-    FFLAGS += -qopenmp
+    ifeq ($(FFC),ifort)
+      FFLAGS += -qopenmp -parallel
+    else # ifx
+      FFLAGS += -qopenmp
+    endif
   endif
 
   # where to look the .mod files
-  FFLAGS += -I$(TNUMTANAMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
+  FFLAGS += $(EXTMod)
 
   # some cpreprocessing
   FFLAGS += -cpp $(CPPSHELL)
@@ -208,11 +222,12 @@ ifeq ($(FFC),ifort)
   endif
 
   FLIB    = $(EXTLib)
-  ifeq ($(LLAPACK),1)
-    #FLIB += -mkl -lpthread
-    FLIB += -qmkl -lpthread
-    #FLIB +=  ${MKLROOT}/lib/libmkl_blas95_ilp64.a ${MKLROOT}/lib/libmkl_lapack95_ilp64.a ${MKLROOT}/lib/libmkl_intel_ilp64.a \
-    #         ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_core.a -liomp5 -lpthread -lm -ldl
+  ifneq ($(LLAPACK),1)
+    ifeq ($(FFC),ifort)
+      FLIB += -mkl -lpthread
+    else # ifx
+      FLIB += -qmkl -lpthread
+    endif
   else
     FLIB += -lpthread
   endif
@@ -338,7 +353,7 @@ clean:
 	rm -f vib.exe
 	@echo "  done cleaning"
 
-cleanall : clean rm_extlib
+cleanall : clean clean_extlib
 	rm -fr obj/* build
 	rm -f lib*.a
 	rm -f *.exe
@@ -378,6 +393,20 @@ $(CONSTPHYSLIBA):
 	cd $(CONSTPHYS_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
 	@echo "  done " $(CONSTPHYS_DIR) " in "$(BaseName)
 #
+$(nDindexLIBA):
+	@test -d $(ExtLibDIR)   || (echo $(ExtLibDIR) "does not exist" ; exit 1)
+	@test -d $(nDindex_DIR) || (cd $(ExtLibDIR) ; ./get_nDindex.sh  $(EXTLIB_TYPE))
+	@test -d $(nDindex_DIR) || (echo $(nDindex_DIR) "does not exist" ; exit 1)
+	cd $(nDindex_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	@echo "  done " $(nDindex_DIR) " in "$(BaseName)
+#
+$(EVRTdnSVMLIBA):
+	@test -d $(ExtLibDIR)     || (echo $(ExtLibDIR) "does not exist" ; exit 1)
+	@test -d $(EVRTdnSVM_DIR) || (cd $(ExtLibDIR) ; ./get_EVRT_dnSVM.sh  $(EXTLIB_TYPE))
+	@test -d $(EVRTdnSVM_DIR) || (echo $(EVRTdnSVM_DIR) "does not exist" ; exit 1)
+	cd $(EVRTdnSVM_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	@echo "  done " $(EVRTdnSVM_DIR) " in "$(BaseName)
+#
 $(FOREVRTLIBA):
 	@test -d $(ExtLibDIR)   || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(FOREVRT_DIR) || (cd $(ExtLibDIR) ; ./get_FOR_EVRT.sh $(EXTLIB_TYPE))
@@ -406,31 +435,16 @@ $(QDLIBA):
 	cd $(QD_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
 	@echo "  done " $(QDLIBA) " in "$(BaseName)
 ##
-.PHONY: clean_extlib rm_extlib mk_extlibdir
+.PHONY: clean_extlib
 clean_extlib:
 	@test -d $(ExtLibDIR) || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	cd $(ExtLibDIR) ; ./cleanlib
 ##
-rm_extlib:
-	@test -d $(ExtLibDIR) || (echo $(ExtLibDIR) "does not exist" ; exit 1)
-	cd $(ExtLibDIR) ; ./cleanliball
-##
-mk_extlibdir:
-	@test -d $(ExtLibDIR) || (echo $(ExtLibDIR) "does not exist" ; exit 1)
-	(cd $(ExtLibDIR) ; ./mkextlibdir $(EXTLIB_TYPE))
 #=======================================================================================
 #=======================================================================================
 #add dependence for parallelization
-#$(OBJ):                     $(EXTLib)
 #	@echo "OBJ with EXTLib"
 $(OBJ) : | $(EXTLib)
-
-#$(OBJ_DIR)/$(VIBMAIN).o:    $(LIBA)
-#	@echo "done VIBMAIN.o"
-
-#$(OBJ_DIR)/sub_Auto_Basis.o : $(OBJ_DIR)/sub_module_basis.o
-#$(OBJ_DIR)/sub_module_basis.o: $(OBJ_DIR)/sub_module_RotBasis.o $(OBJ_DIR)/sub_module_basis_Grid_Param.o \
-#    $(OBJ_DIR)/sub_module_Basis_LTO_n.o $(OBJ_DIR)/sub_SymAbelian.o $(OBJ_DIR)/sub_module_param_SGType2.o
 
 #===============================================
 #===============================================
