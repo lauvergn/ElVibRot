@@ -1,4 +1,3 @@
-c
 C=======================================================================
 C    calcN_op: calculation of the potential and scalar operator matrices
 C     - mat_V(nb_be,nb_be):   potential (real part)
