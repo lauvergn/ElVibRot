@@ -1,4 +1,4 @@
-# ElVibRot-TnumTana
+# ElVibRot
 
 General quantum dynamics code using curvilinear coordinates:
 1. Vibrational levels, intensities for floppy molecular systems
@@ -10,7 +10,7 @@ General quantum dynamics code using curvilinear coordinates:
 
 Originalities of this code:
  * No built-in limitation in terms of number of degrees of freedom.
- * the use of a numerical but exact kinetic energy operator with Tnum (Automatic differentiation), which enables a large flexibility in the choice of the curvilinear coordinates.
+ * It is linked to to the Tnum library for the use of a numerical but exact kinetic energy operator (Automatic differentiation), which enables a large flexibility in the choice of the curvilinear coordinates.
  * the use of Smolyak scheme, which enables to avoid a direct-product basis set and grids.
 
 ## 2) Input file
