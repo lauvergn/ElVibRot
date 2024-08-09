@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_basis_BtoG_GtoB_MPI
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis_BtoG_GtoB_SGType4
   USE mod_MPI_aux
   IMPLICIT NONE

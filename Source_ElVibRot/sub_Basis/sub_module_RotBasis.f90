@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_RotBasis_Param
-      USE mod_system
+      USE EVR_system_m
       use mod_nDindex
       IMPLICIT NONE
 
@@ -90,9 +90,9 @@
 !---------------------------------------------------------------------
       IF (Jrot < 0 .OR. RotBasis_Para%nb_Rot > 0) RETURN
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Jrot',Jrot
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Jrot',Jrot
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -138,10 +138,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_RotBasis_Param(RotBasis_Para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -164,9 +164,9 @@
 !---------------------------------------------------------------------
       IF (Jrot < 0 .OR. RotBasis_Para%nb_Rot > 0) RETURN
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Jrot',Jrot
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Jrot',Jrot
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -200,10 +200,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_RotBasis_Param(RotBasis_Para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -224,9 +224,9 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -249,10 +249,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_RotBasis_Param(RotBasis_Para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -287,9 +287,9 @@
 !---------------------------------------------------------------------
       IF (Jrot < 0) RETURN
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Jrot',Jrot
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Jrot',Jrot
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -332,21 +332,21 @@
       PWang(:,:) = Transpose(conjg(PWangDag))
 
       IF (debug) THEN
-        write(out_unitp,*) 'PWangDag (in line)'
-        CALL Write_Mat(PWangDag,out_unitp,5)
+        write(out_unit,*) 'PWangDag (in line)'
+        CALL Write_Mat(PWangDag,out_unit,5)
 
-        write(out_unitp,*) 'PWang (in column)'
-        CALL Write_Mat(PWang,out_unitp,5)
+        write(out_unit,*) 'PWang (in column)'
+        CALL Write_Mat(PWang,out_unit,5)
       END IF
 
       !CALL alloc_NParray(test_inv,[RotBasis_Para%nb_Rot,RotBasis_Para%nb_Rot],         &
       !                  'test_inv',name_sub)
       !test_inv = matmul(PWang,PWangDag)
-      !write(out_unitp,*) 'PWang . PWangDag'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) 'PWang . PWangDag'
+      !CALL Write_Mat(test_inv,out_unit,5)
       !test_inv = matmul(PWangDag,PWang)
-      !write(out_unitp,*) 'PWangDag . PWang'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) 'PWangDag . PWang'
+      !CALL Write_Mat(test_inv,out_unit,5)
       !CALL dealloc_NParray(test_inv,'test_inv',name_sub)
 
 
@@ -377,13 +377,13 @@
 
       END DO
 
-      !write(out_unitp,*)
-      !write(out_unitp,*) 'Re Jx'
-      !CALL Write_Mat(real(Jx),out_unitp,5)
-      !write(out_unitp,*) 'Jy'
-      !CALL Write_Mat(aimag(Jy),out_unitp,5)
-      !write(out_unitp,*) 'Jz'
-      !CALL Write_Mat(real(Jz),out_unitp,5)
+      !write(out_unit,*)
+      !write(out_unit,*) 'Re Jx'
+      !CALL Write_Mat(real(Jx),out_unit,5)
+      !write(out_unit,*) 'Jy'
+      !CALL Write_Mat(aimag(Jy),out_unit,5)
+      !write(out_unit,*) 'Jz'
+      !CALL Write_Mat(real(Jz),out_unit,5)
 
 !---------------------------------------------------------------------
       ! -3- Jx,Jy,Jz in the Wang basis
@@ -392,19 +392,19 @@
       Ji(:,:,-3) = matmul(PWangDag,matmul(Jz,PWang))
 
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'Im(Jx), SumRe(Jx)',sum(abs(real(Ji(:,:,-1))))
-        CALL Write_Mat(aimag(Ji(:,:,-1)),out_unitp,5)
-        write(out_unitp,*) 'Im(Jy), SumRe(Jy)',sum(abs(real(Ji(:,:,-2))))
-        CALL Write_Mat(aimag(Ji(:,:,-2)),out_unitp,5)
-        write(out_unitp,*) 'Im(Jz), SumRe(Jz)',sum(abs(real(Ji(:,:,-3))))
-        CALL Write_Mat(aimag(Ji(:,:,-3)),out_unitp,5)
+        write(out_unit,*)
+        write(out_unit,*) 'Im(Jx), SumRe(Jx)',sum(abs(real(Ji(:,:,-1))))
+        CALL Write_Mat(aimag(Ji(:,:,-1)),out_unit,5)
+        write(out_unit,*) 'Im(Jy), SumRe(Jy)',sum(abs(real(Ji(:,:,-2))))
+        CALL Write_Mat(aimag(Ji(:,:,-2)),out_unit,5)
+        write(out_unit,*) 'Im(Jz), SumRe(Jz)',sum(abs(real(Ji(:,:,-3))))
+        CALL Write_Mat(aimag(Ji(:,:,-3)),out_unit,5)
       END IF
       !CALL alloc_NParray(test_inv,[RotBasis_Para%nb_Rot,RotBasis_Para%nb_Rot],         &
       !                  'test_inv',name_sub)
       !test_inv = matmul(Jx,Jx)+matmul(Jy,Jy)+matmul(Jz,Jz)
-      !write(out_unitp,*) 'J^2'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) 'J^2'
+      !CALL Write_Mat(test_inv,out_unit,5)
       !CALL dealloc_NParray(test_inv,'test_inv',name_sub)
 
 !---------------------------------------------------------------------
@@ -446,10 +446,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_RotBasis_Param(RotBasis_Para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -484,9 +484,9 @@
 !---------------------------------------------------------------------
       IF (Jrot <= 0 .OR. RotBasis_Para%nb_Rot > 0) RETURN
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Jrot',Jrot
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Jrot',Jrot
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -529,21 +529,21 @@
       PWang(:,:) = Transpose(conjg(PWangDag))
 
       IF (debug) THEN
-        write(out_unitp,*) 'PWangDag (in line)'
-        CALL Write_Mat(PWangDag,out_unitp,5)
+        write(out_unit,*) 'PWangDag (in line)'
+        CALL Write_Mat(PWangDag,out_unit,5)
 
-        write(out_unitp,*) 'PWang (in column)'
-        CALL Write_Mat(PWang,out_unitp,5)
+        write(out_unit,*) 'PWang (in column)'
+        CALL Write_Mat(PWang,out_unit,5)
       END IF
 
       !CALL alloc_NParray(test_inv,[RotBasis_Para%nb_Rot,RotBasis_Para%nb_Rot],         &
       !                  'test_inv',name_sub)
       !test_inv = matmul(PWang,PWangDag)
-      !write(out_unitp,*) 'PWang . PWangDag'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) 'PWang . PWangDag'
+      !CALL Write_Mat(test_inv,out_unit,5)
       !test_inv = matmul(PWangDag,PWang)
-      !write(out_unitp,*) 'PWangDag . PWang'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) 'PWangDag . PWang'
+      !CALL Write_Mat(test_inv,out_unit,5)
       !CALL dealloc_NParray(test_inv,'test_inv',name_sub)
 
 
@@ -574,13 +574,13 @@
 
       END DO
 
-      !write(out_unitp,*)
-      !write(out_unitp,*) 'Re Jx'
-      !CALL Write_Mat(real(Jx),out_unitp,5)
-      !write(out_unitp,*) 'Jy'
-      !CALL Write_Mat(aimag(Jy),out_unitp,5)
-      !write(out_unitp,*) 'Jz'
-      !CALL Write_Mat(real(Jz),out_unitp,5)
+      !write(out_unit,*)
+      !write(out_unit,*) 'Re Jx'
+      !CALL Write_Mat(real(Jx),out_unit,5)
+      !write(out_unit,*) 'Jy'
+      !CALL Write_Mat(aimag(Jy),out_unit,5)
+      !write(out_unit,*) 'Jz'
+      !CALL Write_Mat(real(Jz),out_unit,5)
 
 !---------------------------------------------------------------------
       ! -3- Jx,Jy,Jz in the Wang basis
@@ -589,19 +589,19 @@
       Ji(:,:,-3) = matmul(PWangDag,matmul(Jz,PWang))
 
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'Im(Jx), SumRe(Jx)',sum(abs(real(Ji(:,:,-1))))
-        CALL Write_Mat(aimag(Ji(:,:,-1)),out_unitp,5)
-        write(out_unitp,*) 'Im(Jy), SumRe(Jy)',sum(abs(real(Ji(:,:,-2))))
-        CALL Write_Mat(aimag(Ji(:,:,-2)),out_unitp,5)
-        write(out_unitp,*) 'Im(Jz), SumRe(Jz)',sum(abs(real(Ji(:,:,-3))))
-        CALL Write_Mat(aimag(Ji(:,:,-3)),out_unitp,5)
+        write(out_unit,*)
+        write(out_unit,*) 'Im(Jx), SumRe(Jx)',sum(abs(real(Ji(:,:,-1))))
+        CALL Write_Mat(aimag(Ji(:,:,-1)),out_unit,5)
+        write(out_unit,*) 'Im(Jy), SumRe(Jy)',sum(abs(real(Ji(:,:,-2))))
+        CALL Write_Mat(aimag(Ji(:,:,-2)),out_unit,5)
+        write(out_unit,*) 'Im(Jz), SumRe(Jz)',sum(abs(real(Ji(:,:,-3))))
+        CALL Write_Mat(aimag(Ji(:,:,-3)),out_unit,5)
       END IF
       !CALL alloc_NParray(test_inv,[RotBasis_Para%nb_Rot,RotBasis_Para%nb_Rot],         &
       !                  'test_inv',name_sub)
       !test_inv = matmul(Jx,Jx)+matmul(Jy,Jy)+matmul(Jz,Jz)
-      !write(out_unitp,*) 'J^2'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) 'J^2'
+      !CALL Write_Mat(test_inv,out_unit,5)
       !CALL dealloc_NParray(test_inv,'test_inv',name_sub)
 
 !---------------------------------------------------------------------
@@ -626,25 +626,25 @@
 
 
       test_inv=matmul(Ji(:,:,-1),Ji(:,:,-2))-matmul(Ji(:,:,-2),Ji(:,:,-1))
-      !write(out_unitp,*) '[Jx,Jy]'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) '[Jx,Jy]'
+      !CALL Write_Mat(test_inv,out_unit,5)
       test_inv = test_inv + EYE*Ji(:,:,-3)
-      write(out_unitp,*) '[Jx,Jy] + i Jz = 0 ?',sum(abs(test_inv))
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      write(out_unit,*) '[Jx,Jy] + i Jz = 0 ?',sum(abs(test_inv))
+      !CALL Write_Mat(test_inv,out_unit,5)
 
       test_inv=matmul(Ji(:,:,-3),Ji(:,:,-1))-matmul(Ji(:,:,-1),Ji(:,:,-3))
-      !write(out_unitp,*) '[Jz,Jx]'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) '[Jz,Jx]'
+      !CALL Write_Mat(test_inv,out_unit,5)
       test_inv = test_inv+EYE*Ji(:,:,-2)
-      write(out_unitp,*) '[Jz,Jx] + i Jy = 0 ?',sum(abs(test_inv))
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      write(out_unit,*) '[Jz,Jx] + i Jy = 0 ?',sum(abs(test_inv))
+      !CALL Write_Mat(test_inv,out_unit,5)
 
       test_inv=matmul(Ji(:,:,-2),Ji(:,:,-3))-matmul(Ji(:,:,-3),Ji(:,:,-2))
-      !write(out_unitp,*) '[Jy,Jz]'
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      !write(out_unit,*) '[Jy,Jz]'
+      !CALL Write_Mat(test_inv,out_unit,5)
       test_inv = test_inv+EYE*Ji(:,:,-1)
-      write(out_unitp,*) '[Jy,Jz] + i Jx = 0 ?',sum(abs(test_inv))
-      !CALL Write_Mat(test_inv,out_unitp,5)
+      write(out_unit,*) '[Jy,Jz] + i Jx = 0 ?',sum(abs(test_inv))
+      !CALL Write_Mat(test_inv,out_unit,5)
 
 
 
@@ -659,10 +659,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_RotBasis_Param(RotBasis_Para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -698,40 +698,40 @@
       logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
 
-      write(out_unitp,*) 'RotBasis_Para%Jrot   ',RotBasis_Para%Jrot
-      write(out_unitp,*) 'RotBasis_Para%nb_Rot ',RotBasis_Para%nb_Rot
-      write(out_unitp,*) 'RotBasis_Para%nb_term',RotBasis_Para%nb_term
+      write(out_unit,*) 'RotBasis_Para%Jrot   ',RotBasis_Para%Jrot
+      write(out_unit,*) 'RotBasis_Para%nb_Rot ',RotBasis_Para%nb_Rot
+      write(out_unit,*) 'RotBasis_Para%nb_term',RotBasis_Para%nb_term
 
       IF (allocated(RotBasis_Para%tab_RotOp)) THEN
-        write(out_unitp,*) 'J(-1) => -i*Jx, J(-2) => -i*Jy, J(-3) => -i*Jz'
+        write(out_unit,*) 'J(-1) => -i*Jx, J(-2) => -i*Jy, J(-3) => -i*Jz'
         DO J1=-3,-1
         DO J2=-3,-1
           iterm = RotBasis_Para%tab_der_TO_iterm(J1,J2)
-          write(out_unitp,*) 'JiJj op.',J1,J2,' iterm: ',iterm
-          CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,iterm),out_unitp,5)
+          write(out_unit,*) 'JiJj op.',J1,J2,' iterm: ',iterm
+          CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,iterm),out_unit,5)
         END DO
         END DO
         DO J1=-3,-1
           iterm = RotBasis_Para%tab_der_TO_iterm(J1,0)
-          write(out_unitp,*) 'Im(Ji op.)',J1,' iterm: ',iterm
-          CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,iterm),out_unitp,5)
+          write(out_unit,*) 'Im(Ji op.)',J1,' iterm: ',iterm
+          CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,iterm),out_unit,5)
         END DO
 
-        write(out_unitp,*) 'Id'
-        CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,0),out_unitp,5)
+        write(out_unit,*) 'Id'
+        CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,0),out_unit,5)
       END IF
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -753,9 +753,9 @@
       !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -772,10 +772,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_RotBasis_Param(RotBasis_Para2)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 

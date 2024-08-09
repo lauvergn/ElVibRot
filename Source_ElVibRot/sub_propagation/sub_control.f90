@@ -59,7 +59,7 @@ IMPLICIT NONE
  !     INTERFACE IN vib.f
  !================================================================
  SUBROUTINE sub_nonOpt_control(para_AllOp,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_psi,    ONLY : param_psi,alloc_psi,alloc_array,dealloc_array, &
                              renorm_psi,ecri_psi,sub_PsiBasisRep_TO_GridRep
@@ -98,8 +98,8 @@ IMPLICIT NONE
 !-----------------------------------------------------------
       para_H => para_AllOp%tab_Op(1)
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_nonOpt_control'
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING sub_nonOpt_control'
+        write(out_unit,*)
         CALL write_param_Op(para_H)
       END IF
 !-----------------------------------------------------------
@@ -111,15 +111,15 @@ IMPLICIT NONE
       para_propa%para_poly%Hmax = para_propa%Hmax
 
 
-      write(out_unitp,*) 'Tmax,DeltaT (ua)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (ua)=> ',                         &
              para_propa%WPTmax,para_propa%WPdeltaT
-      write(out_unitp,*) 'Tmax,DeltaT (fs)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (fs)=> ',                         &
                        para_propa%WPTmax*get_Conv_au_TO_unit('t','fs'), &
                      para_propa%WPdeltaT*get_Conv_au_TO_unit('t','fs')
-      write(out_unitp,*) 'Tmax,DeltaT (ps)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (ps)=> ',                         &
                        para_propa%WPTmax*get_Conv_au_TO_unit('t','ps'), &
                      para_propa%WPdeltaT*get_Conv_au_TO_unit('t','ps')
-      write(out_unitp,*) '... DeltaE,Emax (cm-1)',                      &
+      write(out_unit,*) '... DeltaE,Emax (cm-1)',                      &
             TWO*pi/para_propa%WPTmax * get_Conv_au_TO_unit('E','cm-1'), &
           TWO*pi/para_propa%WPdeltaT * get_Conv_au_TO_unit('E','cm-1')
 
@@ -138,7 +138,7 @@ IMPLICIT NONE
       DO i=iOp,iOp+2
         iDip = para_AllOp%tab_Op(i)%n_Op
         IF (para_propa%para_field%pola_xyz(iDip)) THEN
-          write(out_unitp,*) 'Control with ',trim(para_AllOp%tab_Op(i)%name_Op),&
+          write(out_unit,*) 'Control with ',trim(para_AllOp%tab_Op(i)%name_Op),&
                             para_AllOp%tab_Op(i)%n_Op
         END IF
       END DO
@@ -168,8 +168,8 @@ IMPLICIT NONE
       DO i=1,nb_WP
         IF (para_propa%para_control%tab_WP0(i) > tab_WP0(i)%nb_tot)     &
               THEN
-          write(out_unitp,*) ' ERROR in sub_nonOpt_control'
-          write(out_unitp,*) ' tab_WP0(i) > nb_tot',i,                          &
+          write(out_unit,*) ' ERROR in sub_nonOpt_control'
+          write(out_unit,*) ' tab_WP0(i) > nb_tot',i,                          &
                 para_propa%para_control%tab_WP0(i),tab_WP0(i)%nb_tot
           STOP
         END IF
@@ -179,10 +179,10 @@ IMPLICIT NONE
 !     --------------------------------------------------
       IF (para_propa%para_control%gate) THEN
         IF (debug) THEN
-          write(out_unitp,*) 'nb_WP,nb_WPba',nb_WP,nb_WPba
+          write(out_unit,*) 'nb_WP,nb_WPba',nb_WP,nb_WPba
           DO i=1,nb_WP
-            write(out_unitp,*) ' #WP0',i,para_propa%para_control%Mgate0(i,:)
-            write(out_unitp,*) ' #WPt',i,para_propa%para_control%Mgatet(i,:)
+            write(out_unit,*) ' #WP0',i,para_propa%para_control%Mgate0(i,:)
+            write(out_unit,*) ' #WPt',i,para_propa%para_control%Mgatet(i,:)
           END DO
         END IF
 
@@ -198,8 +198,8 @@ IMPLICIT NONE
         DO i=1,nb_WP
           IF (para_propa%para_control%tab_WPt(i) > tab_WPt(i)%nb_tot)   &
              THEN
-            write(out_unitp,*) ' ERROR in sub_nonOpt_control'
-            write(out_unitp,*) ' tab_WPt(i) > nb_tot',i,                        &
+            write(out_unit,*) ' ERROR in sub_nonOpt_control'
+            write(out_unit,*) ' tab_WPt(i) > nb_tot',i,                        &
                 para_propa%para_control%tab_WPt(i),tab_WPt(i)%nb_tot
             STOP
           END IF
@@ -211,11 +211,11 @@ IMPLICIT NONE
       DO i=1,nb_WP
 
         T = ZERO
-        write(out_unitp,*) 'WP0 (BasisRep)',i
+        write(out_unit,*) 'WP0 (BasisRep)',i
         CALL renorm_psi(tab_WP0(i))
         CALL ecri_psi(T=T,psi=tab_WP0(i))
 
-        write(out_unitp,*) 'WPt (BasisRep)',i
+        write(out_unit,*) 'WPt (BasisRep)',i
         CALL renorm_psi(tab_WPt(i))
         CALL ecri_psi(T=T,psi=tab_WPt(i))
 
@@ -262,11 +262,11 @@ IMPLICIT NONE
       IF (print_cont) THEN
         DO j=1,nb_WP
 
-          write(out_unitp,*) 'WP (BasisRep) at T=',j,T
+          write(out_unit,*) 'WP (BasisRep) at T=',j,T
           CALL ecri_psi(T=T,psi=tab_WP(j))
 
           !for the writting of the wp (GridRep)
-          write(out_unitp,*) 'WP (GridRep) at T=',j,T
+          write(out_unit,*) 'WP (GridRep) at T=',j,T
           CALL sub_PsiBasisRep_TO_GridRep(tab_WP(j))
           CALL ecri_psi(T=T,psi=tab_WP(j))
         END DO ! j loop (nb_WP)
@@ -280,7 +280,7 @@ IMPLICIT NONE
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END sub_nonOpt_control'
+        write(out_unit,*) 'END sub_nonOpt_control'
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_nonOpt_control
@@ -292,7 +292,7 @@ IMPLICIT NONE
 !     INTERFACE IN vib.f
 !================================================================
 SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_psi,    ONLY : param_psi,alloc_psi,alloc_array,dealloc_array, &
                             renorm_psi,norm2_psi,sub_PsiBasisRep_TO_GridRep,&
@@ -338,8 +338,8 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 !-----------------------------------------------------------
       para_H => para_AllOp%tab_Op(1)
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         CALL write_param_Op(para_H)
       END IF
 !-----------------------------------------------------------
@@ -350,15 +350,15 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
       para_propa%para_poly%Hmin = para_propa%Hmin
       para_propa%para_poly%Hmax = para_propa%Hmax
 
-      write(out_unitp,*) 'Tmax,DeltaT (ua)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (ua)=> ',                         &
              para_propa%WPTmax,para_propa%WPdeltaT
-      write(out_unitp,*) 'Tmax,DeltaT (fs)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (fs)=> ',                         &
                        para_propa%WPTmax*get_Conv_au_TO_unit('t','fs'), &
                      para_propa%WPdeltaT*get_Conv_au_TO_unit('t','fs')
-      write(out_unitp,*) 'Tmax,DeltaT (ps)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (ps)=> ',                         &
                        para_propa%WPTmax*get_Conv_au_TO_unit('t','ps'), &
                      para_propa%WPdeltaT*get_Conv_au_TO_unit('t','ps')
-      write(out_unitp,*) '... DeltaE,Emax (cm-1)',                      &
+      write(out_unit,*) '... DeltaE,Emax (cm-1)',                      &
             TWO*pi/para_propa%WPTmax * get_Conv_au_TO_unit('E','cm-1'), &
           TWO*pi/para_propa%WPdeltaT * get_Conv_au_TO_unit('E','cm-1')
 
@@ -387,9 +387,9 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
       DO i=iOp,iOp+2
         iDip = para_AllOp%tab_Op(i)%n_Op
         IF (para_propa%para_field%pola_xyz(iDip)) THEN
-          write(out_unitp,*) 'Control with ',trim(para_AllOp%tab_Op(i)%name_Op),&
+          write(out_unit,*) 'Control with ',trim(para_AllOp%tab_Op(i)%name_Op),&
                             para_AllOp%tab_Op(i)%n_Op
-          flush(out_unitp)
+          flush(out_unit)
          END IF
       END DO
 
@@ -427,8 +427,8 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
       DO i=1,nb_WP
         IF (para_propa%para_control%tab_WP0(i) > tab_WP0(i)%nb_tot)     &
               THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' tab_WP0(i) > nb_tot',i,                          &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' tab_WP0(i) > nb_tot',i,                          &
                 para_propa%para_control%tab_WP0(i),tab_WP0(i)%nb_tot
           STOP
         END IF
@@ -440,7 +440,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
         CALL sub_read_psi0(tab_WP,para_propa%para_WP0,nb_WPba)
         DO j=1,nb_WPba
           CALL norm2_psi(tab_WP(j))
-          write(out_unitp,*) 'norm tab_WP(j): ',j,tab_WP(j)%norm2
+          write(out_unit,*) 'norm tab_WP(j): ',j,tab_WP(j)%norm2
         END DO
 
         DO i=1,nb_WP
@@ -465,8 +465,8 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
         ELSE
           DO i=1,nb_WP
             IF (para_propa%para_control%tab_WPt(i) > tab_WPt(i)%nb_tot) THEN
-              write(out_unitp,*) ' ERROR in ',name_sub
-              write(out_unitp,*) ' tab_WPt(i) > nb_tot',i,              &
+              write(out_unit,*) ' ERROR in ',name_sub
+              write(out_unit,*) ' tab_WPt(i) > nb_tot',i,              &
                   para_propa%para_control%tab_WPt(i),tab_WPt(i)%nb_tot
               STOP
             END IF
@@ -544,7 +544,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
                            T,it,para_propa%para_control%alpha,          &
                            .TRUE.)
 
-        flush(out_unitp)
+        flush(out_unit)
 
         epsi_obj = ONETENTH**2
         IF (.NOT. para_propa%para_control%krotov) epsi_obj = FIVE
@@ -593,8 +593,8 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 
         IF (para_propa%para_control%alpha >                             &
                   para_propa%para_control%Max_alpha) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' alpha is too large',                             &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' alpha is too large',                             &
                  para_propa%para_control%alpha
           STOP
         END IF
@@ -604,11 +604,11 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 
 !       - WP0 or WPt in WP -------------------------------
         IF (print_cont) THEN
-          write(out_unitp,*) 'it,DeltaT',it,para_propa%WPdeltaT
+          write(out_unit,*) 'it,DeltaT',it,para_propa%WPdeltaT
           T = para_propa%WPTmax
           IF (para_propa%WPdeltaT < ZERO) T = ZERO
           DO j=1,2*nb_WP
-            write(out_unitp,*) 'WP (BasisRep) ',j
+            write(out_unit,*) 'WP (BasisRep) ',j
             CALL ecri_psi(T=T,psi=tab_WP(j))
           END DO
         END IF
@@ -621,7 +621,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 
         IF (print_cont) THEN
           DO j=1,2*nb_WP
-            write(out_unitp,*) 'WP (BasisRep) ',j
+            write(out_unit,*) 'WP (BasisRep) ',j
             CALL ecri_psi(T=T,psi=tab_WP(j))
           END DO
         END IF
@@ -668,11 +668,11 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
         IF (print_cont) THEN
           DO j=1,nb_WP
 
-            write(out_unitp,*) 'WP (BasisRep) at T=',j,T
+            write(out_unit,*) 'WP (BasisRep) at T=',j,T
             CALL ecri_psi(T=T,psi=tab_WP(j))
 
 !           for the writting of the wp (GridRep)
-            write(out_unitp,*) 'WP (GridRep) at T=',j,T
+            write(out_unit,*) 'WP (GridRep) at T=',j,T
             CALL sub_PsiBasisRep_TO_GridRep(tab_WP(j))
             CALL ecri_psi(T=T,psi=tab_WP(j))
           END DO ! j loop (nb_WP)
@@ -692,7 +692,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
       CALL dealloc_param_field(para_field_new)
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_Opt_control
@@ -710,7 +710,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
                                    print_Op,                            &
                                    para_field_new,make_field,Obj0,      &
                                    tab_Op,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_psi,    ONLY : param_psi,renorm_psi,ecri_psi
       USE mod_Op
@@ -755,19 +755,19 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
        !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_propagation25'
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING sub_propagation25'
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+        write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+        write(out_unit,*)
 
         DO j=1,nb_WP
           CALL renorm_psi(WP(j),GridRep=.FALSE.,BasisRep=.TRUE.)
 
-          write(out_unitp,*) 'WP0 (BasisRep)',j
+          write(out_unit,*) 'WP0 (BasisRep)',j
           CALL ecri_psi(T=ZERO,psi=WP(j),                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.,      &
                         ecri_psi2=.FALSE.)
@@ -784,10 +784,10 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 
 !-----------------------------------------------------------
       IF (print_Op .OR. debug) THEN
-        write(out_unitp,*) ' Propagation ',para_propa%name_WPpropa
-        IF (para_propa%para_field%pola_xyz(1)) write(out_unitp,*) 'with Dipx'
-        IF (para_propa%para_field%pola_xyz(2)) write(out_unitp,*) 'with Dipy'
-        IF (para_propa%para_field%pola_xyz(3)) write(out_unitp,*) 'with Dipz'
+        write(out_unit,*) ' Propagation ',para_propa%name_WPpropa
+        IF (para_propa%para_field%pola_xyz(1)) write(out_unit,*) 'with Dipx'
+        IF (para_propa%para_field%pola_xyz(2)) write(out_unit,*) 'with Dipy'
+        IF (para_propa%para_field%pola_xyz(3)) write(out_unit,*) 'with Dipz'
       END IF
 
 !     - parameters for poly (cheby and nOD) ... ------------
@@ -870,22 +870,22 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
         DO j=1,nb_WP
           CALL renorm_psi(WP(j),GridRep=.FALSE.,BasisRep=.TRUE.)
 
-          write(out_unitp,*) 'WP (BasisRep)',j,' at T=',T
+          write(out_unit,*) 'WP (BasisRep)',j,' at T=',T
           CALL ecri_psi(T=T,psi=WP(j),                                  &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.,      &
                         ecri_psi2=.FALSE.)
 
         END DO ! j loop (nb_WP)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
 !----------------------------------------------------------
 
       IF (para_propa%march_error) THEN
-        write(out_unitp,*) ' ERROR in sub_propagation25'
-        write(out_unitp,*) ' March: norm too large, no convergence...'
+        write(out_unit,*) ' ERROR in sub_propagation25'
+        write(out_unit,*) ' March: norm too large, no convergence...'
         IF (para_propa%test_max_norm)                                   &
-         write(out_unitp,*) ' the norm2 is too large! ',WP(:)%norm2
+         write(out_unit,*) ' the norm2 is too large! ',WP(:)%norm2
         STOP
       END IF
 
@@ -893,7 +893,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END sub_propagation25'
+        write(out_unit,*) 'END sub_propagation25'
       END IF
 !----------------------------------------------------------
 
@@ -906,7 +906,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 !================================================================
       SUBROUTINE build_field(T,WP,nb_WP,para_field_new,Obj0,            &
                              para_Dip,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,dealloc_psi,Overlap_psi1_psi2
       USE mod_Op
       USE mod_field
@@ -942,11 +942,11 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING build_field'
-        write(out_unitp,*)
-        write(out_unitp,*) para_field_new%type
-        write(out_unitp,*) para_field_new%allo_grid
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING build_field'
+        write(out_unit,*)
+        write(out_unit,*) para_field_new%type
+        write(out_unit,*) para_field_new%allo_grid
+        flush(out_unit)
        END IF
 !-----------------------------------------------------------
 
@@ -975,7 +975,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
              CALL Overlap_psi1_psi2(avMu,WP(jt),w2)
              E_new(ip) = E_new(ip) - aimag(S*avMu)/alpha_j
            END DO
-!          write(out_unitp,*) 'T,S,avMu',j,T,S,avMu
+!          write(out_unit,*) 'T,S,avMu',j,T,S,avMu
          END DO
          DO ip=1,3
            IF (.NOT. para_propa%para_field%pola_xyz(ip)) CYCLE
@@ -985,21 +985,21 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
            END IF
          END DO
          add = para_propa%para_control%Krotov
-!        write(out_unitp,*) 'T,S,E_new,add,alpha_j',T,S,E_new(:),add,alpha_j
+!        write(out_unit,*) 'T,S,E_new,add,alpha_j',T,S,E_new(:),add,alpha_j
          CALL EatT_TO_para_field(E_new,T,para_field_new,add)
        END IF
 
 
        IF (T == para_propa%para_field%grid_T(1) .AND.                   &
              para_propa%para_control%Obj_TO_alpha) THEN
-         write(out_unitp,*) 'T Log(Obj/min_Obj)',T,int(log10(Obj0_w(:)/Obj_min))
+         write(out_unit,*) 'T Log(Obj/min_Obj)',T,int(log10(Obj0_w(:)/Obj_min))
        END IF
 
        CALL dealloc_psi(w2)
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END build_field'
+         write(out_unit,*) 'END build_field'
        END IF
 !----------------------------------------------------------
 
@@ -1011,7 +1011,7 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 !================================================================
       SUBROUTINE calc_fidelity(nb_WP,SObj,Obj,tab_WP,tab_WPt,           &
                                T,it,alpha,print_fid)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,Overlap_psi1_psi2
       IMPLICIT NONE
 
@@ -1037,8 +1037,8 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 !     logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING calc_fidelity'
-        write(out_unitp,*) 'nb_WP',nb_WP
+        write(out_unit,*) 'BEGINNING calc_fidelity'
+        write(out_unit,*) 'nb_WP',nb_WP
       END IF
 !-----------------------------------------------------------
 
@@ -1051,12 +1051,12 @@ SUBROUTINE sub_Opt_control(para_AllOp,para_propa)
 
       SObj = sum(Obj(1:nb_WP))/nb_WP
       IF (print_fid .OR. debug)                                         &
-           write(out_unitp,11) ' it,T,alpha,J:',it,T,alpha,SObj,Obj(1:nb_WP)
+           write(out_unit,11) ' it,T,alpha,J:',it,T,alpha,SObj,Obj(1:nb_WP)
  11       format(a,i4,1x,f12.2,1x,f8.2,20(1x,f6.4))
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING calc_fidelity'
+        write(out_unit,*) 'BEGINNING calc_fidelity'
       END IF
 !-----------------------------------------------------------
       end subroutine calc_fidelity

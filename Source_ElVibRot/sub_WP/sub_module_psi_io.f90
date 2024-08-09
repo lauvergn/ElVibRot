@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_psi_io
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       IMPLICIT NONE
@@ -63,7 +63,7 @@
 !     Save vectors
 !=======================================================================================
       SUBROUTINE sub_save_psi(psi,nb_save,file_WP)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -83,12 +83,12 @@
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' nb_save',nb_save
-        write(out_unitp,*) ' nioWP',file_WP%unit
-        write(out_unitp,*) ' name',file_WP%name
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' nb_save',nb_save
+        write(out_unit,*) ' nioWP',file_WP%unit
+        write(out_unit,*) ' name',file_WP%name
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -116,8 +116,8 @@
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+         write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
        END IF
 !----------------------------------------------------------
 
@@ -129,7 +129,7 @@
 !---------------------------------------------------------------------------------------
       SUBROUTINE lect_psiBasisRep(psiBasisRep,WP0cplx,                  &
                                   nb_a,n_h,nb_elec,WP0n_h,WP0nb_elec)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer          :: nb_a,n_h,nb_elec
@@ -144,9 +144,9 @@
       logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING lect_psiBasisRep'
-        write(out_unitp,*) 'nb_a,n_h,nb_elec',nb_a,n_h,nb_elec
-        write(out_unitp,*) 'WP0n_h,WP0nb_elec',WP0n_h,WP0nb_elec
+        write(out_unit,*) 'BEGINNING lect_psiBasisRep'
+        write(out_unit,*) 'nb_a,n_h,nb_elec',nb_a,n_h,nb_elec
+        write(out_unit,*) 'WP0n_h,WP0nb_elec',WP0n_h,WP0nb_elec
       END IF
 !-----------------------------------------------------------
 
@@ -167,36 +167,36 @@
          DO i_e=ini_e,fin_e
          DO i_h=ini_h,fin_h
            DO i_b=1,nb_a
-             read(in_unitp,*) a,b
+             read(in_unit,*) a,b
              psiBasisRep(i_b,i_h,i_e) = cmplx(a,b,kind=Rkind)
            END DO
-           read(in_unitp,*)
+           read(in_unit,*)
          END DO
          END DO
       ELSE
          DO i_e=ini_e,fin_e
          DO i_h=ini_h,fin_h
            DO i_b=1,nb_a
-             read(in_unitp,*) a
+             read(in_unit,*) a
              psiBasisRep(i_b,i_h,i_e) = cmplx(a,ZERO,kind=Rkind)
            END DO
-           read(in_unitp,*)
+           read(in_unit,*)
          END DO
          END DO
        END IF
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'psiBasisRep'
+         write(out_unit,*) 'psiBasisRep'
          DO i_e=ini_e,fin_e
          DO i_h=ini_h,fin_h
            DO i_b=1,nb_a
-             write(out_unitp,*) i_e,i_h,i_b,psiBasisRep(i_b,i_h,i_e)
+             write(out_unit,*) i_e,i_h,i_b,psiBasisRep(i_b,i_h,i_e)
            END DO
-           write(out_unitp,*)
+           write(out_unit,*)
          END DO
          END DO
-         write(out_unitp,*) 'END lect_psiBasisRep'
+         write(out_unit,*) 'END lect_psiBasisRep'
        END IF
 !-----------------------------------------------------------
 
@@ -207,7 +207,7 @@
 !     reading BasisRep Wave packet
 !==============================================================
       SUBROUTINE lect_psiBasisRepnotall(WP0,WP0cplx)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -225,7 +225,7 @@
       logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING lect_psiBasisRepnotall'
+        write(out_unit,*) 'BEGINNING lect_psiBasisRepnotall'
       END IF
 !-----------------------------------------------------------
 
@@ -238,9 +238,9 @@
       DO
         a = ZERO
         b = ZERO
-        IF (WP0cplx) read(in_unitp,*,iostat=err) i_b,i_h,i_e,a,b
-        IF (.NOT. WP0cplx) read(in_unitp,*,iostat=err) i_b,i_h,i_e,a
-!       write(out_unitp,*) i_b,i_h,i_e,a,b,'err',err
+        IF (WP0cplx) read(in_unit,*,iostat=err) i_b,i_h,i_e,a,b
+        IF (.NOT. WP0cplx) read(in_unit,*,iostat=err) i_b,i_h,i_e,a
+!       write(out_unit,*) i_b,i_h,i_e,a,b,'err',err
         IF (err /= 0) EXIT
         i_bhe = i_b + ( (i_h-1)+ (i_e-1)*WP0%nb_bi ) * WP0%nb_ba
         IF (WP0%cplx) THEN
@@ -253,15 +253,15 @@
 !-----------------------------------------------------------
        IF (debug) THEN
 
-         write(out_unitp,*) 'WP0BasisRep'
+         write(out_unit,*) 'WP0BasisRep'
            CALL ecri_psi(T=ZERO,psi=WP0)
-         write(out_unitp,*) 'END lect_psiBasisRepnotall'
+         write(out_unit,*) 'END lect_psiBasisRepnotall'
        END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE lect_psiBasisRepnotall
       SUBROUTINE lect_psiBasisRepnotall_nD(WP0,nioWP,WP0cplx,lformated)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -289,13 +289,13 @@
       !logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'cplx',WP0cplx
-        write(out_unitp,*) 'WP0%cplx',WP0%cplx
-        write(out_unitp,*) 'nb_basis_act1',WP0%nb_basis_act1
-        write(out_unitp,*) 'nioWP',nioWP
-        write(out_unitp,*) 'lformated',lformated
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'cplx',WP0cplx
+        write(out_unit,*) 'WP0%cplx',WP0%cplx
+        write(out_unit,*) 'nb_basis_act1',WP0%nb_basis_act1
+        write(out_unit,*) 'nioWP',nioWP
+        write(out_unit,*) 'lformated',lformated
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -324,11 +324,11 @@
             ELSE
              read(nioWP,*,iostat=Rerr) ind_contractcHAC(:),a
             END IF
-            IF (debug) write(out_unitp,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
+            IF (debug) write(out_unit,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
             IF (Rerr /= 0) THEN
-              write(out_unitp,*) ' ERROR in ',name_sub
-              write(out_unitp,*) ' problem while reading the WP'
-              write(out_unitp,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
+              write(out_unit,*) ' ERROR in ',name_sub
+              write(out_unit,*) ' problem while reading the WP'
+              write(out_unit,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
               STOP
             END IF
 
@@ -339,7 +339,7 @@
 
             IF (.NOT. basis_is_OK) THEN
               IF (.NOT. done_basis_is_smaller)                          &
-                     write(out_unitp,*) ' WARNNING the basis is smaller'
+                     write(out_unit,*) ' WARNNING the basis is smaller'
               done_basis_is_smaller = .TRUE.
             END IF
 
@@ -349,11 +349,11 @@
 
 
             basis_is_OK = i_b <= WP0%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(i_h)
-            IF (debug) write(out_unitp,*) 'i_b,i_h,i_e',i_b,i_h,i_e
+            IF (debug) write(out_unit,*) 'i_b,i_h,i_e',i_b,i_h,i_e
 
             IF (.NOT. basis_is_OK) THEN
               IF (.NOT. done_basis_is_smaller)                          &
-                     write(out_unitp,*) ' WARNNING the basis is smaller'
+                     write(out_unit,*) ' WARNNING the basis is smaller'
               done_basis_is_smaller = .TRUE.
             END IF
             IF (.NOT. basis_is_OK) CYCLE
@@ -361,7 +361,7 @@
             i_bhe = sum(WP0%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(1:i_h-1)) + i_b
             IF (i_bhe > WP0%nb_tot) STOP 'ERROR i_bhe>nb_tot'
 
-            IF (debug) write(out_unitp,*) 'i_bhe,i_b,i_h,i_e,a,b',i_bhe,ind_contractcHAC(:),a,b
+            IF (debug) write(out_unit,*) 'i_bhe,i_b,i_h,i_e,a,b',i_bhe,ind_contractcHAC(:),a,b
             IF (WP0%cplx) THEN
               WP0%CvecB(i_bhe) = cmplx(a,b,kind=Rkind)
             ELSE
@@ -378,7 +378,7 @@
             ELSE
              read(nioWP,*,iostat=Rerr) (ind_ndim(i),i=1,ndim+2),a
             END IF
-            IF (debug) write(out_unitp,*) ind_ndim(:),a,b,'Rerr',Rerr
+            IF (debug) write(out_unit,*) ind_ndim(:),a,b,'Rerr',Rerr
             IF (Rerr /= 0) EXIT
 
             ! test the electronic and adiabatic channels
@@ -388,7 +388,7 @@
 
             IF (.NOT. basis_is_OK) THEN
               IF (.NOT. done_basis_is_smaller)                          &
-                     write(out_unitp,*) ' WARNNING the basis is smaller'
+                     write(out_unit,*) ' WARNNING the basis is smaller'
               done_basis_is_smaller = .TRUE.
             END IF
 
@@ -400,7 +400,7 @@
 
             IF (.NOT. basis_is_OK) THEN
               IF (.NOT. done_basis_is_smaller)                          &
-                         write(out_unitp,*) ' WARNNING the basis is smaller'
+                         write(out_unit,*) ' WARNNING the basis is smaller'
               done_basis_is_smaller = .TRUE.
             END IF
             IF (.NOT. basis_is_OK) CYCLE
@@ -408,7 +408,7 @@
 
 
             i_bhe = i_b + ( (i_h-1)+ (i_e-1)*WP0%nb_bi ) * WP0%nb_ba
-            IF (debug) write(out_unitp,*) 'i_bhe,indnD,a,b',i_bhe,ind_ndim(:),a,b
+            IF (debug) write(out_unit,*) 'i_bhe,indnD,a,b',i_bhe,ind_ndim(:),a,b
             IF(keep_MPI) THEN
               IF (WP0%cplx) THEN
                 WP0%CvecB(i_bhe) = cmplx(a,b,kind=Rkind)
@@ -431,7 +431,7 @@
         ELSE
           read(nioWP,*,iostat=Rerr) (ind_ndim(i),i=1,ndim+2),a
         END IF
-        IF (debug) write(out_unitp,*) ind_ndim(:),a,b,'Rerr',Rerr
+        IF (debug) write(out_unit,*) ind_ndim(:),a,b,'Rerr',Rerr
         IF (Rerr /= 0) EXIT
 
         ! test the electronic and adiabatic channels
@@ -441,7 +441,7 @@
 
         IF (.NOT. basis_is_OK) THEN
           IF (.NOT. done_basis_is_smaller)                              &
-                         write(out_unitp,*) ' WARNNING the basis is smaller'
+                         write(out_unit,*) ' WARNNING the basis is smaller'
           done_basis_is_smaller = .TRUE.
         END IF
 
@@ -452,14 +452,14 @@
 
         IF (.NOT. basis_is_OK) THEN
           IF (.NOT. done_basis_is_smaller)                              &
-                         write(out_unitp,*) ' WARNNING the basis is smaller'
+                         write(out_unit,*) ' WARNNING the basis is smaller'
           done_basis_is_smaller = .TRUE.
         END IF
         IF (.NOT. basis_is_OK) CYCLE
         i_bguess = i_b + 1
 
         i_bhe = i_b + ( (i_h-1)+ (i_e-1)*WP0%nb_bi ) * WP0%nb_ba
-        IF (debug) write(out_unitp,*) 'i_bhe,indnD,a,b',i_bhe,ind_ndim(:),a,b
+        IF (debug) write(out_unit,*) 'i_bhe,indnD,a,b',i_bhe,ind_ndim(:),a,b
         IF (WP0%cplx) THEN
           WP0%CvecB(i_bhe) = cmplx(a,b,kind=Rkind)
         ELSE
@@ -472,16 +472,16 @@
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'WP0BasisRep'
+         write(out_unit,*) 'WP0BasisRep'
          CALL ecri_psi(T=ZERO,psi=WP0)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
       END SUBROUTINE lect_psiBasisRepnotall_nD
 
 !=======================================================================================
       SUBROUTINE ecri_psiBasisRepnotall_nD(WP0,nio,epsi,lformated,iwp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       !USE mod_psi_Op
       IMPLICIT NONE
@@ -505,11 +505,11 @@
 !     logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'cplx',WP0%cplx
-        write(out_unitp,*) 'nb_basis_act1',WP0%nb_basis_act1
-        write(out_unitp,*) 'nb_ba',WP0%nb_ba
-        write(out_unitp,*) 'epsi',epsi
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'cplx',WP0%cplx
+        write(out_unit,*) 'nb_basis_act1',WP0%nb_basis_act1
+        write(out_unit,*) 'nb_ba',WP0%nb_ba
+        write(out_unit,*) 'epsi',epsi
       END IF
 !-----------------------------------------------------------
 
@@ -533,7 +533,7 @@
             IF (sqrt(a*a+b*b) >= epsi) write(nio,*) ind_ndim(:),i_h,i_e,a,b
           ELSE
             a = WP0%RvecB(i_bhe)
-!           write(out_unitp,*) indnD(:),a
+!           write(out_unit,*) indnD(:),a
             IF (abs(a) >= epsi) write(nio,*) ind_ndim(:),i_h,i_e,a
           END IF
           END DO
@@ -557,7 +557,7 @@
             IF (sqrt(a*a+b*b) >= epsi) write(nio) ind_ndim(:),i_h,i_e,a,b
           ELSE
             a = WP0%RvecB(i_b)
-!           write(out_unitp,*) indnD(:),a
+!           write(out_unit,*) indnD(:),a
             IF (abs(a) >= epsi) write(nio) ind_ndim(:),i_h,i_e,a
           END IF
           END DO
@@ -580,7 +580,7 @@
                IF (sqrt(a*a+b*b) >= epsi) write(nio,*) i_b,i_h,i_e,a,b
              ELSE
                a = WP0%RvecB(i_bhe)
-!              write(out_unitp,*) indnD(:),a
+!              write(out_unit,*) indnD(:),a
                IF (abs(a) >= epsi) write(nio,*) i_b,i_h,i_e,a
              END IF
            END DO
@@ -599,7 +599,7 @@
                IF (sqrt(a*a+b*b) >= epsi) write(nio,*) i_b,i_h,i_e,a,b
              ELSE
                a = WP0%RvecB(i_bhe)
-!              write(out_unitp,*) indnD(:),a
+!              write(out_unit,*) indnD(:),a
                IF (abs(a) >= epsi) write(nio) i_b,i_h,i_e,a
              END IF
            END DO
@@ -610,7 +610,7 @@
  END IF
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
 
@@ -619,7 +619,7 @@
 
 SUBROUTINE Read_psi_nDBasis(Psi,nioPsi,lformated,version,  &
                             list_nDindBasis1_TO_nDindBasis2,nb_tot)
-USE mod_system
+USE EVR_system_m
 USE mod_psi_set_alloc
 IMPLICIT NONE
 
@@ -651,13 +651,13 @@ logical, parameter :: debug =.FALSE.
 !logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
 IF (debug) THEN
-  write(out_unitp,*) 'BEGINNING ',name_sub
-  write(out_unitp,*) 'Psi%cplx',Psi%cplx
-  write(out_unitp,*) 'nb_basis_act1',Psi%nb_basis_act1
-  write(out_unitp,*) 'nioPsi',nioPsi
-  write(out_unitp,*) 'lformated',lformated
-  write(out_unitp,*) 'version: ',version
-  flush(out_unitp)
+  write(out_unit,*) 'BEGINNING ',name_sub
+  write(out_unit,*) 'Psi%cplx',Psi%cplx
+  write(out_unit,*) 'nb_basis_act1',Psi%nb_basis_act1
+  write(out_unit,*) 'nioPsi',nioPsi
+  write(out_unit,*) 'lformated',lformated
+  write(out_unit,*) 'version: ',version
+  flush(out_unit)
 END IF
 !-----------------------------------------------------------
 
@@ -667,7 +667,7 @@ ndim = Psi%BasisnD%ndim
 
 
 lformated_loc = lformated
-IF (nioPsi == 5 .OR. nioPsi == in_unitp) lformated_loc = .TRUE.
+IF (nioPsi == 5 .OR. nioPsi == in_unit) lformated_loc = .TRUE.
 !-----------------------------------------------------------
 
 SELECT CASE (version)
@@ -687,11 +687,11 @@ CASE(0)
         ELSE
          read(nioPsi,*,iostat=Rerr) ind_contractcHAC(:),a
         END IF
-        IF (debug) write(out_unitp,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
+        IF (debug) write(out_unit,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
         IF (Rerr /= 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' problem while reading the WP'
-          write(out_unitp,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' problem while reading the WP'
+          write(out_unit,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
           STOP
         END IF
 
@@ -702,7 +702,7 @@ CASE(0)
 
         IF (.NOT. basis_is_OK) THEN
           IF (.NOT. done_basis_is_smaller)                          &
-                 write(out_unitp,*) ' WARNNING the basis is smaller'
+                 write(out_unit,*) ' WARNNING the basis is smaller'
           done_basis_is_smaller = .TRUE.
         END IF
 
@@ -712,11 +712,11 @@ CASE(0)
 
 
         basis_is_OK = i_b <= Psi%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(i_h)
-        IF (debug) write(out_unitp,*) 'i_b,i_h,i_e',i_b,i_h,i_e
+        IF (debug) write(out_unit,*) 'i_b,i_h,i_e',i_b,i_h,i_e
 
         IF (.NOT. basis_is_OK) THEN
           IF (.NOT. done_basis_is_smaller)                          &
-                 write(out_unitp,*) ' WARNNING the basis is smaller'
+                 write(out_unit,*) ' WARNNING the basis is smaller'
           done_basis_is_smaller = .TRUE.
         END IF
         IF (.NOT. basis_is_OK) CYCLE
@@ -724,7 +724,7 @@ CASE(0)
         i_bhe = sum(Psi%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(1:i_h-1)) + i_b
         IF (i_bhe > Psi%nb_tot) STOP 'ERROR i_bhe>nb_tot'
 
-        IF (debug) write(out_unitp,*) 'i_bhe,i_b,i_h,i_e,a,b',i_bhe,ind_contractcHAC(:),a,b
+        IF (debug) write(out_unit,*) 'i_bhe,i_b,i_h,i_e,a,b',i_bhe,ind_contractcHAC(:),a,b
         IF (Psi%cplx) THEN
           Psi%CvecB(i_bhe) = cmplx(a,b,kind=Rkind)
         ELSE
@@ -741,12 +741,12 @@ CASE(0)
         ELSE
          read(nioPsi,*,iostat=Rerr) (ind_ndim(i),i=1,ndim+2),a
         END IF
-        IF (debug) write(out_unitp,*) ind_ndim(:),a,b,'Rerr',Rerr
+        IF (debug) write(out_unit,*) ind_ndim(:),a,b,'Rerr',Rerr
         IF (Rerr /= 0) EXIT
 
         i_bhe = list_nDindBasis1_TO_nDindBasis2(i_bhe_read)
 
-        IF (debug) write(out_unitp,*) 'i_bhe,indnD,a,b',i_bhe,ind_ndim(:),a,b
+        IF (debug) write(out_unit,*) 'i_bhe,indnD,a,b',i_bhe,ind_ndim(:),a,b
 
         IF (i_bhe > 0 .AND. i_bhe <= Psi%nb_baie) THEN
           IF (Psi%cplx) THEN
@@ -771,12 +771,12 @@ CASE(0)
       ELSE
        read(nioPsi,iostat=Rerr) (ind_ndim(i),i=1,ndim+2),a
       END IF
-      IF (debug) write(out_unitp,*) ind_ndim(:),a,b,'Rerr',Rerr
+      IF (debug) write(out_unit,*) ind_ndim(:),a,b,'Rerr',Rerr
       IF (Rerr /= 0) EXIT
 
       i_bhe = list_nDindBasis1_TO_nDindBasis2(i_bhe_read)
 
-      IF (debug) write(out_unitp,*) 'i_bhe,indnD,a,b',i_bhe,ind_ndim(:),a,b
+      IF (debug) write(out_unit,*) 'i_bhe,indnD,a,b',i_bhe,ind_ndim(:),a,b
 
       IF (i_bhe > 0) THEN
         IF (Psi%cplx) THEN
@@ -819,8 +819,8 @@ CASE(1)
   END IF
 
   IF (Rerr /= 0) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) 'Problem while reading the WP with version=',version
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) 'Problem while reading the WP with version=',version
     STOP
   END IF
 CASE(2)
@@ -839,11 +839,11 @@ CASE(2)
         ELSE
          read(nioPsi,*,iostat=Rerr) T,ind_contractcHAC(:),a
         END IF
-        IF (debug) write(out_unitp,*) T,ind_contractcHAC(:),a,b,'Rerr',Rerr
+        IF (debug) write(out_unit,*) T,ind_contractcHAC(:),a,b,'Rerr',Rerr
         IF (Rerr /= 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' problem while reading the WP'
-          write(out_unitp,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' problem while reading the WP'
+          write(out_unit,*) ind_contractcHAC(:),a,b,'Rerr',Rerr
           STOP
         END IF
 
@@ -854,7 +854,7 @@ CASE(2)
 
         IF (.NOT. basis_is_OK) THEN
           IF (.NOT. done_basis_is_smaller)                          &
-                 write(out_unitp,*) ' WARNNING the basis is smaller'
+                 write(out_unit,*) ' WARNNING the basis is smaller'
           done_basis_is_smaller = .TRUE.
         END IF
 
@@ -864,11 +864,11 @@ CASE(2)
 
 
         basis_is_OK = i_b <= Psi%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(i_h)
-        IF (debug) write(out_unitp,*) 'i_b,i_h,i_e',i_b,i_h,i_e
+        IF (debug) write(out_unit,*) 'i_b,i_h,i_e',i_b,i_h,i_e
 
         IF (.NOT. basis_is_OK) THEN
           IF (.NOT. done_basis_is_smaller)                          &
-                 write(out_unitp,*) ' WARNNING the basis is smaller'
+                 write(out_unit,*) ' WARNNING the basis is smaller'
           done_basis_is_smaller = .TRUE.
         END IF
         IF (.NOT. basis_is_OK) CYCLE
@@ -876,7 +876,7 @@ CASE(2)
         i_bhe = sum(Psi%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(1:i_h-1)) + i_b
         IF (i_bhe > Psi%nb_tot) STOP 'ERROR i_bhe>nb_tot'
 
-        IF (debug) write(out_unitp,*) 'i_bhe,i_b,i_h,i_e,a,b',i_bhe,ind_contractcHAC(:),a,b
+        IF (debug) write(out_unit,*) 'i_bhe,i_b,i_h,i_e,a,b',i_bhe,ind_contractcHAC(:),a,b
         IF (Psi%cplx) THEN
           Psi%CvecB(i_bhe) = cmplx(a,b,kind=Rkind)
         ELSE
@@ -894,12 +894,12 @@ CASE(2)
         ELSE
          read(nioPsi,*,iostat=Rerr) T,(ind_ndim(i),i=1,ndim+2),a
         END IF
-        IF (debug) write(out_unitp,*) T,ind_ndim(:),a,b,'Rerr',Rerr
+        IF (debug) write(out_unit,*) T,ind_ndim(:),a,b,'Rerr',Rerr
         IF (Rerr /= 0) EXIT
 
         i_bhe = list_nDindBasis1_TO_nDindBasis2(i_bhe_read)
 
-        IF (debug) write(out_unitp,*) 'T,i_bhe,indnD,a,b',T,i_bhe,ind_ndim(:),a,b
+        IF (debug) write(out_unit,*) 'T,i_bhe,indnD,a,b',T,i_bhe,ind_ndim(:),a,b
 
         IF (i_bhe > 0 .AND. i_bhe <= Psi%nb_baie) THEN
           IF (Psi%cplx) THEN
@@ -924,12 +924,12 @@ CASE(2)
       ELSE
        read(nioPsi,iostat=Rerr) T,(ind_ndim(i),i=1,ndim+2),a
       END IF
-      IF (debug) write(out_unitp,*) T,ind_ndim(:),a,b,'Rerr',Rerr
+      IF (debug) write(out_unit,*) T,ind_ndim(:),a,b,'Rerr',Rerr
       IF (Rerr /= 0) EXIT
 
       i_bhe = list_nDindBasis1_TO_nDindBasis2(i_bhe_read)
 
-      IF (debug) write(out_unitp,*) 'T,i_bhe,indnD,a,b',T,i_bhe,ind_ndim(:),a,b
+      IF (debug) write(out_unit,*) 'T,i_bhe,indnD,a,b',T,i_bhe,ind_ndim(:),a,b
 
       IF (i_bhe > 0) THEN
         IF (Psi%cplx) THEN
@@ -952,9 +952,9 @@ END SELECT
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'PsiBasisRep'
+         write(out_unit,*) 'PsiBasisRep'
          CALL ecri_psi(T=ZERO,psi=Psi)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
       END SUBROUTINE Read_psi_nDBasis
@@ -962,7 +962,7 @@ END SELECT
       SUBROUTINE Read_list_nDindBasis1_TO_nDindBasis2(Psi,              &
                list_nDindBasis1_TO_nDindBasis2,nb_tot,nioPsi,lformated, &
                version)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -989,19 +989,19 @@ END SELECT
       !logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_basis_act1',Psi%nb_basis_act1
-        write(out_unitp,*) 'nioPsi',nioPsi
-        write(out_unitp,*) 'lformated',lformated
-        write(out_unitp,*) 'version: ',version
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_basis_act1',Psi%nb_basis_act1
+        write(out_unit,*) 'nioPsi',nioPsi
+        write(out_unit,*) 'lformated',lformated
+        write(out_unit,*) 'version: ',version
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
 done_basis_is_smaller = .FALSE.
 
 lformated_loc = lformated
-IF (nioPsi == 5 .OR. nioPsi == in_unitp) lformated_loc = .TRUE.
+IF (nioPsi == 5 .OR. nioPsi == in_unit) lformated_loc = .TRUE.
 
 SELECT CASE (version)
 CASE(0)
@@ -1051,7 +1051,7 @@ CASE(0)
 
 
       i_bhe = i_b + ( (i_h-1)+ (i_e-1)*Psi%nb_bi ) * Psi%nb_ba
-      IF (debug) write(out_unitp,*) 'i_bhe,indnD',i_bhe,ind_ndim(:)
+      IF (debug) write(out_unit,*) 'i_bhe,indnD',i_bhe,ind_ndim(:)
       list_nDindBasis1_TO_nDindBasis2(i_bhe_read) = i_bhe
     END DO
   ELSE
@@ -1089,7 +1089,7 @@ CASE(1)
       i_bguess = i_b + 1
 
       i_bhe = i_b + ( (i_h-1)+ (i_e-1)*Psi%nb_bi ) * Psi%nb_ba
-      IF (debug) write(out_unitp,*) 'i_bhe,indnD',i_bhe,ind_ndim(:)
+      IF (debug) write(out_unit,*) 'i_bhe,indnD',i_bhe,ind_ndim(:)
       list_nDindBasis1_TO_nDindBasis2(i_bhe_read) = i_bhe
     END DO
   ELSE
@@ -1142,7 +1142,7 @@ CASE(2)
 
 
       i_bhe = i_b + ( (i_h-1)+ (i_e-1)*Psi%nb_bi ) * Psi%nb_ba
-      IF (debug) write(out_unitp,*) 'i_bhe,indnD',i_bhe,ind_ndim(:)
+      IF (debug) write(out_unit,*) 'i_bhe,indnD',i_bhe,ind_ndim(:)
       list_nDindBasis1_TO_nDindBasis2(i_bhe_read) = i_bhe
     END DO
   ELSE
@@ -1152,20 +1152,20 @@ CASE Default
   STOP 'no default in Read_list_nDindBasis1_TO_nDindBasis2'
 END SELECT
 
-IF (done_basis_is_smaller) write(out_unitp,*) ' WARNNING the basis is smaller'
+IF (done_basis_is_smaller) write(out_unit,*) ' WARNNING the basis is smaller'
 
 !-----------------------------------------------------------
 IF (debug) THEN
-  write(out_unitp,*) ' list_nDindBasis1_TO_nDindBasis2'
-  write(out_unitp,'(10(I0,1X))') list_nDindBasis1_TO_nDindBasis2(:)
-  write(out_unitp,*) 'END ',name_sub
+  write(out_unit,*) ' list_nDindBasis1_TO_nDindBasis2'
+  write(out_unit,'(10(I0,1X))') list_nDindBasis1_TO_nDindBasis2(:)
+  write(out_unit,*) 'END ',name_sub
 END IF
 
 END SUBROUTINE Read_list_nDindBasis1_TO_nDindBasis2
 
 SUBROUTINE Read_header_saveFile_psi(psi,nb_read,list_nDindBasis1_TO_nDindBasis2, &
                                     file_WP,Version_File)
-USE mod_system
+USE EVR_system_m
 USE mod_psi_set_alloc
 IMPLICIT NONE
 
@@ -1196,8 +1196,8 @@ logical, parameter :: debug=.FALSE.
 !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
 IF (debug) THEN
-  write(out_unitp,*) 'BEGINNING ',name_sub
-  write(out_unitp,*)
+  write(out_unit,*) 'BEGINNING ',name_sub
+  write(out_unit,*)
 END IF
 
 ! first we read the header of the file. There are 3 options:
@@ -1222,7 +1222,7 @@ IF (file_WP%formatted) THEN
     CALL file_close(file_WP)
     CALL file_open(file_WP,nioWP,lformatted=file_WP%formatted,old=.TRUE.)
 
-    Version_File = FilePsiVersion ! default from the module "mod_system"
+    Version_File = FilePsiVersion ! default from the module "EVR_system_m"
     nb_psi       = 0
     nb_tot       = 0
     read(nioWP,headerFile,iostat=ioerr)
@@ -1230,8 +1230,8 @@ IF (file_WP%formatted) THEN
 
     ! True error while reading the file
     IF (ioerr /= 0) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' Error while reading the formatted file header (', &
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' Error while reading the formatted file header (', &
                           trim(file_WP%name),').'
       STOP
     END IF
@@ -1258,8 +1258,8 @@ ELSE  ! not formated file
 
   ! True error while reading the file
   IF (ioerr /= 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' Error while reading the unformatted file header (', &
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' Error while reading the unformatted file header (', &
                         trim(file_WP%name),').'
     STOP
   END IF
@@ -1267,10 +1267,10 @@ ELSE  ! not formated file
 END IF
 
 IF (debug) THEN
-  write(out_unitp,*) ' nb_readWP_file: ',nb_read
-  write(out_unitp,*) ' nb_tot_file   : ',nb_tot
-  write(out_unitp,*) ' Version_File  : ',Version_File
-  flush(out_unitp)
+  write(out_unit,*) ' nb_readWP_file: ',nb_read
+  write(out_unit,*) ' nb_tot_file   : ',nb_tot
+  write(out_unit,*) ' Version_File  : ',Version_File
+  flush(out_unit)
 END IF
 
 ! When nb_tot > 0, the list_nDindBasis1_TO_nDindBasis2(:) has to be read.
@@ -1282,8 +1282,8 @@ IF (nb_tot > 0) THEN
                   file_WP%formatted,Version_File)
 
   IF (debug) THEN
-    write(out_unitp,*) 'list_nDindBasis1_TO_nDindBasis2'
-    write(out_unitp,'(10(I0,1X))') list_nDindBasis1_TO_nDindBasis2(:)
+    write(out_unit,*) 'list_nDindBasis1_TO_nDindBasis2'
+    write(out_unit,'(10(I0,1X))') list_nDindBasis1_TO_nDindBasis2(:)
   END IF
 
   IF (Version_File == 0 .OR. Version_File == 2) THEN ! Version_File=0, option=2
@@ -1303,14 +1303,14 @@ END IF
 ! here, the file must be open and ready to read the 1st psi.
 
 IF (debug) THEN
-  write(out_unitp,*)
-  write(out_unitp,*) 'END ',name_sub
+  write(out_unit,*)
+  write(out_unit,*) 'END ',name_sub
 END IF
 
 END SUBROUTINE Read_header_saveFile_psi
 
       SUBROUTINE Write_header_saveFile_psi(psi,nb_save,file_WP)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       !USE mod_psi_Op
       IMPLICIT NONE
@@ -1334,9 +1334,9 @@ END SUBROUTINE Read_header_saveFile_psi
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' nb_save,ndim',nb_save,shape(psi)
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' nb_save,ndim',nb_save,shape(psi)
+        write(out_unit,*)
       END IF
 !-----------------------------------------------------------
 
@@ -1362,13 +1362,13 @@ END SUBROUTINE Read_header_saveFile_psi
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !----------------------------------------------------------
 
       END SUBROUTINE Write_header_saveFile_psi
       SUBROUTINE Write_list_nDindBasis(Psi,nioPsi,lformated,version)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -1388,18 +1388,18 @@ END SUBROUTINE Read_header_saveFile_psi
 !      logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_basis_act1',Psi%nb_basis_act1
-        write(out_unitp,*) 'nioPsi',nioPsi
-        write(out_unitp,*) 'lformated',lformated
-        write(out_unitp,*) 'version: ',version
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_basis_act1',Psi%nb_basis_act1
+        write(out_unit,*) 'nioPsi',nioPsi
+        write(out_unit,*) 'lformated',lformated
+        write(out_unit,*) 'version: ',version
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
 
 lformated_loc = lformated
-IF (nioPsi == 6 .OR. nioPsi == out_unitp) lformated_loc = .TRUE.
+IF (nioPsi == 6 .OR. nioPsi == out_unit) lformated_loc = .TRUE.
 
 SELECT CASE (version)
 CASE(0)
@@ -1469,14 +1469,14 @@ END SELECT
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
       END SUBROUTINE Write_list_nDindBasis
 
 !=======================================================================================
   SUBROUTINE Write_Psi_nDBasis(Psi,nioPsi,iPsi,epsi,lformated,version,T)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     IMPLICIT NONE
 
@@ -1503,20 +1503,20 @@ END SELECT
     !logical, parameter :: debug =.TRUE.
     !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*) 'Psi%cplx',Psi%cplx
-      write(out_unitp,*) 'nioPsi',nioPsi
-      write(out_unitp,*) 'lformated',lformated
-      write(out_unitp,*) 'version: ',version
-      IF (present(T))  write(out_unitp,*) 'T:       ',T
-      flush(out_unitp)
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'Psi%cplx',Psi%cplx
+      write(out_unit,*) 'nioPsi',nioPsi
+      write(out_unit,*) 'lformated',lformated
+      write(out_unit,*) 'version: ',version
+      IF (present(T))  write(out_unit,*) 'T:       ',T
+      flush(out_unit)
     END IF
     !-----------------------------------------------------------
 
     ndim = Psi%BasisnD%ndim
 
     lformated_loc = lformated
-    IF (nioPsi == 6 .OR. nioPsi == out_unitp) lformated_loc = .TRUE.
+    IF (nioPsi == 6 .OR. nioPsi == out_unit) lformated_loc = .TRUE.
 
 !-----------------------------------------------------------
 !-----------------------------------------------------------
@@ -1564,7 +1564,7 @@ CASE(0)
           IF (sqrt(a*a+b*b) >= epsi) write(nioPsi) ind_ndim(:),i_h,i_e,a,b
         ELSE
           a = Psi%RvecB(i_b)
-!         write(out_unitp,*) indnD(:),a
+!         write(out_unit,*) indnD(:),a
           IF (abs(a) >= epsi) write(nioPsi) ind_ndim(:),i_h,i_e,a
         END IF
       END DO
@@ -1586,7 +1586,7 @@ CASE(0)
                IF (sqrt(a*a+b*b) >= epsi) write(nioPsi,*) i_b,i_h,i_e,a,b
              ELSE
                a = Psi%RvecB(i_bhe)
-!              write(out_unitp,*) indnD(:),a
+!              write(out_unit,*) indnD(:),a
                IF (abs(a) >= epsi) write(nioPsi,*) i_b,i_h,i_e,a
              END IF
            END DO
@@ -1605,7 +1605,7 @@ CASE(0)
                IF (sqrt(a*a+b*b) >= epsi) write(nioPsi,*) i_b,i_h,i_e,a,b
              ELSE
                a = Psi%RvecB(i_bhe)
-!              write(out_unitp,*) indnD(:),a
+!              write(out_unit,*) indnD(:),a
                IF (abs(a) >= epsi) write(nioPsi) i_b,i_h,i_e,a
              END IF
            END DO
@@ -1631,8 +1631,8 @@ CASE(1)
   END IF
 
   IF (Rerr /= 0) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) 'Problem while writing the WP with version=',version
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) 'Problem while writing the WP with version=',version
     STOP
   END IF
 
@@ -1680,7 +1680,7 @@ CASE(2)
           IF (sqrt(a*a+b*b) >= epsi) write(nioPsi) ind_ndim(:),i_h,i_e,a,b
         ELSE
           a = Psi%RvecB(i_b)
-!         write(out_unitp,*) indnD(:),a
+!         write(out_unit,*) indnD(:),a
           IF (abs(a) >= epsi) write(nioPsi) ind_ndim(:),i_h,i_e,a
         END IF
       END DO
@@ -1702,7 +1702,7 @@ CASE(2)
                IF (sqrt(a*a+b*b) >= epsi) write(nioPsi,*) T_loc,i_b,i_h,i_e,a,b
              ELSE
                a = Psi%RvecB(i_bhe)
-!              write(out_unitp,*) indnD(:),a
+!              write(out_unit,*) indnD(:),a
                IF (abs(a) >= epsi) write(nioPsi,*) T_loc,i_b,i_h,i_e,a
              END IF
            END DO
@@ -1721,7 +1721,7 @@ CASE(2)
                IF (sqrt(a*a+b*b) >= epsi) write(nioPsi,*) T_loc,i_b,i_h,i_e,a,b
              ELSE
                a = Psi%RvecB(i_bhe)
-!              write(out_unitp,*) indnD(:),a
+!              write(out_unit,*) indnD(:),a
                IF (abs(a) >= epsi) write(nioPsi) T_loc,i_b,i_h,i_e,a
              END IF
            END DO
@@ -1738,9 +1738,9 @@ END SELECT
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'PsiBasisRep'
+         write(out_unit,*) 'PsiBasisRep'
          CALL ecri_psi(T=ZERO,psi=Psi)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
       END SUBROUTINE Write_psi_nDBasis

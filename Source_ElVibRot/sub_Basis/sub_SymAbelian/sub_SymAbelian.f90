@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_SymAbelian
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
         PRIVATE
@@ -94,9 +94,9 @@
          character (len=*), parameter :: name_sub='alloc_SymAbelian'
 
          IF (nb < 1) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  WRONG paramter values: nb',nb
-           write(out_unitp,*) '  CHECK the fortran !!'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  WRONG paramter values: nb',nb
+           write(out_unit,*) '  CHECK the fortran !!'
            STOP
          END IF
 
@@ -197,12 +197,12 @@
 
          character (len=*), parameter :: name_sub='SymAbelian1_TO_SymAbelian2'
 
-         !write(out_unitp,*) 'BEGINNING ',name_sub
+         !write(out_unit,*) 'BEGINNING ',name_sub
 
          IF (.NOT. associated(P_SymAbelian1)) THEN
            IF (print_level > 1) THEN
-             write(out_unitp,*) 'WARNING in ',name_sub
-             write(out_unitp,*) '    SymAbelian1 is not associated!'
+             write(out_unit,*) 'WARNING in ',name_sub
+             write(out_unit,*) '    SymAbelian1 is not associated!'
            END IF
          ELSE
            IF (.NOT. associated(P_SymAbelian2)) THEN
@@ -218,7 +218,7 @@
 
          END IF
 
-         !write(out_unitp,*) 'END ',name_sub
+         !write(out_unit,*) 'END ',name_sub
 
 
        END SUBROUTINE SymAbelian1_TO_SymAbelian2
@@ -233,31 +233,31 @@
 
 
          IF (.NOT. associated(P_SymAbelian)) THEN
-           write(out_unitp,*) 'BEGINNING ',name_sub
-           write(out_unitp,*) 'WARNING: "SymAbelian" is not associated!'
-           write(out_unitp,*) 'END ',name_sub
-           flush(out_unitp)
+           write(out_unit,*) 'BEGINNING ',name_sub
+           write(out_unit,*) 'WARNING: "SymAbelian" is not associated!'
+           write(out_unit,*) 'END ',name_sub
+           flush(out_unit)
            RETURN
          END IF
 
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         flush(out_unitp)
+         write(out_unit,*) 'BEGINNING ',name_sub
+         flush(out_unit)
 
 
-         write(out_unitp,*) 'nb',P_SymAbelian%nb
-         write(out_unitp,*) 'Read_symab',P_SymAbelian%Read_symab
-         write(out_unitp,*) 'nb_PER_symab(:)',P_SymAbelian%nb_PER_symab(:)
+         write(out_unit,*) 'nb',P_SymAbelian%nb
+         write(out_unit,*) 'Read_symab',P_SymAbelian%Read_symab
+         write(out_unit,*) 'nb_PER_symab(:)',P_SymAbelian%nb_PER_symab(:)
 
-         write(out_unitp,*) 'alloc tab_symab',allocated(P_SymAbelian%tab_symab)
+         write(out_unit,*) 'alloc tab_symab',allocated(P_SymAbelian%tab_symab)
          IF (allocated(P_SymAbelian%tab_symab)) THEN
            DO ib=1,P_SymAbelian%nb
-             write(out_unitp,*) 'ib,tab_symab,bits(tab_symab)',ib,      &
+             write(out_unit,*) 'ib,tab_symab,bits(tab_symab)',ib,      &
                            WriteTOstring_symab(P_SymAbelian%tab_symab(ib))
            END DO
          END IF
 
-         write(out_unitp,*) 'END ',name_sub
-         flush(out_unitp)
+         write(out_unit,*) 'END ',name_sub
+         flush(out_unit)
 
        END SUBROUTINE Write_SymAbelian
 
@@ -320,18 +320,18 @@
          character (len=*), parameter :: name_sub='Set_symabOFSymAbelian_AT_ib'
 
          IF (.NOT. associated(P_SymAbelian)) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  SymAbelian is not associated !!'
-           write(out_unitp,*) '  CHECK the fortran !!'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  SymAbelian is not associated !!'
+           write(out_unit,*) '  CHECK the fortran !!'
            STOP
           !ELSE IF (.NOT.  SymAbelian_IS_initialized(P_SymAbelian) .OR.     &
           !        ib < 1 .OR. ib > P_SymAbelian%nb) THEN
          ELSE IF (.NOT.  SymAbelian_IS_initialized(P_SymAbelian) .OR. ib < 1) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  WRONG parameter values'
-           write(out_unitp,*) ' ib',ib
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  WRONG parameter values'
+           write(out_unit,*) ' ib',ib
            CALL Write_SymAbelian(P_SymAbelian)
-           write(out_unitp,*) '  CHECK the fortran !!'
+           write(out_unit,*) '  CHECK the fortran !!'
            STOP
          END IF
          IF (ib > P_SymAbelian%nb) RETURN
@@ -354,10 +354,10 @@
 
 
          IF ( size(tab) < 1 ) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  the size of "tab" is < 1'
-           write(out_unitp,*) '  probably, it is not allocated !'
-           write(out_unitp,*) '  CHECK the fortran !!'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  the size of "tab" is < 1'
+           write(out_unit,*) '  probably, it is not allocated !'
+           write(out_unit,*) '  CHECK the fortran !!'
            STOP
          END IF
 
@@ -410,10 +410,10 @@
                P_SymAbelian%tab_symab(ib) = P_SymAbelian%Read_symab
              END DO
            CASE DEFAULT
-             write(out_unitp,*) ' ERROR in ',name_sub
-             write(out_unitp,*) '  it should never append. The error should come from'
-             write(out_unitp,*) ' "Set_ReadsymabOFSymAbelian" subroutine'
-             write(out_unitp,*) ' CHECK the fortran!!'
+             write(out_unit,*) ' ERROR in ',name_sub
+             write(out_unit,*) '  it should never append. The error should come from'
+             write(out_unit,*) ' "Set_ReadsymabOFSymAbelian" subroutine'
+             write(out_unit,*) ' CHECK the fortran!!'
              STOP
            END SELECT
          END IF
@@ -474,13 +474,13 @@
            P_SymAbelian%Read_symab = Read_symab
 
          ELSE
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  WRONG Read_symab',Read_symab
-           write(out_unitp,*) '  symab = -1     : no symmetry'
-           write(out_unitp,*) '  symab = 0 or 1 : one   symmetry element , Cs, C2...'
-           write(out_unitp,*) '  symab = 0-3    : two   symmetry elements, C2v'
-           write(out_unitp,*) '  symab = 0-7    : three symmetry elements, D4h'
-           write(out_unitp,*) '  CHECK your data'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  WRONG Read_symab',Read_symab
+           write(out_unit,*) '  symab = -1     : no symmetry'
+           write(out_unit,*) '  symab = 0 or 1 : one   symmetry element , Cs, C2...'
+           write(out_unit,*) '  symab = 0-3    : two   symmetry elements, C2v'
+           write(out_unit,*) '  symab = 0-7    : three symmetry elements, D4h'
+           write(out_unit,*) '  CHECK your data'
            STOP
          END IF
 
@@ -492,7 +492,7 @@
 
          character (len=*), parameter :: name_sub='Write_symab'
 
-         write(out_unitp,*) 'symab,bits(symab)',WriteTOstring_symab(symab)
+         write(out_unit,*) 'symab,bits(symab)',WriteTOstring_symab(symab)
 
        END SUBROUTINE Write_symab
        FUNCTION WriteTOstring_symab(symab)

@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_field
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
         integer, parameter :: max_pulse = 110
 
@@ -145,9 +145,9 @@
 
         IF ( (A%init0 .EQV. A%notinit0) .OR.                            &
              (A%notinit0 .AND. .NOT. A%init0) ) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) name_A,' has NOT been initiated with "init0_field"'
-          write(out_unitp,*) ' CHECK the source!!!!!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) name_A,' has NOT been initiated with "init0_field"'
+          write(out_unit,*) ' CHECK the source!!!!!'
           STOP
         END IF
       END SUBROUTINE check_init0_field
@@ -197,22 +197,22 @@
        max_der   = -1
        type      = 'cos'
        type_init_grid = 'cos'
-       read(in_unitp,field)
-       write(out_unitp,field)
+       read(in_unit,field)
+       write(out_unit,field)
 
 
        IF (nb_pulse > max_pulse) THEN
-         write(out_unitp,*) ' ERROR in read_field'
-         write(out_unitp,*) ' the number of pulse (cos) is too large'
-         write(out_unitp,*) ' nb_pulse > max_pulse',nb_pulse,max_pulse
+         write(out_unit,*) ' ERROR in read_field'
+         write(out_unit,*) ' the number of pulse (cos) is too large'
+         write(out_unit,*) ' nb_pulse > max_pulse',nb_pulse,max_pulse
          STOP
        END IF
 
        para_field%nb_pola = count(pola_xyz(:))
 
        IF (para_field%nb_pola == 0) THEN
-         write(out_unitp,*) ' WARNING in read_field'
-         write(out_unitp,*) ' no polarisation is set up'
+         write(out_unit,*) ' WARNING in read_field'
+         write(out_unit,*) ' no polarisation is set up'
        END IF
 
        IF (sum(abs(cte(:))) /= ZERO) THEN
@@ -226,20 +226,20 @@
        END IF
 
        IF (stepw > ZERO .AND. para_field%nb_pola > 1) THEN
-         write(out_unitp,*) ' ERROR in read_field'
-         write(out_unitp,*) ' the scan on the frequency CAN NOT be done with '
-         write(out_unitp,*) ' several polarisations!'
-         write(out_unitp,*) ' stepw,nb_pola',stepw,para_field%nb_pola
+         write(out_unit,*) ' ERROR in read_field'
+         write(out_unit,*) ' the scan on the frequency CAN NOT be done with '
+         write(out_unit,*) ' several polarisations!'
+         write(out_unit,*) ' stepw,nb_pola',stepw,para_field%nb_pola
          STOP
        END IF
 
-       write(out_unitp,*) 'E0',E0(:,1:nb_pulse)
-       write(out_unitp,*) 'w',w(:,1:nb_pulse)
-       write(out_unitp,*) 't1',t1(:,1:nb_pulse)
-       write(out_unitp,*) 'IF t<t1 => E0.cos(w.t)'
+       write(out_unit,*) 'E0',E0(:,1:nb_pulse)
+       write(out_unit,*) 'w',w(:,1:nb_pulse)
+       write(out_unit,*) 't1',t1(:,1:nb_pulse)
+       write(out_unit,*) 'IF t<t1 => E0.cos(w.t)'
        IF (stepw > ZERO) THEN
-         write(out_unitp,*) 'wmin,wmax,stepw',wmin,wmax,stepw
-         write(out_unitp,*) 'scan [wmin, wmin+stepw, wmin+2stepw... wmax]'
+         write(out_unit,*) 'wmin,wmax,stepw',wmin,wmax,stepw
+         write(out_unit,*) 'scan [wmin, wmin+stepw, wmin+2stepw... wmax]'
        END IF
 
 
@@ -257,8 +257,8 @@
         ELSE
           IF (sum(abs(tt)) > ZERO) THEN
             para_field%sigma       = tt
-            write(out_unitp,*) ' WARNNIG in read_field'
-            write(out_unitp,*) ' tt SHOULD NOT be use. Use sigma instead'
+            write(out_unit,*) ' WARNNIG in read_field'
+            write(out_unit,*) ' tt SHOULD NOT be use. Use sigma instead'
           ELSE
             para_field%sigma = ZERO
           END IF
@@ -316,7 +316,7 @@
 !     initialization of the field on the grid
 !===============================================
       SUBROUTINE  init_field_grid(para_field,WPTmax,WPdeltaT)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       type (param_field) :: para_field
@@ -334,17 +334,17 @@
       !logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING init_field_grid'
-        write(out_unitp,*) 'npt,WPTmax,WPdeltaT',npt,WPTmax,WPdeltaT
-        write(out_unitp,*) 'type ',para_field%type
-        write(out_unitp,*) 'allo_grid ',para_field%allo_grid
-        write(out_unitp,*) 'init_grid ',para_field%init_grid
-        write(out_unitp,*) 'type_init_grid ',para_field%type_init_grid
-        write(out_unitp,*) 'nb_pulse',para_field%nb_pulse
-        write(out_unitp,*) 'E0',para_field%E0(:,1:para_field%nb_pulse)
-        write(out_unitp,*) 'w',para_field%w(:,1:para_field%nb_pulse)
-        write(out_unitp,*) 't1',para_field%t1(:,1:para_field%nb_pulse)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING init_field_grid'
+        write(out_unit,*) 'npt,WPTmax,WPdeltaT',npt,WPTmax,WPdeltaT
+        write(out_unit,*) 'type ',para_field%type
+        write(out_unit,*) 'allo_grid ',para_field%allo_grid
+        write(out_unit,*) 'init_grid ',para_field%init_grid
+        write(out_unit,*) 'type_init_grid ',para_field%type_init_grid
+        write(out_unit,*) 'nb_pulse',para_field%nb_pulse
+        write(out_unit,*) 'E0',para_field%E0(:,1:para_field%nb_pulse)
+        write(out_unit,*) 'w',para_field%w(:,1:para_field%nb_pulse)
+        write(out_unit,*) 't1',para_field%t1(:,1:para_field%nb_pulse)
+        flush(out_unit)
       END IF
 
 
@@ -352,7 +352,7 @@
 
       npt = int(WPTmax/abs(WPdeltaT))
       para_field%nb_T = npt
-      write(out_unitp,*) 'Grid init_field_grid, npt: ',npt
+      write(out_unit,*) 'Grid init_field_grid, npt: ',npt
 
       IF (.NOT. para_field%allo_grid) THEN
         para_field%allo_grid = .TRUE.
@@ -375,13 +375,13 @@
               para_field%type_init_grid == 'read' ) THEN
             read(nio,*) sigma,para_field%grid_E(i,1:3)
             IF (abs(sigma-T) > ONETENTH**4) THEN
-              write(out_unitp,*) ' ERROR in init_field_grid'
-              write(out_unitp,*) ' The grid point associated with T',sigma
-              write(out_unitp,*) ' of the file:',para_field%file%name
-              write(out_unitp,*) ' does not match with T',T
-              write(out_unitp,*) ' nb_T',npt
-              write(out_unitp,*) ' DeltaT',WPdeltaT
-              write(out_unitp,*) 'grid_T',para_field%grid_T(1:10)
+              write(out_unit,*) ' ERROR in init_field_grid'
+              write(out_unit,*) ' The grid point associated with T',sigma
+              write(out_unit,*) ' of the file:',para_field%file%name
+              write(out_unit,*) ' does not match with T',T
+              write(out_unit,*) ' nb_T',npt
+              write(out_unit,*) ' DeltaT',WPdeltaT
+              write(out_unit,*) 'grid_T',para_field%grid_T(1:10)
               STOP
             END IF
           ELSE IF (para_field%type_init_grid == 'cos_env' .OR.          &
@@ -420,15 +420,15 @@
               para_field%grid_E(i,k) = ch
             END DO
           ELSE ! error
-            write(out_unitp,*) ' ERROR in init_field_grid'
-            write(out_unitp,*) ' WRONG type_init_grid: ',                       &
+            write(out_unit,*) ' ERROR in init_field_grid'
+            write(out_unit,*) ' WRONG type_init_grid: ',                       &
                              para_field%type_init_grid
-            write(out_unitp,*) ' Possibilities are: '
-            write(out_unitp,*) '    read, grid, cos_env, cos, gauss'
+            write(out_unit,*) ' Possibilities are: '
+            write(out_unit,*) '    read, grid, cos_env, cos, gauss'
             STOP
           END IF
-          IF (debug) write(out_unitp,*) ' field : ',i,T,para_field%grid_E(i,:)
-          flush(out_unitp)
+          IF (debug) write(out_unit,*) ' field : ',i,T,para_field%grid_E(i,:)
+          flush(out_unit)
 !         T = T + abs(WPdeltaT)
         END DO
         CALL file_close(para_field%file)
@@ -437,8 +437,8 @@
       IF (para_field%max_der > 2) para_field%max_der = 2
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END init_field_grid'
-        flush(out_unitp)
+        write(out_unit,*) 'END init_field_grid'
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -474,18 +474,18 @@
 
 
       IF (para_field%type .NE. 'grid') THEN
-        write(out_unitp,*) ' WARNING in print_field_grid'
-        write(out_unitp,*) ' CANNOT print the field on a grid'
+        write(out_unit,*) ' WARNING in print_field_grid'
+        write(out_unit,*) ' CANNOT print the field on a grid'
         RETURN
       ELSE
-        write(out_unitp,*) ' ====================================='
-        write(out_unitp,*) ' Field on a grid'
-        write(out_unitp,*) ' ====================================='
+        write(out_unit,*) ' ====================================='
+        write(out_unit,*) ' Field on a grid'
+        write(out_unit,*) ' ====================================='
         DO i=0,para_field%nb_T
-        write(out_unitp,11) para_field%grid_T(i),para_field%grid_E(i,:)
+        write(out_unit,11) para_field%grid_T(i),para_field%grid_E(i,:)
  11     format(e30.20,3(1X,f30.20))
         END DO
-        write(out_unitp,*) ' ====================================='
+        write(out_unit,*) ' ====================================='
       END IF
 
 
@@ -507,8 +507,8 @@
       real (kind=Rkind) :: DeltaT
 
       IF (.NOT. para_field%allo_grid) THEN
-        write(out_unitp,*) ' ERROR in EatT_TO_para_field'
-        write(out_unitp,*) ' the temporal grids are not allocated!'
+        write(out_unit,*) ' ERROR in EatT_TO_para_field'
+        write(out_unit,*) ' the temporal grids are not allocated!'
         STOP
       END IF
 
@@ -517,15 +517,15 @@
       DeltaT = para_field%grid_T(1)-para_field%grid_T(0)
       it = int(t/DeltaT)
       IF (abs(t-para_field%grid_T(it)) > 1.d-4) THEN
-        write(out_unitp,*) ' ERROR in EatT_TO_para_field'
-        write(out_unitp,*) ' I cannot find the grid point associated with T',t
-        write(out_unitp,*) ' it,grid_T(it)',it,para_field%grid_T(it)
-        write(out_unitp,*) ' nb_T',para_field%nb_T
-        write(out_unitp,*) ' DeltaT',DeltaT
-        write(out_unitp,*) 'grid_T',para_field%grid_T(1:10)
-        write(out_unitp,*) 'grid_Ex',para_field%grid_E(1:10,1)
-        write(out_unitp,*) 'grid_Ey',para_field%grid_E(1:10,2)
-        write(out_unitp,*) 'grid_Ez',para_field%grid_E(1:10,3)
+        write(out_unit,*) ' ERROR in EatT_TO_para_field'
+        write(out_unit,*) ' I cannot find the grid point associated with T',t
+        write(out_unit,*) ' it,grid_T(it)',it,para_field%grid_T(it)
+        write(out_unit,*) ' nb_T',para_field%nb_T
+        write(out_unit,*) ' DeltaT',DeltaT
+        write(out_unit,*) 'grid_T',para_field%grid_T(1:10)
+        write(out_unit,*) 'grid_Ex',para_field%grid_E(1:10,1)
+        write(out_unit,*) 'grid_Ey',para_field%grid_E(1:10,2)
+        write(out_unit,*) 'grid_Ez',para_field%grid_E(1:10,3)
         STOP
       END IF
 
@@ -555,8 +555,8 @@
       real (kind=Rkind) :: dnE(3)
 
 
-!     write(out_unitp,*) 'para_field%w',para_field%w
-!     write(out_unitp,*) 'para_field%E0',para_field%E0
+!     write(out_unit,*) 'para_field%w',para_field%w
+!     write(out_unit,*) 'para_field%E0',para_field%E0
 
       dnE(:) = ZERO
       IF (para_field%type .EQ. 'cos') THEN
@@ -603,7 +603,7 @@
 !     the field is on a grid
 !===============================================
       FUNCTION  dnEgrid(n,t,k,para_field)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind)      :: dnEgrid
@@ -618,8 +618,8 @@
       real (kind=Rkind), save :: DeltaT
 
       IF (.NOT. para_field%allo_grid) THEN
-        write(out_unitp,*) ' ERROR in dnEgrid'
-        write(out_unitp,*) ' the temporal grids are not allocated!'
+        write(out_unit,*) ' ERROR in dnEgrid'
+        write(out_unit,*) ' the temporal grids are not allocated!'
         STOP
       END IF
 
@@ -628,24 +628,24 @@
       DeltaT = para_field%grid_T(1)-para_field%grid_T(0)
       it = int(t/DeltaT)
       IF (it < 0 .OR. it > para_field%nb_T) THEN
-        write(out_unitp,*) ' ERROR in dnEgrid'
-        write(out_unitp,*) ' it is <0 or > nb_T !!!'
-        write(out_unitp,*) ' it,nb_T',it,para_field%nb_T
-        write(out_unitp,*) ' T,DeltaT',t,DeltaT
-        write(out_unitp,*) 'grid_T',para_field%grid_T(1:10)
-        write(out_unitp,*) 'grid_E',para_field%grid_E(1:10,1)
+        write(out_unit,*) ' ERROR in dnEgrid'
+        write(out_unit,*) ' it is <0 or > nb_T !!!'
+        write(out_unit,*) ' it,nb_T',it,para_field%nb_T
+        write(out_unit,*) ' T,DeltaT',t,DeltaT
+        write(out_unit,*) 'grid_T',para_field%grid_T(1:10)
+        write(out_unit,*) 'grid_E',para_field%grid_E(1:10,1)
         STOP
       END IF
       IF (abs(t-para_field%grid_T(it)) > 1.d-4) THEN
-        write(out_unitp,*) ' ERROR in dnEgrid'
-        write(out_unitp,*) ' I cannot find the grid point associated with T',t
-        write(out_unitp,*) ' it,grid_T(it)',it,para_field%grid_T(it)
-        write(out_unitp,*) ' nb_T',para_field%nb_T
-        write(out_unitp,*) ' DeltaT',DeltaT
-        write(out_unitp,*) 'grid_T',para_field%grid_T(1:10)
-        write(out_unitp,*) 'grid_Ex',para_field%grid_E(1:10,1)
-        write(out_unitp,*) 'grid_Ey',para_field%grid_E(1:10,2)
-        write(out_unitp,*) 'grid_Ez',para_field%grid_E(1:10,3)
+        write(out_unit,*) ' ERROR in dnEgrid'
+        write(out_unit,*) ' I cannot find the grid point associated with T',t
+        write(out_unit,*) ' it,grid_T(it)',it,para_field%grid_T(it)
+        write(out_unit,*) ' nb_T',para_field%nb_T
+        write(out_unit,*) ' DeltaT',DeltaT
+        write(out_unit,*) 'grid_T',para_field%grid_T(1:10)
+        write(out_unit,*) 'grid_Ex',para_field%grid_E(1:10,1)
+        write(out_unit,*) 'grid_Ey',para_field%grid_E(1:10,2)
+        write(out_unit,*) 'grid_Ez',para_field%grid_E(1:10,3)
         STOP
       END IF
 
@@ -714,7 +714,7 @@
 !     1/2cos(w t) -1/4 cos( 2w_env-w t) -1/4 cos( 2w_env+w t) with w_env = Pi/tmax
 !===============================================
       FUNCTION  dnEcos_env(n,t,tmax,w)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer :: n
@@ -743,7 +743,7 @@
 !     1/2(1-cos(t *2Pi/tmax) ) * cos(w t)
 !===============================================
       FUNCTION  dnEcos_env_old(n,t,tmax,w)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer :: n
@@ -777,7 +777,7 @@
 !     cos(w t)
 !===============================================
       FUNCTION  dnEcos(n,t,w)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer :: n
@@ -793,18 +793,18 @@
       ph = pi/TWO
       ph = ZERO
 
-!     write(out_unitp,*) 'n,mod(n,2),k',n,mod(n,2),k
+!     write(out_unit,*) 'n,mod(n,2),k',n,mod(n,2),k
       IF ( n .EQ. 0) THEN
         dnE = cos(w*t+ph)
-!       write(out_unitp,*) 'n,cos,w**0',n
+!       write(out_unit,*) 'n,cos,w**0',n
 
       ELSE IF ( mod(n,2) .EQ. 0) THEN
         dnE = ((-ONE)**k)*cos(w*t+ph)*w**n
-!       write(out_unitp,*) 'n,k,cos,w**n*f',n,k,(-ONE)**k
+!       write(out_unit,*) 'n,k,cos,w**n*f',n,k,(-ONE)**k
 
       ELSE
         dnE = ((-ONE)**k)*sin(w*t+ph)*w**n
-!       write(out_unitp,*) 'n,k,sin,w**n*f',n,k,(-ONE)**k
+!       write(out_unit,*) 'n,k,sin,w**n*f',n,k,(-ONE)**k
 
       END IF
 
@@ -813,7 +813,7 @@
       end function  dnEcos
 !==================================================================
       FUNCTION  dnEgauss(n,t,w,t_cent,sigma,ph)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 
@@ -873,7 +873,7 @@
 !     sin(t * Pi/t1)**2
 !===============================================
       FUNCTION  envelopp(t,t1)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind) :: envelopp

@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_basis_BtoG_GtoB_SGType2
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -60,14 +60,14 @@ END TYPE TypeRDP
 CONTAINS
 
 SUBROUTINE alloc_TabRDP_at_iG(TabRDP,iG)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP), allocatable :: TabRDP(:)
 integer                    :: iG
 
 IF (allocated(TabRDP)) THEN
-  !write(out_unitp,*) 'BEGINNING alloc_TabRDP_at_iG'
+  !write(out_unit,*) 'BEGINNING alloc_TabRDP_at_iG'
 
   IF (.NOT. allocated(TabRDP(iG)%RDP)) THEN
     CALL alloc_NParray(TabRDP(iG)%RDP,                                  &
@@ -76,7 +76,7 @@ IF (allocated(TabRDP)) THEN
     TabRDP(iG)%RDP = ZERO
   END IF
 
-!write(out_unitp,*) 'END alloc_TabRDP_at_iG'
+!write(out_unit,*) 'END alloc_TabRDP_at_iG'
 END IF
 
 
@@ -84,21 +84,21 @@ END IF
 END SUBROUTINE alloc_TabRDP_at_iG
 
 SUBROUTINE dealloc_TabRDP_at_iG(TabRDP,iG)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP), allocatable :: TabRDP(:)
 integer               :: iG
 
 IF (allocated(TabRDP)) THEN
-  !write(out_unitp,*) 'BEGINNING dealloc_TabRDP_at_iG'
+  !write(out_unit,*) 'BEGINNING dealloc_TabRDP_at_iG'
 
-    !write(out_unitp,*) 'iG, Shape RDP',iG,shape(TabRDP(iG)%RDP)
+    !write(out_unit,*) 'iG, Shape RDP',iG,shape(TabRDP(iG)%RDP)
 
     IF (allocated(TabRDP(iG)%RDP))                                      &
       CALL dealloc_NParray(TabRDP(iG)%RDP,'TabRDP(iG)%RDP','dealloc_TabRDP_at_iG')
 
-!write(out_unitp,*) 'END dealloc_TabRDP_at_iG'
+!write(out_unit,*) 'END dealloc_TabRDP_at_iG'
 END IF
 
 
@@ -106,7 +106,7 @@ END IF
 END SUBROUTINE dealloc_TabRDP_at_iG
 
 SUBROUTINE dealloc_TabRDP(TabRDP)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP), allocatable :: TabRDP(:)
@@ -116,11 +116,11 @@ integer               :: iG
 
 
 IF (allocated(TabRDP)) THEN
-  !write(out_unitp,*) 'BEGINNING dealloc_TabRDP'
-  !write(out_unitp,*) 'dealloc TabRDP',size(TabRDP)
+  !write(out_unit,*) 'BEGINNING dealloc_TabRDP'
+  !write(out_unit,*) 'dealloc TabRDP',size(TabRDP)
 
   DO iG=lbound(TabRDP,dim=1),ubound(TabRDP,dim=1)
-    !write(out_unitp,*) 'iG, Shape RDP',iG,shape(TabRDP(iG)%RDP)
+    !write(out_unit,*) 'iG, Shape RDP',iG,shape(TabRDP(iG)%RDP)
 
     TabRDP(iG)%n2 = 0
     TabRDP(iG)%n3 = 0
@@ -131,8 +131,8 @@ IF (allocated(TabRDP)) THEN
   END DO
 
   deallocate(TabRDP)
-  !write(out_unitp,*) 'alloc TabRDP ?',allocated(TabRDP)
-  !write(out_unitp,*) 'END dealloc_TabRDP'
+  !write(out_unit,*) 'alloc TabRDP ?',allocated(TabRDP)
+  !write(out_unit,*) 'END dealloc_TabRDP'
 END IF
 
 
@@ -141,7 +141,7 @@ END SUBROUTINE dealloc_TabRDP
 
 
 SUBROUTINE Write_TabRDP(TabRDP)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP), allocatable :: TabRDP(:)
@@ -151,17 +151,17 @@ integer               :: iG,i2,i3
 
 
 IF (allocated(TabRDP)) THEN
-  write(out_unitp,*) '======== TabRDP ============================',shape(TabRDP)
+  write(out_unit,*) '======== TabRDP ============================',shape(TabRDP)
   DO iG=lbound(TabRDP,dim=1),ubound(TabRDP,dim=1)
     IF (allocated(TabRDP(iG)%RDP)) THEN
-      write(out_unitp,*) '    iG',iG
+      write(out_unit,*) '    iG',iG
       DO i3=1,TabRDP(iG)%n3
       DO i2=1,TabRDP(iG)%n2
-        write(out_unitp,*) 'i2,i3',i2,i3,TabRDP(iG)%RDP(i2,i3)
+        write(out_unit,*) 'i2,i3',i2,i3,TabRDP(iG)%RDP(i2,i3)
       END DO
       END DO
     ELSE
-      write(out_unitp,*) '    iG',iG,' RDP is not allocated'
+      write(out_unit,*) '    iG',iG,' RDP is not allocated'
     END IF
 
   END DO
@@ -172,7 +172,7 @@ END IF
 END SUBROUTINE Write_TabRDP
 
 SUBROUTINE SumSq_TabRDP(TabRDP)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP), allocatable :: TabRDP(:)
@@ -187,7 +187,7 @@ IF (allocated(TabRDP)) THEN
     IF (allocated(TabRDP(iG)%RDP)) S  = sum(TabRDP(iG)%RDP**2)
     SS = SS + S
   END DO
-  write(out_unitp,*) 'SumSq TabRDP',SS
+  write(out_unit,*) 'SumSq TabRDP',SS
 
 END IF
 
@@ -195,7 +195,7 @@ END IF
 END SUBROUTINE SumSq_TabRDP
 
 SUBROUTINE Size_TabRDP(TabRDP,nb_BG)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP), allocatable :: TabRDP(:)
@@ -218,18 +218,18 @@ IF (allocated(TabRDP)) THEN
 END IF
 
 IF (Rnb_BG < 1024._Rkind) THEN
-  write(out_unitp,*) 'size WPG',int(Rnb_BG),' Words'
+  write(out_unit,*) 'size WPG',int(Rnb_BG),' Words'
 ELSE IF (Rnb_BG < 1024._Rkind**2) THEN
-  write(out_unitp,*) 'size WPG',int(Rnb_BG/(1024._Rkind**1))*Rkind,' kW (Words)'
+  write(out_unit,*) 'size WPG',int(Rnb_BG/(1024._Rkind**1))*Rkind,' kW (Words)'
 ELSE
-  write(out_unitp,*) 'size WPG',int(Rnb_BG/(1024._Rkind**2))*Rkind,' MW (Words)'
+  write(out_unit,*) 'size WPG',int(Rnb_BG/(1024._Rkind**2))*Rkind,' MW (Words)'
 END IF
-flush(out_unitp)
+flush(out_unit)
 
 END SUBROUTINE Size_TabRDP
 
 SUBROUTINE Norm_OFF_Diff_TabRDP(TabRDP1,TabRDP2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP)      :: TabRDP1(:),TabRDP2(:)
@@ -242,8 +242,8 @@ real(kind=Rkind)   :: Norm
 IF (TabRDP1(1)%n2 /= TabRDP2(1)%n2 .OR.                                 &
     TabRDP1(1)%n3 /= TabRDP2(1)%n3 .OR.                                 &
     size(TabRDP1) /= size(TabRDP2) ) THEN
-  write(out_unitp,*) ' ERROR in Norm_OFF_Diff_TabRDP'
-  write(out_unitp,*) ' incompatible TabRDP1 and TabRDP2'
+  write(out_unit,*) ' ERROR in Norm_OFF_Diff_TabRDP'
+  write(out_unit,*) ' incompatible TabRDP1 and TabRDP2'
   STOP
 END IF
 
@@ -251,12 +251,12 @@ Norm = ZERO
 DO iG=1,ubound(TabRDP1,dim=1)
   Norm = Norm + sum( (TabRDP1(iG)%RDP(:,:) - TabRDP2(iG)%RDP(:,:))**2 )
 END DO
-write(out_unitp,*) 'Norm_OFF_Diff_TabRDP',Norm
+write(out_unit,*) 'Norm_OFF_Diff_TabRDP',Norm
 
 
 END SUBROUTINE Norm_OFF_Diff_TabRDP
 SUBROUTINE TabRDP2_TO_TabRDP1(TabRDP1,TabRDP2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP), allocatable :: TabRDP1(:),TabRDP2(:)
@@ -269,7 +269,7 @@ IF (allocated(TabRDP1)) CALL dealloc_TabRDP(TabRDP1)
 
 IF (allocated(TabRDP2)) THEN
   allocate(TabRDP1( lbound(TabRDP2,dim=1) : ubound(TabRDP2,dim=1) ))
-  !write(out_unitp,*) 'alloc TabRDP',size(TabRDP1)
+  !write(out_unit,*) 'alloc TabRDP',size(TabRDP1)
 
 
   DO iG=lbound(TabRDP1,dim=1),ubound(TabRDP1,dim=1)
@@ -290,7 +290,7 @@ END IF
 END SUBROUTINE TabRDP2_TO_TabRDP1
 
 SUBROUTINE Set_BgG_FOR_id(BgG,ind_Grid,ind_Basis,tab_ba,D,LG,id,WithAlloc_RDP)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -309,20 +309,20 @@ logical, parameter :: debug = .FALSE.
 CALL dealloc_TabRDP(BgG)
 
 IF (debug) THEN
-  write(out_unitp,*) 'BEGINNING in Set_BgG_FOR_id',id
-  write(out_unitp,*) 'tab_q, for B',ind_Basis(id+1)%tab_q
-  write(out_unitp,*) 'tab_q, for G',ind_Grid(id)%tab_q
-  write(out_unitp,*) 'tab_q, for g',0
+  write(out_unit,*) 'BEGINNING in Set_BgG_FOR_id',id
+  write(out_unit,*) 'tab_q, for B',ind_Basis(id+1)%tab_q
+  write(out_unit,*) 'tab_q, for G',ind_Grid(id)%tab_q
+  write(out_unit,*) 'tab_q, for g',0
 END IF
 
 
 allocate(BgG(ind_Grid(id)%MaxnD))
-!write(out_unitp,*) 'alloc TabRDP',size(BgG)
+!write(out_unit,*) 'alloc TabRDP',size(BgG)
 
 DO iG=1,ind_Grid(id)%MaxnD
 
   nqq = 1
-  !write(out_unitp,*) 'iG,l(:)',ind_Grid(id)%tab_ind(:,iG)
+  !write(out_unit,*) 'iG,l(:)',ind_Grid(id)%tab_ind(:,iG)
   DO i=1,ind_Grid(id)%ndim
     li = ind_Grid(id)%tab_ind(i,iG)
     iq = ind_Grid(id)%tab_q(i)
@@ -342,20 +342,20 @@ DO iG=1,ind_Grid(id)%MaxnD
     BgG(iG)%RDP(:,:) = ZERO
   END IF
 
-  !IF (debug) write(out_unitp,*) 'iG, Shape RDP',iG,':',shape(BgG(iG)%RDP)
+  !IF (debug) write(out_unit,*) 'iG, Shape RDP',iG,':',shape(BgG(iG)%RDP)
 
 END DO
 
 IF (debug) THEN
   !CALL Write_TabRDP(BgG)
   CALL Size_TabRDP(BgG,nb_BG)
-  write(out_unitp,*) 'END in Set_BgG_FOR_id',id
-  flush(out_unitp)
+  write(out_unit,*) 'END in Set_BgG_FOR_id',id
+  flush(out_unit)
 END IF
 END SUBROUTINE Set_BgG_FOR_id
 
 SUBROUTINE Transfer_WP_TO_BgG(WPG,BgG)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 real(kind=Rkind)   :: WPG(:)
@@ -366,15 +366,15 @@ integer               :: i_WP,iG,nqq
 
 
 IF (BgG(1)%n2 /= 1) THEN
-  write(out_unitp,*) ' ERROR in Transfer_WP0_TO_BgG'
-  write(out_unitp,*) ' BgG is not completely on the G grid'
+  write(out_unit,*) ' ERROR in Transfer_WP0_TO_BgG'
+  write(out_unit,*) ' BgG is not completely on the G grid'
   STOP
 END IF
 IF (size(WPG) /= sum(BgG(:)%n3)) THEN
-  write(out_unitp,*) ' ERROR in Transfer_WP0_TO_BgG'
-  write(out_unitp,*) ' The sizes of WPG and BgG are not compatible'
-  write(out_unitp,*) 'size(WPG)',size(WPG)
-  write(out_unitp,*) 'sum(BgG(:)%n3)',sum(BgG(:)%n3)
+  write(out_unit,*) ' ERROR in Transfer_WP0_TO_BgG'
+  write(out_unit,*) ' The sizes of WPG and BgG are not compatible'
+  write(out_unit,*) 'size(WPG)',size(WPG)
+  write(out_unit,*) 'sum(BgG(:)%n3)',sum(BgG(:)%n3)
   STOP
 END IF
 
@@ -385,13 +385,13 @@ DO iG=1,ubound(BgG,dim=1)
   BgG(iG)%RDP(1,:) = WPG(i_WP+1:i_WP+nqq)
   i_WP = i_WP+nqq
 END DO
-!write(out_unitp,*) 'i_WP',i_WP
+!write(out_unit,*) 'i_WP',i_WP
 
 
 END SUBROUTINE Transfer_WP_TO_BgG
 
 SUBROUTINE Transfer_BgG_TO_WP(BgG,WPG)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP)      :: BgG(:)
@@ -402,15 +402,15 @@ integer               :: i_WP,iG,nqq
 
 
 IF (BgG(1)%n2 /= 1) THEN
-  write(out_unitp,*) ' ERROR in Transfer_BgG_TO_WP'
-  write(out_unitp,*) ' BgG is not completely on the G grid'
+  write(out_unit,*) ' ERROR in Transfer_BgG_TO_WP'
+  write(out_unit,*) ' BgG is not completely on the G grid'
   STOP
 END IF
 IF (size(WPG) /= sum(BgG(:)%n3)) THEN
-  write(out_unitp,*) ' ERROR in Transfer_BgG_TO_WP'
-  write(out_unitp,*) ' The sizes of WPG and BgG are not compatible'
-  write(out_unitp,*) 'size(WPG)',size(WPG)
-  write(out_unitp,*) 'sum(BgG(:)%n3)',sum(BgG(:)%n3)
+  write(out_unit,*) ' ERROR in Transfer_BgG_TO_WP'
+  write(out_unit,*) ' The sizes of WPG and BgG are not compatible'
+  write(out_unit,*) 'size(WPG)',size(WPG)
+  write(out_unit,*) 'sum(BgG(:)%n3)',sum(BgG(:)%n3)
   STOP
 END IF
 
@@ -421,13 +421,13 @@ DO iG=1,ubound(BgG,dim=1)
   WPG(i_WP+1:i_WP+nqq) = BgG(iG)%RDP(1,:)
   i_WP = i_WP+nqq
 END DO
-!write(out_unitp,*) 'i_WP',i_WP
+!write(out_unit,*) 'i_WP',i_WP
 
 
 END SUBROUTINE Transfer_BgG_TO_WP
 
 SUBROUTINE Norm_OFF_Diff_WP_BgG(WPG,BgG)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeRDP)      :: BgG(:)
@@ -439,15 +439,15 @@ real(kind=Rkind)   :: Norm
 
 
 IF (BgG(1)%n2 /= 1) THEN
-  write(out_unitp,*) ' ERROR in Norm_OFF_Diff_WP_BgG'
-  write(out_unitp,*) ' BgG is not completely on the G grid'
+  write(out_unit,*) ' ERROR in Norm_OFF_Diff_WP_BgG'
+  write(out_unit,*) ' BgG is not completely on the G grid'
   STOP
 END IF
 IF (size(WPG) /= sum(BgG(:)%n3)) THEN
-  write(out_unitp,*) ' ERROR in Norm_OFF_Diff_WP_BgG'
-  write(out_unitp,*) ' The sizes of WPG and BgG are not compatible'
-  write(out_unitp,*) 'size(WPG)',size(WPG)
-  write(out_unitp,*) 'sum(BgG(:)%n3)',sum(BgG(:)%n3)
+  write(out_unit,*) ' ERROR in Norm_OFF_Diff_WP_BgG'
+  write(out_unit,*) ' The sizes of WPG and BgG are not compatible'
+  write(out_unit,*) 'size(WPG)',size(WPG)
+  write(out_unit,*) 'sum(BgG(:)%n3)',sum(BgG(:)%n3)
   STOP
 END IF
 
@@ -459,13 +459,13 @@ DO iG=1,ubound(BgG,dim=1)
   Norm = Norm + sum( (BgG(iG)%RDP(:,1) - WPG(i_WP+1:i_WP+nqq))**2 )
   i_WP = i_WP+nqq
 END DO
-write(out_unitp,*) 'Norm_OFF_Diff_WP_BgG',Norm
+write(out_unit,*) 'Norm_OFF_Diff_WP_BgG',Norm
 
 
 END SUBROUTINE Norm_OFF_Diff_WP_BgG
 
 SUBROUTINE BgG_TO_BbG(BgG,WSG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -496,36 +496,36 @@ logical, parameter :: debug = .FALSE.
 !logical, parameter :: debug = .TRUE.
 
 IF (debug) THEN
-  write(out_unitp,*)
-  write(out_unitp,*) 'BEGINNING BgG_TO_BbG',id
+  write(out_unit,*)
+  write(out_unit,*) 'BEGINNING BgG_TO_BbG',id
   CALL Write_TabRDP(BgG)
-  write(out_unitp,*) 'WSG(:)',WSG(:)
+  write(out_unit,*) 'WSG(:)',WSG(:)
 END IF
 
 CALL Set_BgG_FOR_id(BgG_new,ind_Grid,ind_Basis,tab_ba,D,LG,id,.FALSE.)
 
 IF (debug) THEN
-  write(out_unitp,*) 'size(BgG),size(BgG_new)',size(BgG),size(BgG_new)
-  flush(out_unitp)
+  write(out_unit,*) 'size(BgG),size(BgG_new)',size(BgG),size(BgG_new)
+  flush(out_unit)
 END IF
 
 ! id index of "b" of BbG
 IF (size(BgG) /= ind_Grid(id-1)%MaxnD) THEN
-  write(out_unitp,*) ' ERROR in BgG_TO_BbG'
-  write(out_unitp,*) ' size(BgG) /= ind_Grid(id-1)%MaxnD',size(BgG),ind_Grid(id-1)%MaxnD
+  write(out_unit,*) ' ERROR in BgG_TO_BbG'
+  write(out_unit,*) ' size(BgG) /= ind_Grid(id-1)%MaxnD',size(BgG),ind_Grid(id-1)%MaxnD
   STOP
 END IF
 
 IF (size(BgG_new) /= ind_Grid(id)%MaxnD) THEN
-  write(out_unitp,*) ' ERROR in BgG_TO_BbG'
-  write(out_unitp,*) ' size(BgG_new) /= ind_Grid(id)%MaxnD',size(BgG_new),ind_Grid(id)%MaxnD
+  write(out_unit,*) ' ERROR in BgG_TO_BbG'
+  write(out_unit,*) ' size(BgG_new) /= ind_Grid(id)%MaxnD',size(BgG_new),ind_Grid(id)%MaxnD
   STOP
 END IF
 
 iGm1 = maxval(ind_Grid(id-1)%indD_OF_Dm1)
 IF (iGm1 /= size(BgG_new)) THEN
-  write(out_unitp,*) ' ERROR in BgG_TO_BbG'
-  write(out_unitp,*) ' size(BgG_new) /= iGm1',size(BgG_new),iGm1
+  write(out_unit,*) ' ERROR in BgG_TO_BbG'
+  write(out_unit,*) ' size(BgG_new) /= iGm1',size(BgG_new),iGm1
   STOP
 END IF
 
@@ -538,7 +538,7 @@ DO iq=1,ubound(tab_ba,dim=2)
 END DO
 max_nb = maxval(tab_ba(:,:)%nb)
 
-!write(out_unitp,*) 'nb threads (BasisTOGrid_maxth):',BasisTOGrid_maxth
+!write(out_unit,*) 'nb threads (BasisTOGrid_maxth):',BasisTOGrid_maxth
 
 DO iG=1,size(BgG)
 
@@ -548,8 +548,8 @@ DO iG=1,size(BgG)
     IF (iq < 1 .OR. iq > D) CYCLE
     tabnq(i) = get_nq_FROM_basis(tab_ba(tabl(i),iq))
   END DO
-  !write(out_unitp,*) 'iG,tabl ',iG,tabl(1:ind_Grid(id-1)%ndim)
-  !write(out_unitp,*) 'iG,tabnq',iG,tabnq(1:ind_Grid(id-1)%ndim)
+  !write(out_unit,*) 'iG,tabl ',iG,tabl(1:ind_Grid(id-1)%ndim)
+  !write(out_unit,*) 'iG,tabnq',iG,tabnq(1:ind_Grid(id-1)%ndim)
 
   nbb  = BgG(iG)%n2
   nqq  = product(tabnq(2:ind_Grid(id-1)%ndim))
@@ -557,8 +557,8 @@ DO iG=1,size(BgG)
 
   CALL alloc_TabRDP_at_iG(BgG_new,iGm1)
 
-  !write(out_unitp,*) '---------------------' ; flush(out_unitp)
-  !write(out_unitp,*) 'iG,nbb,nqq',iG,nbb,nqq ; flush(out_unitp)
+  !write(out_unit,*) '---------------------' ; flush(out_unit)
+  !write(out_unit,*) 'iG,nbb,nqq',iG,nbb,nqq ; flush(out_unit)
   allocate(tab_ibbnew_AT_ibb(nbb))
   ibbNew = 0
   DO ibb=1,nbb
@@ -627,15 +627,15 @@ CALL dealloc_TabRDP(BgG_new)
 IF (debug) THEN
   CALL Write_TabRDP(BgG)
   CALL SumSq_TabRDP(BgG)
-  write(out_unitp,*) 'END BgG_TO_BbG',id
-  flush(out_unitp)
+  write(out_unit,*) 'END BgG_TO_BbG',id
+  flush(out_unit)
 END IF
 
 END SUBROUTINE BgG_TO_BbG
 
 
 SUBROUTINE BbG_TO_BgG(BgG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -657,8 +657,8 @@ logical, parameter :: debug = .FALSE.
 !logical, parameter :: debug = .TRUE.
 
 IF (debug) THEN
-  write(out_unitp,*)
-  write(out_unitp,*) 'BEGINNING BbG_TO_BgG',id
+  write(out_unit,*)
+  write(out_unit,*) 'BEGINNING BbG_TO_BgG',id
   CALL Write_TabRDP(BgG)
 END IF
 
@@ -666,21 +666,21 @@ END IF
 CALL Set_BgG_FOR_id(BgG_new,ind_Grid,ind_Basis,tab_ba,D,LG,id-1,.FALSE.)
 
 IF (debug) THEN
-  write(out_unitp,*) 'size(BgG_new),size(BgG)',size(BgG_new),size(BgG)
-  flush(out_unitp)
+  write(out_unit,*) 'size(BgG_new),size(BgG)',size(BgG_new),size(BgG)
+  flush(out_unit)
 END IF
 
 ! id index of "b" of BgG_new
 IF (size(BgG_new) /= ind_Grid(id-1)%MaxnD) THEN
-  write(out_unitp,*) ' ERROR in BbG_TO_BgG'
-  write(out_unitp,*) ' size(BgG_new) /= ind_Grid(id-1)%MaxnD',size(BgG_new),ind_Grid(id-1)%MaxnD
+  write(out_unit,*) ' ERROR in BbG_TO_BgG'
+  write(out_unit,*) ' size(BgG_new) /= ind_Grid(id-1)%MaxnD',size(BgG_new),ind_Grid(id-1)%MaxnD
   STOP
 END IF
 
 iGm1 = maxval(ind_Grid(id-1)%indD_OF_Dm1)
 IF (iGm1 /= size(BgG)) THEN
-  write(out_unitp,*) ' ERROR in BbG_TO_BgG'
-  write(out_unitp,*) ' size(BgG_new) /= iGm1',size(BgG),iGm1
+  write(out_unit,*) ' ERROR in BbG_TO_BgG'
+  write(out_unit,*) ' size(BgG_new) /= iGm1',size(BgG),iGm1
   STOP
 END IF
 
@@ -699,15 +699,15 @@ DO iG=iG1+1,iG2
 
 
 
-  !write(out_unitp,*) '---------------------' ; flush(out_unitp)
-  !write(out_unitp,*) 'iG,iGm1,nbb,nqq',iG,iGm1,nbb,nqq ; flush(out_unitp)
+  !write(out_unit,*) '---------------------' ; flush(out_unit)
+  !write(out_unit,*) 'iG,iGm1,nbb,nqq',iG,iGm1,nbb,nqq ; flush(out_unit)
   allocate(tab_ibbnew_AT_ibb(nbb))
   ibbNew = 0
   DO ibb=1,nbb
     tab_ibbnew_AT_ibb(ibb) = ibbNew
     lbb = ind_Basis(id)%i_TO_l(ibb)
     ibbNew = ibbNew + tab_ba(LB-lbb,id)%nb
-    !write(out_unitp,*) 'ibb,lbb,nb,ibbNew',ibb,lbb,tab_ba(LB-lbb,id)%nb,ibbNew
+    !write(out_unit,*) 'ibb,lbb,nb,ibbNew',ibb,lbb,tab_ba(LB-lbb,id)%nb,ibbNew
   END DO
 
   liq = ind_Grid(id-1)%tab_ind(1,iG)
@@ -756,14 +756,14 @@ CALL dealloc_TabRDP(BgG_new)
 IF (debug) THEN
   CALL Write_TabRDP(BgG)
   CALL SumSq_TabRDP(BgG)
-  write(out_unitp,*) 'END BbG_TO_BgG',id
-  flush(out_unitp)
+  write(out_unit,*) 'END BbG_TO_BgG',id
+  flush(out_unit)
 END IF
 
 END SUBROUTINE BbG_TO_BgG
 
 SUBROUTINE Norm_OF_BgG(BgG,WSG,indGrid,tab_ba,D,LG)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -782,15 +782,15 @@ real(kind=Rkind)      :: w,Norm
 integer  :: tabiq(D),tabnq(D),tabl(D)
 
 IF (BgG(1)%n2 /= 1) THEN
-  write(out_unitp,*) ' ERROR in Transfer_WP0_TO_BgG'
-  write(out_unitp,*) ' BgG is not completely on the G grid'
+  write(out_unit,*) ' ERROR in Transfer_WP0_TO_BgG'
+  write(out_unit,*) ' BgG is not completely on the G grid'
   STOP
 END IF
 
 IF (size(BgG) /= size(WSG) ) THEN
-  write(out_unitp,*) ' ERROR in Transfer_WP0_TO_BgG'
-  write(out_unitp,*) ' The number of SG are different'
-  write(out_unitp,*) ' size(BgG) /= size(WSG)',size(BgG),size(WSG)
+  write(out_unit,*) ' ERROR in Transfer_WP0_TO_BgG'
+  write(out_unit,*) ' The number of SG are different'
+  write(out_unit,*) ' size(BgG) /= size(WSG)',size(BgG),size(WSG)
   STOP
 END IF
 
@@ -814,14 +814,14 @@ DO iG=1,indGrid%MaxnD
   END DO
 END DO
 
-write(out_unitp,*) 'Norm of BgB',Norm
+write(out_unit,*) 'Norm of BgB',Norm
 
 !-------------------------------------------
 !-------------------------------------------
 END SUBROUTINE Norm_OF_BgG
 
 SUBROUTINE sub_G_TO_B_new(RVecG,RVecB,WSG,ind_Grid,ind_Basis,tab_ba,D,LG,LB)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -846,13 +846,13 @@ logical, parameter :: debug=.FALSE.
 !logical, parameter :: debug=.TRUE.
 
 IF (debug) THEN
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
   CALL time_perso('sub_G_TO_B')
-  write(out_unitp,*) '====================================='
-  flush(out_unitp)
-  !write(out_unitp,*) 'RVecG',RVecG
+  write(out_unit,*) '====================================='
+  flush(out_unit)
+  !write(out_unit,*) 'RVecG',RVecG
 END IF
 
 
@@ -875,18 +875,18 @@ CALL dealloc_TabRDP(WPG)
 CALL dealloc_TabRDP(WPB)
 
 IF (debug) THEN
-  !write(out_unitp,*) 'RVecB',RVecB
-  write(out_unitp,*) '====================================='
+  !write(out_unit,*) 'RVecB',RVecB
+  write(out_unit,*) '====================================='
   CALL time_perso('sub_G_TO_B')
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  flush(out_unitp)
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  flush(out_unit)
 END IF
 
 END SUBROUTINE sub_G_TO_B_new
 SUBROUTINE sub_B_TO_G_new(RVecB,RVecG,ind_Grid,ind_Basis,tab_ba,D,LG,LB)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -909,13 +909,13 @@ logical, parameter :: debug=.FALSE.
 
 !CALL Check_mem()
 IF (debug) THEN
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
   CALL time_perso('sub_B_TO_G')
-  write(out_unitp,*) '====================================='
-  !write(out_unitp,*) 'RVecB',RVecB
-  flush(out_unitp)
+  write(out_unit,*) '====================================='
+  !write(out_unit,*) 'RVecB',RVecB
+  flush(out_unit)
 END IF
 
 CALL Set_BgG_FOR_id(WPG,ind_Grid,ind_Basis,tab_ba,D,LG(D),D,.TRUE.)
@@ -932,20 +932,20 @@ CALL Transfer_BgG_TO_WP(WPG,RVecG)
 CALL dealloc_TabRDP(WPG)
 
 IF (debug) THEN
-  !write(out_unitp,*) 'RVecG',RVecG
-  write(out_unitp,*) '====================================='
+  !write(out_unit,*) 'RVecG',RVecG
+  write(out_unit,*) '====================================='
   CALL time_perso('sub_B_TO_G')
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  flush(out_unitp)
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  flush(out_unit)
 END  IF
 
 !CALL UnCheck_mem()
 
 END SUBROUTINE sub_B_TO_G_new
 SUBROUTINE sub_G_TO_B(RVecG,RVecB,WSG,ind_Grid,ind_Basis,tab_ba,D,LG,LB)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -969,13 +969,13 @@ logical, parameter :: debug=.FALSE.
 !logical, parameter :: debug=.TRUE.
 
 IF (debug) THEN
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
   CALL time_perso('sub_G_TO_B')
-  write(out_unitp,*) '====================================='
-  flush(out_unitp)
-  write(out_unitp,*) 'RVecG',RVecG
+  write(out_unit,*) '====================================='
+  flush(out_unit)
+  write(out_unit,*) 'RVecG',RVecG
 END IF
 
 
@@ -998,18 +998,18 @@ CALL dealloc_TabRDP(WPG)
 CALL dealloc_TabRDP(WPB)
 
 IF (debug) THEN
-  write(out_unitp,*) 'RVecB',RVecB
-  write(out_unitp,*) '====================================='
+  write(out_unit,*) 'RVecB',RVecB
+  write(out_unit,*) '====================================='
   CALL time_perso('sub_G_TO_B')
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  flush(out_unitp)
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  flush(out_unit)
 END IF
 
 END SUBROUTINE sub_G_TO_B
 SUBROUTINE sub_B_TO_G(RVecB,RVecG,ind_Grid,ind_Basis,tab_ba,D,LG,LB)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -1031,13 +1031,13 @@ logical, parameter :: debug=.FALSE.
 
 !CALL Check_mem()
 IF (debug) THEN
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
   CALL time_perso('sub_B_TO_G_old')
-  write(out_unitp,*) '====================================='
-  !write(out_unitp,*) 'RVecB',RVecB
-  flush(out_unitp)
+  write(out_unit,*) '====================================='
+  !write(out_unit,*) 'RVecB',RVecB
+  flush(out_unit)
 END IF
 
 CALL Set_BgG_FOR_id(WPG,ind_Grid,ind_Basis,tab_ba,D,LG,D,.TRUE.)
@@ -1051,7 +1051,7 @@ DO id=D,1,-1
   !CALL Set_BgG_FOR_id(WPG,ind_Grid,ind_Basis,tab_ba,D,LG,id,.FALSE.)
 
   CALL BbG_TO_BgG(WPG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id)
-  IF (debug) write(out_unitp,*) 'id',id
+  IF (debug) write(out_unit,*) 'id',id
 
   IF (debug) CALL Size_TabRDP(WPG,nb_BG)
 
@@ -1061,20 +1061,20 @@ CALL Transfer_BgG_TO_WP(WPG,RVecG)
 CALL dealloc_TabRDP(WPG)
 
 IF (debug) THEN
-  !write(out_unitp,*) 'RVecG',RVecG
-  write(out_unitp,*) '====================================='
+  !write(out_unit,*) 'RVecG',RVecG
+  write(out_unit,*) '====================================='
   CALL time_perso('sub_B_TO_G_old')
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  write(out_unitp,*) '====================================='
-  flush(out_unitp)
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  write(out_unit,*) '====================================='
+  flush(out_unit)
 END  IF
 !stop
 !CALL UnCheck_mem()
 
 END SUBROUTINE sub_B_TO_G
 RECURSIVE SUBROUTINE DerivOp_TO_RVecG_SGType2(RVecG,nq,ind_Grid,ind_Basis,tab_ba,D,LG,LB,tab_der)
-USE mod_system
+USE EVR_system_m
 USE mod_module_DInd
 IMPLICIT NONE
 
@@ -1108,9 +1108,9 @@ logical, parameter :: debug=.FALSE.
 !------------------------------------------------------------------
 
 IF (debug) THEN
-  write(out_unitp,*) 'BEGINNING ',name_sub
-  write(out_unitp,*) 'RvecG(:)',RvecG(:)
-  flush(out_unitp)
+  write(out_unit,*) 'BEGINNING ',name_sub
+  write(out_unit,*) 'RvecG(:)',RvecG(:)
+  flush(out_unit)
 END IF
 
 IF (present(tab_der)) THEN
@@ -1120,7 +1120,7 @@ ELSE
 END IF
 WHERE (tab_der_loc < 0) tab_der_loc = 0
 
-IF (debug) write(out_unitp,*) 'tab_der_loc',tab_der_loc
+IF (debug) write(out_unit,*) 'tab_der_loc',tab_der_loc
 !analysis of tab_der_loc
 iq1_d = 0
 iq2_d = 0
@@ -1137,15 +1137,15 @@ DO i=1,D
   END IF
 END DO
 
-IF (debug) write(out_unitp,*) 'dnba_ind2(:)',dnba_ind2(:)
-IF (debug) write(out_unitp,*) 'iq1_d,iq2_d',iq1_d,iq2_d
+IF (debug) write(out_unit,*) 'dnba_ind2(:)',dnba_ind2(:)
+IF (debug) write(out_unit,*) 'iq1_d,iq2_d',iq1_d,iq2_d
 
 
 IF (iq1_d == 0) THEN
-  write(out_unitp,*) ' ERROR in ',name_sub
-  write(out_unitp,*) ' iq1_d == 0: no derivative'
-  write(out_unitp,*) ' it should never appended!'
-  write(out_unitp,*) ' CHECK the fortran!!!'
+  write(out_unit,*) ' ERROR in ',name_sub
+  write(out_unit,*) ' iq1_d == 0: no derivative'
+  write(out_unit,*) ' it should never appended!'
+  write(out_unit,*) ' CHECK the fortran!!!'
   STOP
 END IF
 
@@ -1248,8 +1248,8 @@ CALL Transfer_BgG_TO_WP(WPG,RvecG)
 CALL dealloc_TabRDP(WPG)
 
  IF (debug) THEN
-   write(out_unitp,*) 'RvecG(:)',RvecG(:)
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'RvecG(:)',RvecG(:)
+   write(out_unit,*) 'END ',name_sub
  END IF
 
 END SUBROUTINE DerivOp_TO_RVecG_SGType2

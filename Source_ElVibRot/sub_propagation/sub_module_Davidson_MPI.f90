@@ -64,7 +64,7 @@ MODULE mod_Davidson_MPI
 ! note, new psi(ndim+1) are distributed to the other threads here
 !=======================================================================================
   SUBROUTINE Schmidt_process_MPI(S_Overlap1D,psi,ndim,isym,With_Grid) 
-    USE mod_system
+    USE EVR_system_m
     USE mod_ana_psi_MPI,ONLY:norm_psi_MPI
     USE mod_psi,        ONLY:param_psi
     USE mod_psi_Op_MPI, ONLY:Set_symab_OF_psiBasisRep_MPI,calculate_overlap_MPI,       &
@@ -151,7 +151,7 @@ MODULE mod_Davidson_MPI
   SUBROUTINE MakeResidual_Davidson_MPI3(ndim,g,psi,Hpsi,Ene,Vec,conv,converge,         &
                                         VecToBeIncluded,tab_norm2g,norm2g,convergeResi,&
                                         convergeEne,fresidu,iresidu,nb_diago,epsi)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi,     ONLY : param_psi,norm2_psi,Set_symab_OF_psiBasisRep
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -297,7 +297,7 @@ MODULE mod_Davidson_MPI
   SUBROUTINE MakeResidual_Davidson_MPI4(ndim,g,psi,Hpsi,Ene,Vec,conv,converge,         &
                                         VecToBeIncluded,tab_norm2g,norm2g,convergeResi,&
                                         convergeEne,fresidu,iresidu,nb_diago,epsi)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi,        ONLY:param_psi
     USE mod_ana_psi_MPI,ONLY:norm_psi_MPI
     USE mod_psi_Op_MPI, ONLY:Set_symab_OF_psiBasisRep_MPI
@@ -433,7 +433,7 @@ MODULE mod_Davidson_MPI
 !> @brief MPI for calculating residual at jth
 !=======================================================================================
   SUBROUTINE MakeResidual_Davidson_j_MPI3(jj,g,psi,Hpsi,Ene,Vec)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi,       ONLY:param_psi
     USE mod_psi_Op_MPI,ONLY:Set_symab_OF_psiBasisRep_MPI
     USE mod_MPI_aux
@@ -537,7 +537,7 @@ MODULE mod_Davidson_MPI
 ! not used any more, delete next update
 !=======================================================================================
   SUBROUTINE MakeResidual_Davidson_core(jj,g,psi,Hpsi,Ene,Vec,case_vec,size_vec,ndim)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi,     ONLY : param_psi,Set_symab_OF_psiBasisRep
     IMPLICIT NONE
     
@@ -630,7 +630,7 @@ MODULE mod_Davidson_MPI
 !> @brief: summary part for MakeResidual_Davidson_MPI
 !=======================================================================================
   SUBROUTINE Residual_Davidson_sum_MPI(g,Hpsi,psi,Vec,Ene,ndim,case_vec,size_vec,jj)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi,ONLY:param_psi
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -700,7 +700,7 @@ MODULE mod_Davidson_MPI
   SUBROUTINE MakeResidual_Davidson_MPI(ndim,g,psi,Hpsi,Ene,Vec,conv,converge,          &
                                        VecToBeIncluded,tab_norm2g,norm2g,convergeResi, &
                                        convergeEne,fresidu,iresidu,nb_diago,epsi)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi,     ONLY : param_psi,norm2_psi,Set_symab_OF_psiBasisRep
     USE mod_propa,   ONLY : param_Davidson
     IMPLICIT NONE
@@ -848,7 +848,7 @@ MODULE mod_Davidson_MPI
 ! MPI for calculating residual at jth
 !=======================================================================================
   SUBROUTINE MakeResidual_Davidson_j_MPI(jj,g,psi,Hpsi,Ene,Vec)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi,     ONLY : param_psi,Set_symab_OF_psiBasisRep
     USE mod_propa,   ONLY : param_Davidson
     IMPLICIT NONE

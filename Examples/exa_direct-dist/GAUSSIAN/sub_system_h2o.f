@@ -11,7 +11,7 @@ C================================================================
      *                    calc_ScalOp,pot_cplx)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -48,7 +48,7 @@ C================================================================
 C    fonction pot0(x) 3+9 D pour h2o en cartesiennes (calcul direct)
 C================================================================
       FUNCTION pot0(Q)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer, parameter :: ndim=6
@@ -65,7 +65,7 @@ C    subroutine calculant le gradient
 C================================================================
       SUBROUTINE d0d1d2_g(d0g,d1g,d2g,Qsym0,mole,deriv,num,step)
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -92,7 +92,7 @@ C    et le nom de file_FChk%name
 C================================================================
       SUBROUTINE sub_hessian(hh)
       USE mod_file
-      USE mod_system
+      USE EVR_system_m
       USE mod_OTF
       IMPLICIT NONE
 
@@ -119,26 +119,26 @@ c     - read the hessain matrix
         read(nio,*,iostat=err) ((hh(i,j),i=1,j),j=1,n)
       END IF
       IF (.NOT. located .OR. err /=0) THEN
-        write(out_unitp,*) 'ERROR in sub_hessian'
-        write(out_unitp,*) 'I cannot find the hessian in :',
+        write(out_unit,*) 'ERROR in sub_hessian'
+        write(out_unit,*) 'I cannot find the hessian in :',
      *                        file_FChk%name
-        write(out_unitp,*) 'located,err',located,err
+        write(out_unit,*) 'located,err',located,err
         STOP
       END IF
-!     CALL Write_Mat(hh,out_unitp,5)
+!     CALL Write_Mat(hh,out_unit,5)
       DO j=1,n
       DO i=1,j-1
         hh(j,i) = hh(i,j)
       END DO
       END DO
-      CALL Write_Mat(hh,out_unitp,5)
+      CALL Write_Mat(hh,out_unit,5)
 
       END
 C================================================================
 C    fonction pot_rest(x)
 C================================================================
       FUNCTION pot_rest(Qact,Delta_Qact,nb_inact2n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        real (kind=Rkind) :: pot_rest
@@ -153,7 +153,7 @@ C================================================================
 C    fonction im_pot0(x)
 C================================================================
       FUNCTION im_pot0(Qsym0)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        real (kind=Rkind) :: im_pot0
@@ -174,7 +174,7 @@ C================================================================
      *                     Qsym0,mole,deriv,num,step)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -215,7 +215,7 @@ C================================================================
      *                        Qsym0,mole,nderiv)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -253,7 +253,7 @@ C    analytical derivative (dnQflex : Qflex Qflex' Qflex" Qflex'") calculation
 c    for the variable iq
 C================================================================
       SUBROUTINE calc_dnQflex(iq,dnQflex,Qact,nb_act,nderiv,it)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       IMPLICIT NONE
 
@@ -269,7 +269,7 @@ c    dipole read
 C================================================================
       SUBROUTINE sub_dipole(dip,Q,mole)
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------

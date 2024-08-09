@@ -257,7 +257,7 @@ $(info ************************************************************************)
 $(info ************************************************************************)
 
 #==========================================
-VPATH = Source_ElVibRot/sub_Basis Source_ElVibRot/sub_Basis/sub_Basis_SG4 \
+VPATH = Source_ElVibRot Source_ElVibRot/sub_Basis Source_ElVibRot/sub_Basis/sub_Basis_SG4 \
   Source_ElVibRot/sub_Basis/sub_ReducedDensity Source_ElVibRot/sub_Basis/sub_SymAbelian \
   Source_ElVibRot/sub_CRP Source_ElVibRot/sub_GWP Source_ElVibRot/sub_Operator \
   Source_ElVibRot/sub_Optimization Source_ElVibRot/sub_Smolyak_test Source_ElVibRot/sub_WP \
@@ -275,7 +275,7 @@ OBJ0 += QMRPACK_lib.o
 OBJ=$(addprefix $(OBJ_DIR)/, $(OBJ0))
 $(info ************ OBJ: $(OBJ))
 #
-OBJ0_EXT= sub_system.o calc_f2_f1Q.o Sub_X_TO_Q_ana.o Calc_Tab_dnQflex.o
+OBJ0_EXT= read_para.o sub_system.o calc_f2_f1Q.o Sub_X_TO_Q_ana.o Calc_Tab_dnQflex.o
 OBJ_EXT=$(addprefix $(OBJ_DIR)/, $(OBJ0_EXT))
 $(info ************ OBJ_EXT: $(OBJ_EXT))
 

@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
      RECURSIVE SUBROUTINE Set_SymAbelian_OF_BasisDP(basis_DP)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       IMPLICIT NONE
@@ -64,16 +64,16 @@
 !      logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL Write_SymAbelian(basis_DP%P_SymAbelian)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------------------
 
       IF (basis_DP%nb_basis < 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' This subroutine works only when nb_basis > 0'
-        write(out_unitp,*) 'nb_basis: ',basis_DP%nb_basis
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' This subroutine works only when nb_basis > 0'
+        write(out_unit,*) 'nb_basis: ',basis_DP%nb_basis
         STOP
       END IF
       CALL alloc_SymAbelian(basis_DP%P_SymAbelian,basis_DP%nb)
@@ -94,15 +94,15 @@
           END DO
           CALL Set_symabOFSymAbelian_AT_ib(basis_DP%P_SymAbelian,ib,symab)
 
-          IF (debug) write(out_unitp,*) 'ib,nDval',ib,nDval, &
+          IF (debug) write(out_unit,*) 'ib,nDval',ib,nDval, &
                                         'symab',WriteTOstring_symab(symab)
         END DO
         CALL Set_nbPERsym_FROM_SymAbelian(basis_DP%P_SymAbelian)
 
       CASE (1) ! Sparse basis (Smolyak 1st implementation)
         ! recursive call for the first Smolyak grid
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' It should not be called with SparseGrid_type=1'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' It should not be called with SparseGrid_type=1'
         STOP
 
 !        CALL Set_SymAbelian_OF_BasisDP(basis_DP%tab_PbasisSG(1)%Pbasis)
@@ -128,7 +128,7 @@
           END DO
           CALL Set_symabOFSymAbelian_AT_ib(basis_DP%P_SymAbelian,ib,symab)
 
-          IF (debug) write(out_unitp,*) 'ib,nDval',ib,nDval, &
+          IF (debug) write(out_unit,*) 'ib,nDval',ib,nDval, &
                                         'symab',WriteTOstring_symab(symab)
         END DO
         CALL Set_nbPERsym_FROM_SymAbelian(basis_DP%P_SymAbelian)
@@ -153,16 +153,16 @@
           END DO
           CALL Set_symabOFSymAbelian_AT_ib(basis_DP%P_SymAbelian,ib,symab)
 
-          IF (debug) write(out_unitp,*) 'ib,nDval',ib,nDval, &
+          IF (debug) write(out_unit,*) 'ib,nDval',ib,nDval, &
                                         'symab',WriteTOstring_symab(symab)
         END DO
         CALL Set_nbPERsym_FROM_SymAbelian(basis_DP%P_SymAbelian)
 
 
       CASE DEFAULT
-        write(out_unitp,*) ' ERROR in',name_sub
-        write(out_unitp,*) ' WRONG SparseGrid_type',basis_DP%SparseGrid_type
-        write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+        write(out_unit,*) ' ERROR in',name_sub
+        write(out_unit,*) ' WRONG SparseGrid_type',basis_DP%SparseGrid_type
+        write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
         STOP
       END SELECT
 
@@ -173,8 +173,8 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL Write_SymAbelian(basis_DP%P_SymAbelian)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------------------
 
@@ -182,7 +182,7 @@
       END SUBROUTINE Set_SymAbelian_OF_BasisDP
 
       integer FUNCTION Get_symabOFSymAbelianOFBasis_AT_ib(basis_set,ib)
-         USE mod_system
+         USE EVR_system_m
          USE mod_basis
          IMPLICIT NONE
 
@@ -198,7 +198,7 @@
       END FUNCTION Get_symabOFSymAbelianOFBasis_AT_ib
 
       integer FUNCTION Get_nbPERsym_FROM_SymAbelianOFBasis(basis_set,symab)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -212,7 +212,7 @@
 
       END FUNCTION Get_nbPERsym_FROM_SymAbelianOFBasis
       integer FUNCTION Get_nbPERsym_FROM_SymAbelianOFAllBasis(AllBasis,symab)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 

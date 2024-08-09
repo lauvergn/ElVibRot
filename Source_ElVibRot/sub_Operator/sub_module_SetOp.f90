@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_SetOp
-  USE mod_system
+  USE EVR_system_m
   USE mod_PrimOp, only: param_typeop, PrimOp_t, dealloc_typeop,     &
                             write_typeop, param_d0matop, init_d0matop,  &
                             dealloc_d0matop
@@ -209,23 +209,23 @@ CONTAINS
       character (len=*), parameter :: name_sub='alloc_para_Op'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        IF (present(Mat))      write(out_unitp,*) 'alloc Mat?',Mat
-        IF (present(Grid))     write(out_unitp,*) 'alloc Grid?',Grid
-        IF (present(Grid_cte)) write(out_unitp,*) 'Grid_cte?',Grid_cte
+        write(out_unit,*) 'BEGINNING ',name_sub
+        IF (present(Mat))      write(out_unit,*) 'alloc Mat?',Mat
+        IF (present(Grid))     write(out_unit,*) 'alloc Grid?',Grid
+        IF (present(Grid_cte)) write(out_unit,*) 'Grid_cte?',Grid_cte
 
-        write(out_unitp,*) 'nb_tot',para_Op%nb_tot
-        write(out_unitp,*) 'nb_term',para_Op%nb_term
-        write(out_unitp,*) 'nb_bie',get_nb_be_FROM_Op(para_Op) * para_Op%nb_bi
+        write(out_unit,*) 'nb_tot',para_Op%nb_tot
+        write(out_unit,*) 'nb_term',para_Op%nb_term
+        write(out_unit,*) 'nb_bie',get_nb_be_FROM_Op(para_Op) * para_Op%nb_bi
         !CALL write_param_Op(para_Op)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
       IF (.NOT. para_Op%init_var) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' para_Op has NOT been initiated: init_var=F'
-        write(out_unitp,*) ' CHECK the source!!!!!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' para_Op has NOT been initiated: init_var=F'
+        write(out_unit,*) ' CHECK the source!!!!!'
         CALL write_param_Op(para_Op)
         STOP
       END IF
@@ -253,8 +253,8 @@ CONTAINS
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) ' alloc ...:,Mat,Grid',lo_Mat,lo_Grid
-        write(out_unitp,*) ' Grid_cte: ',lo_Grid_cte(:)
+        write(out_unit,*) ' alloc ...:,Mat,Grid',lo_Mat,lo_Grid
+        write(out_unit,*) ' Grid_cte: ',lo_Grid_cte(:)
       END IF
 
       para_Op%alloc = .TRUE.
@@ -265,8 +265,8 @@ CONTAINS
 
 
       IF (nb_tot < 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_tot is <1',nb_tot
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_tot is <1',nb_tot
         CALL write_param_Op(para_Op)
         STOP
       END IF
@@ -321,7 +321,7 @@ CONTAINS
                               para_Op%derive_termQact(:,k_term),      &
                               para_Op%derive_termQdyn(:,k_term),      &
                               SmolyakRep,Type_FileGrid4,nb_SG,info)
-            IF (debug) write(out_unitp,*) 'shape ...Grid',k_term,shape(para_Op%OpGrid(k_term)%Grid)
+            IF (debug) write(out_unit,*) 'shape ...Grid',k_term,shape(para_Op%OpGrid(k_term)%Grid)
             deallocate(info)
           END DO
         END IF
@@ -343,7 +343,7 @@ CONTAINS
                             para_Op%nb_qa,nb_bie,                     &
                             [0,0],[0,0],SmolyakRep,Type_FileGrid4,nb_SG,info)
 
-            IF (debug) write(out_unitp,*) 'shape ...ImGrid',shape(para_Op%imOpGrid(1)%Grid)
+            IF (debug) write(out_unit,*) 'shape ...ImGrid',shape(para_Op%imOpGrid(1)%Grid)
 
           para_Op%imOpGrid(1)%cplx = .TRUE.
 
@@ -355,7 +355,7 @@ CONTAINS
       IF (debug) THEN
         para_Op%print_done = .FALSE.
         CALL write_param_Op(para_Op)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -381,17 +381,17 @@ CONTAINS
       character (len=*), parameter :: name_sub='alloc_MatOp'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
 
-        write(out_unitp,*) 'nb_tot',para_Op%nb_tot
-        write(out_unitp,*)
+        write(out_unit,*) 'nb_tot',para_Op%nb_tot
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
       IF (.NOT. para_Op%init_var) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' para_Op has NOT been initiated: init_var=F'
-        write(out_unitp,*) ' CHECK the source!!!!!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' para_Op has NOT been initiated: init_var=F'
+        write(out_unit,*) ' CHECK the source!!!!!'
         CALL write_param_Op(para_Op)
         STOP
       END IF
@@ -399,8 +399,8 @@ CONTAINS
 
       nb_tot  = para_Op%nb_tot
       IF (nb_tot < 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_tot is <1',nb_tot
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_tot is <1',nb_tot
         CALL write_param_Op(para_Op)
         STOP
       END IF
@@ -437,7 +437,7 @@ CONTAINS
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL write_param_Op(para_Op)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -641,7 +641,7 @@ END SUBROUTINE alloc_MatOp
 ! ++    write the type param_Op
 !===============================================================================
       SUBROUTINE write_param_Op(para_Op)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       TYPE (param_Op)   :: para_Op
@@ -651,119 +651,119 @@ END SUBROUTINE alloc_MatOp
       IF (print_level <= 0 .OR. para_Op%print_done) RETURN
 
       para_Op%print_done = .TRUE.
-      write(out_unitp,*) 'WRITE param_Op'
+      write(out_unit,*) 'WRITE param_Op'
 
-      write(out_unitp,*) 'asso para_AllBasis',associated(para_Op%para_AllBasis)
-      write(out_unitp,*) 'asso BasisnD',associated(para_Op%BasisnD)
-      write(out_unitp,*) 'asso Basis2n',associated(para_Op%Basis2n)
+      write(out_unit,*) 'asso para_AllBasis',associated(para_Op%para_AllBasis)
+      write(out_unit,*) 'asso BasisnD',associated(para_Op%BasisnD)
+      write(out_unit,*) 'asso Basis2n',associated(para_Op%Basis2n)
 
-      write(out_unitp,*) 'asso mole',associated(para_Op%mole)
-      write(out_unitp,*) 'asso para_Tnum',associated(para_Op%para_Tnum)
+      write(out_unit,*) 'asso mole',associated(para_Op%mole)
+      write(out_unit,*) 'asso para_Tnum',associated(para_Op%para_Tnum)
 
-      write(out_unitp,*)
-      write(out_unitp,*) 'n_Op,name',para_Op%n_Op,para_Op%name_Op
-      write(out_unitp,*) 'alloc,mat_done ',para_Op%alloc,para_Op%mat_done
-      flush(out_unitp)
-      write(out_unitp,*) 'Read_Op ',para_Op%read_Op
-      write(out_unitp,*) 'Make_Mat ',para_Op%Make_Mat
-      write(out_unitp,*) 'sym_Hamil ',para_Op%sym_Hamil
+      write(out_unit,*)
+      write(out_unit,*) 'n_Op,name',para_Op%n_Op,para_Op%name_Op
+      write(out_unit,*) 'alloc,mat_done ',para_Op%alloc,para_Op%mat_done
+      flush(out_unit)
+      write(out_unit,*) 'Read_Op ',para_Op%read_Op
+      write(out_unit,*) 'Make_Mat ',para_Op%Make_Mat
+      write(out_unit,*) 'sym_Hamil ',para_Op%sym_Hamil
 
-      write(out_unitp,*) 'cplx',para_Op%cplx
+      write(out_unit,*) 'cplx',para_Op%cplx
 
       CALL Write_TypeOp(para_Op%param_TypeOp)
 
-      write(out_unitp,*) 'spectral,spectral_Op',                        &
+      write(out_unit,*) 'spectral,spectral_Op',                        &
                   para_Op%spectral,para_Op%spectral_Op
 
-      write(out_unitp,*)
-      write(out_unitp,*) 'nb_tot',para_Op%nb_tot
-      write(out_unitp,*) 'nb_tot_ini',para_Op%nb_tot_ini
-      write(out_unitp,*) 'symab, bits(symab)',                          &
+      write(out_unit,*)
+      write(out_unit,*) 'nb_tot',para_Op%nb_tot
+      write(out_unit,*) 'nb_tot_ini',para_Op%nb_tot_ini
+      write(out_unit,*) 'symab, bits(symab)',                          &
                                       WriteTOstring_symab(para_Op%symab)
 
-      write(out_unitp,*) 'nb_ba,nb_qa',para_Op%nb_ba,para_Op%nb_qa
-      write(out_unitp,*) 'nbc_ba',para_Op%nbc_ba
-      write(out_unitp,*) 'nb_bi,nb_be',para_Op%nb_bi,para_Op%nb_be
-      write(out_unitp,*) 'nb_bai,nb_qai',para_Op%nb_bai,para_Op%nb_qai
-      write(out_unitp,*) 'nb_baie,nb_qaie',para_Op%nb_baie,para_Op%nb_qaie
+      write(out_unit,*) 'nb_ba,nb_qa',para_Op%nb_ba,para_Op%nb_qa
+      write(out_unit,*) 'nbc_ba',para_Op%nbc_ba
+      write(out_unit,*) 'nb_bi,nb_be',para_Op%nb_bi,para_Op%nb_be
+      write(out_unit,*) 'nb_bai,nb_qai',para_Op%nb_bai,para_Op%nb_qai
+      write(out_unit,*) 'nb_baie,nb_qaie',para_Op%nb_baie,para_Op%nb_qaie
 
-      write(out_unitp,*) 'allo List_Mat_i_todo',allocated(para_Op%List_Mat_i_todo)
-      IF (allocated(para_Op%List_Mat_i_todo)) write(out_unitp,*) shape(para_Op%List_Mat_i_todo)
-      write(out_unitp,*) 'Partial_MatOp',para_Op%Partial_MatOp
-      write(out_unitp,*) 'allo Rmat',allocated(para_Op%Rmat)
-      IF (allocated(para_Op%Rmat)) write(out_unitp,*) shape(para_Op%Rmat)
-      write(out_unitp,*) 'allo Cmat',allocated(para_Op%Cmat)
-      IF (allocated(para_Op%Cmat)) write(out_unitp,*) shape(para_Op%Cmat)
-      write(out_unitp,*) 'pack_Op,tol_pack',para_Op%pack_Op,para_Op%tol_pack
-      write(out_unitp,*) 'tol_nopack',para_Op%tol_nopack
-      write(out_unitp,*) 'ratio_pack',para_Op%ratio_pack
-      write(out_unitp,*) 'asso ind_Op',associated(para_Op%ind_Op)
-      IF (associated(para_Op%ind_Op)) write(out_unitp,*) shape(para_Op%ind_Op)
-      write(out_unitp,*) 'asso dim_Op',associated(para_Op%dim_Op)
-      IF (associated(para_Op%dim_Op)) write(out_unitp,*) shape(para_Op%dim_Op)
+      write(out_unit,*) 'allo List_Mat_i_todo',allocated(para_Op%List_Mat_i_todo)
+      IF (allocated(para_Op%List_Mat_i_todo)) write(out_unit,*) shape(para_Op%List_Mat_i_todo)
+      write(out_unit,*) 'Partial_MatOp',para_Op%Partial_MatOp
+      write(out_unit,*) 'allo Rmat',allocated(para_Op%Rmat)
+      IF (allocated(para_Op%Rmat)) write(out_unit,*) shape(para_Op%Rmat)
+      write(out_unit,*) 'allo Cmat',allocated(para_Op%Cmat)
+      IF (allocated(para_Op%Cmat)) write(out_unit,*) shape(para_Op%Cmat)
+      write(out_unit,*) 'pack_Op,tol_pack',para_Op%pack_Op,para_Op%tol_pack
+      write(out_unit,*) 'tol_nopack',para_Op%tol_nopack
+      write(out_unit,*) 'ratio_pack',para_Op%ratio_pack
+      write(out_unit,*) 'asso ind_Op',associated(para_Op%ind_Op)
+      IF (associated(para_Op%ind_Op)) write(out_unit,*) shape(para_Op%ind_Op)
+      write(out_unit,*) 'asso dim_Op',associated(para_Op%dim_Op)
+      IF (associated(para_Op%dim_Op)) write(out_unit,*) shape(para_Op%dim_Op)
 
-      write(out_unitp,*) 'diago',para_Op%diago
-      write(out_unitp,*) 'asso Cdiag',associated(para_Op%Cdiag)
-      IF (associated(para_Op%Cdiag)) write(out_unitp,*) shape(para_Op%Cdiag)
-      write(out_unitp,*) 'asso Cvp',associated(para_Op%Cvp)
-      IF (associated(para_Op%Cvp)) write(out_unitp,*) shape(para_Op%Cvp)
-      write(out_unitp,*) 'asso Rdiag',associated(para_Op%Rdiag)
-      IF (associated(para_Op%Rdiag)) write(out_unitp,*) shape(para_Op%Rdiag)
-      write(out_unitp,*) 'asso Rvp',associated(para_Op%Rvp)
-      IF (associated(para_Op%Rvp)) write(out_unitp,*) shape(para_Op%Rvp)
+      write(out_unit,*) 'diago',para_Op%diago
+      write(out_unit,*) 'asso Cdiag',associated(para_Op%Cdiag)
+      IF (associated(para_Op%Cdiag)) write(out_unit,*) shape(para_Op%Cdiag)
+      write(out_unit,*) 'asso Cvp',associated(para_Op%Cvp)
+      IF (associated(para_Op%Cvp)) write(out_unit,*) shape(para_Op%Cvp)
+      write(out_unit,*) 'asso Rdiag',associated(para_Op%Rdiag)
+      IF (associated(para_Op%Rdiag)) write(out_unit,*) shape(para_Op%Rdiag)
+      write(out_unit,*) 'asso Rvp',associated(para_Op%Rvp)
+      IF (associated(para_Op%Rvp)) write(out_unit,*) shape(para_Op%Rvp)
 
 
-      write(out_unitp,*) 'nb_act1',para_Op%nb_act1
-      write(out_unitp,*) 'nb_term',para_Op%nb_term
-      write(out_unitp,*) 'nb_Term_Rot',para_Op%nb_Term_Rot
-      write(out_unitp,*) 'nb_Term_Vib',para_Op%nb_Term_Vib
+      write(out_unit,*) 'nb_act1',para_Op%nb_act1
+      write(out_unit,*) 'nb_term',para_Op%nb_term
+      write(out_unit,*) 'nb_Term_Rot',para_Op%nb_Term_Rot
+      write(out_unit,*) 'nb_Term_Vib',para_Op%nb_Term_Vib
 
-      write(out_unitp,*) 'allo ...derive_termQact',allocated(para_Op%derive_termQact)
+      write(out_unit,*) 'allo ...derive_termQact',allocated(para_Op%derive_termQact)
       IF (allocated(para_Op%derive_termQact)) THEN
         DO i=1,ubound(para_Op%derive_termQact,dim=2)
-          write(out_unitp,*) 'Op term',i,'der',para_Op%derive_termQact(:,i)
+          write(out_unit,*) 'Op term',i,'der',para_Op%derive_termQact(:,i)
         END DO
       END IF
-      write(out_unitp,*) 'allo ...derive_termQdyn',allocated(para_Op%derive_termQdyn)
+      write(out_unit,*) 'allo ...derive_termQdyn',allocated(para_Op%derive_termQdyn)
       IF (allocated(para_Op%derive_termQdyn)) THEN
         DO i=1,ubound(para_Op%derive_termQact,dim=2)
-          write(out_unitp,*) 'Op term',i,'der',para_Op%derive_termQdyn(:,i)
+          write(out_unit,*) 'Op term',i,'der',para_Op%derive_termQdyn(:,i)
         END DO
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
-      write(out_unitp,*) 'para_FileGrid'
+      write(out_unit,*) 'para_FileGrid'
       CALL Write_FileGrid(para_Op%para_ReadOp%para_FileGrid)
-      flush(out_unitp)
+      flush(out_unit)
 
-      write(out_unitp,*) 'asso ...Grid',associated(para_Op%OpGrid)
+      write(out_unit,*) 'asso ...Grid',associated(para_Op%OpGrid)
       IF (associated(para_Op%OpGrid))                                   &
-                              write(out_unitp,*) shape(para_Op%OpGrid)
-      flush(out_unitp)
-      write(out_unitp,*) 'asso ...imGrid',associated(para_Op%imOpGrid)
-      flush(out_unitp)
+                              write(out_unit,*) shape(para_Op%OpGrid)
+      flush(out_unit)
+      write(out_unit,*) 'asso ...imGrid',associated(para_Op%imOpGrid)
+      flush(out_unit)
 
       IF (associated(para_Op%OpGrid)) THEN
         DO iOp=1,size(para_Op%OpGrid)
-           write(out_unitp,*) 'param of para_Op%OpGrid(iOp)',iOp
-           flush(out_unitp)
+           write(out_unit,*) 'param of para_Op%OpGrid(iOp)',iOp
+           flush(out_unit)
           CALL Write_OpGrid(para_Op%OpGrid(iOp))
         END DO
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
 
       IF (para_Op%n_Op == 0) THEN
-        write(out_unitp,*) 'for H Operator n_Op = 0'
-        write(out_unitp,*) 'scaled,E0,Esc',para_Op%scaled,para_Op%E0,para_Op%Esc
-        write(out_unitp,*) 'Hmin,Hmax ',para_Op%Hmin,para_Op%Hmax
-        write(out_unitp,*) 'pot0 ',para_Op%pot0
-        write(out_unitp,*) 'pot_only,T_only ',para_Op%pot_only,para_Op%T_only
+        write(out_unit,*) 'for H Operator n_Op = 0'
+        write(out_unit,*) 'scaled,E0,Esc',para_Op%scaled,para_Op%E0,para_Op%Esc
+        write(out_unit,*) 'Hmin,Hmax ',para_Op%Hmin,para_Op%Hmax
+        write(out_unit,*) 'pot0 ',para_Op%pot0
+        write(out_unit,*) 'pot_only,T_only ',para_Op%pot_only,para_Op%T_only
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
-      write(out_unitp,*) 'END WRITE param_Op'
-      flush(out_unitp)
+      write(out_unit,*) 'END WRITE param_Op'
+      flush(out_unit)
 
       END SUBROUTINE write_param_Op
 !===============================================================================
@@ -854,7 +854,7 @@ END SUBROUTINE alloc_MatOp
       END SUBROUTINE dealloc_array_OF_Opdim1
 
       FUNCTION get_nb_be_FROM_Op(para_Op)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer :: get_nb_be_FROM_Op
@@ -867,15 +867,15 @@ END SUBROUTINE alloc_MatOp
        logical, parameter :: debug = .FALSE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING get_nb_be_FROM_Op'
+        write(out_unit,*) 'BEGINNING get_nb_be_FROM_Op'
       END IF
 
      IF (NewBasisEl) THEN
        get_nb_be_FROM_Op = get_nb_be_FROM_basis(para_Op%BasisnD)
        IF (get_nb_be_FROM_Op == -1) THEN
-         write(out_unitp,*) ' ERROR in get_nb_be_FROM_Op'
-         write(out_unitp,*) ' NewBasisEl = t and no El basis set!!'
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in get_nb_be_FROM_Op'
+         write(out_unit,*) ' NewBasisEl = t and no El basis set!!'
+         write(out_unit,*) ' CHECK the source'
          STOP
        END IF
      ELSE
@@ -883,7 +883,7 @@ END SUBROUTINE alloc_MatOp
      END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'END get_nb_be_FROM_Op'
+        write(out_unit,*) 'END get_nb_be_FROM_Op'
       END IF
       END FUNCTION get_nb_be_FROM_Op
 !
@@ -911,10 +911,10 @@ END SUBROUTINE alloc_MatOp
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'i_bi',i_bi
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'i_bi',i_bi
         CALL write_param_Op(para_H)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -923,8 +923,8 @@ END SUBROUTINE alloc_MatOp
       para_H_HADA%mat_done = .FALSE.
 
       IF (.NOT. associated(para_H_HADA%para_AllBasis)) THEN
-         write(out_unitp,*) 'ERROR in param_HTOparam_H_HADA'
-         write(out_unitp,*) 'para_AllBasis in para_H_HADA must be associated!'
+         write(out_unit,*) 'ERROR in param_HTOparam_H_HADA'
+         write(out_unit,*) 'para_AllBasis in para_H_HADA must be associated!'
          STOP 'ERROR in param_HTOparam_H_HADA: para_AllBasis is not associated'
       END IF
 
@@ -1022,7 +1022,7 @@ END SUBROUTINE alloc_MatOp
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL write_param_Op(para_H_HADA)
-        write(out_unitp,*) ' END param_HTOparam_H_HADA'
+        write(out_unit,*) ' END param_HTOparam_H_HADA'
       END IF
 !-----------------------------------------------------------
 
@@ -1056,7 +1056,7 @@ END SUBROUTINE alloc_MatOp
 !     logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING param_Op1TOparam_Op2'
+        write(out_unit,*) 'BEGINNING param_Op1TOparam_Op2'
         CALL write_param_Op(para_Op1)
       END IF
 !-----------------------------------------------------------
@@ -1068,28 +1068,28 @@ END SUBROUTINE alloc_MatOp
       IF (associated(para_Op1%para_AllBasis)) THEN
         para_Op2%para_AllBasis => para_Op1%para_AllBasis
       ELSE
-        write(out_unitp,*) ' ERROR in param_Op1TOparam_Op2'
-        write(out_unitp,*) '  CANNOT be associated'
-        write(out_unitp,*) ' asso para_Op1%para_AllBasis',associated(para_Op1%para_AllBasis)
-        write(out_unitp,*) ' CHECK the source'
+        write(out_unit,*) ' ERROR in param_Op1TOparam_Op2'
+        write(out_unit,*) '  CANNOT be associated'
+        write(out_unit,*) ' asso para_Op1%para_AllBasis',associated(para_Op1%para_AllBasis)
+        write(out_unit,*) ' CHECK the source'
         STOP
       END IF
       IF (associated(para_Op1%BasisnD)) THEN
         para_Op2%BasisnD => para_Op1%BasisnD
       ELSE
-        write(out_unitp,*) ' ERROR in param_Op1TOparam_Op2'
-        write(out_unitp,*) '  CANNOT be associated'
-        write(out_unitp,*) ' asso para_Op1%Basis2n',associated(para_Op1%Basis2n)
-        write(out_unitp,*) ' CHECK the source'
+        write(out_unit,*) ' ERROR in param_Op1TOparam_Op2'
+        write(out_unit,*) '  CANNOT be associated'
+        write(out_unit,*) ' asso para_Op1%Basis2n',associated(para_Op1%Basis2n)
+        write(out_unit,*) ' CHECK the source'
         STOP
       END IF
       IF (associated(para_Op1%Basis2n)) THEN
         para_Op2%Basis2n => para_Op1%Basis2n
       ELSE
-        write(out_unitp,*) ' ERROR in param_Op1TOparam_Op2'
-        write(out_unitp,*) '  CANNOT be associated'
-        write(out_unitp,*) ' asso para_Op1%BasisnD',associated(para_Op1%BasisnD)
-        write(out_unitp,*) ' CHECK the source'
+        write(out_unit,*) ' ERROR in param_Op1TOparam_Op2'
+        write(out_unit,*) '  CANNOT be associated'
+        write(out_unit,*) ' asso para_Op1%BasisnD',associated(para_Op1%BasisnD)
+        write(out_unit,*) ' CHECK the source'
         STOP
       END IF
       para_Op2%symab = para_Op1%symab
@@ -1099,20 +1099,20 @@ END SUBROUTINE alloc_MatOp
       IF (associated(para_Op1%mole)) THEN
         para_Op2%mole      => para_Op1%mole
       ELSE
-        write(out_unitp,*) ' ERROR in param_Op1TOparam_Op2'
-        write(out_unitp,*) ' mole CANNOT be associated'
-        write(out_unitp,*) ' asso para_Op1%mole',associated(para_Op1%mole)
-        write(out_unitp,*) ' CHECK the source'
+        write(out_unit,*) ' ERROR in param_Op1TOparam_Op2'
+        write(out_unit,*) ' mole CANNOT be associated'
+        write(out_unit,*) ' asso para_Op1%mole',associated(para_Op1%mole)
+        write(out_unit,*) ' CHECK the source'
         STOP
       END IF
 
       IF (associated(para_Op1%para_Tnum)) THEN
         para_Op2%para_Tnum => para_Op1%para_Tnum
       ELSE
-        write(out_unitp,*) ' ERROR in param_Op1TOparam_Op2'
-        write(out_unitp,*) ' para_Tnum CANNOT be associated'
-        write(out_unitp,*) ' asso para_Op1%para_Tnum',associated(para_Op1%para_Tnum)
-        write(out_unitp,*) ' CHECK the source'
+        write(out_unit,*) ' ERROR in param_Op1TOparam_Op2'
+        write(out_unit,*) ' para_Tnum CANNOT be associated'
+        write(out_unit,*) ' asso para_Op1%para_Tnum',associated(para_Op1%para_Tnum)
+        write(out_unit,*) ' CHECK the source'
         STOP
       END IF
 
@@ -1194,7 +1194,7 @@ END SUBROUTINE alloc_MatOp
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL write_param_Op(para_Op2)
-        write(out_unitp,*) ' END param_Op1TOparam_Op2'
+        write(out_unit,*) ' END param_Op1TOparam_Op2'
       END IF
 !-----------------------------------------------------------
 
@@ -1317,17 +1317,17 @@ END SUBROUTINE alloc_MatOp
 
         type_Op = para_Op%type_Op
         IF (type_Op /= 1 .AND. type_Op /= 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) '    Type_HamilOp',type_Op
-          write(out_unitp,*) '    Type_HamilOp MUST be equal to 1 for Type_FileGrid=0'
-          write(out_unitp,*) '    CHECK your data!!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) '    Type_HamilOp',type_Op
+          write(out_unit,*) '    Type_HamilOp MUST be equal to 1 for Type_FileGrid=0'
+          write(out_unit,*) '    CHECK your data!!'
           STOP
         END IF
 
 
         CALL Init_d0MatOp(d0MatOp,para_Op%param_TypeOp,para_Op%nb_bie)
 
-        write(out_unitp,'(a)',ADVANCE='no') 'Read_HADA (%): 0'
+        write(out_unit,'(a)',ADVANCE='no') 'Read_HADA (%): 0'
 
         DO i_qa=1,para_Op%nb_qa
 
@@ -1355,13 +1355,13 @@ END SUBROUTINE alloc_MatOp
           END IF
 
           IF (mod(i_qa,max(1,int(para_Op%nb_qa/10))) == 0)                &
-              write(out_unitp,'(a,i3)',ADVANCE='no') ' -',                &
+              write(out_unit,'(a,i3)',ADVANCE='no') ' -',                &
                 int(real(i_qa,kind=Rkind)*HUNDRED/real(para_Op%nb_qa,kind=Rkind))
-           flush(out_unitp)
+           flush(out_unit)
 
         END DO
-        write(out_unitp,'(a)',ADVANCE='yes') ' - End'
-        flush(out_unitp)
+        write(out_unit,'(a)',ADVANCE='yes') ' - End'
+        flush(out_unit)
         CALL dealloc_d0MatOp(d0MatOp)
 
       CASE (1) ! sequential acces file
@@ -1389,7 +1389,7 @@ END SUBROUTINE alloc_MatOp
       CASE (5) ! sequential acces file with one record
         DO k_term=1,size(para_Op%OpGrid)
 
-          write(out_unitp,*) 'Read OpGrid',k_term,'file: ',para_Op%OpGrid(k_term)%file_Grid%name
+          write(out_unit,*) 'Read OpGrid',k_term,'file: ',para_Op%OpGrid(k_term)%file_Grid%name
           CALL file_open(para_Op%OpGrid(k_term)%file_Grid,nio,lformatted=.FALSE.)
 
           read(nio,IOSTAT=ioerr) para_Op%OpGrid(k_term)%Grid(:,:,:)
@@ -1407,7 +1407,7 @@ END SUBROUTINE alloc_MatOp
 
         IF (associated(para_Op%imOpGrid)) THEN
           DO k_term=1,size(para_Op%imOpGrid)
-            write(out_unitp,*) 'Read imOpGrid',k_term,'file: ',para_Op%imOpGrid(k_term)%file_Grid%name
+            write(out_unit,*) 'Read imOpGrid',k_term,'file: ',para_Op%imOpGrid(k_term)%file_Grid%name
             CALL file_open(para_Op%imOpGrid(k_term)%file_Grid,nio,lformatted=.FALSE.)
 
             read(nio,IOSTAT=ioerr) para_Op%imOpGrid(k_term)%Grid(:,:,:)
@@ -1447,21 +1447,21 @@ END SUBROUTINE alloc_MatOp
       IF (      para_Op%para_ReadOp%para_FileGrid%Save_FileGrid_done .OR.       &
           .NOT. para_Op%para_ReadOp%para_FileGrid%Save_FileGrid) RETURN
 
-!write(out_unitp,*) 'BEGINNING ',name_sub
-!write(out_unitp,*) 'Save_FileGrid',para_Op%para_ReadOp%para_FileGrid%Save_FileGrid
-!write(out_unitp,*) 'Save_FileGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_FileGrid_done
-!write(out_unitp,*) 'Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
-!write(out_unitp,*) 'Type_FileGrid',para_Op%para_ReadOp%para_FileGrid%Type_FileGrid
+!write(out_unit,*) 'BEGINNING ',name_sub
+!write(out_unit,*) 'Save_FileGrid',para_Op%para_ReadOp%para_FileGrid%Save_FileGrid
+!write(out_unit,*) 'Save_FileGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_FileGrid_done
+!write(out_unit,*) 'Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
+!write(out_unit,*) 'Type_FileGrid',para_Op%para_ReadOp%para_FileGrid%Type_FileGrid
 
       IF (.NOT. para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '    The grid is not save in memory'
-        write(out_unitp,*) '    CHECK the fortran!!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '    The grid is not save in memory'
+        write(out_unit,*) '    CHECK the fortran!!'
         STOP
       END IF
 
       DO k_term=1,size(para_Op%OpGrid)
-        write(out_unitp,*) 'Save OpGrid',k_term,'file: ',para_Op%OpGrid(k_term)%file_Grid%name
+        write(out_unit,*) 'Save OpGrid',k_term,'file: ',para_Op%OpGrid(k_term)%file_Grid%name
         CALL file_open(para_Op%OpGrid(k_term)%file_Grid,nio,lformatted=.FALSE.)
 
         IF (para_Op%OpGrid(k_term)%grid_zero .OR. para_Op%OpGrid(k_term)%grid_cte) THEN
@@ -1477,7 +1477,7 @@ END SUBROUTINE alloc_MatOp
 
       IF (associated(para_Op%imOpGrid)) THEN
         DO k_term=1,size(para_Op%imOpGrid)
-          write(out_unitp,*) 'Save imOpGrid',k_term,'file: ',para_Op%imOpGrid(k_term)%file_Grid%name
+          write(out_unit,*) 'Save imOpGrid',k_term,'file: ',para_Op%imOpGrid(k_term)%file_Grid%name
           CALL file_open(para_Op%imOpGrid(k_term)%file_Grid,nio,lformatted=.FALSE.)
 
           IF (para_Op%imOpGrid(k_term)%grid_zero .OR. para_Op%imOpGrid(k_term)%grid_cte) THEN
@@ -1493,8 +1493,8 @@ END SUBROUTINE alloc_MatOp
       END IF
       para_Op%para_ReadOp%para_FileGrid%Save_FileGrid_done  = .TRUE.
 
-!write(out_unitp,*) 'Save_FileGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_FileGrid_done
-!write(out_unitp,*) 'END ',name_sub
+!write(out_unit,*) 'Save_FileGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_FileGrid_done
+!write(out_unit,*) 'END ',name_sub
 
 
     END SUBROUTINE Save_OpGrid_OF_Op
@@ -1518,10 +1518,10 @@ END SUBROUTINE alloc_MatOp
 
        IF (.NOT. associated(para_Op%OpGrid)) THEN
          IF (print_level>-1 .AND. MPI_id==0) THEN
-           write(out_unitp,*)'--------------------------------------------------------------'
-           write(out_unitp,*)'n_Op,k_term,derive_term,cte,zero,    minval,    maxval,dealloc'
-           write(out_unitp,'(i5,1x,a)') para_Op%n_Op,'This Operator is not allocated'
-           write(out_unitp,*)'--------------------------------------------------------------'
+           write(out_unit,*)'--------------------------------------------------------------'
+           write(out_unit,*)'n_Op,k_term,derive_term,cte,zero,    minval,    maxval,dealloc'
+           write(out_unit,'(i5,1x,a)') para_Op%n_Op,'This Operator is not allocated'
+           write(out_unit,*)'--------------------------------------------------------------'
          END IF
          RETURN
        END IF
@@ -1534,16 +1534,16 @@ END SUBROUTINE alloc_MatOp
          iq = para_Op%OpGrid(iterm00)%iq_min
          IF (iq > 0) THEN
            CALL Rec_Qact(Qact,para_Op%para_AllBasis%BasisnD,iq,para_Op%mole,OldPara)
-           IF(MPI_id==0) write(out_unitp,*) 'iq_min,Op_min,Qact',iq,para_Op%OpGrid(iterm00)%Op_min,Qact(1:para_Op%mole%nb_act1)
+           IF(MPI_id==0) write(out_unit,*) 'iq_min,Op_min,Qact',iq,para_Op%OpGrid(iterm00)%Op_min,Qact(1:para_Op%mole%nb_act1)
          END IF
          iq = para_Op%OpGrid(iterm00)%iq_max
          IF (iq > 0) THEN
            CALL Rec_Qact(Qact,para_Op%para_AllBasis%BasisnD,iq,para_Op%mole,OldPara)
-           IF(MPI_id==0) write(out_unitp,*) 'iq_max,Op_max,Qact',iq,para_Op%OpGrid(iterm00)%Op_max,Qact(1:para_Op%mole%nb_act1)
+           IF(MPI_id==0) write(out_unit,*) 'iq_max,Op_max,Qact',iq,para_Op%OpGrid(iterm00)%Op_max,Qact(1:para_Op%mole%nb_act1)
          END IF
        END IF
 
-       IF (print_level>-1 .AND. MPI_id==0) write(out_unitp,*) 'Analysis of the imaginary Op grid',para_Op%cplx
+       IF (print_level>-1 .AND. MPI_id==0) write(out_unit,*) 'Analysis of the imaginary Op grid',para_Op%cplx
        IF (para_Op%cplx) THEN
          CALL Analysis_OpGrid(para_Op%imOpGrid,para_Op%n_Op)
        END IF
@@ -1559,7 +1559,7 @@ END SUBROUTINE alloc_MatOp
       ! forced  : To force to set-up the ZPE even if para_Op%Set_ZPE=.TRUE.
       !================================================
       SUBROUTINE Set_ZPE_OF_Op(para_Op,Ene,ZPE,Ene_min,forced)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       TYPE (param_Op),    intent(inout)        :: para_Op
@@ -1608,7 +1608,7 @@ END SUBROUTINE alloc_MatOp
 
 
       FUNCTION Get_ZPE(Ene,min_Ene)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind) :: Get_ZPE
@@ -1636,7 +1636,7 @@ END SUBROUTINE alloc_MatOp
 !     initialization of psi
 !=======================================================================================
   SUBROUTINE init_psi_FROM_Op(psi,para_H,cplx,para_AllBasis_ana)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi, ONLY : param_psi,ecri_init_psi
       IMPLICIT NONE
 
@@ -1653,36 +1653,36 @@ END SUBROUTINE alloc_MatOp
        logical, parameter :: debug = .FALSE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING init_psi_FROM_Op : cplx',cplx
+        write(out_unit,*) 'BEGINNING init_psi_FROM_Op : cplx',cplx
       END IF
 !-----------------------------------------------------------
 !----- link the basis set ---------------------------------
      IF (associated(para_H%para_AllBasis)) THEN
        psi%para_AllBasis => para_H%para_AllBasis
      ELSE
-       write(out_unitp,*) ' ERROR in init_psi_FROM_Op'
-       write(out_unitp,*) ' BasisnD CANNOT be associated'
-       write(out_unitp,*) ' asso para_H%para_AllBasis',associated(para_H%para_AllBasis)
-       write(out_unitp,*) ' CHECK the source'
+       write(out_unit,*) ' ERROR in init_psi_FROM_Op'
+       write(out_unit,*) ' BasisnD CANNOT be associated'
+       write(out_unit,*) ' asso para_H%para_AllBasis',associated(para_H%para_AllBasis)
+       write(out_unit,*) ' CHECK the source'
        STOP
      END IF
       IF (associated(psi%para_AllBasis%BasisnD)) THEN
          psi%BasisnD => psi%para_AllBasis%BasisnD
       ELSE
-         write(out_unitp,*) ' ERROR in init_psi_FROM_Op'
-         write(out_unitp,*) ' BasisnD CANNOT be associated'
-         write(out_unitp,*) ' asso psi%para_AllBasis%BasisnD',associated(psi%para_AllBasis%BasisnD)
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in init_psi_FROM_Op'
+         write(out_unit,*) ' BasisnD CANNOT be associated'
+         write(out_unit,*) ' asso psi%para_AllBasis%BasisnD',associated(psi%para_AllBasis%BasisnD)
+         write(out_unit,*) ' CHECK the source'
          STOP
       END IF
 
       IF (associated(psi%para_AllBasis%Basis2n)) THEN
          psi%Basis2n => psi%para_AllBasis%Basis2n
       ELSE
-         write(out_unitp,*) ' ERROR in init_psi_FROM_Op'
-         write(out_unitp,*) ' BasisnD CANNOT be associated'
-         write(out_unitp,*) ' asso psi%para_AllBasis%Basis2n',associated(psi%para_AllBasis%Basis2n)
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in init_psi_FROM_Op'
+         write(out_unit,*) ' BasisnD CANNOT be associated'
+         write(out_unit,*) ' asso psi%para_AllBasis%Basis2n',associated(psi%para_AllBasis%Basis2n)
+         write(out_unit,*) ' CHECK the source'
          STOP
       END IF
 !-----------------------------------------------------------
@@ -1720,7 +1720,7 @@ END SUBROUTINE alloc_MatOp
 
       IF (debug) THEN
         CALL ecri_init_psi(psi)
-        write(out_unitp,*) 'END init_psi_FROM_Op'
+        write(out_unit,*) 'END init_psi_FROM_Op'
       END IF
   END SUBROUTINE init_psi_FROM_Op
 

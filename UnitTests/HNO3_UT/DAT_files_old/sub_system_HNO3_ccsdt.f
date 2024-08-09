@@ -9,7 +9,7 @@ C================================================================
       SUBROUTINE calcN_op(mat_V,mat_imV,mat_ScalOp,nb_be,nb_ScalOp,
      *                   Qsym,nb_var,mole,
      *                   calc_ScalOp,pot_cplx)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -43,7 +43,7 @@ c----- for the CoordType and Tnum --------------------------------------
 C================================================================
 C================================================================
       FUNCTION pot0_9DQflex(Qsym,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       implicit none
 
@@ -380,7 +380,7 @@ C    analytical derivative (Qeq Qeq' Qeq" Qeq'") calculation
 c    for the variable i_qsym
 C================================================================
       SUBROUTINE calc_dnQflex(iq,dnQflex,Qact,nb_act,nderiv,it)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       IMPLICIT NONE
 

@@ -57,7 +57,7 @@
 !
 !=============================================================
       SUBROUTINE sub_quadra_legendre(base,paire)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -78,10 +78,10 @@
 !-----------------------------------------------------------
        nq = get_nq_FROM_basis(base)
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING sub_quadra_legendre'
-         write(out_unitp,*) 'nb,nq',base%nb,nq
-         write(out_unitp,*) 'ndim',base%ndim
-         write(out_unitp,*) 'paire',paire
+         write(out_unit,*) 'BEGINNING sub_quadra_legendre'
+         write(out_unit,*) 'nb,nq',base%nb,nq
+         write(out_unit,*) 'ndim',base%ndim
+         write(out_unit,*) 'paire',paire
        END IF
 !-----------------------------------------------------------
        deriv = .TRUE.
@@ -96,8 +96,8 @@
 !      nb_quadra > nb_legendre
 !----------------------------------------------------------------------------
       IF (base%check_nq_OF_basis .AND. print_level > -1) THEN
-        write(out_unitp,*) '    Basis: Legendre polynomia'
-        write(out_unitp,*) '      nb_legendre',base%nb
+        write(out_unit,*) '    Basis: Legendre polynomia'
+        write(out_unit,*) '      nb_legendre',base%nb
       END IF
 
       base%packed            = .TRUE.
@@ -106,13 +106,13 @@
 
       IF (.NOT. base%xPOGridRep_done) THEN
         IF (base%check_nq_OF_basis) THEN
-          IF (print_level > -1) write(out_unitp,*) '      old nb_quadra',nq
+          IF (print_level > -1) write(out_unit,*) '      old nb_quadra',nq
           IF (paire == -1) THEN
             IF ( nq < base%nb ) nq = base%nb
           ELSE
             IF ( nq < 2*base%nb ) nq = 2*base%nb+1
           END IF
-          IF (print_level > -1) write(out_unitp,*) '      new nb_quadra',nq
+          IF (print_level > -1) write(out_unit,*) '      new nb_quadra',nq
         END IF
         CALL Set_nq_OF_basis(base,nq)
 
@@ -130,20 +130,20 @@
 
       IF (paire == 0) THEN
         IF (base%print_info_OF_basisDP .AND. print_level > -1)          &
-                       write(out_unitp,*) '     even Legendre polynomia'
+                       write(out_unit,*) '     even Legendre polynomia'
         base%tab_ndim_index(1,:) = [(2*i-1,i=1,base%nb)]
         CALL d0d1d2Plm_0_grid(base%x(1,:),base%dnRGB%d0,base%dnRGB%d1,base%dnRGB%d2,   &
                               base%nb,nq,deriv,num,step)
 
       ELSE IF (paire == 1) THEN
         IF (base%print_info_OF_basisDP .AND. print_level > -1)          &
-                        write(out_unitp,*) '     odd Legendre polynomia'
+                        write(out_unit,*) '     odd Legendre polynomia'
         base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
         CALL d0d1d2Plm_1_grid(base%x(1,:),base%dnRGB%d0,base%dnRGB%d1,base%dnRGB%d2,   &
                               base%nb,nq,deriv,num,step)
       ELSE
         IF (base%print_info_OF_basisDP .AND. print_level > -1)          &
-                        write(out_unitp,*) '     All Legendre polynomia'
+                        write(out_unit,*) '     All Legendre polynomia'
         base%tab_ndim_index(1,:) = [(i,i=1,base%nb)]
         CALL d0d1d2Plm_grid(base%x(1,:),base%dnRGB%d0,base%dnRGB%d1,base%dnRGB%d2,     &
                             base%nb,nq,deriv,num,step)
@@ -152,7 +152,7 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END sub_quadra_legendre'
+        write(out_unit,*) 'END sub_quadra_legendre'
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_quadra_legendre
@@ -163,7 +163,7 @@
 !
 !=============================================================
       SUBROUTINE transfo_cosTOangle(base)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 

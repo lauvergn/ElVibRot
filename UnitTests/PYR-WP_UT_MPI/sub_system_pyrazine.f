@@ -11,7 +11,7 @@ c================================================================
      *                    calc_ScalOp,pot_cplx)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       IMPLICIT NONE
 
@@ -90,7 +90,7 @@ C    subroutine calculant le gradient
 C================================================================
       SUBROUTINE d0d1d2_g(d0g,d1g,d2g,Qsym0,mole,deriv,num,step)
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -117,7 +117,7 @@ C    et le nom de file_FChk%name
 C================================================================
       SUBROUTINE sub_hessian(hh)
       USE mod_file
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer, parameter :: n = 9
@@ -127,7 +127,7 @@ C================================================================
       hh = zero
       END
       SUBROUTINE H0_sym(h,n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
         integer       :: n
         real (kind=Rkind) :: h(n,n)
@@ -159,7 +159,7 @@ C================================================================
 C    fonction pot_rest(x)
 C================================================================
       FUNCTION pot_rest(Qact,Delta_Qact,nb_inact2n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        real (kind=Rkind) :: pot_rest
@@ -174,7 +174,7 @@ C================================================================
 C    fonction im_pot0(x)
 C================================================================
       FUNCTION im_pot0(Q,n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        real (kind=Rkind) :: im_pot0
@@ -202,7 +202,7 @@ C================================================================
      *                     Qsym0,mole,deriv,num,step)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -243,7 +243,7 @@ C================================================================
      *                        Qsym0,mole,nderiv)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -281,7 +281,7 @@ C    analytical derivative (dnQflex : Qflex Qflex' Qflex" Qflex'") calculation
 c    for the variable iq
 C================================================================
       SUBROUTINE calc_dnQflex(iq,dnQflex,Qact,nb_act,nderiv,it)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       IMPLICIT NONE
 
@@ -298,7 +298,7 @@ C================================================================
       SUBROUTINE sub_scalar(scalar,nb_scalar,Q,n,mole)
       USE mod_Tnum
       USE mod_paramQ
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------

@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_EVR
- USE mod_system
+ USE EVR_system_m
 !$ USE omp_lib, only : omp_get_max_threads
  USE mod_Constant
  USE mod_Coord_KEO

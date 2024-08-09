@@ -20,7 +20,7 @@ C
 C**********************************************************************
 C
       SUBROUTINE ZSCPX (NDIM,NLEN,NLIM,VECS,TOL,INFO)
-      use mod_system, only : Rkind
+      use EVR_system_m, only : Rkind
 
 C     Purpose:
 C     This subroutine uses the QMR algorithm based  on the coupled two-
@@ -1502,7 +1502,7 @@ C
 C**********************************************************************
 C
       SUBROUTINE ZAXPBY (N,ZZ,ZA,ZX,ZB,ZY)
-      use mod_system, only : Rkind
+      use EVR_system_m, only : Rkind
 
 C
 C     Purpose:
@@ -1687,7 +1687,7 @@ c
 C**********************************************************************
 C
       SUBROUTINE ZRANDN (N,ZX,SEED)
-      use mod_system, only : Rkind
+      use EVR_system_m, only : Rkind
 
 C
 C     Purpose:
@@ -1762,7 +1762,7 @@ C
 C
 C**********************************************************************
       subroutine zrotg(ca,cb,c,s)
-      use mod_system, only : Rkind
+      use EVR_system_m, only : Rkind
       double complex ca,cb,s
       double precision c
       double precision norm,scale
@@ -1805,7 +1805,7 @@ C
 C**********************************************************************
 C
       SUBROUTINE ZSQMX (NDIM,NLEN,NLIM,VECS,TOL,INFO)
-      use mod_system, only : Rkind
+      use EVR_system_m, only : Rkind
 
 C
 C     Purpose:
@@ -2274,7 +2274,7 @@ C
 C**********************************************************************
 C
       SUBROUTINE ZUQMX (NDIM,NLEN,NLIM,VECS,TOL,INFO)
-      use mod_system, only : Rkind
+      use EVR_system_m, only : Rkind
 C
 C     Purpose:
 C     This subroutine uses  the QMR algorithm to solve  linear systems.
@@ -2719,7 +2719,7 @@ C
 C**********************************************************************
       subroutine p_multiplyQMR(Vin,Vut,tab_Op,nb_Op,Ene,N,M,eps_in,
      *                         iOp_CAP_Reactif,iOp_CAP_Product)
-      use mod_system
+      use EVR_system_m
       USE mod_Op
       USE mod_CRP
       implicit none
@@ -2741,10 +2741,10 @@ c----- for debuging --------------------------------------------------
       character (len=*), parameter :: name_sub ='p_multiplyQMR'
 c-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Vin',Vin(:)
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Vin',Vin(:)
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -2756,7 +2756,7 @@ c     ------------------------------------------
 c     |b>=e_r*|0>
       b(:)=Vin(:)
       call OpOnVec(b,tab_Op(iOp_CAP_Reactif),'NOC')
-      IF (debug) write(out_unitp,*) 'e_r |Vin>',b(:)
+      IF (debug) write(out_unit,*) 'e_r |Vin>',b(:)
 
 c     |x>=1/(H-E-ie)*|b>
 
@@ -2770,13 +2770,13 @@ c      else
 c      call qm(N,b,x,tab_Op,eps_in)
 c      end if
 c      x(:)=b(:)
-      IF (debug) write(out_unitp,*) '1/(H-E-ie)|b>',x(:)
+      IF (debug) write(out_unit,*) '1/(H-E-ie)|b>',x(:)
 
 
 c     |b>=e_p*|x>
       b(:)=x(:)
       call OpOnVec(b,tab_Op(iOp_CAP_Product),'NOC')
-      IF (debug) write(out_unitp,*) 'e_p |b>',b(:)
+      IF (debug) write(out_unit,*) 'e_p |b>',b(:)
 
 
 
@@ -2795,17 +2795,17 @@ c      end if
 
 c-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Vut',Vut(:)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'Vut',Vut(:)
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 c-----------------------------------------------------------
 
       End
       subroutine qm(N,x,y,eps_in)
 
-      use mod_system
+      use EVR_system_m
       implicit NONE
 c
 !      include 'headers/sizes.h'
@@ -2878,7 +2878,7 @@ c
       subroutine qm_precon(N,x,y,M,tab_Op,nb_Op,Ene,eps_in,cjg,
      *                         iOp_CAP_Reactif,iOp_CAP_Product)
 
-      use mod_system
+      use EVR_system_m
       USE mod_Op
       USE mod_CRP
       implicit NONE
@@ -2912,7 +2912,7 @@ c     -------------------------------------------------------
       info(2)=0
       info(3)=0
       info(4)=0
-      write(out_unitp,'(a)',advance='no') 'QMR it:'
+      write(out_unit,'(a)',advance='no') 'QMR it:'
 
 c
 c      write(*,*) 'nlim = ', nlim, ' info(1) = ', info(1), ' N =', N
@@ -2923,9 +2923,9 @@ c      write(*,*) 'tol = ', tol, ' maxDVRpoints = ', maxDVRpoints
        it = it + 1
        !write(*,*) 'QMR it',it
        IF (mod(it,10) == 0 .AND. mod(it,100) /= 0) THEN
-          write(out_unitp,'(a)',advance='no') '.'
+          write(out_unit,'(a)',advance='no') '.'
        END IF
-       IF (mod(it,100) == 0) write(out_unitp,'(i0)',advance='no') it
+       IF (mod(it,100) == 0) write(out_unit,'(i0)',advance='no') it
 
 
       revcom = info(2)

@@ -61,7 +61,7 @@ CONTAINS
 
  SUBROUTINE sub_OpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
- USE mod_system
+ USE EVR_system_m
 !$ USE omp_lib, only : OMP_GET_THREAD_NUM
  USE mod_nDindex
  USE mod_Coord_KEO,                ONLY : CoordType
@@ -97,16 +97,16 @@ CONTAINS
  !logical, parameter :: debug = .TRUE.
  !-----------------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-   write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-   write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-   !flush(out_unitp)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+   write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+   write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+   !flush(out_unit)
    !CALL write_param_Op(para_Op)
-   write(out_unitp,*)
-   write(out_unitp,*) 'PsiBasisRep'
-   write(out_unitp,*) 'Psi%RvecB',Psi%RvecB
-   flush(out_unitp)
+   write(out_unit,*)
+   write(out_unit,*) 'PsiBasisRep'
+   write(out_unit,*) 'Psi%RvecB',Psi%RvecB
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------------
   !CALL Check_mem()
@@ -129,19 +129,19 @@ CONTAINS
  OpPsi%RvecB(:)  = ZERO
 
  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4 ) THEN
-   write(out_unitp,'(a)')              'OpPsi SG4 (%): [-10-20-30-40-50-60-70-80-90-100]'
-   write(out_unitp,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
-   flush(out_unitp)
+   write(out_unit,'(a)')              'OpPsi SG4 (%): [-10-20-30-40-50-60-70-80-90-100]'
+   write(out_unit,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
+   flush(out_unit)
  END IF
 
  IF (OpPsi_omp == 0) THEN
    DO iG=1,BasisnD%para_SGType2%nb_SG
 
-     !write(out_unitp,*) 'iG',iG
+     !write(out_unit,*) 'iG',iG
      !transfert part of the psi%RvecB(:) to PsiR%V
      CALL tabPackedBasis_TO_tabR_AT_iG(PsiR%V,psi%RvecB,    &
                                          iG,BasisnD%para_SGType2)
-     !write(out_unitp,*) 'iG,PsiR',iG,PsiR%V
+     !write(out_unit,*) 'iG,PsiR',iG,PsiR%V
 
      CALL sub_OpPsi_OF_ONEDP_FOR_SGtype4_ompGrid(PsiR,iG,para_Op)
 
@@ -155,11 +155,11 @@ CONTAINS
 
      IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
          mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0) THEN
-       write(out_unitp,'(a)',ADVANCE='no') '---'
-       flush(out_unitp)
+       write(out_unit,'(a)',ADVANCE='no') '---'
+       flush(out_unit)
      END IF
 
-     !write(out_unitp,*) 'iG done:',iG ; flush(out_unitp)
+     !write(out_unit,*) 'iG done:',iG ; flush(out_unit)
    END DO
  ELSE
 
@@ -169,7 +169,7 @@ CONTAINS
    !$OMP parallel                                                &
    !$OMP default(none)                                           &
    !$OMP shared(Psi,OpPsi)                                       &
-   !$OMP shared(para_Op,BasisnD,print_level,out_unitp,MPI_id)    &
+   !$OMP shared(para_Op,BasisnD,print_level,out_unit,MPI_id)    &
    !$OMP private(iG,iiG,tab_l,PsiR,ith)                          &
    !$OMP num_threads(BasisnD%para_SGType2%nb_threads)
 
@@ -187,10 +187,10 @@ CONTAINS
 
      CALL ADD_ONE_TO_nDindex(BasisnD%para_SGType2%nDind_SmolyakRep,tab_l,iG=iG)
 
-     !write(out_unitp,*) 'iG',iG ; flush(out_unitp)
+     !write(out_unit,*) 'iG',iG ; flush(out_unit)
      !transfert part of the psi%RvecB(:) to PsiR%V
      CALL tabPackedBasis_TO_tabR_AT_iG(PsiR%V,psi%RvecB,iG,BasisnD%para_SGType2)
-     !write(out_unitp,*) 'iG,PsiR',iG,PsiR%V ; flush(out_unitp)
+     !write(out_unit,*) 'iG,PsiR',iG,PsiR%V ; flush(out_unit)
 
      CALL sub_OpPsi_OF_ONEDP_FOR_SGtype4(PsiR,iG,tab_l,para_Op)
 
@@ -204,20 +204,20 @@ CONTAINS
 
      IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
          mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0) THEN
-       write(out_unitp,'(a)',ADVANCE='no') '---'
-       flush(out_unitp)
+       write(out_unit,'(a)',ADVANCE='no') '---'
+       flush(out_unit)
      END IF
 
-     !write(out_unitp,*) 'iG done:',iG ; flush(out_unitp)
+     !write(out_unit,*) 'iG done:',iG ; flush(out_unit)
    END DO
    CALL dealloc_NParray(tab_l,'tabl_l',name_sub)
   !$OMP   END PARALLEL
 END IF
 
  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4) THEN
-   write(out_unitp,'(a)',ADVANCE='yes') '-]'
+   write(out_unit,'(a)',ADVANCE='yes') '-]'
  END IF
- flush(out_unitp)
+ flush(out_unit)
 
  iterm00 = para_Op%derive_term_TO_iterm(0,0)
  IF (associated(para_Op%OpGrid)) THEN
@@ -229,17 +229,17 @@ END IF
 
 !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'OpPsiBasisRep'
-   write(out_unitp,*) 'OpPsi%RvecB',OpPsi%RvecB
-   write(out_unitp,*)
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'OpPsiBasisRep'
+   write(out_unit,*) 'OpPsi%RvecB',OpPsi%RvecB
+   write(out_unit,*)
+   write(out_unit,*) 'END ',name_sub
  END IF
 !-----------------------------------------------------------
 
   END SUBROUTINE sub_OpPsi_FOR_SGtype4
 
  SUBROUTINE sub_OpPsi_OF_ONEDP_FOR_SGtype4(PsiR,iG,tab_l,para_Op)
- USE mod_system
+ USE EVR_system_m
 !$ USE omp_lib, only : OMP_GET_THREAD_NUM
  USE mod_nDindex
 
@@ -293,16 +293,16 @@ END IF
  !logical, parameter :: debug = .TRUE.
  !-----------------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-   write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-   write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-   flush(out_unitp)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+   write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+   write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------------
 
-  !write(out_unitp,*) '================================' ; flush(out_unitp)
-  !write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+  !write(out_unit,*) '================================' ; flush(out_unit)
+  !write(out_unit,*) '============ START =============' ; flush(out_unit)
 
   mole    => para_Op%mole
   BasisnD => para_Op%BasisnD
@@ -328,20 +328,20 @@ END IF
 
  CALL get_OpGrid_type10_OF_ONEDP_FOR_SG4(iG,tab_l,para_Op,V,GGiq,sqRhoOVERJac,Jac)
 
- !write(out_unitp,*) ' GGiq:',GGiq
- !write(out_unitp,*) ' Jac :',Jac
- !write(out_unitp,*) ' sqRhoOVERJac :',sqRhoOVERJac
- !write(out_unitp,*) 'd0GG ... done' ; flush(out_unitp)
+ !write(out_unit,*) ' GGiq:',GGiq
+ !write(out_unit,*) ' Jac :',Jac
+ !write(out_unit,*) ' sqRhoOVERJac :',sqRhoOVERJac
+ !write(out_unit,*) 'd0GG ... done' ; flush(out_unit)
  CALL alloc_NParray(OpPsiR,[nq],'OpPsiR',name_sub)
 
- !write(out_unitp,*) ' V Basis of PsiR :',PsiR%V
+ !write(out_unit,*) ' V Basis of PsiR :',PsiR%V
 
  ! partial B to G
  CALL BDP_TO_GDP_OF_SmolyakRep(PsiR%V,BasisnD%tab_basisPrimSG,        &
                                  tab_l,tab_nq,tab_nb,nb0)
  ! now PsiR is on the grid
- !write(out_unitp,*) ' R Grid of PsiR :',PsiR%V
- !write(out_unitp,*) ' R Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+ !write(out_unit,*) ' R Grid of PsiR :',PsiR%V
+ !write(out_unit,*) ' R Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
  ! VPsi calculation, it has to be done before because V is not diagonal
  CALL alloc_NParray(VPsi,[nq,nb0],'VPsi',name_sub)
@@ -363,8 +363,8 @@ END IF
    ! multiplication by sqRhoOVERJac
    PsiR%V(iqi:iqf) = PsiR%V(iqi:iqf) * sqRhoOVERJac(:)
 
-   !write(out_unitp,*) ' R*sq Grid of PsiR :',PsiR%V
-   !write(out_unitp,*) ' R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' R*sq Grid of PsiR :',PsiR%V
+   !write(out_unit,*) ' R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
 
    ! derivative with respect to Qj
@@ -375,9 +375,9 @@ END IF
      CALL DerivOp_TO_RDP_OF_SmolaykRep(PsiRj(:,j),BasisnD%tab_basisPrimSG, &
                                          tab_l,tab_nq,derive_termQdyn)
 
-     !write(out_unitp,*) 'dQj Grid of PsiR',j,PsiRj(:,j) ; flush(out_unitp)
+     !write(out_unit,*) 'dQj Grid of PsiR',j,PsiRj(:,j) ; flush(out_unit)
    END DO
-   !write(out_unitp,*) ' dQj R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' dQj R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
    OpPsiR(:) = ZERO
    DO i=1,mole%nb_act1
@@ -387,24 +387,24 @@ END IF
        PsiRi(:) = PsiRi(:) + GGiq(:,j,i) * PsiRj(:,j)
      END DO
      PsiRi(:) = PsiRi(:) * Jac(:)
-     !write(out_unitp,*) ' Jac Gij* ... Grid of SRep : done',iG,i,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' Jac Gij* ... Grid of SRep : done',iG,i,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      derive_termQdyn(:) = [mole%liste_QactTOQdyn(i),0]
 
      CALL DerivOp_TO_RDP_OF_SmolaykRep(PsiRi(:),BasisnD%tab_basisPrimSG,&
                                          tab_l,tab_nq,derive_termQdyn)
 
-     !write(out_unitp,*) 'shape OpPsiR,PsiRi ',shape(OpPsiR),shape(PsiRi)
-     !write(out_unitp,*) 'DerivOp_TO_RDP_OF_SmolaykRep : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) 'shape OpPsiR,PsiRi ',shape(OpPsiR),shape(PsiRi)
+     !write(out_unit,*) 'DerivOp_TO_RDP_OF_SmolaykRep : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      OpPsiR(:) = OpPsiR(:) + PsiRi(:)
    END DO
 
-   !write(out_unitp,*) ' dQi Jac Gij* ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' dQi Jac Gij* ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
    OpPsiR(:) =   -HALF*OpPsiR(:) / ( Jac(:)*sqRhoOVERJac(:) ) + VPsi(:,ib0)
-   !write(out_unitp,*) ' OpPsiR Grid of PsiR',OpPsiR
-   !write(out_unitp,*) ' OpPsiR Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' OpPsiR Grid of PsiR',OpPsiR
+   !write(out_unit,*) ' OpPsiR Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
    !tranfert OpPsiR (on the grid) to PsiR
    PsiR%V(iqi:iqf) = OpPsiR(:)
@@ -419,7 +419,7 @@ END IF
  CALL GDP_TO_BDP_OF_SmolyakRep(PsiR%V,BasisnD%tab_basisPrimSG,&
                                tab_l,tab_nq,tab_nb,nb0)
  ! now PsiR%V is on the Basis
- !write(out_unitp,*) ' V Basis of OpPsiR :',PsiR%V
+ !write(out_unit,*) ' V Basis of OpPsiR :',PsiR%V
 
  IF (allocated(PsiRi))        CALL dealloc_NParray(PsiRi,       'PsiRi',       name_sub)
  IF (allocated(PsiRj))        CALL dealloc_NParray(PsiRj,       'PsiRj',       name_sub)
@@ -432,19 +432,19 @@ END IF
  IF (allocated(Jac))          CALL dealloc_NParray(Jac,         'Jac',         name_sub)
  IF (allocated(V))            CALL dealloc_NParray(V,           'V',           name_sub)
 
- !write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
- !write(out_unitp,*) '================================' ; flush(out_unitp)
+ !write(out_unit,*) '============ END ===============' ; flush(out_unit)
+ !write(out_unit,*) '================================' ; flush(out_unit)
 
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
-   flush(out_unitp)
+   write(out_unit,*) 'END ',name_sub
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
  !CALL UnCheck_mem() ; stop
  END SUBROUTINE sub_OpPsi_OF_ONEDP_FOR_SGtype4
   SUBROUTINE sub_OpPsi_OF_ONEDP_FOR_SGtype4_ompGrid(PsiR,iG,para_Op)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
 
   USE mod_Coord_KEO,               ONLY : CoordType, get_d0GG
@@ -497,17 +497,17 @@ END IF
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
   !CALL Check_mem()
 
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
-   !write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+   !write(out_unit,*) '================================' ; flush(out_unit)
+   !write(out_unit,*) '============ START =============' ; flush(out_unit)
 
 
   IF (Grid_omp == 0 .AND. OpPsi_omp > 0) THEN
@@ -575,8 +575,8 @@ END IF
    CALL BDP_TO_GDP_OF_SmolyakRep(PsiR%V,BasisnD%tab_basisPrimSG,  &
                                  tab_l,tab_nq,tab_nb,nb0)
    ! now PsiR is on the grid
-   !write(out_unitp,*) ' R Grid of PsiR :',PsiR%V
-   !write(out_unitp,*) ' R Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' R Grid of PsiR :',PsiR%V
+   !write(out_unit,*) ' R Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
  ! VPsi calculation, it has to be done before because V is not diagonal
  CALL alloc_NParray(VPsi,[nq,nb0],'VPsi',name_sub)
@@ -598,8 +598,8 @@ END IF
    ! multiplication by sqRhoOVERJac
    PsiR%V(iqi:iqf) = PsiR%V(iqi:iqf) * sqRhoOVERJac(:)
 
-   !write(out_unitp,*) ' R*sq Grid of PsiR :',PsiR
-   !write(out_unitp,*) ' R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' R*sq Grid of PsiR :',PsiR
+   !write(out_unit,*) ' R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
 
    ! derivative with respect to Qj
@@ -610,9 +610,9 @@ END IF
      CALL DerivOp_TO_RDP_OF_SmolaykRep(PsiRj(:,j),BasisnD%tab_basisPrimSG, &
                                          tab_l,tab_nq,derive_termQdyn)
 
-     !write(out_unitp,*) 'dQj Grid of PsiR',j,PsiRj(:,j) ; flush(out_unitp)
+     !write(out_unit,*) 'dQj Grid of PsiR',j,PsiRj(:,j) ; flush(out_unit)
    END DO
-   !write(out_unitp,*) ' dQj R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' dQj R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
    OpPsiR(:) = ZERO
    DO i=1,mole%nb_act1
@@ -622,7 +622,7 @@ END IF
        PsiRi(:) = PsiRi(:) + GGiq(:,j,i) * PsiRj(:,j)
      END DO
      PsiRi(:) = PsiRi(:) * Jac(:)
-     !write(out_unitp,*) ' Jac Gij* ... Grid of SRep : done',iG,i,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' Jac Gij* ... Grid of SRep : done',iG,i,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      derive_termQdyn(:) = [mole%liste_QactTOQdyn(i),0]
 
@@ -632,11 +632,11 @@ END IF
      OpPsiR(:) = OpPsiR(:) + PsiRi(:)
 
    END DO
-   !write(out_unitp,*) ' dQi Jac Gij* ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' dQi Jac Gij* ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
    OpPsiR(:) =   -HALF*OpPsiR(:) / ( Jac(:)*sqRhoOVERJac(:) ) + VPsi(:,ib0)
-   !write(out_unitp,*) ' OpPsiR Grid of PsiR',OpPsiR
-   !write(out_unitp,*) ' OpPsiR Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+   !write(out_unit,*) ' OpPsiR Grid of PsiR',OpPsiR
+   !write(out_unit,*) ' OpPsiR Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
    !tranfert OpPsiR (on the grid) to PsiR
    PsiR%V(iqi:iqf) = OpPsiR(:)
@@ -664,13 +664,13 @@ END IF
  IF (allocated(Jac))          CALL dealloc_NParray(Jac,         'Jac',         name_sub)
  IF (allocated(V))            CALL dealloc_NParray(V,           'V',           name_sub)
 
- !write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
- !write(out_unitp,*) '================================' ; flush(out_unitp)
+ !write(out_unit,*) '============ END ===============' ; flush(out_unit)
+ !write(out_unit,*) '================================' ; flush(out_unit)
 
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
-   flush(out_unitp)
+   write(out_unit,*) 'END ',name_sub
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
  !CALL UnCheck_mem() ; stop
@@ -681,7 +681,7 @@ END IF
 !> after this subroutine, OpPsi will be ready
 !=======================================================================================
 SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
-  USE mod_system
+  USE EVR_system_m
   !$ USE omp_lib, only : OMP_GET_THREAD_NUM
   USE mod_nDindex
 
@@ -722,18 +722,18 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    !flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    !flush(out_unit)
     !CALL write_param_Op(para_Op)
-    write(out_unitp,*)
-    write(out_unitp,*) 'PsiBasisRep'
+    write(out_unit,*)
+    write(out_unit,*) 'PsiBasisRep'
     !DO itab=1,size(Psi)
       !CALL ecri_psi(Psi=Psi(itab))
     !END DO
-    flush(out_unitp)
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------------------
   mole    => para_Op%mole
@@ -741,15 +741,15 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
   IF(MPI_id==0) THEN
     IF (size(Psi) == 0) THEN
-      write(out_unitp,*) 'ERROR in ',name_sub
-      write(out_unitp,*) '  The size of Psi(:) is zero!!'
-      write(out_unitp,*) '  => Check the fortran.'
+      write(out_unit,*) 'ERROR in ',name_sub
+      write(out_unit,*) '  The size of Psi(:) is zero!!'
+      write(out_unit,*) '  => Check the fortran.'
       STOP ' ERROR in sub_TabOpPsi_FOR_SGtype4: size(Psi) = 0'
     END IF
     IF (Psi(1)%cplx) THEN
-      write(out_unitp,*) 'ERROR in ',name_sub
-      write(out_unitp,*) '  Psi(1) is complex !!'
-      write(out_unitp,*) '  => Check the fortran.'
+      write(out_unit,*) 'ERROR in ',name_sub
+      write(out_unit,*) '  Psi(1) is complex !!'
+      write(out_unit,*) '  => Check the fortran.'
       STOP ' ERROR in sub_TabOpPsi_FOR_SGtype4: Psi(1) is complex'
     END IF
   ENDIF
@@ -773,9 +773,9 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
 
   IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4 ) THEN
-    write(out_unitp,'(a)')              'OpPsi SG4 (%): [-10-20-30-40-50-60-70-80-90-100]'
-    write(out_unitp,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
-    flush(out_unitp)
+    write(out_unit,'(a)')              'OpPsi SG4 (%): [-10-20-30-40-50-60-70-80-90-100]'
+    write(out_unit,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
+    flush(out_unit)
   END IF
 
 !  IF(openmpi) THEN
@@ -793,19 +793,19 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
         DO itab=1,size(Psi)
           CALL tabPackedBasis_TO_tabR_AT_iG(PsiR(itab)%V,psi(itab)%RvecB,    &
                                             iG,BasisnD%para_SGType2)
-          !write(out_unitp,*) 'iG,itab,PsiR',iG,itab,PsiR(itab)%V  ;    flush(out_unitp)
+          !write(out_unit,*) 'iG,itab,PsiR',iG,itab,PsiR(itab)%V  ;    flush(out_unit)
         END DO
-        !write(out_unitp,*) 'iG',iG, ' unpack done' ;    flush(out_unitp)
+        !write(out_unit,*) 'iG',iG, ' unpack done' ;    flush(out_unit)
 
         CALL sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_ompGrid(PsiR,iG,para_Op)
-        !write(out_unitp,*) 'iG',iG, ' TabOpPsi done' ;    flush(out_unitp)
+        !write(out_unit,*) 'iG',iG, ' TabOpPsi done' ;    flush(out_unit)
 
         !transfert back, PsiR(itab)%V (HPsi) to the psi(:)%RvecB(:)
         DO itab=1,size(Psi)
           CALL tabR_AT_iG_TO_tabPackedBasis(OpPsi(itab)%RvecB,PsiR(itab)%V,  &
                          iG,BasisnD%para_SGType2,BasisnD%WeightSG(iG))
         END DO
-        !write(out_unitp,*) 'iG',iG, ' pack done' ;    flush(out_unitp)
+        !write(out_unit,*) 'iG',iG, ' pack done' ;    flush(out_unit)
 
         !deallocate PsiR(:)
         DO itab=1,size(Psi)
@@ -815,8 +815,8 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
         IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND.    &
             mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
-          write(out_unitp,'(a)',ADVANCE='no') '---'
-          flush(out_unitp)
+          write(out_unit,'(a)',ADVANCE='no') '---'
+          flush(out_unit)
         END IF
 
       END DO
@@ -827,7 +827,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
       !$OMP   PARALLEL DEFAULT(NONE)                              &
       !$OMP   SHARED(Psi,OpPsi)                                   &
       !$OMP   SHARED(para_Op,BasisnD)                             &
-      !$OMP   SHARED(print_level,out_unitp,SG4_maxth,packet_size) &
+      !$OMP   SHARED(print_level,out_unit,SG4_maxth,packet_size) &
       !$OMP   SHARED(MPI_id)                                      &
       !$OMP   PRIVATE(iG,itab,PsiR)                               &
       !$OMP   NUM_THREADS(SG4_maxth)
@@ -859,11 +859,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
         IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
             mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
-          write(out_unitp,'(a)',ADVANCE='no') '---'
-          flush(out_unitp)
+          write(out_unit,'(a)',ADVANCE='no') '---'
+          flush(out_unit)
         END IF
 
-        !write(out_unitp,*) 'iG done:',iG ; flush(out_unitp)
+        !write(out_unit,*) 'iG done:',iG ; flush(out_unit)
       END DO
       !$OMP   END DO
       deallocate(PsiR) ! with ifx it has to be removed !!
@@ -890,7 +890,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
       !$OMP parallel                                                &
       !$OMP default(none)                                           &
       !$OMP shared(Psi,OpPsi)                                       &
-      !$OMP shared(para_Op,BasisnD,print_level,out_unitp,MPI_id)    &
+      !$OMP shared(para_Op,BasisnD,print_level,out_unit,MPI_id)    &
       !$OMP private(itab,iG,iiG,tab_l,PsiR,ith)                     &
       !$OMP num_threads(BasisnD%para_SGType2%nb_threads)
 
@@ -902,11 +902,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
       tab_l(:) = BasisnD%para_SGType2%nDval_init(:,ith+1)
       !--------------------------------------------------------------
 
-      !write(out_unitp,*) 'ith,tab_l(:)',ith,':',tab_l
+      !write(out_unit,*) 'ith,tab_l(:)',ith,':',tab_l
 
       ! we are not using the parallel do, to be able to use the correct initialized tab_l with nDval_init
       DO iG=BasisnD%para_SGType2%iG_th(ith+1),BasisnD%para_SGType2%fG_th(ith+1)
-        !write(out_unitp,*) 'iG',iG ; flush(out_unitp)
+        !write(out_unit,*) 'iG',iG ; flush(out_unit)
 
         CALL ADD_ONE_TO_nDindex(BasisnD%para_SGType2%nDind_SmolyakRep,tab_l,iG=iG)
 
@@ -915,7 +915,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
         DO itab=1,size(Psi)
           CALL tabPackedBasis_TO_tabR_AT_iG(PsiR(itab)%V,psi(itab)%RvecB,    &
                                             iG,BasisnD%para_SGType2)
-          !write(out_unitp,*) 'iG,itab,PsiR',iG,itab,PsiR(itab)%V
+          !write(out_unit,*) 'iG,itab,PsiR',iG,itab,PsiR(itab)%V
         END DO
 
         CALL sub_TabOpPsi_OF_ONEDP_FOR_SGtype4(PsiR,iG,tab_l,para_Op)
@@ -934,11 +934,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
         IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
             mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
-          write(out_unitp,'(a)',ADVANCE='no') '---'
-          flush(out_unitp)
+          write(out_unit,'(a)',ADVANCE='no') '---'
+          flush(out_unit)
         END IF
 
-        !write(out_unitp,*) 'iG done:',iG ; flush(out_unitp)
+        !write(out_unit,*) 'iG done:',iG ; flush(out_unit)
       END DO
       CALL dealloc_NParray(tab_l,'tabl_l',name_sub)
       !$OMP   END PARALLEL
@@ -947,9 +947,9 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 !  ENDIF ! for openmpi
 
   IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4) THEN
-    write(out_unitp,'(a)',ADVANCE='yes') '-]'
+    write(out_unit,'(a)',ADVANCE='yes') '-]'
   END IF
-  flush(out_unitp)
+  flush(out_unit)
 
   iterm00 = para_Op%derive_term_TO_iterm(0,0)
   IF (associated(para_Op%OpGrid)) THEN
@@ -965,19 +965,19 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
       OpPsi_symab = Calc_symab1_EOR_symab2(para_Op%symab,Psi(i)%symab)
       CALL Set_symab_OF_psiBasisRep(OpPsi(i),OpPsi_symab)
 
-      !write(out_unitp,*) 'para_Op,psi symab ',i,para_Op%symab,Psi(i)%symab
-      !write(out_unitp,*) 'OpPsi_symab',i,OpPsi(i)%symab
+      !write(out_unit,*) 'para_Op,psi symab ',i,para_Op%symab,Psi(i)%symab
+      !write(out_unit,*) 'OpPsi_symab',i,OpPsi(i)%symab
     END DO
   ENDIF
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'OpPsiGridRep'
+    write(out_unit,*) 'OpPsiGridRep'
     !DO itab=1,size(Psi)
       !CALL ecri_psi(Psi=OpPsi(itab))
     !END DO
-    write(out_unitp,*)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*)
+    write(out_unit,*) 'END ',name_sub
   END IF
   !-----------------------------------------------------------
 
@@ -986,7 +986,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
  SUBROUTINE sub_TabOpPsi_OF_SeveralDP_FOR_SGtype4(Psi,OpPsi,para_Op,    &
                                                   tab_l_init,initG,endG)
- USE mod_system
+ USE EVR_system_m
  USE mod_nDindex
  USE mod_Coord_KEO,                ONLY : CoordType
  USE mod_basis_set_alloc,          ONLY : basis
@@ -1016,8 +1016,8 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
  !logical, parameter :: debug = .TRUE.
  !-----------------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   flush(out_unitp)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------------
   BasisnD => para_Op%BasisnD
@@ -1035,13 +1035,13 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
      CALL ADD_ONE_TO_nDindex(BasisnD%para_SGType2%nDind_SmolyakRep,tab_l,iG=iG)
 
-     !write(out_unitp,*) 'iG',iG
+     !write(out_unit,*) 'iG',iG
      !transfert part of the psi(:)%RvecB(:) to PsiR(itab)%V
      allocate(PsiR(size(Psi)))
      DO itab=1,size(Psi)
        CALL tabPackedBasis_TO_tabR_AT_iG(PsiR(itab)%V,psi(itab)%RvecB,    &
                                          iG,BasisnD%para_SGType2)
-       !write(out_unitp,*) 'iG,itab,PsiR',iG,itab,PsiR(itab)%V
+       !write(out_unit,*) 'iG,itab,PsiR',iG,itab,PsiR(itab)%V
      END DO
 
      CALL sub_TabOpPsi_OF_ONEDP_FOR_SGtype4(PsiR,iG,tab_l,para_Op)
@@ -1060,16 +1060,16 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
      IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
          mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
-       write(out_unitp,'(a)',ADVANCE='no') '---'
-       flush(out_unitp)
+       write(out_unit,'(a)',ADVANCE='no') '---'
+       flush(out_unit)
      END IF
 
    END DO
 
 !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*)
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*)
+   write(out_unit,*) 'END ',name_sub
  END IF
 !-----------------------------------------------------------
 
@@ -1077,7 +1077,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
 
   SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_old(PsiR,iG,tab_l,para_Op,PsiROnGrid)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
 
   USE mod_Coord_KEO,               ONLY : CoordType
@@ -1128,21 +1128,21 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    write(out_unitp,*) 'nb psi',size(PsiR)
-    write(out_unitp,*) 'iG, tab_l(:)',iG,':',tab_l(:)
-    write(out_unitp,*) 'nq',para_Op%BasisnD%para_SGType2%tab_nq_OF_SRep(iG)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    write(out_unit,*) 'nb psi',size(PsiR)
+    write(out_unit,*) 'iG, tab_l(:)',iG,':',tab_l(:)
+    write(out_unit,*) 'nq',para_Op%BasisnD%para_SGType2%tab_nq_OF_SRep(iG)
 
-    flush(out_unitp)
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
   !CALL Check_mem()
 
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
-   !write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+   !write(out_unit,*) '================================' ; flush(out_unit)
+   !write(out_unit,*) '============ START =============' ; flush(out_unit)
 
    mole    => para_Op%mole
    BasisnD => para_Op%BasisnD
@@ -1189,7 +1189,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
      IF (allocated(V)) CALL dealloc_NParray(V,'V',name_sub)
 
    CASE (1) ! 1 : H: F2.d^2 + F1.d^1 + V
-     IF (debug) write(out_unitp,*) 'nb_Term',para_Op%nb_Term
+     IF (debug) write(out_unit,*) 'nb_Term',para_Op%nb_Term
 
      CALL get_OpGrid_type1_OF_ONEDP_FOR_SG4(iG,tab_l,para_Op,GridOp)
 
@@ -1269,14 +1269,14 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
        END IF
 
        ! now PsiR is on the grid
-       !write(out_unitp,*) ' R Grid of PsiR(itab) :',PsiR(itab)%V
-       !write(out_unitp,*) ' R Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+       !write(out_unit,*) ' R Grid of PsiR(itab) :',PsiR(itab)%V
+       !write(out_unit,*) ' R Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
        ! multiplication by sqRhoOVERJac
        PsiR(itab)%V(:) = PsiR(itab)%V(:) * sqRhoOVERJac(:)
 
-       !write(out_unitp,*) ' R*sq Grid of PsiR(itab) :',PsiR
-       !write(out_unitp,*) ' R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+       !write(out_unit,*) ' R*sq Grid of PsiR(itab) :',PsiR
+       !write(out_unit,*) ' R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
 
        ! derivative with respect to Qj
@@ -1287,9 +1287,9 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
          CALL DerivOp_TO_RDP_OF_SmolaykRep(PsiRj(:,j),BasisnD%tab_basisPrimSG, &
                                            tab_l,tab_nq,derive_termQdyn)
 
-         !write(out_unitp,*) 'dQj Grid of PsiR(itab)',j,PsiRj(:,j) ; flush(out_unitp)
+         !write(out_unit,*) 'dQj Grid of PsiR(itab)',j,PsiRj(:,j) ; flush(out_unit)
        END DO
-       !write(out_unitp,*) ' dQj R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+       !write(out_unit,*) ' dQj R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
        OpPsiR(:) = ZERO
        DO i=1,mole%nb_act1
@@ -1299,7 +1299,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
            PsiRi(:) = PsiRi(:) + GGiq(:,j,i) * PsiRj(:,j)
          END DO
          PsiRi(:) = PsiRi(:) * Jac(:)
-         !write(out_unitp,*) ' Jac Gij* ... Grid of SRep : done',iG,itab,i,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+         !write(out_unit,*) ' Jac Gij* ... Grid of SRep : done',iG,itab,i,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
          derive_termQdyn(:) = [mole%liste_QactTOQdyn(i),0]
 
@@ -1309,11 +1309,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
          OpPsiR(:) = OpPsiR(:) + PsiRi(:)
 
        END DO
-       !write(out_unitp,*) ' dQi Jac Gij* ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+       !write(out_unit,*) ' dQi Jac Gij* ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
        OpPsiR(:) = (  -HALF*OpPsiR(:)/Jac(:) + PsiR(itab)%V(:)*V(:,1,1) ) / sqRhoOVERJac(:)
-       !write(out_unitp,*) ' OpPsiR Grid of PsiR(itab)',OpPsiR
-       !write(out_unitp,*) ' OpPsiR Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+       !write(out_unit,*) ' OpPsiR Grid of PsiR(itab)',OpPsiR
+       !write(out_unit,*) ' OpPsiR Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
        !tranfert OpPsiR (on the grid) to PsiR(itab)
        PsiR(itab)%V(:) = OpPsiR(:)
@@ -1344,12 +1344,12 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
    IF (allocated(tab_nb)) CALL dealloc_NParray(tab_nb,'tab_nb',name_sub)
    IF (allocated(tab_nq)) CALL dealloc_NParray(tab_nq,'tab_nq',name_sub)
-   !write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
+   !write(out_unit,*) '============ END ===============' ; flush(out_unit)
+   !write(out_unit,*) '================================' ; flush(out_unit)
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
   !CALL UnCheck_mem() ; stop
@@ -1357,7 +1357,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
 !=======================================================================================
   SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4(PsiR,iG,tab_l,para_Op,PsiROnGrid)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
 
   USE mod_Coord_KEO,               ONLY : CoordType
@@ -1411,23 +1411,23 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    write(out_unitp,*) 'nb psi',size(PsiR)
-    write(out_unitp,*) 'iG, tab_l(:)',iG,':',tab_l(:)
-    write(out_unitp,*) 'nb0',para_Op%BasisnD%para_SGType2%nb0
-    write(out_unitp,*) 'nq',para_Op%BasisnD%para_SGType2%tab_nq_OF_SRep(iG)
-    write(out_unitp,*) 'nb',para_Op%BasisnD%para_SGType2%tab_nb_OF_SRep(iG)
-    IF (present(PsiROnGrid)) write(out_unitp,*) 'PsiROnGrid',PsiROnGrid
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    write(out_unit,*) 'nb psi',size(PsiR)
+    write(out_unit,*) 'iG, tab_l(:)',iG,':',tab_l(:)
+    write(out_unit,*) 'nb0',para_Op%BasisnD%para_SGType2%nb0
+    write(out_unit,*) 'nq',para_Op%BasisnD%para_SGType2%tab_nq_OF_SRep(iG)
+    write(out_unit,*) 'nb',para_Op%BasisnD%para_SGType2%tab_nb_OF_SRep(iG)
+    IF (present(PsiROnGrid)) write(out_unit,*) 'PsiROnGrid',PsiROnGrid
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
   !CALL Check_mem()
 
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
-   !write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+   !write(out_unit,*) '================================' ; flush(out_unit)
+   !write(out_unit,*) '============ START =============' ; flush(out_unit)
 
    mole    => para_Op%mole
    BasisnD => para_Op%BasisnD
@@ -1493,7 +1493,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
      IF (allocated(OpPsi)) CALL dealloc_NParray(OpPsi,'OpPsi',name_sub)
 
    CASE (1) ! 1 : H: F2.d^2 + F1.d^1 + V
-     IF (debug) write(out_unitp,*) 'nb_Term',para_Op%nb_Term
+     IF (debug) write(out_unit,*) 'nb_Term',para_Op%nb_Term
 
      CALL get_OpGrid_type1_OF_ONEDP_FOR_SG4(iG,tab_l,para_Op,GridOp)
 
@@ -1587,8 +1587,8 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
          ! multiplication by sqRhoOVERJac
          PsiR(itab)%V(iqi:iqf) = PsiR(itab)%V(iqi:iqf) * sqRhoOVERJac(:)
 
-         !write(out_unitp,*) ' R*sq Grid of PsiR :',PsiR%V
-         !write(out_unitp,*) ' R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+         !write(out_unit,*) ' R*sq Grid of PsiR :',PsiR%V
+         !write(out_unit,*) ' R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
 
          ! derivative with respect to Qj
@@ -1598,9 +1598,9 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
            PsiRj(:,j) = PsiR(itab)%V(iqi:iqf)
            CALL DerivOp_TO_RDP_OF_SmolaykRep(PsiRj(:,j),BasisnD%tab_basisPrimSG, &
                                              tab_l,tab_nq,derive_termQdyn)
-           !write(out_unitp,*) 'dQj Grid of PsiR',j,PsiRj(:,j) ; flush(out_unitp)
+           !write(out_unit,*) 'dQj Grid of PsiR',j,PsiRj(:,j) ; flush(out_unit)
          END DO
-         !write(out_unitp,*) ' dQj R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+         !write(out_unit,*) ' dQj R*sq ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
          OpPsiR(:) = ZERO
          DO i=1,mole%nb_act1
@@ -1610,24 +1610,24 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
              PsiRi(:) = PsiRi(:) + GGiq(:,j,i) * PsiRj(:,j)
            END DO
            PsiRi(:) = PsiRi(:) * Jac(:)
-           !write(out_unitp,*) ' Jac Gij* ... Grid of SRep : done',iG,i,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+           !write(out_unit,*) ' Jac Gij* ... Grid of SRep : done',iG,i,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
            derive_termQdyn(:) = [mole%liste_QactTOQdyn(i),0]
 
            CALL DerivOp_TO_RDP_OF_SmolaykRep(PsiRi(:),BasisnD%tab_basisPrimSG,&
                                                tab_l,tab_nq,derive_termQdyn)
 
-           !write(out_unitp,*) 'shape OpPsiR,PsiRi ',shape(OpPsiR),shape(PsiRi)
-           !write(out_unitp,*) 'DerivOp_TO_RDP_OF_SmolaykRep : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+           !write(out_unit,*) 'shape OpPsiR,PsiRi ',shape(OpPsiR),shape(PsiRi)
+           !write(out_unit,*) 'DerivOp_TO_RDP_OF_SmolaykRep : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
            OpPsiR(:) = OpPsiR(:) + PsiRi(:)
          END DO
 
-         !write(out_unitp,*) ' dQi Jac Gij* ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+         !write(out_unit,*) ' dQi Jac Gij* ... Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
          OpPsiR(:) =   -HALF*OpPsiR(:) / ( Jac(:)*sqRhoOVERJac(:) ) + VPsi(:,ib0)
-         !write(out_unitp,*) ' OpPsiR Grid of PsiR',OpPsiR
-         !write(out_unitp,*) ' OpPsiR Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unitp)
+         !write(out_unit,*) ' OpPsiR Grid of PsiR',OpPsiR
+         !write(out_unit,*) ' OpPsiR Grid of PsiR : done',OMP_GET_THREAD_NUM() ; flush(out_unit)
 
          !tranfert OpPsiR (on the grid) to PsiR
          PsiR(itab)%V(iqi:iqf) = OpPsiR(:)
@@ -1661,12 +1661,12 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 
    IF (allocated(tab_nb)) CALL dealloc_NParray(tab_nb,'tab_nb',name_sub)
    IF (allocated(tab_nq)) CALL dealloc_NParray(tab_nq,'tab_nq',name_sub)
-   !write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
+   !write(out_unit,*) '============ END ===============' ; flush(out_unit)
+   !write(out_unit,*) '================================' ; flush(out_unit)
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
   !CALL UnCheck_mem() ; stop
@@ -1677,7 +1677,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
 !> sub_TabOpPsi_OF_ONEDP_FOR_SGtype4 for working on fulll Smolyak rep. on basis
 !=======================================================================================
   SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRB_MPI(iG,psi,OpPsi,tab_l,para_Op)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
   USE mod_Coord_KEO,              ONLY:CoordType
   USE mod_basis_set_alloc,        ONLY:basis
@@ -1927,7 +1927,7 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRB_MPI
 !> sub_TabOpPsi_OF_ONEDP_FOR_SGtype4 for working on fulll Smolyak rep.
 !=======================================================================================
   SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI(iG,psi,OpPsi,tab_l,para_Op)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
   USE mod_Coord_KEO,              ONLY:CoordType
   USE mod_basis_set_alloc,        ONLY:basis
@@ -2161,7 +2161,7 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
 
   SUBROUTINE sub_TabOpPsi_OF_ONEGDP_WithOp_FOR_SGtype4(PsiR,iG,para_Op, &
                                                    V,GG,sqRhoOVERJac,Jac)
-  USE mod_system
+  USE EVR_system_m
 
   USE mod_Coord_KEO,               ONLY : CoordType
 
@@ -2209,17 +2209,17 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
   !CALL Check_mem()
 
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
-   !write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+   !write(out_unit,*) '================================' ; flush(out_unit)
+   !write(out_unit,*) '============ START =============' ; flush(out_unit)
 
    mole    => para_Op%mole
    BasisnD => para_Op%BasisnD
@@ -2253,8 +2253,8 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      ! multiplication by sqRhoOVERJac
      PsiR(itab)%V(:) = PsiR(itab)%V(:) * sqRhoOVERJac(:)
 
-     !write(out_unitp,*) ' R*sq Grid of PsiR(itab) :',PsiR
-     !write(out_unitp,*) ' R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' R*sq Grid of PsiR(itab) :',PsiR
+     !write(out_unit,*) ' R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
 
      ! derivative with respect to Qj
@@ -2265,9 +2265,9 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
        CALL DerivOp_TO_RDP_OF_SmolaykRep(PsiRj(:,j),BasisnD%tab_basisPrimSG, &
                                          tab_l,tab_nq,derive_termQdyn)
 
-       !write(out_unitp,*) 'dQj Grid of PsiR(itab)',j,PsiRj(:,j) ; flush(out_unitp)
+       !write(out_unit,*) 'dQj Grid of PsiR(itab)',j,PsiRj(:,j) ; flush(out_unit)
      END DO
-     !write(out_unitp,*) ' dQj R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' dQj R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      OpPsiR(:) = ZERO
      DO i=1,mole%nb_act1
@@ -2277,7 +2277,7 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
          PsiRi(:) = PsiRi(:) + GG(:,j,i) * PsiRj(:,j)
        END DO
        PsiRi(:) = PsiRi(:) * Jac(:)
-       !write(out_unitp,*) ' Jac Gij* ... Grid of SRep : done',iG,itab,i,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+       !write(out_unit,*) ' Jac Gij* ... Grid of SRep : done',iG,itab,i,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
        derive_termQdyn(:) = [mole%liste_QactTOQdyn(i),0]
 
@@ -2287,11 +2287,11 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
        OpPsiR(:) = OpPsiR(:) + PsiRi(:)
 
      END DO
-     !write(out_unitp,*) ' dQi Jac Gij* ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' dQi Jac Gij* ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      OpPsiR(:) = (  -HALF*OpPsiR(:)/Jac(:) + PsiR(itab)%V(:)*V(:) ) / sqRhoOVERJac(:)
-     !write(out_unitp,*) ' OpPsiR Grid of PsiR(itab)',OpPsiR
-     !write(out_unitp,*) ' OpPsiR Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' OpPsiR Grid of PsiR(itab)',OpPsiR
+     !write(out_unit,*) ' OpPsiR Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      !tranfert OpPsiR (on the grid) to PsiR(itab)
      PsiR(itab)%V(:) = OpPsiR(:)
@@ -2311,20 +2311,20 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
    IF (allocated(tab_nq))       CALL dealloc_NParray(tab_nq,      'tab_nq',      name_sub)
    IF (allocated(tab_l))        CALL dealloc_NParray(tab_l,       'tab_l',       name_sub)
 
-   !write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
+   !write(out_unit,*) '============ END ===============' ; flush(out_unit)
+   !write(out_unit,*) '================================' ; flush(out_unit)
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
   !CALL UnCheck_mem() ; stop
   END SUBROUTINE sub_TabOpPsi_OF_ONEGDP_WithOp_FOR_SGtype4
 
   SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_ompGrid(PsiR,iG,para_Op)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
 
   USE mod_Coord_KEO,               ONLY : CoordType, get_d0GG
@@ -2377,17 +2377,17 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
   !CALL Check_mem()
 
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
-   !write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+   !write(out_unit,*) '================================' ; flush(out_unit)
+   !write(out_unit,*) '============ START =============' ; flush(out_unit)
 
 
   IF (Grid_omp == 0 .AND. OpPsi_omp > 0) THEN
@@ -2457,14 +2457,14 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      CALL BDP_TO_GDP_OF_SmolyakRep(PsiR(itab)%V,BasisnD%tab_basisPrimSG,&
                                    tab_l,tab_nq,tab_nb)
      ! now PsiR is on the grid
-     !write(out_unitp,*) ' R Grid of PsiR(itab) :',PsiR(itab)%V
-     !write(out_unitp,*) ' R Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' R Grid of PsiR(itab) :',PsiR(itab)%V
+     !write(out_unit,*) ' R Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      ! multiplication by sqRhoOVERJac
      PsiR(itab)%V(:) = PsiR(itab)%V(:) * sqRhoOVERJac(:)
 
-     !write(out_unitp,*) ' R*sq Grid of PsiR(itab) :',PsiR
-     !write(out_unitp,*) ' R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' R*sq Grid of PsiR(itab) :',PsiR
+     !write(out_unit,*) ' R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
 
      ! derivative with respect to Qj
@@ -2475,9 +2475,9 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
        CALL DerivOp_TO_RDP_OF_SmolaykRep(PsiRj(:,j),BasisnD%tab_basisPrimSG, &
                                          tab_l,tab_nq,derive_termQdyn)
 
-       !write(out_unitp,*) 'dQj Grid of PsiR(itab)',j,PsiRj(:,j) ; flush(out_unitp)
+       !write(out_unit,*) 'dQj Grid of PsiR(itab)',j,PsiRj(:,j) ; flush(out_unit)
      END DO
-     !write(out_unitp,*) ' dQj R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' dQj R*sq ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      OpPsiR(:) = ZERO
      DO i=1,mole%nb_act1
@@ -2487,7 +2487,7 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
          PsiRi(:) = PsiRi(:) + GGiq(:,j,i) * PsiRj(:,j)
        END DO
        PsiRi(:) = PsiRi(:) * Jac(:)
-       !write(out_unitp,*) ' Jac Gij* ... Grid of SRep : done',iG,itab,i,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+       !write(out_unit,*) ' Jac Gij* ... Grid of SRep : done',iG,itab,i,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
        derive_termQdyn(:) = [mole%liste_QactTOQdyn(i),0]
 
@@ -2497,11 +2497,11 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
        OpPsiR(:) = OpPsiR(:) + PsiRi(:)
 
      END DO
-     !write(out_unitp,*) ' dQi Jac Gij* ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' dQi Jac Gij* ... Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      OpPsiR(:) = (  -HALF*OpPsiR(:)/Jac(:) + PsiR(itab)%V(:)*V(:,1,1) ) / sqRhoOVERJac(:)
-     !write(out_unitp,*) ' OpPsiR Grid of PsiR(itab)',OpPsiR
-     !write(out_unitp,*) ' OpPsiR Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unitp)
+     !write(out_unit,*) ' OpPsiR Grid of PsiR(itab)',OpPsiR
+     !write(out_unit,*) ' OpPsiR Grid of PsiR(itab) : done',itab,OMP_GET_THREAD_NUM() ; flush(out_unit)
 
      !tranfert OpPsiR (on the grid) to PsiR(itab)
      PsiR(itab)%V(:) = OpPsiR(:)
@@ -2528,20 +2528,20 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
    IF (allocated(Jac))          CALL dealloc_NParray(Jac,         'Jac',         name_sub)
    IF (allocated(V))            CALL dealloc_NParray(V,           'V',           name_sub)
 
-   !write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
+   !write(out_unit,*) '============ END ===============' ; flush(out_unit)
+   !write(out_unit,*) '================================' ; flush(out_unit)
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
   !CALL UnCheck_mem() ; stop
   END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_ompGrid
 
   SUBROUTINE get_OpGrid_type10_OF_ONEDP_FOR_SG4(iG,tab_l,para_Op,V,GGiq,sqRhoOVERJac,Jac)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
 
   USE mod_Coord_KEO,               ONLY: CoordType, get_d0GG
@@ -2596,16 +2596,16 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
 
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
-   !write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+   !write(out_unit,*) '================================' ; flush(out_unit)
+   !write(out_unit,*) '============ START =============' ; flush(out_unit)
 
    mole    => para_Op%mole
    BasisnD => para_Op%BasisnD
@@ -2636,10 +2636,10 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
    lformatted = para_Op%OpGrid(iterm00)%para_FileGrid%Formatted_FileGrid
 
    IF (debug) THEN
-     write(out_unitp,*) iG,'Save_MemGrid,Save_MemGrid_done',            &
+     write(out_unit,*) iG,'Save_MemGrid,Save_MemGrid_done',            &
                  para_Op%OpGrid(iterm00)%para_FileGrid%Save_MemGrid,    &
                  para_Op%OpGrid(iterm00)%para_FileGrid%Save_MemGrid_done
-     write(out_unitp,*) iG,'Save_FileGrid,Save_FileGrid_done',          &
+     write(out_unit,*) iG,'Save_FileGrid,Save_FileGrid_done',          &
                 para_Op%OpGrid(iterm00)%para_FileGrid%Save_FileGrid,    &
                 para_Op%OpGrid(iterm00)%para_FileGrid%Save_FileGrid_done
    END IF
@@ -2681,23 +2681,23 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      FileName_RV = trim(para_Op%OpGrid(iterm00)%file_Grid%name) // '_SGterm' // TO_string(iG)
 
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq, FileName_RV',iG,nq,FileName_RV
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq, FileName_RV',iG,nq,FileName_RV
+       flush(out_unit)
      END IF
 
      ! this subroutine does not work because V as 3 dim (before 1)
      !CALL sub_ReadRV(V,FileName_RV,lformatted,err_sub)
      IF (err_sub /= 0) STOP 'error while reading the grid'
      IF (nq /= size(V)) THEN
-       write(out_unitp,*) ' ERROR in ',name_sub
-       write(out_unitp,*) ' the size of the subroutine and file grids are different'
-       write(out_unitp,*) ' nq (subroutine) and nq (file):',nq,size(V)
-       write(out_unitp,*) ' file name: ',FileName_RV
+       write(out_unit,*) ' ERROR in ',name_sub
+       write(out_unit,*) ' the size of the subroutine and file grids are different'
+       write(out_unit,*) ' nq (subroutine) and nq (file):',nq,size(V)
+       write(out_unit,*) ' file name: ',FileName_RV
        STOP
      END IF
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq, read V',iG,nq
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq, read V',iG,nq
+       flush(out_unit)
      END IF
 
     !$OMP  END CRITICAL (get_OpGrid_type10_OF_ONEDP_FOR_SG4_CRIT2)
@@ -2746,14 +2746,14 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
         END DO
 
         IF (iG == 1 .AND. debug) THEN
-          write(out_unitp,*) 'iG,nq,V',iG,nq,V
-          flush(out_unitp)
+          write(out_unit,*) 'iG,nq,V',iG,nq,V
+          flush(out_unit)
         END IF
 
      END IF
 
    END DO
-   !IF (debug) write(out_unitp,*) 'V(:,:,:)',V(:,:,:)
+   !IF (debug) write(out_unit,*) 'V(:,:,:)',V(:,:,:)
 
 
    IF (para_Op%OpGrid(iterm00)%para_FileGrid%Save_MemGrid .AND.       &
@@ -2764,8 +2764,8 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      para_Op%OpGrid(iterm00)%Grid(itabR-nR+1:itabR,:,:) = V
 
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq, save mem V',iG,nq
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq, save mem V',iG,nq
+       flush(out_unit)
      END IF
 
    END IF
@@ -2784,8 +2784,8 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      !CALL sub_WriteRV(V,FileName_RV,lformatted,err_sub)
 
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq, save file V',iG,nq
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq, save file V',iG,nq
+       flush(out_unit)
      END IF
 
 !    !$OMP  END CRITICAL (get_OpGrid_type10_OF_ONEDP_FOR_SG4_CRIT1)
@@ -2800,22 +2800,22 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
     deallocate(d0MatOp)
   END IF
 
-   !write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
+   !write(out_unit,*) '============ END ===============' ; flush(out_unit)
+   !write(out_unit,*) '================================' ; flush(out_unit)
 
   !-----------------------------------------------------------
   IF (debug) THEN
     DO i=1,nb0
     DO j=1,nb0
-      write(out_unitp,*) 'V(:,j,i) ',j,i,V(:,j,i)
+      write(out_unit,*) 'V(:,j,i) ',j,i,V(:,j,i)
     END DO
     END DO
-    write(out_unitp,*) 'GGiq(iq,:,:)'
+    write(out_unit,*) 'GGiq(iq,:,:)'
     DO iq=1,nq
-      CALL Write_Mat(GGiq(iq,:,:),out_unitp,6)
+      CALL Write_Mat(GGiq(iq,:,:),out_unit,6)
     END DO
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
   END SUBROUTINE get_OpGrid_type10_OF_ONEDP_FOR_SG4
@@ -2823,7 +2823,7 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
 !=======================================================================================
 ! get_OpGrid_type1_OF_ONEDP_FOR_SG4 added SmolyakRep part
   SUBROUTINE get_OpGrid_type1_OF_ONEDP_FOR_SG4(iG,tab_l,para_Op,GridOp)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
 
   USE mod_Coord_KEO,               ONLY : CoordType
@@ -2874,16 +2874,16 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
 
- IF (iG == 1 .AND. debug) write(out_unitp,*) '================================' ; flush(out_unitp)
- IF (iG == 1 .AND. debug) write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+ IF (iG == 1 .AND. debug) write(out_unit,*) '================================' ; flush(out_unit)
+ IF (iG == 1 .AND. debug) write(out_unit,*) '============ START =============' ; flush(out_unit)
 
    mole    => para_Op%mole
    BasisnD => para_Op%BasisnD
@@ -2909,10 +2909,10 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
    iterm00   = para_Op%derive_term_TO_iterm(0,0)
    iOp       = Get_iOp_FROM_n_Op(para_Op%n_Op)
 
-   !write(out_unitp,*) name_sub,' iOp',iOp
+   !write(out_unit,*) name_sub,' iOp',iOp
 
    IF (iG == 1 .AND. debug) THEN
-     write(out_unitp,*) iG,'Save_MemGrid,Save_MemGrid_done',            &
+     write(out_unit,*) iG,'Save_MemGrid,Save_MemGrid_done',            &
                  para_Op%OpGrid(iterm00)%para_FileGrid%Save_MemGrid,    &
                  para_Op%OpGrid(iterm00)%para_FileGrid%Save_MemGrid_done
    END IF
@@ -2924,12 +2924,12 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      zero_term = para_Op%zero_term(iterm) .OR. para_Op%OpGrid(iterm)%grid_zero
 
      IF (zero_term) THEN
-       IF (iG == 1 .AND. debug) write(out_unitp,*) ' Op term: zero',iG,nq
+       IF (iG == 1 .AND. debug) write(out_unit,*) ' Op term: zero',iG,nq
 
        GridOp(:,:,:,iterm) = ZERO
        Op_term_done(iterm) = .TRUE.
      ELSE IF (para_Op%OpGrid(iterm)%grid_cte) THEN
-       IF (iG == 1 .AND. debug) write(out_unitp,*) ' Op term: cte',iG,iterm,nq
+       IF (iG == 1 .AND. debug) write(out_unit,*) ' Op term: cte',iG,iterm,nq
        DO i=1,nb0
        DO j=1,nb0
            GridOp(:,j,i,iterm) = para_Op%OpGrid(iterm)%Mat_cte(j,i)
@@ -2952,7 +2952,7 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
           IF (Op_term_done(iterm)) CYCLE
 
           IF (associated(para_Op%OpGrid(iterm)%Grid)) THEN
-            IF (iG == 1 .AND. debug) write(out_unitp,*) ' Op term: from memory',iG,iterm,nq
+            IF (iG == 1 .AND. debug) write(out_unit,*) ' Op term: from memory',iG,iterm,nq
             Op_term_done(iterm) = .TRUE.
             DO i=1,nb0
             DO j=1,nb0
@@ -2962,14 +2962,14 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
             END DO
             END DO
           ELSE
-            IF (iG == 1 .AND. debug) write(out_unitp,*) ' Op term: from memory SRep',iG,iterm,nq
+            IF (iG == 1 .AND. debug) write(out_unit,*) ' Op term: from memory SRep',iG,iterm,nq
             Op_term_done(iterm) = .TRUE.
             GridOp(:,:,:,iterm) = reshape(para_Op%OpGrid(iterm)%SRep%SmolyakRep(iG)%V,shape=[nq,nb0,nb0])
           END IF
 
           IF (iG == 1 .AND. debug) THEN
-            write(out_unitp,*) 'iG,nq,GridOp: from mem',iG,nq,GridOp(:,:,:,iterm)
-            flush(out_unitp)
+            write(out_unit,*) 'iG,nq,GridOp: from mem',iG,nq,GridOp(:,:,:,iterm)
+            flush(out_unit)
           END IF
 
         END DO
@@ -3014,8 +3014,8 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
 
 
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq,GridOp: calc',iG,nq,GridOp(:,:,:,iterm00)
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq,GridOp: calc',iG,nq,GridOp(:,:,:,iterm00)
+       flush(out_unit)
      END IF
    END IF
 
@@ -3029,7 +3029,7 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
 
        ! tag: para_Op%BasisnD%SparseGrid_type==4
        IF (allocated(para_Op%OpGrid(iterm)%SRep%SmolyakRep)) THEN
-         IF (iG == 1 .AND. debug) write(out_unitp,*) 'iG,nq,GridOp SRep: save mem Grid',iterm
+         IF (iG == 1 .AND. debug) write(out_unit,*) 'iG,nq,GridOp SRep: save mem Grid',iterm
 
          para_Op%OpGrid(iterm)%SRep%SmolyakRep(iG)%V = reshape(GridOp(:,:,:,iterm),shape=[nq*nb0**2])
          para_Op%OpGrid(iterm)%grid_zero = .FALSE.
@@ -3039,23 +3039,23 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
                                para_Op%OpGrid(1)%para_FileGrid%Save_MemGrid_iG(iG)=.TRUE.
 
          IF (iG == 1 .AND. debug) THEN
-           write(out_unitp,*) 'iG,nq,GridOp: save mem Grid',iG,nq,para_Op%OpGrid(iterm)%SRep%SmolyakRep(iG)%V
-           flush(out_unitp)
+           write(out_unit,*) 'iG,nq,GridOp: save mem Grid',iG,nq,para_Op%OpGrid(iterm)%SRep%SmolyakRep(iG)%V
+           flush(out_unit)
          END IF
 
        ELSE IF (associated(para_Op%OpGrid(iterm)%Grid)) THEN
          itabR = BasisnD%para_SGType2%tab_Sum_nq_OF_SRep(iG)
          nR    = BasisnD%para_SGType2%tab_nq_OF_SRep(iG)
 
-         IF (iG == 1 .AND. debug) write(out_unitp,*) 'iG,nq,GridOp: save mem Grid',iterm
+         IF (iG == 1 .AND. debug) write(out_unit,*) 'iG,nq,GridOp: save mem Grid',iterm
 
          para_Op%OpGrid(iterm)%Grid(itabR-nR+1:itabR,:,:) = GridOp(:,:,:,iterm)
          para_Op%OpGrid(iterm)%grid_zero = .FALSE.
          para_Op%OpGrid(iterm)%grid_cte  = .FALSE.
 
          IF (iG == 1 .AND. debug) THEN
-           write(out_unitp,*) 'iG,nq,GridOp: save mem Grid',iG,nq,para_Op%OpGrid(iterm)%Grid(itabR-nR+1:itabR,:,:)
-           flush(out_unitp)
+           write(out_unit,*) 'iG,nq,GridOp: save mem Grid',iG,nq,para_Op%OpGrid(iterm)%Grid(itabR-nR+1:itabR,:,:)
+           flush(out_unit)
          END IF
 
        END IF
@@ -3074,23 +3074,23 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
     deallocate(d0MatOp)
   END IF
 
- IF (iG == 1 .AND. debug)  write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
- IF (iG == 1 .AND. debug)  write(out_unitp,*) '================================' ; flush(out_unitp)
+ IF (iG == 1 .AND. debug)  write(out_unit,*) '============ END ===============' ; flush(out_unit)
+ IF (iG == 1 .AND. debug)  write(out_unit,*) '================================' ; flush(out_unit)
 
   !-----------------------------------------------------------
   IF (debug) THEN
     !DO iterm=1,para_Op%nb_Term
-    !  write(out_unitp,*) 'GridOp(:,:,:,iterm)',iterm,GridOp(:,:,:,iterm)
+    !  write(out_unit,*) 'GridOp(:,:,:,iterm)',iterm,GridOp(:,:,:,iterm)
     !END DO
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
   END SUBROUTINE get_OpGrid_type1_OF_ONEDP_FOR_SG4
 !=======================================================================================
 
   SUBROUTINE get_OpGrid_type0_OF_ONEDP_FOR_SG4(iG,tab_l,para_Op,V)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
 
   USE mod_Coord_KEO,               ONLY: CoordType
@@ -3142,16 +3142,16 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-    write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-    write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+    write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+    write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
 
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
-   !write(out_unitp,*) '============ START =============' ; flush(out_unitp)
+   !write(out_unit,*) '================================' ; flush(out_unit)
+   !write(out_unit,*) '============ START =============' ; flush(out_unit)
 
    mole    => para_Op%mole
    BasisnD => para_Op%BasisnD
@@ -3175,10 +3175,10 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
    lformatted = para_Op%OpGrid(iterm00)%para_FileGrid%Formatted_FileGrid
 
    IF (debug) THEN
-     write(out_unitp,*) iG,'Save_MemGrid,Save_MemGrid_done',            &
+     write(out_unit,*) iG,'Save_MemGrid,Save_MemGrid_done',            &
                  para_Op%OpGrid(iterm00)%para_FileGrid%Save_MemGrid,    &
                  para_Op%OpGrid(iterm00)%para_FileGrid%Save_MemGrid_done
-     write(out_unitp,*) iG,'Save_FileGrid,Save_FileGrid_done',          &
+     write(out_unit,*) iG,'Save_FileGrid,Save_FileGrid_done',          &
                 para_Op%OpGrid(iterm00)%para_FileGrid%Save_FileGrid,    &
                 para_Op%OpGrid(iterm00)%para_FileGrid%Save_FileGrid_done
    END IF
@@ -3217,23 +3217,23 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      FileName_RV = trim(para_Op%OpGrid(iterm00)%file_Grid%name) // '_SGterm' // TO_string(iG)
 
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq, FileName_RV',iG,nq,FileName_RV
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq, FileName_RV',iG,nq,FileName_RV
+       flush(out_unit)
      END IF
 
      ! the rank of V is 3 now, this subroutine work with rank 1
      !CALL sub_ReadRV(V,FileName_RV,lformatted,err_sub)
      IF (err_sub /= 0) STOP 'error while reading the grid'
      IF (nq /= size(V)) THEN
-       write(out_unitp,*) ' ERROR in ',name_sub
-       write(out_unitp,*) ' the size of the subroutine and file grids are different'
-       write(out_unitp,*) ' nq (subroutine) and nq (file):',nq,size(V)
-       write(out_unitp,*) ' file name: ',FileName_RV
+       write(out_unit,*) ' ERROR in ',name_sub
+       write(out_unit,*) ' the size of the subroutine and file grids are different'
+       write(out_unit,*) ' nq (subroutine) and nq (file):',nq,size(V)
+       write(out_unit,*) ' file name: ',FileName_RV
        STOP
      END IF
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq, read V',iG,nq
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq, read V',iG,nq
+       flush(out_unit)
      END IF
      !$OMP  END CRITICAL (get_OpGrid_type0_OF_ONEDP_FOR_SG4_CRIT2)
 
@@ -3262,8 +3262,8 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
         V(iq,:,:) = d0MatOp(iterm00)%ReVal(:,:,1)
 
         IF (iG == 1 .AND. debug) THEN
-          write(out_unitp,*) 'iG,nq,V',iG,nq,V
-          flush(out_unitp)
+          write(out_unit,*) 'iG,nq,V',iG,nq,V
+          flush(out_unit)
         END IF
 
      END IF
@@ -3278,8 +3278,8 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      para_Op%OpGrid(iterm00)%Grid(itabR-nR+1:itabR,:,:) = V(:,:,:)
 
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq, save mem V',iG,nq
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq, save mem V',iG,nq
+       flush(out_unit)
      END IF
 
    END IF
@@ -3297,8 +3297,8 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
      !CALL sub_WriteRV(V,FileName_RV,lformatted,err_sub)
 
      IF (iG == 1 .AND. debug) THEN
-       write(out_unitp,*) 'iG,nq, save file V',iG,nq
-       flush(out_unitp)
+       write(out_unit,*) 'iG,nq, save file V',iG,nq
+       flush(out_unit)
      END IF
 
 !    !$OMP  END CRITICAL (get_OpGrid_type0_OF_ONEDP_FOR_SG4_CRIT1)
@@ -3314,13 +3314,13 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
     deallocate(d0MatOp)
   END IF
 
-   !write(out_unitp,*) '============ END ===============' ; flush(out_unitp)
-   !write(out_unitp,*) '================================' ; flush(out_unitp)
+   !write(out_unit,*) '============ END ===============' ; flush(out_unit)
+   !write(out_unit,*) '================================' ; flush(out_unit)
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
   END SUBROUTINE get_OpGrid_type0_OF_ONEDP_FOR_SG4

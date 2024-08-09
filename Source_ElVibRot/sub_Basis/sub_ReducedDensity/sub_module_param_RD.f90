@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_param_RD
-USE mod_system
+USE EVR_system_m
 use mod_nDindex
 IMPLICIT NONE
 
@@ -146,8 +146,8 @@ character (len=*), parameter :: name_sub='init_RD'
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nDindB: '
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nDindB: '
     CALL Write_nDindex(nDindB)
   END IF
   !-----------------------------------------------------------
@@ -156,8 +156,8 @@ character (len=*), parameter :: name_sub='init_RD'
   !para_RD%nb = maxval(nDindB%Tab_nDval(ibasis,:))
   para_RD%nb = nDindB%nDsize(ibasis)
 
-  IF (debug) write(out_unitp,*) 'para_RD%basis_index: ',para_RD%basis_index
-  IF (debug) write(out_unitp,*) 'para_RD%nb:          ',para_RD%nb
+  IF (debug) write(out_unit,*) 'para_RD%basis_index: ',para_RD%basis_index
+  IF (debug) write(out_unit,*) 'para_RD%nb:          ',para_RD%nb
 
   para_RD%nDindex_ComplBasis = nDindB
 
@@ -178,7 +178,7 @@ character (len=*), parameter :: name_sub='init_RD'
      With_init=.FALSE.,With_nDindex=.TRUE.)
 
   IF (debug) THEN
-    write(out_unitp,*) 'nDindex_ComplBasis: '
+    write(out_unit,*) 'nDindex_ComplBasis: '
     CALL Write_nDindex(para_RD%nDindex_ComplBasis)
   END IF
 
@@ -207,14 +207,14 @@ character (len=*), parameter :: name_sub='init_RD'
   IF (present(Rvec)) THEN
   IF (allocated(Rvec)) THEN
 
-    !write(out_unitp,*) 'shape(Rvec)',shape(Rvec)
+    !write(out_unit,*) 'shape(Rvec)',shape(Rvec)
 
     CALL alloc_NParray(para_RD%cbb,shape(Rvec),'para_RD%cbb',name_sub)
     para_RD%cbb(:,:) = Rvec
 
     IF (debug) THEN
-      write(out_unitp,*) 'para_RD%cbb(:,:)'
-      CALL Write_Mat(para_RD%cbb,out_unitp,5)
+      write(out_unit,*) 'para_RD%cbb(:,:)'
+      CALL Write_Mat(para_RD%cbb,out_unit,5)
     END IF
 
   END IF
@@ -222,12 +222,12 @@ character (len=*), parameter :: name_sub='init_RD'
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'tab_OF_iBComplBasis_AND_ib_TO_iB'
+    write(out_unit,*) 'tab_OF_iBComplBasis_AND_ib_TO_iB'
     DO iB=1,para_RD%nDindex_ComplBasis%Max_nDI
       CALL calc_nDindex(nDindB,iB,nDval)
-      write(out_unitp,*) 'iB:',nDval(:),':',para_RD%tab_OF_iBComplBasis_AND_ib_TO_iB(:,iB)
+      write(out_unit,*) 'iB:',nDval(:),':',para_RD%tab_OF_iBComplBasis_AND_ib_TO_iB(:,iB)
     END DO
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
   !-----------------------------------------------------------
 
@@ -256,17 +256,17 @@ character (len=*), parameter :: name_sub='calc_RD'
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'BEGINNING ',name_sub
   END IF
   !-----------------------------------------------------------
 
   IF (size(RvecB) /= maxval(para_RD%tab_OF_iBComplBasis_AND_ib_TO_iB)) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) 'the size of RvecB is not consistent with tab_OF_iBComplBasis_AND_ib_TO_iB'
-    write(out_unitp,*) 'size(RvecB):',size(RvecB)
-    write(out_unitp,*) 'maxval(tab_OF_iBComplBasis_AND_ib_TO_iB):',     &
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) 'the size of RvecB is not consistent with tab_OF_iBComplBasis_AND_ib_TO_iB'
+    write(out_unit,*) 'size(RvecB):',size(RvecB)
+    write(out_unit,*) 'maxval(tab_OF_iBComplBasis_AND_ib_TO_iB):',     &
                         maxval(para_RD%tab_OF_iBComplBasis_AND_ib_TO_iB)
-    write(out_unitp,*) ' Check the fortran.'
+    write(out_unit,*) ' Check the fortran.'
     STOP ' ERROR calc_RD: inconsistent parameters'
   END IF
 
@@ -288,11 +288,11 @@ character (len=*), parameter :: name_sub='calc_RD'
   END DO
 
   IF (debug) THEN
-    write(out_unitp,*) 'RD_loc(:,:)'
-    CALL Write_Mat(RD_loc,out_unitp,5)
+    write(out_unit,*) 'RD_loc(:,:)'
+    CALL Write_Mat(RD_loc,out_unit,5)
   END IF
 
-  IF (printRD_loc) write(out_unitp,*) 'Diag RD           ',para_RD%basis_index,(RD_loc(i,i),i=1,para_RD%nb)
+  IF (printRD_loc) write(out_unit,*) 'Diag RD           ',para_RD%basis_index,(RD_loc(i,i),i=1,para_RD%nb)
 
   IF (allocated(para_RD%cbb)) THEN
 
@@ -300,11 +300,11 @@ character (len=*), parameter :: name_sub='calc_RD'
     CALL alloc_NParray(RDcontrac_loc,[nbc,nbc],'RDcontrac',name_sub)
     RDcontrac_loc(:,:) = matmul(transpose(para_RD%cbb),matmul(RD_loc,para_RD%cbb))
 
-    IF (printRD_loc) write(out_unitp,*) 'Diag RD contracted',para_RD%basis_index,(RDcontrac_loc(i,i),i=1,nbc)
+    IF (printRD_loc) write(out_unit,*) 'Diag RD contracted',para_RD%basis_index,(RDcontrac_loc(i,i),i=1,nbc)
 
     IF (debug) THEN
-      write(out_unitp,*) 'RDcontrac_loc(:,:)'
-      CALL Write_Mat(RDcontrac_loc,out_unitp,5)
+      write(out_unit,*) 'RDcontrac_loc(:,:)'
+      CALL Write_Mat(RDcontrac_loc,out_unit,5)
     END IF
 
     IF (present(RDcontrac)) CALL MOVE_ALLOC( TO=RDcontrac, FROM=RDcontrac_loc )
@@ -318,7 +318,7 @@ character (len=*), parameter :: name_sub='calc_RD'
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
   !-----------------------------------------------------------
 
@@ -347,17 +347,17 @@ character (len=*), parameter :: name_sub='calc_CRD'
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'BEGINNING ',name_sub
   END IF
   !-----------------------------------------------------------
 
   IF (size(CvecB) /= maxval(para_RD%tab_OF_iBComplBasis_AND_ib_TO_iB)) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) 'the size of CvecB is not consistent with tab_OF_iBComplBasis_AND_ib_TO_iB'
-    write(out_unitp,*) 'size(CvecB):',size(CvecB)
-    write(out_unitp,*) 'maxval(tab_OF_iBComplBasis_AND_ib_TO_iB):',     &
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) 'the size of CvecB is not consistent with tab_OF_iBComplBasis_AND_ib_TO_iB'
+    write(out_unit,*) 'size(CvecB):',size(CvecB)
+    write(out_unit,*) 'maxval(tab_OF_iBComplBasis_AND_ib_TO_iB):',     &
                         maxval(para_RD%tab_OF_iBComplBasis_AND_ib_TO_iB)
-    write(out_unitp,*) ' Check the fortran.'
+    write(out_unit,*) ' Check the fortran.'
     STOP ' ERROR calc_CRD: inconsistent parameters'
   END IF
 
@@ -379,11 +379,11 @@ character (len=*), parameter :: name_sub='calc_CRD'
   END DO
 
   IF (debug) THEN
-    write(out_unitp,*) 'CRD_loc(:,:)'
-    CALL Write_Mat(CRD_loc,out_unitp,5)
+    write(out_unit,*) 'CRD_loc(:,:)'
+    CALL Write_Mat(CRD_loc,out_unit,5)
   END IF
 
-  IF (printRD_loc) write(out_unitp,*) 'Diag CRD           ',para_RD%basis_index,(CRD_loc(i,i),i=1,para_RD%nb)
+  IF (printRD_loc) write(out_unit,*) 'Diag CRD           ',para_RD%basis_index,(CRD_loc(i,i),i=1,para_RD%nb)
 
   IF (allocated(para_RD%cbb)) THEN
 
@@ -391,11 +391,11 @@ character (len=*), parameter :: name_sub='calc_CRD'
     CALL alloc_NParray(CRDcontrac_loc,[nbc,nbc],'CRDcontrac',name_sub)
     CRDcontrac_loc(:,:) = matmul(transpose(para_RD%cbb),matmul(CRD_loc,para_RD%cbb))
 
-    IF (printRD_loc) write(out_unitp,*) 'Diag CRD contracted',para_RD%basis_index,(CRDcontrac_loc(i,i),i=1,nbc)
+    IF (printRD_loc) write(out_unit,*) 'Diag CRD contracted',para_RD%basis_index,(CRDcontrac_loc(i,i),i=1,nbc)
 
     IF (debug) THEN
-      write(out_unitp,*) 'CRDcontrac_loc(:,:)'
-      CALL Write_Mat(CRDcontrac_loc,out_unitp,5)
+      write(out_unit,*) 'CRDcontrac_loc(:,:)'
+      CALL Write_Mat(CRDcontrac_loc,out_unit,5)
     END IF
 
     IF (present(CRDcontrac)) CALL MOVE_ALLOC( TO=CRDcontrac, FROM=CRDcontrac_loc )
@@ -410,7 +410,7 @@ character (len=*), parameter :: name_sub='calc_CRD'
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
   !-----------------------------------------------------------
 

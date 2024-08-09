@@ -7,7 +7,7 @@ DIR_pot=$DIR_vib/sub_pot
  cp $SYSTEM $DIR_pot/sub_system.f
 
 cd $DIR_vib
- make
+ make OPT=0
 cd $here
 
  x1=0.538516066
@@ -16,7 +16,7 @@ cd $here
 #export OMP_NUM_THREADS=4
 
 nice $DIR_vib/vib << ** > res
- &system RMatFormat="f18.10" EneFormat="e22.15" /
+ &system RMatFormat="f18.10" EneFormat="e22.15" printlevel=2 /
  &constantes /
  &variables 
          zmat=T

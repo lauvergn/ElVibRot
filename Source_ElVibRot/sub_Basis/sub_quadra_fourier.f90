@@ -52,7 +52,7 @@
 !
 !=============================================================
   SUBROUTINE sub_quadra_fourier(base,nosym,nstep,nb_shift,tab_shift)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -80,8 +80,8 @@
 !-----------------------------------------------------------
        nq = get_nq_FROM_basis(base)
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING sub_quadra_fourier'
-         write(out_unitp,*) 'nb,nq',base%nb,nq
+         write(out_unit,*) 'BEGINNING sub_quadra_fourier'
+         write(out_unit,*) 'nb,nq',base%nb,nq
        END IF
 !-----------------------------------------------------------
 
@@ -98,16 +98,16 @@
 !      "cos 2 -1": only cosine
 !----------------------------------------------------------------------------
       IF (base%check_nq_OF_basis) THEN
-        IF (print_level > -1) write(out_unitp,*) '    Basis: Fourier series'
-        IF (print_level > -1) write(out_unitp,*) '      old nb_fourier',base%nb
+        IF (print_level > -1) write(out_unit,*) '    Basis: Fourier series'
+        IF (print_level > -1) write(out_unit,*) '      old nb_fourier',base%nb
         IF (mod(base%nb,nb_shift) == 0) THEN
           nb_i = base%nb/nb_shift
         ELSE
           nb_i = base%nb/nb_shift + 1
         END IF
         base%nb = nb_i * nb_shift
-        IF (print_level > -1) write(out_unitp,*) '      nb_fourier',base%nb
-        IF (print_level > -1) write(out_unitp,*) '      nb_shift:',nb_shift,'tab',tab_shift
+        IF (print_level > -1) write(out_unit,*) '      nb_fourier',base%nb
+        IF (print_level > -1) write(out_unit,*) '      nb_shift:',nb_shift,'tab',tab_shift
       ELSE
         nstep    = 1
         nb_i     = base%nb
@@ -116,13 +116,13 @@
 
       IF (.NOT. base%xPOGridRep_done) THEN
         IF (base%check_nq_OF_basis) THEN
-          IF (print_level > -1) write(out_unitp,*) '      old nb_quadra',nq
+          IF (print_level > -1) write(out_unit,*) '      old nb_quadra',nq
           IF ( nq < nb_i*nstep ) nq = nb_i*nstep
           IF (nosym .AND. nq == nb_i*nstep .AND. mod(nq,2) == 0) nq = nq + 1
-          IF (print_level > -1) write(out_unitp,*) '      new nb_quadra',nq
+          IF (print_level > -1) write(out_unit,*) '      new nb_quadra',nq
         END IF
 
-        IF (print_level > -1) write(out_unitp,*) 'fourier: nb,nq',base%nb,nq
+        IF (print_level > -1) write(out_unit,*) 'fourier: nb,nq',base%nb,nq
         CALL Set_nq_OF_basis(base,nq)
         CALL alloc_xw_OF_basis(base)
         CALL gauss_fourier(base%x(1,:),base%w,nq)
@@ -149,9 +149,9 @@
           ii = nstep*i+tab_shift(ishift)
           IF (print_level > -1 .AND. base%print_info_OF_basisDP)  THEN
             IF (mod(ii,2) == 0 .AND. ii < 11) THEN
-              write(out_unitp,*) 'basis function: fourrier',ii,'or sin',int(ii/2)
+              write(out_unit,*) 'basis function: fourrier',ii,'or sin',int(ii/2)
             ELSE IF (mod(ii,2) == 1 .AND. ii < 11) THEN
-              write(out_unitp,*) 'basis function: fourrier',ii,'or cos',int(ii/2)
+              write(out_unit,*) 'basis function: fourrier',ii,'or cos',int(ii/2)
             END IF
           END IF
           base%tab_ndim_index(1,ib) = ii
@@ -160,7 +160,7 @@
             base%dnRGB%d0(k,ib)     = d0
             base%dnRGB%d1(k,ib,1)   = d1
             base%dnRGB%d2(k,ib,1,1) = d2
-!           write(out_unitp,*) ib,k,ii,d0,d1,d2
+!           write(out_unit,*) ib,k,ii,d0,d1,d2
           END DO
         END DO
 
@@ -175,13 +175,13 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END sub_quadra_fourier'
+        write(out_unit,*) 'END sub_quadra_fourier'
       END IF
 !-----------------------------------------------------------
 
   end subroutine sub_quadra_fourier
   SUBROUTINE RB_TO_RG_fourier(RB,RG,base)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   IMPLICIT NONE
 
@@ -199,16 +199,16 @@
   !-----------------------------------------------------------
   nq = get_nq_FROM_basis(base)
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING RB_TO_RG_fourier'
-    write(out_unitp,*) 'nb,nq',base%nb,nq
-    write(out_unitp,*) 'RB',RB(:)
+    write(out_unit,*) 'BEGINNING RB_TO_RG_fourier'
+    write(out_unit,*) 'nb,nq',base%nb,nq
+    write(out_unit,*) 'RB',RB(:)
   END IF
   !-----------------------------------------------------------
 
   IF (base%nb < size(RB) .OR. nq /= size(RG)) THEN
-    write(out_unitp,*) ' ERROR in RB_TO_RG_fourier'
-    write(out_unitp,*) ' nb is inconsistent with size(RB)',base%nb,size(RB)
-    write(out_unitp,*) ' nq is inconsistent with size(RG)',nq,size(RG)
+    write(out_unit,*) ' ERROR in RB_TO_RG_fourier'
+    write(out_unit,*) ' nb is inconsistent with size(RB)',base%nb,size(RB)
+    write(out_unit,*) ' nq is inconsistent with size(RG)',nq,size(RG)
     STOP ' ERROR in RB_TO_RG_fourier: inconsistent sizes'
   END IF
 
@@ -216,8 +216,8 @@
 
 !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'RG',RG(:)
-    write(out_unitp,*) 'END RB_TO_RG_fourier'
+    write(out_unit,*) 'RG',RG(:)
+    write(out_unit,*) 'END RB_TO_RG_fourier'
   END IF
 !-----------------------------------------------------------
 

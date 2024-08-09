@@ -11,7 +11,7 @@ C================================================================
      *                    calc_ScalOp,pot_cplx)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -48,7 +48,7 @@ C================================================================
 C    fonction pot0(x) 3+9 D pour h2o en cartesiennes (calcul direct)
 C================================================================
       FUNCTION pot0(Q)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer, parameter :: ndim=6
@@ -65,7 +65,7 @@ C    subroutine calculant le gradient
 C================================================================
       SUBROUTINE d0d1d2_g(d0g,d1g,d2g,Qsym0,mole,deriv,num,step)
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -92,7 +92,7 @@ C    et le nom de file_FChk%name
 C================================================================
       SUBROUTINE sub_hessian(hh)
       USE mod_file
-      USE mod_system
+      USE EVR_system_m
       USE mod_OTF
       IMPLICIT NONE
 
@@ -147,7 +147,7 @@ c     write(6,*) 'located hessian',located
       hh = h
       END
       SUBROUTINE H0_sym(h,n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
         integer       :: n
         real (kind=Rkind) :: h(n,n)
@@ -179,7 +179,7 @@ C================================================================
 C    fonction pot_rest(x)
 C================================================================
       FUNCTION pot_rest(Qact,Delta_Qact,nb_inact2n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        real (kind=Rkind) :: pot_rest
@@ -194,7 +194,7 @@ C================================================================
 C    fonction im_pot0(x)
 C================================================================
       FUNCTION im_pot0(Qsym0)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        real (kind=Rkind) :: im_pot0
@@ -215,7 +215,7 @@ C================================================================
      *                     Qsym0,mole,deriv,num,step)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -256,7 +256,7 @@ C================================================================
      *                        Qsym0,mole,nderiv)
 
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------
@@ -294,7 +294,7 @@ C    analytical derivative (dnQflex : Qflex Qflex' Qflex" Qflex'") calculation
 c    for the variable iq
 C================================================================
       SUBROUTINE calc_dnQflex(iq,dnQflex,Qact,nb_act,nderiv,it)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       IMPLICIT NONE
 
@@ -310,7 +310,7 @@ C    for the variable iq_gene
 C================================================================
       SUBROUTINE calc_dnQgene(iq_gene,dnQgene,Qgene,nb_Qgene,nderiv,it,
      *                        inTOout)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       IMPLICIT NONE
 
@@ -328,7 +328,7 @@ c    dipole read
 C================================================================
       SUBROUTINE sub_dipole(dip,Q,mole)
       USE mod_Tnum
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 c----- for the zmatrix and Tnum --------------------------------------

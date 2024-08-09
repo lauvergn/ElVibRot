@@ -47,7 +47,7 @@
 !===========================================================================
       SUBROUTINE sub_quadra_hermite(base,paire)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -77,10 +77,10 @@
        nq = get_nq_FROM_basis(base)
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'L_SparseBasis',base%L_SparseBasis
-         write(out_unitp,*) 'nb',base%nb
-         write(out_unitp,*) 'nq',nq
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'L_SparseBasis',base%L_SparseBasis
+         write(out_unit,*) 'nb',base%nb
+         write(out_unit,*) 'nq',nq
        END IF
 !-----------------------------------------------------------
        deriv = .TRUE.
@@ -93,8 +93,8 @@
        END IF
 
        IF (base%nb <= 0) THEN
-         write(out_unitp,*) 'ERROR in sub_quadra_hermite'
-         write(out_unitp,*) 'nb<=0',base%nb
+         write(out_unit,*) 'ERROR in sub_quadra_hermite'
+         write(out_unit,*) 'nb<=0',base%nb
          STOP 'ERROR nb<=0'
        END IF
 
@@ -104,8 +104,8 @@
 !      nb_quadra > nb_herm
 !----------------------------------------------------------------------------
       IF (Print_basis) THEN
-        write(out_unitp,*) '    Basis: Hermite polynomials'
-        write(out_unitp,*) '      nb_hermite',base%nb
+        write(out_unit,*) '    Basis: Hermite polynomials'
+        write(out_unit,*) '      nb_hermite',base%nb
       END IF
 
       base%packed            = .TRUE.
@@ -114,8 +114,8 @@
 
       IF (.NOT. base%xPOGridRep_done) THEN
         IF (base%check_nq_OF_basis) THEN
-          IF (Print_basis) write(out_unitp,*) '      nb_hermite',base%nb
-          IF (Print_basis) write(out_unitp,*) '      old nb_quadra',nq
+          IF (Print_basis) write(out_unit,*) '      nb_hermite',base%nb
+          IF (Print_basis) write(out_unit,*) '      old nb_quadra',nq
           IF (paire == -1) THEN
             nb_nosym = base%nb
           ELSE IF (paire == 1) THEN ! odd
@@ -124,7 +124,7 @@
             nb_nosym = 2*base%nb
           END IF
         END IF
-        flush(out_unitp)
+        flush(out_unit)
         SELECT CASE (base%Nested)
         CASE(1)
 
@@ -132,7 +132,7 @@
 
           IF (base%check_nq_OF_basis .AND. mod(nq,2) == 0)    nq = nq + 1 ! here nq must be odd : 2n-1
           IF (base%check_nq_OF_basis .AND. nq < 2*nb_nosym-1) nq = 2*nb_nosym-1
-          IF (Print_basis) write(out_unitp,*) '      new nb_quadra',nq
+          IF (Print_basis) write(out_unit,*) '      new nb_quadra',nq
 
           CALL alloc_NParray(x_loc,[1,nq],'x_loc',name_sub)
           CALL alloc_NParray(w_loc,[nq],  'w_loc',name_sub)
@@ -144,7 +144,7 @@
 
           IF (base%check_nq_OF_basis .AND. mod(nq,2) == 0)    nq = nq + 1 ! here nq must be odd : 2n-1
           IF (base%check_nq_OF_basis .AND. nq < 2*nb_nosym-1) nq = 2*nb_nosym-1
-          IF (Print_basis) write(out_unitp,*) '      new nb_quadra',nq
+          IF (Print_basis) write(out_unit,*) '      new nb_quadra',nq
 
           CALL alloc_NParray(x_loc,[1,nq],'x_loc',name_sub)
           CALL alloc_NParray(w_loc,[nq],  'w_loc',name_sub)
@@ -156,8 +156,8 @@
           IF (base%check_nq_OF_basis) THEN
             IF (nq < nb_nosym) nq = nb_nosym + 1
           END IF
-          IF (Print_basis) write(out_unitp,*) '      new nb_quadra',nq
-          flush(out_unitp)
+          IF (Print_basis) write(out_unit,*) '      new nb_quadra',nq
+          flush(out_unit)
 
           CALL alloc_NParray(x_loc,[1,nq],'x_loc',name_sub)
           CALL alloc_NParray(w_loc,[nq],  'w_loc',name_sub)
@@ -168,13 +168,13 @@
             herm_file%name = trim(EVRT_path) //                                 &
               '/Internal_data/HermQuadra/herm' // TO_string(nq) // '.txt'
 
-            write(out_unitp,*) 'herm_file%name: ',herm_file%name
-            flush(out_unitp)
+            write(out_unit,*) 'herm_file%name: ',herm_file%name
+            flush(out_unit)
             CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
 
             IF (err_io /= 0) THEN
-              write(out_unitp,*) 'WARNNING in ',name_sub
-              write(out_unitp,*) 'cannot find quadrature file: ',herm_file%name
+              write(out_unit,*) 'WARNNING in ',name_sub
+              write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
             ELSE
 
               DO iq=1,nq
@@ -213,7 +213,7 @@
       CALL alloc_dnb_OF_basis(base)
 
       IF (paire == 0) THEN
-        IF (Print_basis) write(out_unitp,*) '      even Hermite polynomials'
+        IF (Print_basis) write(out_unit,*) '      even Hermite polynomials'
         base%tab_ndim_index(1,:) = [(2*i-1,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_0_exp_grille(                                   &
                              base%x(1,:),                                       &
@@ -222,7 +222,7 @@
                              base%dnRGB%d2(:,:,1,1),                            &
                              base%nb,nq,deriv,num,step)
       ELSE IF (paire == 1) THEN
-        IF (Print_basis) write(out_unitp,*) '      odd Hermite polynomials'
+        IF (Print_basis) write(out_unit,*) '      odd Hermite polynomials'
         base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_1_exp_grille(                                   &
                              base%x(1,:),                                       &
@@ -231,7 +231,7 @@
                              base%dnRGB%d2(:,:,1,1),                            &
                              base%nb,nq,deriv,num,step)
       ELSE
-        IF (Print_basis) write(out_unitp,*) '      All Hermite polynomials'
+        IF (Print_basis) write(out_unit,*) '      All Hermite polynomials'
         base%tab_ndim_index(1,:) = [(i,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_exp_grille(                                     &
                              base%x(1,:),                                       &
@@ -244,14 +244,14 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base,write_all=.TRUE.)
-        write(out_unitp,*) 'END sub_quadra_hermite'
+        write(out_unit,*) 'END sub_quadra_hermite'
       END IF
 !-----------------------------------------------------------
 
       end subroutine sub_quadra_hermite
 
   SUBROUTINE sub_quadra_hermiteAB(base,paire)
-    USE mod_system
+    USE EVR_system_m
     USE mod_basis
     USE ADdnSVM_m
     IMPLICIT NONE
@@ -271,9 +271,9 @@
     nq = get_nq_FROM_basis(base)
 
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*) 'nb',base%nb
-      write(out_unitp,*) 'nq',nq
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'nb',base%nb
+      write(out_unit,*) 'nq',nq
     END IF
     !-----------------------------------------------------------
 
@@ -315,7 +315,7 @@
     !-----------------------------------------------------------
     IF (debug) THEN
       CALL RecWrite_basis(base,write_all=.TRUE.)
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
     END IF
     !-----------------------------------------------------------
 
@@ -323,7 +323,7 @@
 
   SUBROUTINE sub_quadra_hermite_half(base,paire)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -353,10 +353,10 @@
        nq = get_nq_FROM_basis(base)
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'L_SparseBasis',base%L_SparseBasis
-         write(out_unitp,*) 'nb',base%nb
-         write(out_unitp,*) 'nq',nq
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'L_SparseBasis',base%L_SparseBasis
+         write(out_unit,*) 'nb',base%nb
+         write(out_unit,*) 'nq',nq
        END IF
 !-----------------------------------------------------------
        deriv = .TRUE.
@@ -369,8 +369,8 @@
        END IF
 
        IF (base%nb <= 0) THEN
-         write(out_unitp,*) 'ERROR in ',name_sub
-         write(out_unitp,*) 'nb<=0',base%nb
+         write(out_unit,*) 'ERROR in ',name_sub
+         write(out_unit,*) 'nb<=0',base%nb
          STOP 'ERROR in sub_quadra_hermite_half: nb<=0'
        END IF
 
@@ -380,8 +380,8 @@
 !      nb_quadra > nb_herm
 !----------------------------------------------------------------------------
       IF (Print_basis) THEN
-        write(out_unitp,*) '    Basis: Hermite polynomials in [0,+inf]'
-        write(out_unitp,*) '      nb_hermite',base%nb
+        write(out_unit,*) '    Basis: Hermite polynomials in [0,+inf]'
+        write(out_unit,*) '      nb_hermite',base%nb
       END IF
 
       base%packed            = .TRUE.
@@ -391,15 +391,15 @@
       IF (.NOT. base%xPOGridRep_done) THEN
 
 
-        IF (Print_basis) write(out_unitp,*) '      nb_hermite',base%nb
-        IF (Print_basis) write(out_unitp,*) '      old nb_quadra',nq
-        flush(out_unitp)
+        IF (Print_basis) write(out_unit,*) '      nb_hermite',base%nb
+        IF (Print_basis) write(out_unit,*) '      old nb_quadra',nq
+        flush(out_unit)
 
         IF (base%check_nq_OF_basis) THEN
           IF (nq < base%nb) nq = base%nb+1
         END IF
-        IF (Print_basis) write(out_unitp,*) '      new nb_quadra',nq
-        flush(out_unitp)
+        IF (Print_basis) write(out_unit,*) '      new nb_quadra',nq
+        flush(out_unit)
 
         !nb_nosym = 2*base%nb
         !nq_nosym = 2*nq
@@ -416,12 +416,12 @@
           herm_file%name = trim(EVRT_path) //                                   &
             '/Internal_data/HermQuadra/herm' // TO_string(2*nq) // '.txt'
 
-          write(out_unitp,*) 'herm_file%name: ',herm_file%name
+          write(out_unit,*) 'herm_file%name: ',herm_file%name
           CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
 
           IF (err_io /= 0) THEN
-            write(out_unitp,*) 'WARNNING in ',name_sub
-            write(out_unitp,*) 'cannot find quadrature file: ',herm_file%name
+            write(out_unit,*) 'WARNNING in ',name_sub
+            write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
           ELSE
 
             DO iq=1,2*nq
@@ -460,7 +460,7 @@
       nq = nq + base%nq_extra
 
       IF (paire == 0) THEN
-        IF (Print_basis) write(out_unitp,*) '      even Hermite polynomials'
+        IF (Print_basis) write(out_unit,*) '      even Hermite polynomials'
         base%tab_ndim_index(1,:) = [(2*i-1,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_0_exp_grille(                                   &
                              base%x(1,:),                                       &
@@ -469,7 +469,7 @@
                              base%dnRGB%d2(:,:,1,1),                            &
                              base%nb,nq,deriv,num,step)
       ELSE
-        IF (Print_basis) write(out_unitp,*) '      odd Hermite polynomials'
+        IF (Print_basis) write(out_unit,*) '      odd Hermite polynomials'
         base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_1_exp_grille(                                   &
                              base%x(1,:),                                       &
@@ -488,14 +488,14 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base,write_all=.TRUE.)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
 end subroutine sub_quadra_hermite_half
 SUBROUTINE sub_quadra_hermite_halfRight(base,paire)
 
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   IMPLICIT NONE
 
@@ -525,10 +525,10 @@ SUBROUTINE sub_quadra_hermite_halfRight(base,paire)
    nq = get_nq_FROM_basis(base)
 
    IF (debug) THEN
-     write(out_unitp,*) 'BEGINNING ',name_sub
-     write(out_unitp,*) 'L_SparseBasis',base%L_SparseBasis
-     write(out_unitp,*) 'nb',base%nb
-     write(out_unitp,*) 'nq',nq
+     write(out_unit,*) 'BEGINNING ',name_sub
+     write(out_unit,*) 'L_SparseBasis',base%L_SparseBasis
+     write(out_unit,*) 'nb',base%nb
+     write(out_unit,*) 'nq',nq
    END IF
 !-----------------------------------------------------------
    deriv = .TRUE.
@@ -541,8 +541,8 @@ SUBROUTINE sub_quadra_hermite_halfRight(base,paire)
    END IF
 
    IF (base%nb <= 0) THEN
-     write(out_unitp,*) 'ERROR in ',name_sub
-     write(out_unitp,*) 'nb<=0',base%nb
+     write(out_unit,*) 'ERROR in ',name_sub
+     write(out_unit,*) 'nb<=0',base%nb
      STOP 'ERROR in sub_quadra_hermite_halfRight: nb<=0'
    END IF
 
@@ -552,8 +552,8 @@ SUBROUTINE sub_quadra_hermite_halfRight(base,paire)
 !      nb_quadra > nb_herm
 !----------------------------------------------------------------------------
   IF (Print_basis) THEN
-    write(out_unitp,*) '    Basis: Hermite polynomials in [0,+inf['
-    write(out_unitp,*) '      nb_hermite',base%nb
+    write(out_unit,*) '    Basis: Hermite polynomials in [0,+inf['
+    write(out_unit,*) '      nb_hermite',base%nb
   END IF
 
   base%packed            = .TRUE.
@@ -563,15 +563,15 @@ SUBROUTINE sub_quadra_hermite_halfRight(base,paire)
   IF (.NOT. base%xPOGridRep_done) THEN
 
 
-    IF (Print_basis) write(out_unitp,*) '      nb_hermite',base%nb
-    IF (Print_basis) write(out_unitp,*) '      old nb_quadra',nq
-    flush(out_unitp)
+    IF (Print_basis) write(out_unit,*) '      nb_hermite',base%nb
+    IF (Print_basis) write(out_unit,*) '      old nb_quadra',nq
+    flush(out_unit)
 
     IF (base%check_nq_OF_basis) THEN
       IF (nq < base%nb) nq = base%nb+1
     END IF
-    IF (Print_basis) write(out_unitp,*) '      new nb_quadra',nq
-    flush(out_unitp)
+    IF (Print_basis) write(out_unit,*) '      new nb_quadra',nq
+    flush(out_unit)
 
     !nb_nosym = 2*base%nb
     !nq_nosym = 2*nq
@@ -588,12 +588,12 @@ SUBROUTINE sub_quadra_hermite_halfRight(base,paire)
       herm_file%name = trim(EVRT_path) //                                   &
         '/Internal_data/HermQuadra/herm' // TO_string(2*nq) // '.txt'
 
-      write(out_unitp,*) 'herm_file%name: ',herm_file%name
+      write(out_unit,*) 'herm_file%name: ',herm_file%name
       CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
 
       IF (err_io /= 0) THEN
-        write(out_unitp,*) 'WARNNING in ',name_sub
-        write(out_unitp,*) 'cannot find quadrature file: ',herm_file%name
+        write(out_unit,*) 'WARNNING in ',name_sub
+        write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
       ELSE
 
         DO iq=1,2*nq
@@ -631,7 +631,7 @@ SUBROUTINE sub_quadra_hermite_halfRight(base,paire)
 
   nq = nq + base%nq_extra
 
-  IF (Print_basis) write(out_unitp,*) '      odd Hermite polynomials'
+  IF (Print_basis) write(out_unit,*) '      odd Hermite polynomials'
   base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
   CALL d0d1d2poly_Hermite_1_exp_grille(                                     &
                          base%x(1,:),                                       &
@@ -649,14 +649,14 @@ SUBROUTINE sub_quadra_hermite_halfRight(base,paire)
 !-----------------------------------------------------------
   IF (debug) THEN
     CALL RecWrite_basis(base,write_all=.TRUE.)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
 !-----------------------------------------------------------
 
 end subroutine sub_quadra_hermite_halfRight
 SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
 
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   IMPLICIT NONE
 
@@ -686,10 +686,10 @@ SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
    nq = get_nq_FROM_basis(base)
 
    IF (debug) THEN
-     write(out_unitp,*) 'BEGINNING ',name_sub
-     write(out_unitp,*) 'L_SparseBasis',base%L_SparseBasis
-     write(out_unitp,*) 'nb',base%nb
-     write(out_unitp,*) 'nq',nq
+     write(out_unit,*) 'BEGINNING ',name_sub
+     write(out_unit,*) 'L_SparseBasis',base%L_SparseBasis
+     write(out_unit,*) 'nb',base%nb
+     write(out_unit,*) 'nq',nq
    END IF
 !-----------------------------------------------------------
    deriv = .TRUE.
@@ -702,8 +702,8 @@ SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
    END IF
 
    IF (base%nb <= 0) THEN
-     write(out_unitp,*) 'ERROR in ',name_sub
-     write(out_unitp,*) 'nb<=0',base%nb
+     write(out_unit,*) 'ERROR in ',name_sub
+     write(out_unit,*) 'nb<=0',base%nb
      STOP 'ERROR in sub_quadra_hermite_halfLeft_new: nb<=0'
    END IF
 
@@ -713,8 +713,8 @@ SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
 !      nb_quadra > nb_herm
 !----------------------------------------------------------------------------
   IF (Print_basis) THEN
-    write(out_unitp,*) '    Basis: Hermite polynomials in ]-inf,0]'
-    write(out_unitp,*) '      nb_hermite',base%nb
+    write(out_unit,*) '    Basis: Hermite polynomials in ]-inf,0]'
+    write(out_unit,*) '      nb_hermite',base%nb
   END IF
 
   base%packed            = .TRUE.
@@ -724,15 +724,15 @@ SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
   IF (.NOT. base%xPOGridRep_done) THEN
 
 
-    IF (Print_basis) write(out_unitp,*) '      nb_hermite',base%nb
-    IF (Print_basis) write(out_unitp,*) '      old nb_quadra',nq
-    flush(out_unitp)
+    IF (Print_basis) write(out_unit,*) '      nb_hermite',base%nb
+    IF (Print_basis) write(out_unit,*) '      old nb_quadra',nq
+    flush(out_unit)
 
     IF (base%check_nq_OF_basis) THEN
       IF (nq < base%nb) nq = base%nb+1
     END IF
-    IF (Print_basis) write(out_unitp,*) '      new nb_quadra',nq
-    flush(out_unitp)
+    IF (Print_basis) write(out_unit,*) '      new nb_quadra',nq
+    flush(out_unit)
 
     !nb_nosym = 2*base%nb
     !nq_nosym = 2*nq
@@ -749,12 +749,12 @@ SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
       herm_file%name = trim(EVRT_path) //                                   &
         '/Internal_data/HermQuadra/herm' // TO_string(2*nq+1) // '.txt'
 
-      write(out_unitp,*) 'herm_file%name: ',herm_file%name
+      write(out_unit,*) 'herm_file%name: ',herm_file%name
       CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
 
       IF (err_io /= 0) THEN
-        write(out_unitp,*) 'WARNNING in ',name_sub
-        write(out_unitp,*) 'cannot find quadrature file: ',herm_file%name
+        write(out_unit,*) 'WARNNING in ',name_sub
+        write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
       ELSE
 
         DO iq=1,2*nq+1
@@ -793,7 +793,7 @@ SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
 
   nq = nq+1 + base%nq_extra
 
-  IF (Print_basis) write(out_unitp,*) '      odd Hermite polynomials'
+  IF (Print_basis) write(out_unit,*) '      odd Hermite polynomials'
   base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
   CALL d0d1d2poly_Hermite_1_exp_grille(                                     &
                          base%x(1,:),                                       &
@@ -811,14 +811,14 @@ SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
 !-----------------------------------------------------------
   IF (debug) THEN
     CALL RecWrite_basis(base,write_all=.TRUE.)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
 !-----------------------------------------------------------
 
 end subroutine sub_quadra_hermite_halfLeft_new
 SUBROUTINE sub_quadra_hermite_halfLeft(base,paire)
 
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   IMPLICIT NONE
 
@@ -848,10 +848,10 @@ SUBROUTINE sub_quadra_hermite_halfLeft(base,paire)
    nq = get_nq_FROM_basis(base)
 
    IF (debug) THEN
-     write(out_unitp,*) 'BEGINNING ',name_sub
-     write(out_unitp,*) 'L_SparseBasis',base%L_SparseBasis
-     write(out_unitp,*) 'nb',base%nb
-     write(out_unitp,*) 'nq',nq
+     write(out_unit,*) 'BEGINNING ',name_sub
+     write(out_unit,*) 'L_SparseBasis',base%L_SparseBasis
+     write(out_unit,*) 'nb',base%nb
+     write(out_unit,*) 'nq',nq
    END IF
 !-----------------------------------------------------------
    deriv = .TRUE.
@@ -864,8 +864,8 @@ SUBROUTINE sub_quadra_hermite_halfLeft(base,paire)
    END IF
 
    IF (base%nb <= 0) THEN
-     write(out_unitp,*) 'ERROR in ',name_sub
-     write(out_unitp,*) 'nb<=0',base%nb
+     write(out_unit,*) 'ERROR in ',name_sub
+     write(out_unit,*) 'nb<=0',base%nb
      STOP 'ERROR in sub_quadra_hermite_halfLeft: nb<=0'
    END IF
 
@@ -875,8 +875,8 @@ SUBROUTINE sub_quadra_hermite_halfLeft(base,paire)
 !      nb_quadra > nb_herm
 !----------------------------------------------------------------------------
   IF (Print_basis) THEN
-    write(out_unitp,*) '    Basis: Hermite polynomials in ]-inf,0]'
-    write(out_unitp,*) '      nb_hermite',base%nb
+    write(out_unit,*) '    Basis: Hermite polynomials in ]-inf,0]'
+    write(out_unit,*) '      nb_hermite',base%nb
   END IF
 
   base%packed            = .TRUE.
@@ -886,15 +886,15 @@ SUBROUTINE sub_quadra_hermite_halfLeft(base,paire)
   IF (.NOT. base%xPOGridRep_done) THEN
 
 
-    IF (Print_basis) write(out_unitp,*) '      nb_hermite',base%nb
-    IF (Print_basis) write(out_unitp,*) '      old nb_quadra',nq
-    flush(out_unitp)
+    IF (Print_basis) write(out_unit,*) '      nb_hermite',base%nb
+    IF (Print_basis) write(out_unit,*) '      old nb_quadra',nq
+    flush(out_unit)
 
     IF (base%check_nq_OF_basis) THEN
       IF (nq < base%nb) nq = base%nb+1
     END IF
-    IF (Print_basis) write(out_unitp,*) '      new nb_quadra',nq
-    flush(out_unitp)
+    IF (Print_basis) write(out_unit,*) '      new nb_quadra',nq
+    flush(out_unit)
 
     !nb_nosym = 2*base%nb
     !nq_nosym = 2*nq
@@ -911,12 +911,12 @@ SUBROUTINE sub_quadra_hermite_halfLeft(base,paire)
       herm_file%name = trim(EVRT_path) //                                   &
         '/Internal_data/HermQuadra/herm' // TO_string(2*nq) // '.txt'
 
-      write(out_unitp,*) 'herm_file%name: ',herm_file%name
+      write(out_unit,*) 'herm_file%name: ',herm_file%name
       CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
 
       IF (err_io /= 0) THEN
-        write(out_unitp,*) 'WARNNING in ',name_sub
-        write(out_unitp,*) 'cannot find quadrature file: ',herm_file%name
+        write(out_unit,*) 'WARNNING in ',name_sub
+        write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
       ELSE
 
         DO iq=1,2*nq
@@ -954,7 +954,7 @@ SUBROUTINE sub_quadra_hermite_halfLeft(base,paire)
 
   nq = nq + base%nq_extra
 
-  IF (Print_basis) write(out_unitp,*) '      odd Hermite polynomials'
+  IF (Print_basis) write(out_unit,*) '      odd Hermite polynomials'
   base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
   CALL d0d1d2poly_Hermite_1_exp_grille(                                     &
                          base%x(1,:),                                       &
@@ -972,7 +972,7 @@ SUBROUTINE sub_quadra_hermite_halfLeft(base,paire)
 !-----------------------------------------------------------
   IF (debug) THEN
     CALL RecWrite_basis(base,write_all=.TRUE.)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
 !-----------------------------------------------------------
 
@@ -985,7 +985,7 @@ end subroutine sub_quadra_hermite_halfLeft
 !=============================================================
       SUBROUTINE sub_quadra_hermitebox(base,paire)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -1008,9 +1008,9 @@ end subroutine sub_quadra_hermite_halfLeft
 !-----------------------------------------------------------
        nqo = get_nq_FROM_basis(base)
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING sub_quadra_hermitebox'
-         write(out_unitp,*) 'nb,nq',base%nb,nqo
-         write(out_unitp,*) 'num,step',num,step
+         write(out_unit,*) 'BEGINNING sub_quadra_hermitebox'
+         write(out_unit,*) 'nb,nq',base%nb,nqo
+         write(out_unit,*) 'num,step',num,step
        END IF
 !-----------------------------------------------------------
 
@@ -1025,26 +1025,26 @@ end subroutine sub_quadra_hermite_halfLeft
 !      nb_quadra > nb_herm
 !----------------------------------------------------------------------------
       IF (base%print_info_OF_basisDP .AND. print_level > -1)            &
-                 write(out_unitp,*) '    Basis: Hermite polynomia+BoxAB'
+                 write(out_unit,*) '    Basis: Hermite polynomia+BoxAB'
       base%packed            = .TRUE.
       base%packed_done       = .TRUE.
 
 
       IF (base%xPOGridRep_done) THEN
-        write(out_unitp,*) 'ERROR in sub_quadra_hermitebox'
-        write(out_unitp,*) 'xPOGridRep_done=t is not possible for this basis!'
-        write(out_unitp,*) 'CHECK your data'
+        write(out_unit,*) 'ERROR in sub_quadra_hermitebox'
+        write(out_unit,*) 'xPOGridRep_done=t is not possible for this basis!'
+        write(out_unit,*) 'CHECK your data'
         STOP
       END IF
       IF (base%check_nq_OF_basis) THEN
-        IF (print_level > -1) write(out_unitp,*) '      nb_hermite',base%nb
-        IF (print_level > -1) write(out_unitp,*) '      old nb_quadra',nqo
+        IF (print_level > -1) write(out_unit,*) '      nb_hermite',base%nb
+        IF (print_level > -1) write(out_unit,*) '      old nb_quadra',nqo
         IF (paire .EQ. -1) THEN
           IF ( nqo < base%nb ) nqo = base%nb + 1
         ELSE
           IF ( nqo < 2*base%nb ) nqo = 2*base%nb+1
         END IF
-        IF (print_level > -1) write(out_unitp,*) '      new nb_quadra',nqo
+        IF (print_level > -1) write(out_unit,*) '      new nb_quadra',nqo
       END IF
       CALL Set_nq_OF_basis(base,nqo)
 
@@ -1062,7 +1062,7 @@ end subroutine sub_quadra_hermite_halfLeft
       A = base%x(1,1)
       B = base%x(1,nq)
       IF (base%print_info_OF_basisDP .AND. print_level > -1)            &
-                                   write(out_unitp,*) 'HermBox: A,B',A,B
+                                   write(out_unit,*) 'HermBox: A,B',A,B
       dx = (B-A)/real(nqo-nq,kind=Rkind)
       base%x(1,nq+1:nqo) =                                              &
          [(A+dx*(real(i,kind=Rkind)-HALF),i=1,nqo-nq)]
@@ -1095,7 +1095,7 @@ end subroutine sub_quadra_hermite_halfLeft
 
       IF (paire == 0) THEN ! even
         IF (base%print_info_OF_basisDP .AND. print_level > -1)                  &
-                       write(out_unitp,*) '      even Hermite polynomials'
+                       write(out_unit,*) '      even Hermite polynomials'
         base%tab_ndim_index(1,:) = [(2*i-1,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_0_exp_grille(                                   &
                              base%x(1,:),                                       &
@@ -1105,7 +1105,7 @@ end subroutine sub_quadra_hermite_halfLeft
                              base%nb,nqo,deriv,num,step)
       ELSE IF (paire == 1) THEN ! odd
         IF (base%print_info_OF_basisDP .AND. print_level > -1)                  &
-                        write(out_unitp,*) '      odd Hermite polynomials'
+                        write(out_unit,*) '      odd Hermite polynomials'
         base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_1_exp_grille(                                   &
                              base%x(1,:),                                       &
@@ -1115,7 +1115,7 @@ end subroutine sub_quadra_hermite_halfLeft
                              base%nb,nqo,deriv,num,step)
       ELSE
         IF (base%print_info_OF_basisDP .AND. print_level > -1)                  &
-                        write(out_unitp,*) '      All Hermite polynomials'
+                        write(out_unit,*) '      All Hermite polynomials'
         base%tab_ndim_index(1,:) = [(i,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_exp_grille(                                     &
                              base%x(1,:),                                       &
@@ -1129,7 +1129,7 @@ end subroutine sub_quadra_hermite_halfLeft
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END sub_quadra_hermite'
+        write(out_unit,*) 'END sub_quadra_hermite'
       END IF
 !-----------------------------------------------------------
 
@@ -1138,7 +1138,7 @@ end subroutine sub_quadra_hermite_halfLeft
 
       SUBROUTINE grid_HermiteNested1(x,w,nq,nqmax)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE BasisMakeGrid
       IMPLICIT NONE
@@ -1168,8 +1168,8 @@ end subroutine sub_quadra_hermite_halfLeft
       logical, parameter :: debug = .FALSE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nq,nqmax',nq,nqmax
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nq,nqmax',nq,nqmax
       END IF
 !-----------------------------------------------------------
 
@@ -1177,7 +1177,7 @@ end subroutine sub_quadra_hermite_halfLeft
       num   = .FALSE.
 
       IF (nq > nqmax .OR. mod(nqmax-nq,2) /= 0) THEN
-        write(out_unitp,*) 'nq,nqmax',nq,nqmax
+        write(out_unit,*) 'nq,nqmax',nq,nqmax
         STOP 'ERROR in grid_HermiteNested1'
       END IF
 
@@ -1185,8 +1185,8 @@ end subroutine sub_quadra_hermite_halfLeft
       CALL alloc_NParray(x_loc,[nqmax],"x_loc",name_sub)
       CALL alloc_NParray(w_loc,[nqmax],"w_loc",name_sub)
       CALL hercom(nqmax,x_loc(:),w_loc(:))
-      !write(out_unitp,*) 'old w(:)',w_loc(:)
-      !write(out_unitp,*) 'old x(:)',x_loc(:)
+      !write(out_unit,*) 'old w(:)',w_loc(:)
+      !write(out_unit,*) 'old x(:)',x_loc(:)
 
       ! new grid
       dnb = (nqmax-nq)/2
@@ -1220,7 +1220,7 @@ end subroutine sub_quadra_hermite_halfLeft
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -1228,7 +1228,7 @@ end subroutine sub_quadra_hermite_halfLeft
 
       SUBROUTINE sub_quadra_HermiteNested2(base,paire)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE BasisMakeGrid
       IMPLICIT NONE
@@ -1256,9 +1256,9 @@ end subroutine sub_quadra_hermite_halfLeft
 !-----------------------------------------------------------
        nqo = get_nq_FROM_basis(base)
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb,nq',base%nb,nqo
-        write(out_unitp,*) 'num,step',num,step
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb,nq',base%nb,nqo
+        write(out_unit,*) 'num,step',num,step
       END IF
 !-----------------------------------------------------------
 
@@ -1273,20 +1273,20 @@ end subroutine sub_quadra_hermite_halfLeft
 !      test sur nb_herm et nb_quadra
 !      nb_quadra > nb_herm
 !----------------------------------------------------------------------------
-      IF (base%print_info_OF_basisDP) write(out_unitp,*) '    Basis: Hermite polynomials+Nested'
+      IF (base%print_info_OF_basisDP) write(out_unit,*) '    Basis: Hermite polynomials+Nested'
       base%packed            = .TRUE.
       base%packed_done       = .TRUE.
 
 
       IF (base%xPOGridRep_done) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'xPOGridRep_done=t is not possible for this basis!'
-        write(out_unitp,*) 'CHECK your data'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'xPOGridRep_done=t is not possible for this basis!'
+        write(out_unit,*) 'CHECK your data'
         STOP
       END IF
       IF (base%check_nq_OF_basis) THEN
-        write(out_unitp,*) '      nb_hermite',base%nb
-        write(out_unitp,*) '      old nb_quadra',nqo
+        write(out_unit,*) '      nb_hermite',base%nb
+        write(out_unit,*) '      old nb_quadra',nqo
         IF (paire == -1) THEN
           nb_nosym = base%nb
         ELSE IF (paire == 1) THEN ! even
@@ -1298,19 +1298,19 @@ end subroutine sub_quadra_hermite_halfLeft
         IF (nqo < 2*nb_nosym-1) THEN
           nqo = 2*nb_nosym-1
         END IF
-        write(out_unitp,*) '      new nb_quadra',nqo
+        write(out_unit,*) '      new nb_quadra',nqo
       END IF
 
       IF (base%L_SparseGrid < 0) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'base%L_SparseGrid MUST larger than -1',base%L_SparseGrid
-        write(out_unitp,*) 'CHECK the fortran !!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'base%L_SparseGrid MUST larger than -1',base%L_SparseGrid
+        write(out_unit,*) 'CHECK the fortran !!'
         STOP
       END IF
       IF (base%nq_max_Nested < 1) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'nq_max_Nested < 1',base%nq_max_Nested
-        write(out_unitp,*) 'CHECK your data or the fortran!!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'nq_max_Nested < 1',base%nq_max_Nested
+        write(out_unit,*) 'CHECK your data or the fortran!!'
         STOP
       END IF
       IF (mod(base%nq_max_Nested,2) == 0) base%nq_max_Nested = base%nq_max_Nested + 1
@@ -1329,8 +1329,8 @@ end subroutine sub_quadra_hermite_halfLeft
         nq1      = 1
         nq2      = base%nq_max_Nested
       END IF
-      write(out_unitp,*) 'base%nq_max_Nested',base%nq_max_Nested
-      write(out_unitp,*) 'base%L_SparseGrid,nq,nb_nosym,nq1,nq2',base%L_SparseGrid,nqo,nb_nosym,nq1,nq2
+      write(out_unit,*) 'base%nq_max_Nested',base%nq_max_Nested
+      write(out_unit,*) 'base%L_SparseGrid,nq,nb_nosym,nq1,nq2',base%L_SparseGrid,nqo,nb_nosym,nq1,nq2
         CALL Set_nq_OF_basis(base,nqo)
 
       CALL alloc_xw_OF_basis(base)
@@ -1341,10 +1341,10 @@ end subroutine sub_quadra_hermite_halfLeft
                         "w_loc","sub_quadra_HermiteNested2")
 
       CALL hercom(base%nq_max_Nested,x_loc(:),w_loc(:))
-      !write(out_unitp,*) 'old w(:)',w_loc(:)
-      !write(out_unitp,*) 'old x(:)',x_loc(:)
+      !write(out_unit,*) 'old w(:)',w_loc(:)
+      !write(out_unit,*) 'old x(:)',x_loc(:)
       base%x(1,:) = x_loc(nq1:nq2)
-      write(out_unitp,*) 'new x(:)',base%x(1,:)
+      write(out_unit,*) 'new x(:)',base%x(1,:)
 
 
 
@@ -1366,7 +1366,7 @@ end subroutine sub_quadra_hermite_halfLeft
       CALL Weight_OF_grid_basis(base)
       CALL dealloc_dnb_OF_basis(base)
       base%nb = nb
-      write(out_unitp,*) 'new w',base%w
+      write(out_unit,*) 'new w',base%w
 
 !     calcul des valeurs des polynomes de hermites et des derivees en chaque
 !     point de la quadrature.
@@ -1374,7 +1374,7 @@ end subroutine sub_quadra_hermite_halfLeft
       CALL alloc_dnb_OF_basis(base)
 
       IF (paire == 0) THEN
-        IF (base%print_info_OF_basisDP) write(out_unitp,*) '      even Hermite polynomials'
+        IF (base%print_info_OF_basisDP) write(out_unit,*) '      even Hermite polynomials'
         base%tab_ndim_index(1,:) = [(2*i-1,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_0_exp_grille(                                   &
                              base%x(1,:),                                       &
@@ -1383,7 +1383,7 @@ end subroutine sub_quadra_hermite_halfLeft
                              base%dnRGB%d2(:,:,1,1),                            &
                              base%nb,nqo,deriv,num,step)
       ELSE IF (paire == 1) THEN
-        IF (base%print_info_OF_basisDP) write(out_unitp,*) '      odd Hermite polynomials'
+        IF (base%print_info_OF_basisDP) write(out_unit,*) '      odd Hermite polynomials'
         base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_1_exp_grille(                                   &
                              base%x(1,:),                                       &
@@ -1392,7 +1392,7 @@ end subroutine sub_quadra_hermite_halfLeft
                              base%dnRGB%d2(:,:,1,1),                            &
                              base%nb,nqo,deriv,num,step)
       ELSE
-        IF (base%print_info_OF_basisDP) write(out_unitp,*) '      All Hermite polynomials'
+        IF (base%print_info_OF_basisDP) write(out_unit,*) '      All Hermite polynomials'
         base%tab_ndim_index(1,:) = [(i,i=1,base%nb)]
         CALL d0d1d2poly_Hermite_exp_grille(                                     &
                              base%x(1,:),                                       &
@@ -1408,14 +1408,14 @@ end subroutine sub_quadra_hermite_halfLeft
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_quadra_HermiteNested2
 
      SUBROUTINE sub_quadra_hermite_cuba(base)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       IMPLICIT NONE
@@ -1456,9 +1456,9 @@ end subroutine sub_quadra_hermite_halfLeft
        END IF
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING sub_quadra_hermite_cuba'
-         write(out_unitp,*) 'LB,LG',LB,LG
-         write(out_unitp,*) 'ndim',base%ndim
+         write(out_unit,*) 'BEGINNING sub_quadra_hermite_cuba'
+         write(out_unit,*) 'LB,LG',LB,LG
+         write(out_unit,*) 'ndim',base%ndim
        END IF
 !-----------------------------------------------------------
        IF (base%ndim < 1) STOP ' Problem with ndim'
@@ -1471,8 +1471,8 @@ end subroutine sub_quadra_hermite_halfLeft
 
        ! test if nq >= nb
       IF (base%check_nq_OF_basis) THEN
-        write(out_unitp,*) '    Basis: Hermite polynomials, cubature'
-        write(out_unitp,*) '      LB,LG',LB,LG
+        write(out_unit,*) '    Basis: Hermite polynomials, cubature'
+        write(out_unit,*) '      LB,LG',LB,LG
       END IF
       base%packed            = .TRUE.
       base%packed_done       = .TRUE.
@@ -1480,49 +1480,49 @@ end subroutine sub_quadra_hermite_halfLeft
 
       IF (.NOT. base%xPOGridRep_done) THEN
         IF (base%check_nq_OF_basis) THEN
-          IF (print_level > -1) write(out_unitp,*) '      old LG',LG
+          IF (print_level > -1) write(out_unit,*) '      old LG',LG
           IF ( LG < LB ) LG = LB + 1
-          IF (print_level > -1) write(out_unitp,*) '      new LG',LG
-          IF (print_level > -1) write(out_unitp,*) '           d',2*LG
+          IF (print_level > -1) write(out_unit,*) '      new LG',LG
+          IF (print_level > -1) write(out_unit,*) '           d',2*LG
         END IF
 
         d = 2*LG ! degree
         ! calculation of the grid point number (with the EN_02... size subroutine)
         SELECT CASE (d)
         CASE(0)
-          IF (print_level > -1) write(out_unitp,*) ' en_r2_01_1_size'
+          IF (print_level > -1) write(out_unit,*) ' en_r2_01_1_size'
           CALL en_r2_01_1_size(base%ndim,nq)
         CASE(2)
-          IF (print_level > -1) write(out_unitp,*) ' en_r2_02_xiu_size'
+          IF (print_level > -1) write(out_unit,*) ' en_r2_02_xiu_size'
           CALL en_r2_02_xiu_size(base%ndim,nq)
         CASE(4)
-          IF (print_level > -1) write(out_unitp,*) ' en_r2_05_1_size'
+          IF (print_level > -1) write(out_unit,*) ' en_r2_05_1_size'
           option = 1
           CALL en_r2_05_1_size(base%ndim,option,nq)
         CASE(6)
-          IF (print_level > -1) write(out_unitp,*) ' en_r2_07_3_size'
+          IF (print_level > -1) write(out_unit,*) ' en_r2_07_3_size'
           option = 1
           CALL en_r2_07_3_size(base%ndim,option,nq)
         CASE(8)
-          IF (print_level > -1) write(out_unitp,*) ' en_r2_09_1_size'
+          IF (print_level > -1) write(out_unit,*) ' en_r2_09_1_size'
           option = 1
           CALL en_r2_09_1_size(base%ndim,option,nq)
         CASE(10)
-         IF (print_level > -1)  write(out_unitp,*) ' en_r2_11_1_size'
+         IF (print_level > -1)  write(out_unit,*) ' en_r2_11_1_size'
           option = 1
           CALL en_r2_11_1_size(base%ndim,option,nq)
         CASE DEFAULT
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' we cannot use cubature with d > 10'
-          write(out_unitp,*) 'd',d
-          write(out_unitp,*) 'nb,nq',base%nb,nq
-          write(out_unitp,*) 'ndim',base%ndim
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' we cannot use cubature with d > 10'
+          write(out_unit,*) 'd',d
+          write(out_unit,*) 'nb,nq',base%nb,nq
+          write(out_unit,*) 'ndim',base%ndim
           nq = -1
           !RETURN
         END SELECT
         IF (base%print_info_OF_basisDP .AND. print_level > -1) THEN
-          write(out_unitp,*) 'maximum degree:',d
-          write(out_unitp,*) 'Cubature point number:',nq
+          write(out_unit,*) 'maximum degree:',d
+          write(out_unit,*) 'Cubature point number:',nq
         END IF
         CALL Set_nq_OF_basis(base,nq)
 
@@ -1550,10 +1550,10 @@ end subroutine sub_quadra_hermite_halfLeft
           option = 1
           CALL en_r2_11_1(base%ndim,option,nq,base%x,base%w)
         CASE DEFAULT
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' we cannot use cubature with d > 10'
-          write(out_unitp,*) 'nb,nq',base%nb,nq
-          write(out_unitp,*) 'ndim',base%ndim
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' we cannot use cubature with d > 10'
+          write(out_unit,*) 'nb,nq',base%nb,nq
+          write(out_unit,*) 'ndim',base%ndim
           nq = -1
           STOP
         END SELECT
@@ -1564,9 +1564,9 @@ end subroutine sub_quadra_hermite_halfLeft
         END DO
 
         IF (base%print_info_OF_basisDP .AND. print_level > -1) THEN
-          write(out_unitp,*) 'cubature',nq
+          write(out_unit,*) 'cubature',nq
           DO iQ=1,nq
-            write(out_unitp,*) iQ,base%x(:,iQ),base%w(iQ)
+            write(out_unit,*) iQ,base%x(:,iQ),base%w(iQ)
           END DO
         END IF
 
@@ -1591,7 +1591,7 @@ end subroutine sub_quadra_hermite_halfLeft
       IF (debug) CALL Write_nDindex(base%nDindB,name_sub)
       base%nb = base%nDindB%max_nDI
       IF (base%print_info_OF_basisDP .AND. print_level > -1) THEN
-        write(out_unitp,*) 'Basis function number:',base%nb
+        write(out_unit,*) 'Basis function number:',base%nb
       END IF
 
 
@@ -1642,23 +1642,23 @@ end subroutine sub_quadra_hermite_halfLeft
 
 !      CALL sort_basis(base)
 !      base%check_basis = .TRUE.
-!      write(out_unitp,*) 'coucou ',name_sub
+!      write(out_unit,*) 'coucou ',name_sub
 !      CALL check_ortho_basis(base,.FALSE.)
 !      base%check_basis = .FALSE.
-!      write(out_unitp,*) 'old w',base%w
+!      write(out_unit,*) 'old w',base%w
 !      CALL Weight_OF_grid_basis(base)
-!      write(out_unitp,*) 'new w',base%w
+!      write(out_unit,*) 'new w',base%w
 
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END sub_quadra_hermite_cuba'
+        write(out_unit,*) 'END sub_quadra_hermite_cuba'
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_quadra_hermite_cuba
       SUBROUTINE sub_quadra_hermite_cuba_DML(base,err_grid)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       IMPLICIT NONE
@@ -1704,9 +1704,9 @@ end subroutine sub_quadra_hermite_halfLeft
        END IF
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) '    Basis: Hermite polynomials, cubture'
-         write(out_unitp,*) '      LB,LG',LB,LG
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) '    Basis: Hermite polynomials, cubture'
+         write(out_unit,*) '      LB,LG',LB,LG
        END IF
 !-----------------------------------------------------------
        err_Grid = .FALSE.
@@ -1721,8 +1721,8 @@ end subroutine sub_quadra_hermite_halfLeft
 
        ! test if nq >= nb
       IF (base%check_nq_OF_basis) THEN
-        write(out_unitp,*) '    Basis: Hermite polynomia, cubature'
-        write(out_unitp,*) '      LB,LG',LB,LG
+        write(out_unit,*) '    Basis: Hermite polynomia, cubature'
+        write(out_unit,*) '      LB,LG',LB,LG
       END IF
       base%packed            = .TRUE.
       base%packed_done       = .TRUE.
@@ -1730,9 +1730,9 @@ end subroutine sub_quadra_hermite_halfLeft
 
       IF (.NOT. base%xPOGridRep_done) THEN
         IF (base%check_nq_OF_basis) THEN
-          IF (print_level > -1) write(out_unitp,*) '      old LG',LG
+          IF (print_level > -1) write(out_unit,*) '      old LG',LG
           IF (LG < LB) LG = LB + 1
-          IF (print_level > -1) write(out_unitp,*) '      new LG',LG
+          IF (print_level > -1) write(out_unit,*) '      new LG',LG
         END IF
 
         IF (LG /= 0) THEN
@@ -1740,17 +1740,17 @@ end subroutine sub_quadra_hermite_halfLeft
              TO_String(base%ndim) // 'D_deg' // TO_String(LG)
 
 
-          write(out_unitp,*) 'cubature_file%name: ',cubature_file%name
+          write(out_unit,*) 'cubature_file%name: ',cubature_file%name
           CALL file_open(cubature_file,nio,old=.TRUE.,err_file=err_io)
 
           IF (err_io == 0) THEN
             read(nio,*,iostat=err_io) nq
           ELSE
-            write(out_unitp,*) 'WARNNING in ',name_sub
-            write(out_unitp,*) 'cannot find cubature file: ',cubature_file%name
+            write(out_unit,*) 'WARNNING in ',name_sub
+            write(out_unit,*) 'cannot find cubature file: ',cubature_file%name
             err_Grid = .TRUE.
           END IF
-          write(out_unitp,*) '      cubature nq',nq
+          write(out_unit,*) '      cubature nq',nq
           CALL file_close(cubature_file)
 
           CALL Set_nq_OF_basis(base,nq)
@@ -1796,7 +1796,7 @@ end subroutine sub_quadra_hermite_halfLeft
                             nDsize=tab_nb)
       IF (debug) CALL Write_nDindex(base%nDindB,name_sub)
       base%nb = base%nDindB%max_nDI
-      IF (base%print_info_OF_basisDP) write(out_unitp,*) 'Basis function number:',base%nb
+      IF (base%print_info_OF_basisDP) write(out_unit,*) 'Basis function number:',base%nb
 
 
 !     calcul des valeurs des polynomes de hermites et des derivees en chaque
@@ -1846,24 +1846,24 @@ end subroutine sub_quadra_hermite_halfLeft
 
 !      CALL sort_basis(base)
 !      base%check_basis = .TRUE.
-!      write(out_unitp,*) 'coucou ',name_sub
+!      write(out_unit,*) 'coucou ',name_sub
 !      CALL check_ortho_basis(base,.FALSE.)
 !      base%check_basis = .FALSE.
-!      write(out_unitp,*) 'old w',base%w
+!      write(out_unit,*) 'old w',base%w
 !      CALL Weight_OF_grid_basis(base)
-!      write(out_unitp,*) 'new w',base%w
+!      write(out_unit,*) 'new w',base%w
 
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END sub_quadra_hermite_cuba_DML'
+        write(out_unit,*) 'END sub_quadra_hermite_cuba_DML'
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_quadra_hermite_cuba_DML
 
       SUBROUTINE transfo_Q_TO_tQ(base)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE mod_dnSVM
       IMPLICIT NONE
@@ -1889,8 +1889,8 @@ end subroutine sub_quadra_hermite_halfLeft
         q  = base%x(1,i)
         CALL sub_dntf(-itype,dntQ_inv,q,base%cte_Transfo(:,1),dnErr)
         IF (dnErr /= 0) THEN
-          write(out_unitp,*) ' ERROR in transfo_Q_TO_tQ'
-          write(out_unitp,*) '   ERROR in the sub_dntf call for the coordinates, iQdyn:',base%iQdyn(1)
+          write(out_unit,*) ' ERROR in transfo_Q_TO_tQ'
+          write(out_unit,*) '   ERROR in the sub_dntf call for the coordinates, iQdyn:',base%iQdyn(1)
           STOP 'ERROR in sub_dntf called from transfo_Q_TO_tQ'
         END IF
 
@@ -1898,8 +1898,8 @@ end subroutine sub_quadra_hermite_halfLeft
 
         CALL sub_dntf(itype,dntQ,dntQ_inv%d0,base%cte_Transfo(:,1),dnErr)
         IF (dnErr /= 0) THEN
-          write(out_unitp,*) ' ERROR in transfo_Q_TO_tQ'
-          write(out_unitp,*) '   ERROR in the sub_dntf call for the coordinates, iQdyn:',base%iQdyn(1)
+          write(out_unit,*) ' ERROR in transfo_Q_TO_tQ'
+          write(out_unit,*) '   ERROR in the sub_dntf call for the coordinates, iQdyn:',base%iQdyn(1)
           STOP 'ERROR in sub_dntf called from transfo_Q_TO_tQ'
         END IF
 

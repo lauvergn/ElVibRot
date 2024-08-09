@@ -73,7 +73,7 @@ MODULE mod_psi_Op_MPI
 !  be careful with bounds_MPI. It should be consistant with the *vecB in psi
 !---------------------------------------------------------------------------------------
   SUBROUTINE Set_symab_OF_psiBasisRep_MPI(psi,symab,changes)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -111,7 +111,7 @@ MODULE mod_psi_Op_MPI
           CALL MPI_Reduce_max_Bcast(ib)
 
           loc_symab=Get_symabOFSymAbelianOFBasis_AT_ib(psi%BasisnD,ib)
-          !write(out_unitp,*) 'maxloc,loc_symab check',ib,loc_symab,MPI_id
+          !write(out_unit,*) 'maxloc,loc_symab check',ib,loc_symab,MPI_id
         ENDIF
       ELSE
         loc_symab=-1
@@ -159,7 +159,7 @@ MODULE mod_psi_Op_MPI
 !> calculate overlap: <psi1|psi2> on Smolyak rep on Basis.
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi1_psi2_SRB_MPI(Overlap,psi1,psi2)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -200,7 +200,7 @@ MODULE mod_psi_Op_MPI
 !> calculate overlap: <psi1|psi2> on Smolyak rep.
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi1_psi2_SRG_MPI(Overlap,psi1,psi2)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_param_SGType2
     USE mod_MPI_aux
@@ -302,7 +302,7 @@ MODULE mod_psi_Op_MPI
 ! improve later
 !---------------------------------------------------------------------------------------
   SUBROUTINE norm2_psi_SR_MPI(psi,scheme)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     IMPLICIT NONE
     
@@ -342,7 +342,7 @@ MODULE mod_psi_Op_MPI
 ! MPI version, takes too much memory
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi_Hpsi_matrix_MPI(H_overlap,S_overlap,psi,Hpsi,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_psi_Op,ONLY:Overlap_psi1_psi2
     USE mod_MPI_aux
@@ -423,7 +423,7 @@ MODULE mod_psi_Op_MPI
 ! MPI version, less memory
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi_Hpsi_matrix_MPI2(H_overlap,S_overlap,psi,Hpsi,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -486,7 +486,7 @@ MODULE mod_psi_Op_MPI
 !> of Residual g in MakeResidual_Davidson_MPI2
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_HS_matrix_MPI3(H_overlap,S_overlap,psi,Hpsi,ndim0,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -590,7 +590,7 @@ MODULE mod_psi_Op_MPI
 !> of Residual g in MakeResidual_Davidson_MPI3
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_H_matrix_MPI4(H_overlap,psi,Hpsi,ndim0,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -668,7 +668,7 @@ MODULE mod_psi_Op_MPI
 !> and Residual g in MakeResidual_Davidson_MPI3
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_S_matrix_MPI4(S_overlap,psi,ndim0,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -735,7 +735,7 @@ MODULE mod_psi_Op_MPI
 !> Overlap_S_matrix_MPI without the distribution of psi
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_S0_matrix_MPI4(S_overlap,psi,ndim0,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -771,7 +771,7 @@ MODULE mod_psi_Op_MPI
 !> of Residual g in MakeResidual_Davidson_MPI2
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi_Hpsi_MPI(H_overlap,psi,Hpsi,ndim0,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -812,7 +812,7 @@ MODULE mod_psi_Op_MPI
 !> of H_overlap and Residual g in MakeResidual_Davidson_MPI3
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi_psi_MPI(S_overlap,psi,ndim0,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -846,7 +846,7 @@ MODULE mod_psi_Op_MPI
 !> the distribution is depends on the length of vec (RvecB, CvecB, RvecG, or CvecG)
 !---------------------------------------------------------------------------------------
   SUBROUTINE distribute_psi_MPI(psi,ndim1,ndim2,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -953,7 +953,7 @@ MODULE mod_psi_Op_MPI
 !> vector is packed on master and unpacked on theards to reduce comm. time.
 !---------------------------------------------------------------------------------------
   SUBROUTINE distribute_psi_pack_MPI(psi,ndim1,ndim2,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -1123,7 +1123,7 @@ MODULE mod_psi_Op_MPI
 !>         limited by bound1_MPI and bound2_MPI, see "Overlap_psipsi_MPI3"
 !---------------------------------------------------------------------------------------
   SUBROUTINE calculate_overlap_MPI(psi,ndim1,ndim2,With_Grid,Hpsi,S_overlap,H_overlap)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -1213,7 +1213,7 @@ MODULE mod_psi_Op_MPI
 !> @brief calculate <psi|psi> and/or <psi|H|psi> in MPI scheme 1 
 !---------------------------------------------------------------------------------------
   SUBROUTINE calculate_overlap_S1_MPI(psi,ndim1,ndim2,With_Grid,Hpsi,S_overlap,H_overlap)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_psi_Op,ONLY:Overlap_psi1_psi2
     USE mod_MPI_aux
@@ -1353,7 +1353,7 @@ MODULE mod_psi_Op_MPI
 ! calculate overlap for <psi(n+1)|psi(i)> or/and <Hpsi(n+1)|psi(i)> i=1...n
 !---------------------------------------------------------------------------------------
   SUBROUTINE calculate_overlap1D_MPI(psi,ndim,With_Grid,Hpsi,S_overlap1D,H_overlap1D)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -1377,7 +1377,7 @@ MODULE mod_psi_Op_MPI
 
     IF((present(Hpsi) .AND. (.NOT. present(H_overlap1D))) .OR.                         &
        ((.NOT. present(S_overlap1D)) .AND. (.NOT. present(H_overlap1D)))) THEN
-      write(out_unitp,*) 'variable presented error in calculate_overlap_MPI'  
+      write(out_unit,*) 'variable presented error in calculate_overlap_MPI'  
       STOP
     ENDIF
 
@@ -1425,7 +1425,7 @@ MODULE mod_psi_Op_MPI
 !> of Residual g in MakeResidual_Davidson_MPI2
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi1_psi2_MPI5(H_overlap,S_overlap,psi,Hpsi,ndim0,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -1474,7 +1474,7 @@ MODULE mod_psi_Op_MPI
 !> of Residual g in MakeResidual_Davidson_MPI2
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi1_psi2_MPI3(H_overlap,S_overlap,psi,Hpsi,ndim0,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -1666,7 +1666,7 @@ MODULE mod_psi_Op_MPI
 ! of Residual g in MakeResidual_Davidson_MPI2
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi1_psi2_MPI2(H_overlap,S_overlap,psi,Hpsi,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -1862,7 +1862,7 @@ MODULE mod_psi_Op_MPI
 ! DO j=j_l,j_u
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psi1_psi2_MPI(H_overlap,S_overlap,psi,Hpsi,ndim,With_Grid)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -2034,7 +2034,7 @@ MODULE mod_psi_Op_MPI
 !>  which is ready in Overlap_psi1_psi2_MPI3
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psipsi_MPI3(Overlap,psi1,psi2,With_Grid,Channel_ie)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -2075,15 +2075,15 @@ MODULE mod_psi_Op_MPI
 
     !-----------------------------------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*) 'psi1'
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'psi1'
       CALL ecri_psi(psi=psi1)
 
-      write(out_unitp,*) 'psi2'
+      write(out_unit,*) 'psi2'
       CALL ecri_psi(psi=psi2)
-      write(out_unitp,*) 'GridRep,BasisRep ?'
-      IF (present(With_Grid)) write(out_unitp,*) 'With_Grid',With_Grid
-      IF (present(Channel_ie)) write(out_unitp,*) 'Channel_ie',Channel_ie
+      write(out_unit,*) 'GridRep,BasisRep ?'
+      IF (present(With_Grid)) write(out_unit,*) 'With_Grid',With_Grid
+      IF (present(Channel_ie)) write(out_unit,*) 'Channel_ie',Channel_ie
     ENDIF
     !-----------------------------------------------------------------------------------
 
@@ -2115,16 +2115,16 @@ MODULE mod_psi_Op_MPI
       ELSE IF(.NOT. psi1%cplx .AND. allocated(psi1%RvecG) .AND.                        &
                allocated(psi2%RvecG)) THEN
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' impossible to calculate the GridRep overlap'
-        write(out_unitp,*) ' With_Grid_loc=t but problem with the allocation GridRep'
-        write(out_unitp,*) 'allocated(psi1%CvecG)',allocated(psi1%CvecG)
-        write(out_unitp,*) 'allocated(psi2%CvecG)',allocated(psi2%CvecG)
-        write(out_unitp,*) 'allocated(psi1%RvecG)',allocated(psi1%RvecG)
-        write(out_unitp,*) 'allocated(psi2%RvecG)',allocated(psi2%RvecG)
-        write(out_unitp,*) ' psi1'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' impossible to calculate the GridRep overlap'
+        write(out_unit,*) ' With_Grid_loc=t but problem with the allocation GridRep'
+        write(out_unit,*) 'allocated(psi1%CvecG)',allocated(psi1%CvecG)
+        write(out_unit,*) 'allocated(psi2%CvecG)',allocated(psi2%CvecG)
+        write(out_unit,*) 'allocated(psi1%RvecG)',allocated(psi1%RvecG)
+        write(out_unit,*) 'allocated(psi2%RvecG)',allocated(psi2%RvecG)
+        write(out_unit,*) ' psi1'
         CALL ecri_psi(psi=psi1,ecri_GridRep=.TRUE.)
-        write(out_unitp,*) ' psi2'
+        write(out_unit,*) ' psi2'
         CALL ecri_psi(psi=psi2,ecri_GridRep=.TRUE.)
         STOP
       ENDIF
@@ -2133,16 +2133,16 @@ MODULE mod_psi_Op_MPI
       ELSE IF(.NOT. psi1%cplx .AND. allocated(psi1%RvecB) .AND.                        &
               allocated(psi2%RvecB)) THEN
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' impossible to calculate the BasisRep overlap'
-        write(out_unitp,*) ' With_Grid_loc=f (on basis) but problem with the allocation of BasisRep'
-        write(out_unitp,*) 'allocated(psi1%CvecB)',allocated(psi1%CvecB)
-        write(out_unitp,*) 'allocated(psi2%CvecB)',allocated(psi2%CvecB)
-        write(out_unitp,*) 'allocated(psi1%RvecB)',allocated(psi1%RvecB)
-        write(out_unitp,*) 'allocated(psi2%RvecB)',allocated(psi2%RvecB)
-        write(out_unitp,*) ' psi1'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' impossible to calculate the BasisRep overlap'
+        write(out_unit,*) ' With_Grid_loc=f (on basis) but problem with the allocation of BasisRep'
+        write(out_unit,*) 'allocated(psi1%CvecB)',allocated(psi1%CvecB)
+        write(out_unit,*) 'allocated(psi2%CvecB)',allocated(psi2%CvecB)
+        write(out_unit,*) 'allocated(psi1%RvecB)',allocated(psi1%RvecB)
+        write(out_unit,*) 'allocated(psi2%RvecB)',allocated(psi2%RvecB)
+        write(out_unit,*) ' psi1'
         CALL ecri_psi(psi=psi1,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) ' psi2'
+        write(out_unit,*) ' psi2'
         CALL ecri_psi(psi=psi2,ecri_BasisRep=.TRUE.)
         STOP
       ENDIF
@@ -2222,8 +2222,8 @@ MODULE mod_psi_Op_MPI
 
     !-----------------------------------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'Overlap : ',Overlap
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'Overlap : ',Overlap
+      write(out_unit,*) 'END ',name_sub
     ENDIF
     !-----------------------------------------------------------------------------------
 
@@ -2237,7 +2237,7 @@ MODULE mod_psi_Op_MPI
 ! and thus completely removed later
 !---------------------------------------------------------------------------------------
   SUBROUTINE Overlap_psipsi_MPI(Overlap,psi1,psi2,With_Grid,Channel_ie)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     IMPLICIT NONE
 
@@ -2269,15 +2269,15 @@ MODULE mod_psi_Op_MPI
 
 !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*) 'psi1'
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'psi1'
       CALL ecri_psi(psi=psi1)
 
-      write(out_unitp,*) 'psi2'
+      write(out_unit,*) 'psi2'
       CALL ecri_psi(psi=psi2)
-      write(out_unitp,*) 'GridRep,BasisRep ?'
-      IF (present(With_Grid)) write(out_unitp,*) 'With_Grid',With_Grid
-      IF (present(Channel_ie)) write(out_unitp,*) 'Channel_ie',Channel_ie
+      write(out_unit,*) 'GridRep,BasisRep ?'
+      IF (present(With_Grid)) write(out_unit,*) 'With_Grid',With_Grid
+      IF (present(Channel_ie)) write(out_unit,*) 'Channel_ie',Channel_ie
     END IF
 !-----------------------------------------------------------
 
@@ -2299,16 +2299,16 @@ MODULE mod_psi_Op_MPI
       ELSE IF (.NOT. psi1%cplx .AND.                                  &
        allocated(psi1%RvecG) .AND. allocated(psi2%RvecG)) THEN
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' impossible to calculate the GridRep overlap'
-        write(out_unitp,*) ' With_Grid_loc=t but problem with the allocation GridRep'
-        write(out_unitp,*) 'allocated(psi1%CvecG)',allocated(psi1%CvecG)
-        write(out_unitp,*) 'allocated(psi2%CvecG)',allocated(psi2%CvecG)
-        write(out_unitp,*) 'allocated(psi1%RvecG)',allocated(psi1%RvecG)
-        write(out_unitp,*) 'allocated(psi2%RvecG)',allocated(psi2%RvecG)
-        write(out_unitp,*) ' psi1'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' impossible to calculate the GridRep overlap'
+        write(out_unit,*) ' With_Grid_loc=t but problem with the allocation GridRep'
+        write(out_unit,*) 'allocated(psi1%CvecG)',allocated(psi1%CvecG)
+        write(out_unit,*) 'allocated(psi2%CvecG)',allocated(psi2%CvecG)
+        write(out_unit,*) 'allocated(psi1%RvecG)',allocated(psi1%RvecG)
+        write(out_unit,*) 'allocated(psi2%RvecG)',allocated(psi2%RvecG)
+        write(out_unit,*) ' psi1'
         CALL ecri_psi(psi=psi1,ecri_GridRep=.TRUE.)
-        write(out_unitp,*) ' psi2'
+        write(out_unit,*) ' psi2'
         CALL ecri_psi(psi=psi2,ecri_GridRep=.TRUE.)
         STOP
       END IF
@@ -2318,16 +2318,16 @@ MODULE mod_psi_Op_MPI
       ELSE IF (.NOT. psi1%cplx .AND.                                  &
        allocated(psi1%RvecB) .AND. allocated(psi2%RvecB)) THEN
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' impossible to calculate the BasisRep overlap'
-        write(out_unitp,*) ' With_Grid_loc=f (on basis) but problem with the allocation of BasisRep'
-        write(out_unitp,*) 'allocated(psi1%CvecB)',allocated(psi1%CvecB)
-        write(out_unitp,*) 'allocated(psi2%CvecB)',allocated(psi2%CvecB)
-        write(out_unitp,*) 'allocated(psi1%RvecB)',allocated(psi1%RvecB)
-        write(out_unitp,*) 'allocated(psi2%RvecB)',allocated(psi2%RvecB)
-        write(out_unitp,*) ' psi1'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' impossible to calculate the BasisRep overlap'
+        write(out_unit,*) ' With_Grid_loc=f (on basis) but problem with the allocation of BasisRep'
+        write(out_unit,*) 'allocated(psi1%CvecB)',allocated(psi1%CvecB)
+        write(out_unit,*) 'allocated(psi2%CvecB)',allocated(psi2%CvecB)
+        write(out_unit,*) 'allocated(psi1%RvecB)',allocated(psi1%RvecB)
+        write(out_unit,*) 'allocated(psi2%RvecB)',allocated(psi2%RvecB)
+        write(out_unit,*) ' psi1'
         CALL ecri_psi(psi=psi1,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) ' psi2'
+        write(out_unit,*) ' psi2'
         CALL ecri_psi(psi=psi2,ecri_BasisRep=.TRUE.)
         STOP
       END IF
@@ -2394,8 +2394,8 @@ MODULE mod_psi_Op_MPI
 
 !----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'Overlap : ',Overlap
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'Overlap : ',Overlap
+      write(out_unit,*) 'END ',name_sub
     END IF
 !----------------------------------------------------------
 
@@ -2408,7 +2408,7 @@ MODULE mod_psi_Op_MPI
 ! Save vectors
 !---------------------------------------------------------------------------------------
   SUBROUTINE sub_LCpsi_TO_psi_MPI(psi,Vec,ndim,nb_save)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
     IMPLICIT NONE

@@ -73,8 +73,8 @@
       conv = 1.d0
       Emin = 0.d0
       Emax = -1.d0
-      read(in_unitp,param)
-      write(out_unitp,param)
+      read(in_unit,param)
+      write(out_unit,param)
 
 !     read the time function (autocorrelation...)
 
@@ -91,14 +91,14 @@
           dt = t(2)-t(1)
           tmax = t(npts)
           close(nio) ! CALL file_close cannot be used
-          write(out_unitp,*) 'npts t0,tmax,dt: ',npts,t0,tmax,dt
+          write(out_unit,*) 'npts t0,tmax,dt: ',npts,t0,tmax,dt
 !     END read the time function
 
 !     Check the funcErgy grid...
           dE = 2.d0*Pi/tmax
           IF (Emax <0) Emax=2.d0*Pi/dt
           IF (Emax> 2.d0*Pi/dt) THEN
-            write(out_unitp,*) 'Emax> 2.d0*Pi/dt',Emax,2.d0*Pi/tmax
+            write(out_unit,*) 'Emax> 2.d0*Pi/dt',Emax,2.d0*Pi/tmax
             STOP
           END IF
           nptE = int((Emax-Emin)/dE)
@@ -110,7 +110,7 @@
             Expiwt(:) = exp(EYE*E*t(:))
 
             funcE(i) = 2.d0*dt*sum(Expiwt(:)*auto(:))
-            write(out_unitp,*) E,funcE(i)
+            write(out_unit,*) E,funcE(i)
           END DO
 
 

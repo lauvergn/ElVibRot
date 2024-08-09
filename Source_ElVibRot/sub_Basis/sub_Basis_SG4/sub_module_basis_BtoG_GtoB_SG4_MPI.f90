@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_basis_BtoG_GtoB_SGType4_MPI
-USE mod_system
+USE EVR_system_m
 USE mod_nDindex
 USE mod_basis_set_alloc
 USE mod_param_SGType2
@@ -65,7 +65,7 @@ CONTAINS
 !> @breif allocate mapping table for different MPI scheme
 !---------------------------------------------------------------------------------------
 SUBROUTINE Mapping_table_allocate_MPI(basis_SG,Max_Srep)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis_set_alloc,ONLY:basis
   USE mod_MPI_aux
   IMPLICIT NONE
@@ -127,7 +127,7 @@ ENDSUBROUTINE Mapping_table_allocate_MPI
 !> scheme 3: keep required mapping table on levels2 threads
 !---------------------------------------------------------------------------------------
 SUBROUTINE Mapping_table_MPI(basis_SG,Max_Srep)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis_set_alloc,ONLY:basis
   USE mod_MPI_aux
   IMPLICIT NONE
@@ -232,7 +232,7 @@ END SUBROUTINE Mapping_table_MPI
 !---------------------------------------------------------------------------------------
 SUBROUTINE tabPackedBasis_TO_tabR_MPI(PsiR,all_RvecB_temp,iG,SGType2,nDI_index,        &
                                  reduce_Vlength,size_psi,Max_nDI_ib0,nDI_index_list)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis_set_alloc
   USE mod_param_SGType2
   USE mod_nDindex
@@ -313,7 +313,7 @@ END SUBROUTINE tabPackedBasis_TO_tabR_MPI
 !---------------------------------------------------------------------------------------
 SUBROUTINE PackedBasis_TO_tabR_index_MPI(iG,SGType2,reduce_index_mpi,nDI_index,        &
                                          Max_nDI_ib0,nDI_index_list)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis_set_alloc
   USE mod_param_SGType2
   USE mod_nDindex
@@ -415,7 +415,7 @@ END SUBROUTINE tabPackedBasis_TO_tabRpacked_MPI
 !---------------------------------------------------------------------------------------
 SUBROUTINE tabR_TO_tabPackedBasis_MPI(all_RvecB_temp2,PsiR,iG,SGType2,WeightiG,        &
                            nDI_index,reduce_Vlength,size_psi,Max_nDI_ib0,nDI_index_list)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis_set_alloc
   USE mod_param_SGType2
   USE mod_nDindex
@@ -511,7 +511,7 @@ SUBROUTINE Set_scheme_MPI_old(basis_SG)
   IF(MPI_scheme==3) THEN
     n_level2=MPI_np/(MPI_np/Num_L2+1)
     IF(mod(MPI_np,MPI_np/Num_L2+1)/=0) n_level2=n_level2+1
-    ! write(out_unitp,*) 'MPI_scheme3 check: Num_L2=',Num_L2,'n_level2=',n_level2
+    ! write(out_unit,*) 'MPI_scheme3 check: Num_L2=',Num_L2,'n_level2=',n_level2
   ENDIF
 
   ! initialize iGs distribution
@@ -587,7 +587,7 @@ SUBROUTINE Set_scheme_MPI(basis_SG,lMax_Srep)
     IF(MPI_S2_L2) THEN
       n_level2=MPI_np/(MPI_np/Num_L2+1)
       IF(mod(MPI_np,MPI_np/Num_L2+1)/=0) n_level2=n_level2+1
-      ! write(out_unitp,*) 'MPI_scheme3 check: Num_L2=',Num_L2,'n_level2=',n_level2
+      ! write(out_unit,*) 'MPI_scheme3 check: Num_L2=',Num_L2,'n_level2=',n_level2
     ELSE
       n_level2=MPI_np+1 ! set n_level2>MPI_np
     ENDIF
@@ -599,7 +599,7 @@ SUBROUTINE Set_scheme_MPI(basis_SG,lMax_Srep)
   ! initialize iGs distribution
   CALL ini_iGs_MPI(basis_SG,.FALSE.)
 
-  write(out_unitp,*) 'MPI scheme ',MPI_scheme,' used for parallelization'
+  write(out_unit,*) 'MPI scheme ',MPI_scheme,' used for parallelization'
 
   ! build communicator for node*-0 processors
   IF(MPI_scheme==3) THEN
@@ -618,9 +618,9 @@ SUBROUTINE Set_scheme_MPI(basis_SG,lMax_Srep)
       CALL MPI_Comm_size(MPI_NODE_0_COMM,MPI_np_node,MPI_err)
     ENDIF
 
-    write(out_unitp,*) 'Communicator for MPI scheme 3 initialized:'
-    write(out_unitp,*) '  MPI_id MPI_id_node:',MPI_id,MPI_id_node
-    write(out_unitp,*) '  MPI_np MPI_np_node:',MPI_np,MPI_np_node
+    write(out_unit,*) 'Communicator for MPI scheme 3 initialized:'
+    write(out_unit,*) '  MPI_id MPI_id_node:',MPI_id,MPI_id_node
+    write(out_unit,*) '  MPI_np MPI_np_node:',MPI_np,MPI_np_node
 
     ! test Communicator MPI_NODE_0_COMM
     ! IF(MPI_nodes_p0) THEN
@@ -763,7 +763,7 @@ FUNCTION get_mem_S1_MPI(basis_SG,lMax_Srep) RESULT(mem_S1)
   mem_CB=mem_CB*MPI_np ! duplication on each processor
   mem_S1=(mem_CB+mem_MT)/1024_Rkind**3 ! in unit GB
 
-  write(out_unitp,*) 'memory estimated for MPI scheme 1: ',mem_S1,' GB'
+  write(out_unit,*) 'memory estimated for MPI scheme 1: ',mem_S1,' GB'
 
 #endif
 ENDFUNCTION

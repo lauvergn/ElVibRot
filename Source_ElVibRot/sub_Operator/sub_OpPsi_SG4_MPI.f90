@@ -59,7 +59,7 @@ MODULE mod_OpPsi_SG4_MPI
 !> after this subroutine, OpPsi will be ready
 !=======================================================================================
 SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
   USE mod_Coord_KEO,              ONLY:CoordType
   USE mod_SymAbelian,             ONLY:Calc_symab1_EOR_symab2
@@ -92,15 +92,15 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 
   IF(MPI_id==0) THEN
     IF(size(Psi)==0) THEN
-      write(out_unitp,*) 'ERROR in ',name_sub
-      write(out_unitp,*) '  The size of Psi(:) is zero!!'
-      write(out_unitp,*) '  => Check the fortran.'
+      write(out_unit,*) 'ERROR in ',name_sub
+      write(out_unit,*) '  The size of Psi(:) is zero!!'
+      write(out_unit,*) '  => Check the fortran.'
       STOP ' ERROR in sub_TabOpPsi_FOR_SGtype4_MPI: size(Psi) = 0'
     END IF
     IF (Psi(1)%cplx) THEN
-      write(out_unitp,*) 'ERROR in ',name_sub
-      write(out_unitp,*) '  Psi(1) is complex !!'
-      write(out_unitp,*) '  => Check the fortran.'
+      write(out_unit,*) 'ERROR in ',name_sub
+      write(out_unit,*) '  Psi(1) is complex !!'
+      write(out_unit,*) '  => Check the fortran.'
       STOP ' ERROR in sub_TabOpPsi_FOR_SGtype4_MPI: Psi(1) is complex'
     END IF
   ENDIF
@@ -119,9 +119,9 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
   CALL Action_MPI(Psi,OpPsi,BasisnD,para_Op)
 
   IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4) THEN
-    write(out_unitp,'(a)',ADVANCE='yes') '-]'
+    write(out_unit,'(a)',ADVANCE='yes') '-]'
   END IF
-  flush(out_unitp)
+  flush(out_unit)
 
   iterm00 = para_Op%derive_term_TO_iterm(0,0)
   IF (associated(para_Op%OpGrid)) THEN
@@ -137,8 +137,8 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
     DO ii=1,size(OpPsi)
       OpPsi_symab = Calc_symab1_EOR_symab2(para_Op%symab,Psi(ii)%symab)
       CALL Set_symab_OF_psiBasisRep(OpPsi(ii),OpPsi_symab)
-      !write(out_unitp,*) 'para_Op,psi symab ',i,para_Op%symab,Psi(i)%symab
-      !write(out_unitp,*) 'OpPsi_symab',i,OpPsi(i)%symab
+      !write(out_unit,*) 'para_Op,psi symab ',i,para_Op%symab,Psi(i)%symab
+      !write(out_unit,*) 'OpPsi_symab',i,OpPsi(i)%symab
     END DO
   ENDIF
 
@@ -151,7 +151,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> @brief operator action using MPI
 !=======================================================================================
   SUBROUTINE Action_MPI(Psi,OpPsi,BasisnD,para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_nDindex
     USE mod_psi,            ONLY:param_psi
     USE mod_SetOp,          ONLY:param_Op
@@ -180,7 +180,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
       CALL allocate_array(BasisnD%para_SGType2%size_ST,0,MPI_np-1)
       CALL allocate_array(BasisnD%para_SGType2%size_ST_mc,1,MPI_mc,0,MPI_np-1)
 
-      write(out_unitp,*) 'nb_Term,nb_SG',para_Op%nb_Term,BasisnD%para_SGType2%nb_SG
+      write(out_unit,*) 'nb_Term,nb_SG',para_Op%nb_Term,BasisnD%para_SGType2%nb_SG
       IF(MPI_scheme/=1) THEN
         CALL allocate_array(para_Op%OpGrid(1)%para_FileGrid%Save_MemGrid_iG,           &
                             1,BasisnD%para_SGType2%nb_SG)
@@ -192,8 +192,8 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
     size_ST_mc=>BasisnD%para_SGType2%size_ST_mc
     IF(BasisnD%para_SGType2%once_action) THEN
       CALL get_size_ST(BasisnD,size_ST,size_ST_mc)
-      write(out_unitp,*) 'size_ST:',size_ST(MPI_id),'from',MPI_id
-      !write(out_unitp,*) 'size_ST_mc:',size_ST_mc(:,MPI_id),'from',MPI_id
+      write(out_unit,*) 'size_ST:',size_ST(MPI_id),'from',MPI_id
+      !write(out_unit,*) 'size_ST_mc:',size_ST_mc(:,MPI_id),'from',MPI_id
     ENDIF
 
     !-----------------------------------------------------------------------------------
@@ -225,11 +225,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
     time_MPI_action=time_MPI_action+time_MPI_act_all(MPI_id)
 
     IF(BasisnD%para_SGType2%once_action .AND. MPI_id==0)                               &
-                   write(out_unitp,*) 'time MPI comm check: ',time_comm,' from ', MPI_id
+                   write(out_unit,*) 'time MPI comm check: ',time_comm,' from ', MPI_id
     IF(BasisnD%para_SGType2%once_action) CALL time_perso('MPI loop in action end')
     BasisnD%para_SGType2%once_action=.FALSE.
 
-    write(out_unitp,*) 'time used in action on processor :', MPI_id,                   &
+    write(out_unit,*) 'time used in action on processor :', MPI_id,                   &
                     real(time_MPI_act_all(MPI_id),kind=Rkind)/real(time_rate,kind=Rkind)
 #endif
   END SUBROUTINE Action_MPI
@@ -241,7 +241,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !!> action with MPI: scheme 1
 !!=======================================================================================
 !  SUBROUTINE Action_MPI_S1(Psi,OpPsi,BasisnD,para_Op)
-!    USE mod_system
+!    USE EVR_system_m
 !    USE mod_nDindex
 !    USE mod_Coord_KEO,                  ONLY:CoordType
 !    USE mod_basis_set_alloc,            ONLY:basis
@@ -283,15 +283,15 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !    size_ST     => BasisnD%para_SGType2%size_ST
 !
 !    IF(once_action) THEN
-!      write(out_unitp,*) 'action with MPI: Scheme 1'
+!      write(out_unit,*) 'action with MPI: Scheme 1'
 !    ELSE
 !      ! auto distribute Smolyak terms to different threads
-!      write(out_unitp,*) '------------------------------------------------'
-!      write(out_unitp,*) 'iGs_MPI at current step: ',iGs_MPI
+!      write(out_unit,*) '------------------------------------------------'
+!      write(out_unit,*) 'iGs_MPI at current step: ',iGs_MPI
 !
 !      IF(MPI_iGs_auto .AND. MPI_np>1) CALL auto_iGs_MPI(para_Op)
-!      write(out_unitp,*) 'iGs_MPI at new step    : ',iGs_MPI
-!      write(out_unitp,*) '------------------------------------------------'
+!      write(out_unit,*) 'iGs_MPI at new step    : ',iGs_MPI
+!      write(out_unit,*) '------------------------------------------------'
 !
 !      ! get new size_ST according to new iGs_MPI
 !      IF(MPI_iGs_auto) THEN
@@ -333,12 +333,12 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !          ENDDO
 !        ENDDO ! for iG
 !        Psi_ST_length(i_MPI)=ST_index1
-!        IF(once_action) write(out_unitp,*) 'length check:',i_MPI,size_ST(i_MPI),       &
+!        IF(once_action) write(out_unit,*) 'length check:',i_MPI,size_ST(i_MPI),       &
 !                 size_psi,size(psi(1)%RvecB),sum(BasisnD%para_SGType2%tab_nb_OF_SRep(:))
 !
 !        ! double check
 !        IF(Abs(size_psi*size_ST(i_MPI)-Psi_ST_length(i_MPI))>0) THEN
-!          write(out_unitp,*) 'error in MPI action part,check length'
+!          write(out_unit,*) 'error in MPI action part,check length'
 !          STOP
 !        ENDIF
 !
@@ -457,7 +457,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> @param para_Op [in] Operator
 !=======================================================================================
   SUBROUTINE Action_MPI_S1(Psi,OpPsi,BasisnD,para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_nDindex
     USE mod_psi,                        ONLY:param_psi
     USE mod_SetOp,                      ONLY:param_Op
@@ -497,11 +497,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
     size_RvecB=size(psi(1)%RvecB)
 
     IF(once_action) THEN
-      write(out_unitp,*) 'action with MPI: Scheme 1'
-      write(out_unitp,*) '------------------------------------------------'
-      !write(out_unitp,*) 'iGs_MPI: ',iGs_MPI
-      !write(out_unitp,*) '------------------------------------------------'
-      write(out_unitp,*) 'length check:',MPI_id,size_psi,size_RvecB,size_ST(MPI_id),   &
+      write(out_unit,*) 'action with MPI: Scheme 1'
+      write(out_unit,*) '------------------------------------------------'
+      !write(out_unit,*) 'iGs_MPI: ',iGs_MPI
+      !write(out_unit,*) '------------------------------------------------'
+      write(out_unit,*) 'length check:',MPI_id,size_psi,size_RvecB,size_ST(MPI_id),   &
                                          sum(BasisnD%para_SGType2%tab_nb_OF_SRep(:))
     ENDIF ! once_action
 
@@ -588,7 +588,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> @param para_Op [in] Operator
 !=======================================================================================
   SUBROUTINE Action_MPI_S2(Psi,OpPsi,BasisnD,para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_nDindex
     USE mod_psi,                             ONLY:param_psi
     USE mod_SetOp,                           ONLY:param_Op
@@ -640,14 +640,14 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
     once_action => BasisnD%para_SGType2%once_action
 
     IF(once_action) THEN
-      write(out_unitp,*) 'action with MPI: Scheme 2'
+      write(out_unit,*) 'action with MPI: Scheme 2'
       IF(MPI_S2_L2) THEN
-        write(out_unitp,*) 'enable 2-level distribution of Smolyak terms'
-        IF(MPI_np<Num_L2) write(out_unitp,*) 'Warning: 2-level distribution requires more cores'
+        write(out_unit,*) 'enable 2-level distribution of Smolyak terms'
+        IF(MPI_np<Num_L2) write(out_unit,*) 'Warning: 2-level distribution requires more cores'
       ENDIF
-      write(out_unitp,*) '------------------------------------------------'
-      write(out_unitp,*) 'iGs_MPI initial: ',iGs_MPI
-      write(out_unitp,*) '------------------------------------------------'
+      write(out_unit,*) '------------------------------------------------'
+      write(out_unit,*) 'iGs_MPI initial: ',iGs_MPI
+      write(out_unit,*) '------------------------------------------------'
     ELSE
       IF(MPI_iGs_auto) THEN
         iGs_change=.FALSE.
@@ -655,9 +655,9 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
         IF(MPI_np>1) CALL auto_iGs_MPI(para_Op,iGs_change)
 
         IF(iGs_change) THEN
-          write(out_unitp,*) '------------------------------------------------'
-          write(out_unitp,*) 'iGs_MPI changed, current: ',iGs_MPI
-          write(out_unitp,*) '------------------------------------------------'
+          write(out_unit,*) '------------------------------------------------'
+          write(out_unit,*) 'iGs_MPI changed, current: ',iGs_MPI
+          write(out_unit,*) '------------------------------------------------'
 
           ! get new size_ST according to new iGs_MPI
           CALL set_iGs_MPI_mc(BasisnD)
@@ -723,14 +723,14 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
           Psi_ST_length(i_MPI)=ST_index1
 
           IF(once_action .AND. i_mc==1) THEN
-            write(out_unitp,*) 'length check:',i_MPI,size_psi,size_RvecB,              &
+            write(out_unit,*) 'length check:',i_MPI,size_psi,size_RvecB,              &
                                 size_ST(i_MPI),size_ST_mc(i_mc,i_MPI),sum(size_ST),    &
                                 sum(BasisnD%para_SGType2%tab_nb_OF_SRep(:))
           ENDIF
 
           ! double check
           IF(Abs(length_ST_mc-Psi_ST_length(i_MPI))>0) THEN
-            write(out_unitp,*) 'ST length check:',length_ST_mc,Psi_ST_length(i_MPI)
+            write(out_unit,*) 'ST length check:',length_ST_mc,Psi_ST_length(i_MPI)
             STOP 'error in MPI action part,check length'
           ENDIF
 
@@ -839,7 +839,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 
             ! double check
             IF(Abs(length_ST_mc-Psi_ST_length(i_MPI))>0) THEN
-              write(out_unitp,*) 'error in MPI action part,check Psi_ST_length'
+              write(out_unit,*) 'error in MPI action part,check Psi_ST_length'
               STOP
             ENDIF
 
@@ -956,7 +956,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 ! consider to merge with scheme 2
 !=======================================================================================
   SUBROUTINE Action_MPI_S3(Psi,OpPsi,BasisnD,para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_nDindex
     USE mod_psi,                             ONLY:param_psi
     USE mod_SetOp,                           ONLY:param_Op
@@ -1008,10 +1008,10 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
     once_action => BasisnD%para_SGType2%once_action
 
     IF(once_action) THEN
-      write(out_unitp,*) 'action with MPI: Scheme 3'
-      write(out_unitp,*) '------------------------------------------------'
-      write(out_unitp,*) 'iGs_MPI initial: ',iGs_MPI
-      write(out_unitp,*) '------------------------------------------------'
+      write(out_unit,*) 'action with MPI: Scheme 3'
+      write(out_unit,*) '------------------------------------------------'
+      write(out_unit,*) 'iGs_MPI initial: ',iGs_MPI
+      write(out_unit,*) '------------------------------------------------'
     ELSE
       IF(MPI_iGs_auto) THEN
         iGs_change=.FALSE.
@@ -1019,9 +1019,9 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
         IF(MPI_np>1) CALL auto_iGs_MPI(para_Op,iGs_change)
 
         IF(iGs_change) THEN
-          write(out_unitp,*) '------------------------------------------------'
-          write(out_unitp,*) 'iGs_MPI changed, current: ',iGs_MPI
-          write(out_unitp,*) '------------------------------------------------'
+          write(out_unit,*) '------------------------------------------------'
+          write(out_unit,*) 'iGs_MPI changed, current: ',iGs_MPI
+          write(out_unit,*) '------------------------------------------------'
 
           ! get new size_ST according to new iGs_MPI
           CALL set_iGs_MPI_mc(BasisnD)
@@ -1064,14 +1064,14 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
           Psi_ST_length(i_MPI)=ST_index1
 
           IF(once_action .AND. i_mc==1) THEN
-            write(out_unitp,*) 'length check:',i_MPI,size_psi,size_RvecB,              &
+            write(out_unit,*) 'length check:',i_MPI,size_psi,size_RvecB,              &
                                 size_ST(i_MPI),size_ST_mc(i_mc,i_MPI),sum(size_ST),    &
                                 sum(BasisnD%para_SGType2%tab_nb_OF_SRep(:))
           ENDIF
 
           ! double check
           IF(Abs(length_ST_mc-Psi_ST_length(i_MPI))>0) THEN
-            write(out_unitp,*) 'ST length check:',length_ST_mc,Psi_ST_length(i_MPI)
+            write(out_unit,*) 'ST length check:',length_ST_mc,Psi_ST_length(i_MPI)
             STOP 'error in MPI action part,check length'
           ENDIF
 
@@ -1240,7 +1240,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> not very effeicient, consider to remove it later
 !=======================================================================================
   SUBROUTINE Action_MPI_S4(Psi,OpPsi,BasisnD,para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_nDindex
     USE mod_Coord_KEO,                  ONLY:CoordType
     USE mod_basis_set_alloc,            ONLY:basis
@@ -1292,7 +1292,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 
     ! calculate total length of vectors for each threads--------------------------------
     IF(once_action .AND. MPI_id==0) THEN
-      write(out_unitp,*) 'action with MPI: Scheme 4'
+      write(out_unit,*) 'action with MPI: Scheme 4'
       allocate(BasisnD%para_SGType2%nDI_index_master(0:MPI_np-1))
       allocate(BasisnD%para_SGType2%reduce_Vlength_master(0:MPI_np-1))
     ENDIF
@@ -1326,7 +1326,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
                                          BasisnD%para_SGType2%nDI_index,Max_nDI_ib0,   &
                                          BasisnD%para_SGType2%nDI_index_list)
         ENDDO
-        write(out_unitp,*) 'V_allcount check',V_allcount,size_ST(MPI_id),          &
+        write(out_unit,*) 'V_allcount check',V_allcount,size_ST(MPI_id),          &
                                               reduce_Vlength,' from ',MPI_id
         CALL MPI_Send(reduce_Vlength,size1_MPI,Int_MPI,root_MPI,MPI_id,                &
                       MPI_COMM_WORLD,MPI_err)
@@ -1389,7 +1389,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
           CALL MPI_Recv(BasisnD%para_SGType2%nDI_index_master(i_MPI)%array,            &
                         reduce_Vlength,Int_MPI,i_MPI,i_MPI,MPI_COMM_WORLD,             &
                         MPI_stat,MPI_err)
-          write(out_unitp,*) 'length of comm list:',reduce_Vlength_master(i_MPI),      &
+          write(out_unit,*) 'length of comm list:',reduce_Vlength_master(i_MPI),      &
                              'from',i_MPI
         ENDIF ! for once_action
         CALL time_record(time_comm,time_temp1,time_temp2,2)
@@ -1463,7 +1463,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> sub_TabOpPsi_FOR_SGtype4 for working on full Smolyak rep.
 !=======================================================================================
   SUBROUTINE sub_TabOpPsi_FOR_SGtype4_SRB_MPI(Psi,OpPsi,para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_nDindex
     USE mod_psi_set_alloc,  ONLY:param_psi
     USE mod_basis_set_alloc,ONLY:basis
@@ -1526,7 +1526,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> sub_TabOpPsi_OF_ONEDP_FOR_SGtype4 for working on fulll Smolyak rep. on basis
 !=======================================================================================
   SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRB_MPI(iG,psi,OpPsi,tab_l,para_Op)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
   USE mod_Coord_KEO,              ONLY:CoordType
   USE mod_basis_set_alloc,        ONLY:basis
@@ -1782,7 +1782,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> sub_TabOpPsi_OF_ONEDP_FOR_SGtype4 for working on fulll Smolyak rep.
 !=======================================================================================
   SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI(iG,psi,OpPsi,tab_l,para_Op)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
   USE mod_Coord_KEO,              ONLY:CoordType
   USE mod_basis_set_alloc,        ONLY:basis
@@ -2024,7 +2024,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> sub_TabOpPsi_FOR_SGtype4 for working on full Smolyak rep.
 !=======================================================================================
   SUBROUTINE sub_TabOpPsi_FOR_SGtype4_SRG_MPI(Psi,OpPsi,para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_nDindex
     USE mod_psi_set_alloc,  ONLY:param_psi
     USE mod_basis_set_alloc,ONLY:basis
@@ -2090,7 +2090,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> time used in the previous action
 !=======================================================================================
   SUBROUTINE auto_iGs_MPI_old(para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_SetOp,ONLY:param_Op
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -2115,7 +2115,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
     CALL MPI_collect_info(time_MPI_act_all) ! time_MPI_act_all infor on master
 
     IF(MPI_id==0) THEN
-      write(out_unitp,*) 'time used in action for each threads:',time_MPI_act_all
+      write(out_unit,*) 'time used in action for each threads:',time_MPI_act_all
     ENDIF
 
     IF(MPI_id==0) THEN
@@ -2196,7 +2196,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> time used in the previous action
 !=======================================================================================
   SUBROUTINE auto_iGs_MPI_old2(para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_SetOp,ONLY:param_Op
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -2223,7 +2223,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 
     returnall=.FALSE.
     IF(MPI_id==0) THEN
-      write(out_unitp,*) 'time used in action for each threads:',time_MPI_act_all
+      write(out_unit,*) 'time used in action for each threads:',time_MPI_act_all
       ave_time=Real(SUM(time_MPI_act_all),kind=Rkind)/Real(MPI_np,kind=Rkind)
       IF(ALL(ABS(ave_time-time_MPI_act_all)/ave_time<0.12)) returnall=.TRUE.
     ENDIF
@@ -2319,7 +2319,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> time used in the previous action
 !=======================================================================================
   SUBROUTINE auto_iGs_MPI_old3(para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_SetOp,ONLY:param_Op
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -2345,11 +2345,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 
     returnall=.FALSE.
     IF(MPI_id==0) THEN
-      write(out_unitp,*) 'time used in action for each threads:',time_MPI_act_all
-      !write(out_unitp,*) 'commu time used in action for each threads:',time_MPI_local
+      write(out_unit,*) 'time used in action for each threads:',time_MPI_act_all
+      !write(out_unit,*) 'commu time used in action for each threads:',time_MPI_local
       ave_time=Real(SUM(time_MPI_act_all),kind=Rkind)/Real(MPI_np,kind=Rkind)
       IF(ALL(ABS(ave_time-time_MPI_act_all)/ave_time<0.1)) returnall=.TRUE.
-      write(out_unitp,*) 'time balance:',ABS(ave_time-time_MPI_act_all)/ave_time<0.1
+      write(out_unit,*) 'time balance:',ABS(ave_time-time_MPI_act_all)/ave_time<0.1
     ENDIF
 
     CALL MPI_BCAST(returnall,size1_MPI,MPI_Logical,root_MPI,MPI_COMM_WORLD,MPI_err)
@@ -2439,7 +2439,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> time used in the previous action
 !=======================================================================================
   SUBROUTINE auto_iGs_MPI_old4(para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_SetOp,ONLY:param_Op
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -2465,11 +2465,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 
     returnall=.FALSE.
     IF(MPI_id==0) THEN
-      write(out_unitp,*) 'time used in action for each threads:',time_MPI_act_all
-      !write(out_unitp,*) 'commu time used in action for each threads:',time_MPI_local
+      write(out_unit,*) 'time used in action for each threads:',time_MPI_act_all
+      !write(out_unit,*) 'commu time used in action for each threads:',time_MPI_local
       ave_time=Real(SUM(time_MPI_act_all),kind=Rkind)/Real(MPI_np,kind=Rkind)
       IF(ALL(ABS(ave_time-time_MPI_act_all)/ave_time<0.1)) returnall=.TRUE.
-      write(out_unitp,*) 'time balance:',ABS(ave_time-time_MPI_act_all)/ave_time<0.1
+      write(out_unit,*) 'time balance:',ABS(ave_time-time_MPI_act_all)/ave_time<0.1
     ENDIF
 
     CALL MPI_BCAST(returnall,size1_MPI,MPI_Logical,root_MPI,MPI_COMM_WORLD,MPI_err)
@@ -2558,7 +2558,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> time used in the previous action
 !=======================================================================================
   SUBROUTINE auto_iGs_MPI_old5(para_Op)
-    USE mod_system
+    USE EVR_system_m
     USE mod_SetOp,ONLY:param_Op
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -2590,11 +2590,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 
     returnall=.FALSE.
     IF(MPI_id==0) THEN
-      write(out_unitp,*) 'time used in action for each processer:',time_MPI_act_all
-      write(out_unitp,*) 'local comm time used for each processer:',time_MPI_local
+      write(out_unit,*) 'time used in action for each processer:',time_MPI_act_all
+      write(out_unit,*) 'local comm time used for each processer:',time_MPI_local
       ave_time=Real(SUM(time_MPI_act_all),kind=Rkind)/Real(MPI_np,kind=Rkind)
       IF(ALL(ABS(ave_time-time_MPI_act_all)/ave_time<0.1)) returnall=.TRUE.
-      write(out_unitp,*) 'time balance:',ABS(ave_time-time_MPI_act_all)/ave_time<0.1
+      write(out_unit,*) 'time balance:',ABS(ave_time-time_MPI_act_all)/ave_time<0.1
     ENDIF
 
     CALL MPI_BCAST(returnall,size1_MPI,MPI_Logical,root_MPI,MPI_COMM_WORLD,MPI_err)
@@ -2692,7 +2692,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 !> time used in the previous action
 !---------------------------------------------------------------------------------------
   SUBROUTINE auto_iGs_MPI(para_Op,iGs_change)
-    USE mod_system
+    USE EVR_system_m
     USE mod_SetOp,ONLY:param_Op
     USE mod_MPI_aux
     IMPLICIT NONE
@@ -2723,12 +2723,12 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
 
     iGs_change=.TRUE.
     IF(MPI_id==0) THEN
-      write(out_unitp,*) 'time used in action for each processer:',time_MPI_act_all
-      write(out_unitp,*) 'local comm time used for each processer:',time_MPI_local
-      write(out_unitp,*) 'calculation time used for each processer:',time_MPI_calcu
+      write(out_unit,*) 'time used in action for each processer:',time_MPI_act_all
+      write(out_unit,*) 'local comm time used for each processer:',time_MPI_local
+      write(out_unit,*) 'calculation time used for each processer:',time_MPI_calcu
       ave_time=Real(SUM(time_MPI_act_all),kind=Rkind)/Real(MPI_np,kind=Rkind)
       IF(ALL(ABS(ave_time-time_MPI_act_all)/ave_time<0.1)) iGs_change=.FALSE.
-      write(out_unitp,*) 'time balance:',ABS(ave_time-time_MPI_act_all)/ave_time<0.1
+      write(out_unit,*) 'time balance:',ABS(ave_time-time_MPI_act_all)/ave_time<0.1
     ENDIF
 
     CALL MPI_BCAST(iGs_change,size1_MPI,MPI_Logical,root_MPI,MPI_COMM_WORLD,MPI_err)
@@ -2794,7 +2794,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4_MPI(Psi,OpPsi,para_Op)
         ENDIF
 
         IF(ii==MPI_np) THEN
-          write(out_unitp,*) 'Warning: error in auto_iGs_MPI, back to initial'
+          write(out_unit,*) 'Warning: error in auto_iGs_MPI, back to initial'
           iGs_MPI=iGs_MPI0
           iGs_MPI_mc=iGs_MPI_mc0
           RETURN

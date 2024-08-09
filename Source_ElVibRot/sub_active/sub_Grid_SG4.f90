@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       SUBROUTINE Make_Grid_SG4(para_AllOp)
-      USE mod_system
+      USE EVR_system_m
 !$    USE omp_lib, only : OMP_GET_THREAD_NUM
       USE mod_nDindex
       USE mod_Op
@@ -84,7 +84,7 @@
   BasisnD => para_AllOp%tab_Op(1)%BasisnD
 
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'BEGINNING ',name_sub
   END IF
   !-----------------------------------------------------------
 
@@ -162,17 +162,17 @@
   ELSE
     nb_thread = BasisnD%para_SGType2%nb_threads
   END IF
-  IF (print_level > 1) write(out_unitp,*) 'nb_thread in ',name_sub,' : ',nb_thread
+  IF (print_level > 1) write(out_unit,*) 'nb_thread in ',name_sub,' : ',nb_thread
 
   IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**5 .AND. &
       mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0) THEN
-    write(out_unitp,'(a)',ADVANCE='no') '---'
-    flush(out_unitp)
+    write(out_unit,'(a)',ADVANCE='no') '---'
+    flush(out_unit)
   END IF
 
   !$OMP parallel                                                &
   !$OMP default(none)                                           &
-  !$OMP shared(para_AllOp,BasisnD,print_level,out_unitp,MPI_id) &
+  !$OMP shared(para_AllOp,BasisnD,print_level,out_unit,MPI_id) &
   !$OMP private(iG,tab_l,ith)                                   &
   !$OMP num_threads(nb_thread)
 
@@ -193,11 +193,11 @@
 
     IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**5 .AND. &
         mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0) THEN
-      write(out_unitp,'(a)',ADVANCE='no') '---'
-      flush(out_unitp)
+      write(out_unit,'(a)',ADVANCE='no') '---'
+      flush(out_unit)
     END IF
 
-    !write(out_unitp,*) 'iG done:',iG ; flush(out_unitp)
+    !write(out_unit,*) 'iG done:',iG ; flush(out_unit)
   END DO
   CALL dealloc_NParray(tab_l,'tab_l',name_sub)
 
@@ -205,13 +205,13 @@
   !$OMP   END PARALLEL
 
   IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**5) THEN
-    write(out_unitp,'(a)',ADVANCE='yes') '----]'
+    write(out_unit,'(a)',ADVANCE='yes') '----]'
   END IF
-  flush(out_unitp)
+  flush(out_unit)
 
   !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
   !-------------------------------------------------------
 

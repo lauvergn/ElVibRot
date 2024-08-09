@@ -1,5 +1,6 @@
 #===============================================
 SRCFILES= \
+EVR_system_m.f90  \
 sub_Auto_Basis.f90  \
 sub_module_basis_BtoG_GtoB_SG4.f90  \
 sub_module_basis_BtoG_GtoB_SG4_MPI.f90  \

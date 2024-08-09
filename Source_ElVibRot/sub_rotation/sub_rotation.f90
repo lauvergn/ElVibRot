@@ -64,12 +64,12 @@
 
 
 !     read gamma and mu with Jx, Jy, Jz operators
-      read(in_unitp,*) gam_xyz(:)
-      read(in_unitp,*) mu_xyz(:,:)
-      read(in_unitp,*) JJ
-      write(out_unitp,*) gam_xyz(:)
-      write(out_unitp,*) mu_xyz(:,:)
-      write(out_unitp,*) JJ
+      read(in_unit,*) gam_xyz(:)
+      read(in_unit,*) mu_xyz(:,:)
+      read(in_unit,*) JJ
+      write(out_unit,*) gam_xyz(:)
+      write(out_unit,*) mu_xyz(:,:)
+      write(out_unit,*) JJ
 
 !     rewrite gamma and mu with J+, J-, Jz operators
       gam_pmz(1) = HALF*(EYE*gam_xyz(1)+gam_xyz(2))
@@ -89,12 +89,12 @@
       mu_pmz(1,2) = HALF**2 * ( mu_xyz(1,1) + mu_xyz(2,2) )
       mu_pmz(2,1) = mu_pmz(1,2)
 
-      write(out_unitp,*) 'gam_pmz',gam_pmz
-      write(out_unitp,*) 'mu_pmz',mu_pmz
+      write(out_unit,*) 'gam_pmz',gam_pmz
+      write(out_unit,*) 'mu_pmz',mu_pmz
 
       IF (JJ < 0) THEN
-        write(out_unitp,*) ' ERROR in sub_rotation'
-        write(out_unitp,*) ' JJ < 0',JJ
+        write(out_unit,*) ' ERROR in sub_rotation'
+        write(out_unit,*) ' JJ < 0',JJ
         STOP
       END IF
 
@@ -136,7 +136,7 @@
 
 
       DO indK=1,dim_rot
-      write(out_unitp,*) Hrot(:,indK)
+      write(out_unit,*) Hrot(:,indK)
       END DO
 
       memory = size(Hrot)
@@ -170,15 +170,15 @@
         IF (Kout <= Jin) Proj = sqrt(real(Jin*(Jin+1),kind=8)-          &
                                      real(Kin*(Kin+1),kind=8))
       ELSE
-        write(out_unitp,*) ' ERROR in Rot_Op'
-        write(out_unitp,*) ' nOp MUST be : 1,2,3',nOp
-        write(out_unitp,*) ' Remark : 1,2,3 => J+, J-, Jz'
+        write(out_unit,*) ' ERROR in Rot_Op'
+        write(out_unit,*) ' nOp MUST be : 1,2,3',nOp
+        write(out_unit,*) ' Remark : 1,2,3 => J+, J-, Jz'
         STOP
       END IF
 
-!     write(out_unitp,*) 'Jin,Kin,nOp',Jin,Kin,nOp
-!     write(out_unitp,*) 'Jout,Kout,Proj',Jout,Kout,Proj
-      write(out_unitp,*) 'Kin,Kout,nOp,Proj',Kin,Kout,nOp,Proj
+!     write(out_unit,*) 'Jin,Kin,nOp',Jin,Kin,nOp
+!     write(out_unit,*) 'Jout,Kout,Proj',Jout,Kout,Proj
+      write(out_unit,*) 'Kin,Kout,nOp,Proj',Kin,Kout,nOp,Proj
 
       end subroutine Rot_Op
 

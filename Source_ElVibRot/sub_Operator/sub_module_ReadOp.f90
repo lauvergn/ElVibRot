@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_ReadOp
-      USE mod_system
+      USE EVR_system_m
       USE mod_OpGrid
       USE mod_PrimOp
       IMPLICIT NONE

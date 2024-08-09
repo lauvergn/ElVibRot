@@ -161,7 +161,7 @@ CONTAINS
 !< calculate auto-correcetion function on Smolyak rep. 
 !=======================================================================================
   FUNCTION Calc_AutoCorr_SR_MPI(psi0,psi,para_propa,TT,Write_AC)
-    USE mod_system
+    USE EVR_system_m
     USE mod_Op,           ONLY:param_Op
     USE mod_propa,        ONLY:param_propa,Write_AutoCorr
     USE mod_psi_set_alloc,ONLY:param_psi

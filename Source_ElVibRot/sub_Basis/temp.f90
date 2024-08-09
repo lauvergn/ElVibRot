@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 SUBROUTINE OpRV_TO_RV_basis(Vin,Vout,lBin,lBout,base,der)
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
     
   real (kind=Rkind), intent(in)           :: Vin(:)
@@ -70,11 +70,11 @@ SUBROUTINE OpRV_TO_RV_basis(Vin,Vout,lBin,lBout,base,der)
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING OpRV_TO_RV_basis'
-    write(out_unitp,*) 'nb,nq',nb,nq
-    write(out_unitp,*) 'n_Vin',n_Vin
-    write(out_unitp,*) 'n_Vout',n_Vout
-    write(out_unitp,*) 'Vin',Vin(:)
+    write(out_unit,*) 'BEGINNING OpRV_TO_RV_basis'
+    write(out_unit,*) 'nb,nq',nb,nq
+    write(out_unit,*) 'n_Vin',n_Vin
+    write(out_unit,*) 'n_Vout',n_Vout
+    write(out_unit,*) 'Vin',Vin(:)
   END IF
   !-----------------------------------------------------------
 
@@ -82,9 +82,9 @@ SUBROUTINE OpRV_TO_RV_basis(Vin,Vout,lBin,lBout,base,der)
     G(:) = B
   ELSE
     IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
-      write(out_unitp,*) ' ERROR in RB_TO_RG_basis'
-      write(out_unitp,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
-      write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+      write(out_unit,*) ' ERROR in RB_TO_RG_basis'
+      write(out_unit,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
+      write(out_unit,*) ' nq is inconsistent with size(G)',nq,size(G)
       STOP ' ERROR in RB_TO_RG_basis: inconsistent sizes'
     END IF
     nb_mult_BTOG = nb_mult_BTOG + int(nb_B*nq,kind=ILkind)
@@ -132,8 +132,8 @@ SUBROUTINE OpRV_TO_RV_basis(Vin,Vout,lBin,lBout,base,der)
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'Vout',Vout(:)
-    write(out_unitp,*) 'END OpRV_TO_RV_basis'
+    write(out_unit,*) 'Vout',Vout(:)
+    write(out_unit,*) 'END OpRV_TO_RV_basis'
   END IF
   !-----------------------------------------------------------
 END SUBROUTINE OpRV_TO_RV_basis

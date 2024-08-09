@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       SUBROUTINE sub_cart(max_mem)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_Constant
       USE mod_Coord_KEO
@@ -101,56 +101,56 @@
                         cart,name_x,name_y,name_z,                      &
                         name_alpha,name_beta,name_gamma
 !=====================================================================
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' CART: initialization of variables'
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' CART: initialization of variables'
 
       CALL sub_constantes(const_phys,.FALSE.)
 
-      write(out_unitp,*) ' END CART: initialization of variables'
-      write(out_unitp,*) '================================================='
+      write(out_unit,*) ' END CART: initialization of variables'
+      write(out_unit,*) '================================================='
 
       DO
         nat     = 0
         nb_vect = 0
         nb_G    = 0
         conv    = ONE
-        read(in_unitp,Coord_transfo,err=999,end=999)
-        write(out_unitp,Coord_transfo)
+        read(in_unit,Coord_transfo,err=999,end=999)
+        write(out_unit,Coord_transfo)
         IF (nb_vect < 1) nb_vect = nat-1
 
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' CART: ',trim(name_transfo)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' CART: ',trim(name_transfo)
 
         SELECT CASE (name_transfo)
         CASE ('cart')
-          write(out_unitp,*) nat
+          write(out_unit,*) nat
           CALL alloc_Type_cart(para_cart,nb_at=nat+nb_G)
           DO i=1,nat
-            read(in_unitp,41) line
-            !write(out_unitp,*) line
-            flush(out_unitp)
+            read(in_unit,41) line
+            !write(out_unit,*) line
+            flush(out_unit)
  41         format(72a)
             read(line,*) name_Z,x,y,z
             para_cart%masses(i) = get_mass_Tnum(const_phys%mendeleev,name=name_Z)
             para_cart%dnAt(i)%d0(1:3) = [x,y,z]
             para_cart%dnAt(i)%d0(:) = para_cart%dnAt(i)%d0(:) * conv
-            !write(out_unitp,*) para_cart%masses(i),para_cart%dnAt(i)%d0
+            !write(out_unit,*) para_cart%masses(i),para_cart%dnAt(i)%d0
           END DO
           para_cart%Mtot = sum(para_cart%masses)
 
           ! for the center-of-mass
           DO i=1,nb_G
             tab_At_TO_G(:) = 0
-            read(in_unitp,recenterG)
-            write(out_unitp,recenterG)
+            read(in_unit,recenterG)
+            write(out_unit,recenterG)
             para_cart%dnAt(nat+i)%d0(1:3) = ZERO
             Mtot = ZERO
             DO j=1,count(tab_At_TO_G > 0)
               jat = tab_At_TO_G(j)
               IF (jat < 1 .OR. jat > nat) THEN
-                write(out_unitp,*) ' ERROR in sub_cart'
-                write(out_unitp,*) ' The index of the center-of-mass is out of range: [1,',nat,']'
-                write(out_unitp,*) ' tab_At_TO_G(:) ',tab_At_TO_G(1:count(tab_At_TO_G > 0))
+                write(out_unit,*) ' ERROR in sub_cart'
+                write(out_unit,*) ' The index of the center-of-mass is out of range: [1,',nat,']'
+                write(out_unit,*) ' tab_At_TO_G(:) ',tab_At_TO_G(1:count(tab_At_TO_G > 0))
                 STOP
               END IF
               Mtot = Mtot + para_cart%masses(jat)
@@ -163,12 +163,12 @@
           ! for the vectors
           CALL alloc_Type_cart(para_cart,nb_vect=nb_vect+1)  ! one vector is added for the center-of-mass
           DO i=1,nb_vect
-            read(in_unitp,*) ivA,ivB
+            read(in_unit,*) ivA,ivB
             IF (ivA < 1 .OR. ivA > para_cart%nb_at .OR.                 &
                 ivB < 1 .OR. ivB > para_cart%nb_at) THEN
-                write(out_unitp,*) ' ERROR in sub_cart'
-                write(out_unitp,*) ' The index of the vectors are out of range: [1,',nat,']'
-                write(out_unitp,*) ' ivA,ivB ',ivA,ivb
+                write(out_unit,*) ' ERROR in sub_cart'
+                write(out_unit,*) ' The index of the vectors are out of range: [1,',nat,']'
+                write(out_unit,*) ' ivA,ivB ',ivA,ivb
                 STOP
             END IF
             para_cart%dnVect(i)%d0(1:3) = para_cart%dnAt(ivB)%d0(1:3) - &
@@ -186,7 +186,7 @@
           CALL write_Type_cart(para_cart)
         CASE ('vector')
           DO i=1,nb_vect
-            write(out_unitp,*) 'vect',i,para_cart%dnVect(i)%d0
+            write(out_unit,*) 'vect',i,para_cart%dnVect(i)%d0
           END DO
 
           CALL alloc_dnSVM(UnitVect_F0(1),nb_var_vec=3,nderiv=0)
@@ -200,36 +200,36 @@
 
           iv_tot = 0
           CALL RecGet_Vec_Fi(para_cart%dnVect,nb_vect,iv_tot,1,UnitVect_F0)
-          write(out_unitp,*) 'iv_tot',iv_tot
+          write(out_unit,*) 'iv_tot',iv_tot
 
           CALL dealloc_dnSVM(UnitVect_F0(1))
           CALL dealloc_dnSVM(UnitVect_F0(2))
           CALL dealloc_dnSVM(UnitVect_F0(3))
         CASE default ! ERROR: wrong transformation !
-          write(out_unitp,*) ' ERROR in sub_cart'
-          write(out_unitp,*) ' The transformation is UNKNOWN: ',trim(name_transfo)
+          write(out_unit,*) ' ERROR in sub_cart'
+          write(out_unit,*) ' The transformation is UNKNOWN: ',trim(name_transfo)
           STOP
         END SELECT
 
 
-      write(out_unitp,*) ' CART: END ',trim(name_transfo)
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*)
-      flush(out_unitp)
+      write(out_unit,*) ' CART: END ',trim(name_transfo)
+      write(out_unit,*) '================================================='
+      write(out_unit,*)
+      flush(out_unit)
      END DO
  999 CONTINUE ! no more namelist (end-of-file)
 
 
 
-      write(out_unitp,*) '================================================'
-      write(out_unitp,*) ' CART AU REVOIR!!!'
-      write(out_unitp,*) '================================================'
+      write(out_unit,*) '================================================'
+      write(out_unit,*) ' CART AU REVOIR!!!'
+      write(out_unit,*) '================================================'
 
 
       END SUBROUTINE sub_cart
 
       RECURSIVE SUBROUTINE RecGet_Vec_Fi(tab_Vect_Fi,nb_vect_tot,iv_tot,iv_Fi,UnitVect_Fi)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       IMPLICIT NONE
 
@@ -259,17 +259,17 @@
       real (kind=Rkind), parameter :: radTOdeg = 180._Rkind / pi
 
       iv_tot = iv_tot + 1
-      !write(out_unitp,*) 'RecGet_Vec_Fi: nb_vect_tot,iv_Fi',nb_vect_tot,iv_Fi,iv_tot
-      !write(out_unitp,*) 'vect:',tab_Vect_Fi(iv_tot)%d0
+      !write(out_unit,*) 'RecGet_Vec_Fi: nb_vect_tot,iv_Fi',nb_vect_tot,iv_Fi,iv_tot
+      !write(out_unit,*) 'vect:',tab_Vect_Fi(iv_tot)%d0
       nb_vect = 0
       Frame = .FALSE.
       zmat_order = .TRUE.
-      read(in_unitp,vector)
-      !write(out_unitp,vector)
+      read(in_unit,vector)
+      !write(out_unit,vector)
 
       IF (Frame) THEN
-        write(out_unitp,*) '============================================='
-        write(out_unitp,*) ' Frame = T, iv_tot',iv_tot
+        write(out_unit,*) '============================================='
+        write(out_unit,*) ' Frame = T, iv_tot',iv_tot
         ! norm of the vector (distance)
         Riv = sqrt(dot_product(tab_Vect_Fi(iv_tot)%d0,tab_Vect_Fi(iv_tot)%d0))
 
@@ -295,9 +295,9 @@
           UnitVect_Fij(2)%d0(3) =                                         &
                        UnitVect_Fij(3)%d0(1) * UnitVect_Fij(1)%d0(2) -  &
                        UnitVect_Fij(3)%d0(2) * UnitVect_Fij(1)%d0(1)
-           !write(out_unitp,*) 'ex_Fij',UnitVect_Fij(1)%d0
-           !write(out_unitp,*) 'ey_Fij',UnitVect_Fij(2)%d0
-           !write(out_unitp,*) 'ez_Fij',UnitVect_Fij(3)%d0
+           !write(out_unit,*) 'ex_Fij',UnitVect_Fij(1)%d0
+           !write(out_unit,*) 'ey_Fij',UnitVect_Fij(2)%d0
+           !write(out_unit,*) 'ez_Fij',UnitVect_Fij(3)%d0
         END IF
 
         ! Riv = sqrt(dot_product(tab_Vect_Fi(iv_tot)%d0,tab_Vect_Fi(iv_tot)%d0)) !already calculated
@@ -310,14 +310,14 @@
         betaiv = acos(ubetaiv)
         alphaiv = atan2(py,px)
 
-        write(out_unitp,*) 'R       : ',iv_Fi,':',Riv,Riv
+        write(out_unit,*) 'R       : ',iv_Fi,':',Riv,Riv
 
         IF (zmat_order) THEN
           IF (iv_Fi == 2) THEN
-            write(out_unitp,*) 'beta (u): ',iv_Fi,':',betaiv*radTOdeg,ubetaiv
+            write(out_unit,*) 'beta (u): ',iv_Fi,':',betaiv*radTOdeg,ubetaiv
           ELSE ! iv_Fi /= 2
-            write(out_unitp,*) 'beta (u): ',iv_Fi,':',betaiv*radTOdeg,ubetaiv
-            write(out_unitp,*) 'alpha   : ',iv_Fi,':',alphaiv*radTOdeg,alphaiv
+            write(out_unit,*) 'beta (u): ',iv_Fi,':',betaiv*radTOdeg,ubetaiv
+            write(out_unit,*) 'alpha   : ',iv_Fi,':',alphaiv*radTOdeg,alphaiv
           END IF
 
         END IF
@@ -330,27 +330,27 @@
             ! for gamma we use ex_BF projected on the SF
             px = dot_product(UnitVect_Fij(1)%d0,UnitVect_Fi(3)%d0)
             py = dot_product(UnitVect_Fij(2)%d0,UnitVect_Fi(3)%d0)
-            !write(out_unitp,*) 'for gamma, px,py',px,py
+            !write(out_unit,*) 'for gamma, px,py',px,py
             gammaiv = atan2(py,-px)
-            write(out_unitp,*) 'gamma   : ',iv_Fi,':',gammaiv*radTOdeg,gammaiv
+            write(out_unit,*) 'gamma   : ',iv_Fi,':',gammaiv*radTOdeg,gammaiv
           END IF
         END DO
 
         IF (.NOT. zmat_order) THEN
           IF (iv_Fi == 2) THEN
-            write(out_unitp,*) 'beta (u): ',iv_Fi,':',betaiv*radTOdeg,ubetaiv
+            write(out_unit,*) 'beta (u): ',iv_Fi,':',betaiv*radTOdeg,ubetaiv
           ELSE ! iv_Fi /= 2
-            write(out_unitp,*) 'alpha   : ',iv_Fi,':',alphaiv*radTOdeg,alphaiv
-            write(out_unitp,*) 'beta (u): ',iv_Fi,':',betaiv*radTOdeg,ubetaiv
+            write(out_unit,*) 'alpha   : ',iv_Fi,':',alphaiv*radTOdeg,alphaiv
+            write(out_unit,*) 'beta (u): ',iv_Fi,':',betaiv*radTOdeg,ubetaiv
           END IF
 
           IF (nb_vect > 0) THEN
             ! for gamma we use ex_BF projected on the SF
             px = dot_product(UnitVect_Fij(1)%d0,UnitVect_Fi(3)%d0)
             py = dot_product(UnitVect_Fij(2)%d0,UnitVect_Fi(3)%d0)
-            !write(out_unitp,*) 'for gamma, px,py',px,py
+            !write(out_unit,*) 'for gamma, px,py',px,py
             gammaiv = atan2(py,-px)
-            write(out_unitp,*) 'gamma   : ',iv_Fi,':',gammaiv*radTOdeg,gammaiv
+            write(out_unit,*) 'gamma   : ',iv_Fi,':',gammaiv*radTOdeg,gammaiv
           END IF
         END IF
 
@@ -358,17 +358,17 @@
         CALL dealloc_dnSVM(UnitVect_Fij(2))
         CALL dealloc_dnSVM(UnitVect_Fij(3))
 
-        write(out_unitp,*) '============================================='
+        write(out_unit,*) '============================================='
       ELSE
 
-!        write(out_unitp,*) 'ex_Fi',UnitVect_Fi(1)%d0
-!        write(out_unitp,*) 'ey_Fi',UnitVect_Fi(2)%d0
-!        write(out_unitp,*) 'ez_Fi',UnitVect_Fi(3)%d0
+!        write(out_unit,*) 'ex_Fi',UnitVect_Fi(1)%d0
+!        write(out_unit,*) 'ey_Fi',UnitVect_Fi(2)%d0
+!        write(out_unit,*) 'ez_Fi',UnitVect_Fi(3)%d0
 
         IF (iv_Fi == 1) THEN
-          write(out_unitp,*) ' ERROR in RecGet_Vec_Fi'
-          write(out_unitp,*) ' iv_Fi=1 and frame=F is NOT possible'
-          write(out_unitp,*) ' check the fortran!'
+          write(out_unit,*) ' ERROR in RecGet_Vec_Fi'
+          write(out_unit,*) ' iv_Fi=1 and frame=F is NOT possible'
+          write(out_unit,*) ' check the fortran!'
           STOP
         ELSE IF (iv_Fi == 2) THEN
           ! norm of the vector (distance)
@@ -378,8 +378,8 @@
           uiv = pz / Riv  ! cos(thi)
           thiv = acos(uiv)
 
-          write(out_unitp,*) 'R       : ',iv_Fi,':',Riv,Riv
-          write(out_unitp,*) 'th (u)  : ',iv_Fi,':',thiv*radTOdeg,uiv
+          write(out_unit,*) 'R       : ',iv_Fi,':',Riv,Riv
+          write(out_unit,*) 'th (u)  : ',iv_Fi,':',thiv*radTOdeg,uiv
         ELSE
           ! norm of the vector (distance)
           Riv = sqrt(dot_product(tab_Vect_Fi(iv_tot)%d0,tab_Vect_Fi(iv_tot)%d0))
@@ -392,9 +392,9 @@
           py = dot_product(tab_Vect_Fi(iv_tot)%d0,UnitVect_Fi(2)%d0)
           phiv = atan2(py,px)
 
-          write(out_unitp,*) 'R       : ',iv_Fi,':',Riv,Riv
-          write(out_unitp,*) 'th (u)  : ',iv_Fi,':',thiv*radTOdeg,uiv
-          write(out_unitp,*) 'phi     : ',iv_Fi,':',phiv*radTOdeg,phiv
+          write(out_unit,*) 'R       : ',iv_Fi,':',Riv,Riv
+          write(out_unit,*) 'th (u)  : ',iv_Fi,':',thiv*radTOdeg,uiv
+          write(out_unit,*) 'phi     : ',iv_Fi,':',phiv*radTOdeg,phiv
 
         END IF
 

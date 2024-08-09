@@ -5,7 +5,8 @@ F90=$2
 extf=$3
 
 DIR_pot=$DIR_EVRT/sub_pot
-DIR_T=$DIR_EVRT/Ext_Lib/Tnum-Tana/Source_TnumTana_Coord/sub_operator_T
+#DIR_T=$DIR_EVRT/Ext_Lib/Tnum-Tana/sub_operator_T
+DIR_T=$DIR_EVRT/sub_operator_T
 
 echo "#!/bin/bash
 " > vib

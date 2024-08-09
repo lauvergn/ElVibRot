@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
  SUBROUTINE TF_autocorr(para_propa)
-   USE mod_system
+   USE EVR_system_m
    USE mod_Constant, ONLY: get_Conv_au_TO_unit
    USE mod_propa
    IMPLICIT NONE
@@ -73,7 +73,7 @@
       CALL file_open(para_propa%file_autocorr,ni)
       IF(MPI_id==0) THEN
         CALL file_open(para_propa%file_spectrum,no)
-        write(out_unitp,*) 'ni,no',ni,no
+        write(out_unit,*) 'ni,no',ni,no
       ENDIF
 
       microDeltaT = para_propa%WPdeltaT/para_propa%nb_micro
@@ -82,9 +82,9 @@
       NPT  = para_propa%WPTmax/microDeltaT
       NPT2 = 2**para_propa%TFnexp2
       IF (NPT2 < NPT) THEN
-        write(out_unitp,*) ' ERROR in TF_autocorr'
-        write(out_unitp,*) ' NPT2(=2^TFnexp2) is inferior to npt',NPT2,NPT
-        write(out_unitp,*) ' Increase "TFnexp2" in the "&propa" namlist'
+        write(out_unit,*) ' ERROR in TF_autocorr'
+        write(out_unit,*) ' NPT2(=2^TFnexp2) is inferior to npt',NPT2,NPT
+        write(out_unit,*) ' Increase "TFnexp2" in the "&propa" namlist'
         STOP
       END IF
 
@@ -93,12 +93,12 @@
       CALL alloc_array(C,[NPT2],"C","TF_autocorr")
       CALL alloc_array(W,[NPT2],"C","TF_autocorr")
 
-      write(out_unitp,*)  'NPT,NPT2,microWPdeltaT',NPT,NPT2,microDeltaT
-      flush(out_unitp)
+      write(out_unit,*)  'NPT,NPT2,microWPdeltaT',NPT,NPT2,microDeltaT
+      flush(out_unit)
 
       DO I=1,NPT
         CALL Read_AutoCorr(ni,t,C(I))
-        !write(out_unitp,*) t,C(I) ; flush(out_unitp)
+        !write(out_unit,*) t,C(I) ; flush(out_unit)
       END DO
       C(1) = C(1) * HALF
       CALL file_close(para_propa%file_autocorr)
@@ -108,9 +108,9 @@
       TMAX = NPT2*microDeltaT
       DE   = TWO*pi/TMAX * auTOcm_inv
 
-      write(out_unitp,*) 'DeltaE(TF)  (cm-1)',DE
-      write(out_unitp,*) 'TFmaxE  (cm-1)', para_propa%TFmaxE*auTOcm_inv
-      write(out_unitp,*) 'TFminE  (cm-1)', para_propa%TFminE*auTOcm_inv
+      write(out_unit,*) 'DeltaE(TF)  (cm-1)',DE
+      write(out_unit,*) 'TFmaxE  (cm-1)', para_propa%TFmaxE*auTOcm_inv
+      write(out_unit,*) 'TFminE  (cm-1)', para_propa%TFminE*auTOcm_inv
 
       CALL PREFFT(NPT2,1,para_propa%TFnexp2,W)
       CALL FFT(NPT2,1,microDeltaT,para_propa%TFnexp2,W,C)

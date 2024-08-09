@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_basis_set_alloc
-  use mod_system
+  use EVR_system_m
 
   use mod_dnSVM,   only: type_dnmat,type_dncplxmat,          &
                          alloc_array, alloc_dncplxmat, alloc_dnmat,      &
@@ -321,9 +321,9 @@ CONTAINS
 
 
 !       IF (basis_set%ndim < 1 .AND. .NOT. NewBasisEl) THEN
-!         write(out_unitp,*) ' ERROR in ',name_sub
-!         write(out_unitp,*) '  WRONG parameter values: ndim',basis_set%ndim
-!         write(out_unitp,*) '  CHECK the fortran !!'
+!         write(out_unit,*) ' ERROR in ',name_sub
+!         write(out_unit,*) '  WRONG parameter values: ndim',basis_set%ndim
+!         write(out_unit,*) '  CHECK the fortran !!'
 !         STOP
 !       END IF
 
@@ -417,30 +417,30 @@ CONTAINS
          !logical,parameter :: debug=.TRUE.
          !----- for debuging --------------------------------------------------
 
-         IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
-         flush(out_unitp)
+         IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
+         flush(out_unit)
 
          nq = get_nq_FROM_basis(basis_set)
 
          nderiv_loc = 2
          IF (basis_set%ndim == 0) THEN
            nderiv_loc = 0
-           write(out_unitp,*) ' WARNING in ',name_sub
-           write(out_unitp,*) '  ndim = 0'
+           write(out_unit,*) ' WARNING in ',name_sub
+           write(out_unit,*) '  ndim = 0'
          END IF
 
          IF (basis_set%ndim < 0 .OR. basis_set%nb < 1 .OR. nq < 1) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  WRONG paramter values: ndim or nb or nq',      &
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  WRONG paramter values: ndim or nb or nq',      &
                        basis_set%ndim,basis_set%nb,nq
-           write(out_unitp,*) '  CHECK the fortran !!'
+           write(out_unit,*) '  CHECK the fortran !!'
            STOP
          END IF
 !         IF (basis_set%ndim < 1 .OR. basis_set%nb < 1 .OR. nq < 1) THEN
-!           write(out_unitp,*) ' ERROR in ',name_sub
-!           write(out_unitp,*) '  WRONG paramter values: ndim or nb or nq',      &
+!           write(out_unit,*) ' ERROR in ',name_sub
+!           write(out_unit,*) '  WRONG paramter values: ndim or nb or nq',      &
 !                       basis_set%ndim,basis_set%nb,nq
-!           write(out_unitp,*) '  CHECK the fortran !!'
+!           write(out_unit,*) '  CHECK the fortran !!'
 !           STOP
 !         END IF
          ! first deallocation
@@ -457,8 +457,8 @@ CONTAINS
 
          CALL alloc_dnMat(basis_set%dnRBG,basis_set%nb,nq,basis_set%ndim,nderiv=0)
 
-         IF (debug) write(out_unitp,*) 'END ',name_sub
-         flush(out_unitp)
+         IF (debug) write(out_unit,*) 'END ',name_sub
+         flush(out_unit)
 
        END SUBROUTINE alloc_dnb_OF_basis
        SUBROUTINE dealloc_dnb_OF_basis(basis_set)
@@ -471,8 +471,8 @@ CONTAINS
          !logical,parameter :: debug=.TRUE.
          !----- for debuging --------------------------------------------------
 
-         IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
-         flush(out_unitp)
+         IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
+         flush(out_unit)
 
          IF (allocated(basis_set%tab_ndim_index)) THEN
            CALL dealloc_NParray(basis_set%tab_ndim_index,                 &
@@ -487,8 +487,8 @@ CONTAINS
          CALL dealloc_dnMat(basis_set%dnRBB)
          CALL dealloc_dnMat(basis_set%dnRGG)
 
-         IF (debug) write(out_unitp,*) 'END ',name_sub
-         flush(out_unitp)
+         IF (debug) write(out_unit,*) 'END ',name_sub
+         flush(out_unit)
 
        END SUBROUTINE dealloc_dnb_OF_basis
        SUBROUTINE alloc_xw_OF_basis(basis_set)
@@ -502,16 +502,16 @@ CONTAINS
          Lmax = max(0,basis_set%L_SparseBasis)
 
          IF (basis_set%ndim < 1 .OR. nq < 1) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  WRONG parameter values: ndim or nq',basis_set%ndim,nq
-           write(out_unitp,*) '  CHECK the fortran !!'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  WRONG parameter values: ndim or nq',basis_set%ndim,nq
+           write(out_unit,*) '  CHECK the fortran !!'
            STOP
          END IF
 
          IF (basis_set%xPOGridRep_done) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  xPOGridRep_done = .TRUE. is impossible'
-           write(out_unitp,*) '  CHECK the fortran !!'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  xPOGridRep_done = .TRUE. is impossible'
+           write(out_unit,*) '  CHECK the fortran !!'
            STOP
          END IF
 
@@ -699,9 +699,9 @@ CONTAINS
          character (len=*), parameter :: name_sub='alloc_tab_Pbasis_OF_basis'
 
          IF (basis_set%nb_basis < 0) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  WRONG paramter values: nb_basis',basis_set%nb_basis
-           write(out_unitp,*) '  CHECK the fortran !!'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  WRONG paramter values: nb_basis',basis_set%nb_basis
+           write(out_unit,*) '  CHECK the fortran !!'
            STOP
          END IF
 
@@ -1042,7 +1042,7 @@ CONTAINS
 
   END SUBROUTINE dealloc_basis_ext2n
   SUBROUTINE alloc_basis_ext2n(basis_ext2n,nb_ba,nb_bie)
-    USE mod_system
+    USE EVR_system_m
     IMPLICIT NONE
 
     !----- for the basis set ----------------------------------------------
@@ -1055,7 +1055,7 @@ CONTAINS
 
     character (len=*), parameter :: name_sub = 'alloc_basis_ext2n'
 
-    !write(out_unitp,*) ' BEGINNING ',name_sub
+    !write(out_unit,*) ' BEGINNING ',name_sub
 
     IF (nb_bie < 1) STOP 'ERROR in alloc_basis_ext2n: nb_bie < 1'
 
@@ -1085,11 +1085,11 @@ CONTAINS
     END DO
     basis_ext2n%Eneba_ON_HAC(:,:) = ZERO
 
-    !write(out_unitp,*) ' END ',name_sub
+    !write(out_unit,*) ' END ',name_sub
 
   END SUBROUTINE alloc_basis_ext2n
   SUBROUTINE write_basis_ext2n(basis_ext2n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       TYPE (basis_ext2n_t), intent(in) :: basis_ext2n
@@ -1100,25 +1100,25 @@ CONTAINS
 !     logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
 
-      write(out_unitp,*) 'WRITE write_basis_ext2n'
-      write(out_unitp,*)
+      write(out_unit,*) 'WRITE write_basis_ext2n'
+      write(out_unit,*)
 
-      write(out_unitp,*)
-      write(out_unitp,*) 'ADA',basis_ext2n%ADA
-      write(out_unitp,*) 'contrac_ba_ON_HAC',basis_ext2n%contrac_ba_ON_HAC
-      write(out_unitp,*) 'max_nb_ba_ON_HAC ',basis_ext2n%max_nb_ba_ON_HAC
-      write(out_unitp,*) 'max_ene_ON_HAC   ',basis_ext2n%max_ene_ON_HAC
-      write(out_unitp,*) 'asso d0Cba_ON_HAC',allocated(basis_ext2n%d0Cba_ON_HAC)
+      write(out_unit,*)
+      write(out_unit,*) 'ADA',basis_ext2n%ADA
+      write(out_unit,*) 'contrac_ba_ON_HAC',basis_ext2n%contrac_ba_ON_HAC
+      write(out_unit,*) 'max_nb_ba_ON_HAC ',basis_ext2n%max_nb_ba_ON_HAC
+      write(out_unit,*) 'max_ene_ON_HAC   ',basis_ext2n%max_ene_ON_HAC
+      write(out_unit,*) 'asso d0Cba_ON_HAC',allocated(basis_ext2n%d0Cba_ON_HAC)
       IF (allocated(basis_ext2n%d0Cba_ON_HAC))                                   &
-               write(out_unitp,*) shape(basis_ext2n%d0Cba_ON_HAC)
-      write(out_unitp,*) 'asso Eneba_ON_HAC',allocated(basis_ext2n%Eneba_ON_HAC)
+               write(out_unit,*) shape(basis_ext2n%d0Cba_ON_HAC)
+      write(out_unit,*) 'asso Eneba_ON_HAC',allocated(basis_ext2n%Eneba_ON_HAC)
       IF (allocated(basis_ext2n%Eneba_ON_HAC))                                   &
-               write(out_unitp,*) shape(basis_ext2n%Eneba_ON_HAC)
-      write(out_unitp,*) 'asso nb_ba_ON_HAC',allocated(basis_ext2n%nb_ba_ON_HAC)
+               write(out_unit,*) shape(basis_ext2n%Eneba_ON_HAC)
+      write(out_unit,*) 'asso nb_ba_ON_HAC',allocated(basis_ext2n%nb_ba_ON_HAC)
       IF (allocated(basis_ext2n%nb_ba_ON_HAC))                                   &
-               write(out_unitp,*) shape(basis_ext2n%nb_ba_ON_HAC)
+               write(out_unit,*) shape(basis_ext2n%nb_ba_ON_HAC)
 
-      write(out_unitp,*) 'END WRITE param_basis_ext2n'
+      write(out_unit,*) 'END WRITE param_basis_ext2n'
 
   END SUBROUTINE write_basis_ext2n
   SUBROUTINE dealloc_basis_ext(basis_ext)
@@ -1151,7 +1151,7 @@ CONTAINS
   END SUBROUTINE dealloc_basis_ext
 
   SUBROUTINE write_basis_ext(basis_ext)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       TYPE (basis_ext_t), intent(in) :: basis_ext
@@ -1162,26 +1162,26 @@ CONTAINS
 !     logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
 
-      write(out_unitp,*) 'WRITE write_basis_ext'
-      write(out_unitp,*)
+      write(out_unit,*) 'WRITE write_basis_ext'
+      write(out_unit,*)
 
-      write(out_unitp,*) 'nb_vp_spec',basis_ext%nb_vp_spec
+      write(out_unit,*) 'nb_vp_spec',basis_ext%nb_vp_spec
       IF (associated(basis_ext%Rvp_spec))                               &
-               write(out_unitp,*) shape(basis_ext%Rvp_spec)
+               write(out_unit,*) shape(basis_ext%Rvp_spec)
       IF (associated(basis_ext%Cvp_spec))                               &
-               write(out_unitp,*) shape(basis_ext%Cvp_spec)
+               write(out_unit,*) shape(basis_ext%Cvp_spec)
       IF (allocated(basis_ext%liste_spec))                              &
-               write(out_unitp,*) shape(basis_ext%liste_spec)
+               write(out_unit,*) shape(basis_ext%liste_spec)
 
 
       IF (allocated(basis_ext%sqRhoOVERJac)) THEN
-        write(out_unitp,*) 'shape sqRhoOVERJac',shape(basis_ext%sqRhoOVERJac)
+        write(out_unit,*) 'shape sqRhoOVERJac',shape(basis_ext%sqRhoOVERJac)
       END IF
       IF (allocated(basis_ext%Jac)) THEN
-        write(out_unitp,*) 'shape Jac ',shape(basis_ext%Jac)
+        write(out_unit,*) 'shape Jac ',shape(basis_ext%Jac)
       END IF
 
-      write(out_unitp,*) 'END WRITE param_basis_ext'
+      write(out_unit,*) 'END WRITE param_basis_ext'
 
 
   END SUBROUTINE write_basis_ext
@@ -1502,7 +1502,7 @@ CONTAINS
 
          IF (basis_set%dnBBRep_done) THEN
 
-           write(out_unitp,*) 'clean d1b, d2b, d1cb, d2cb'
+           write(out_unit,*) 'clean d1b, d2b, d1cb, d2cb'
            IF (associated(basis_set%dnRGB%d1)) THEN
              CALL dealloc_array(basis_set%dnRGB%d1,'basis_set%dnRGB%d1',name_sub)
              basis_set%dnRGB%nderiv = 0
@@ -1514,7 +1514,7 @@ CONTAINS
            END IF
 
          END IF
-         IF (print_level > -1) write(out_unitp,*) 'clean all the tab_basis'
+         IF (print_level > -1) write(out_unit,*) 'clean all the tab_basis'
 
          IF (associated(basis_set%Tab_OF_Tabnb2)) THEN
            DO i=1,size(basis_set%Tab_OF_Tabnb2)
@@ -1765,8 +1765,8 @@ CONTAINS
         IF (.NOT. Basis_FOR_SG_loc) THEN
           IF (.NOT. associated(basis_set2%nDindB)) THEN
             CALL RecWrite_basis(basis_set2)
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' nDindB of basis_set2 is not associated'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' nDindB of basis_set2 is not associated'
             STOP
           END IF
           basis_set1%nDindB = basis_set2%nDindB
@@ -1931,7 +1931,7 @@ CONTAINS
       END SUBROUTINE basis2TObasis1
 
   SUBROUTINE Get3_MatdnRGG(basis_set,MatRGG,dnba_ind)
-    USE mod_system
+    USE EVR_system_m
     IMPLICIT NONE
 
     TYPE (basis),     target,   intent(in)    :: basis_set
@@ -1949,21 +1949,21 @@ CONTAINS
     nq = get_nq_FROM_basis(basis_set)
 
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*) 'ndim',basis_set%ndim
-      write(out_unitp,*) 'dnba_ind',dnba_ind
-      write(out_unitp,*) 'nq',nq
-      write(out_unitp,*) 'shape(MatRGG)',shape(MatRGG)
-      write(out_unitp,*) 'alloc dnRGG',basis_set%dnRGG%alloc
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'ndim',basis_set%ndim
+      write(out_unit,*) 'dnba_ind',dnba_ind
+      write(out_unit,*) 'nq',nq
+      write(out_unit,*) 'shape(MatRGG)',shape(MatRGG)
+      write(out_unit,*) 'alloc dnRGG',basis_set%dnRGG%alloc
       CALL write_dnSVM(basis_set%dnRGG)
-      flush(out_unitp)
+      flush(out_unit)
     END IF
 !-----------------------------------------------------------
 
     IF (.NOT. basis_set%dnRGG%alloc) THEN
-      write(out_unitp,*) 'ERROR in ',name_sub
-      write(out_unitp,*) 'basis_set%dnRGG is not allocated!!'
-      write(out_unitp,*) 'CHECK the fortran source'
+      write(out_unit,*) 'ERROR in ',name_sub
+      write(out_unit,*) 'basis_set%dnRGG is not allocated!!'
+      write(out_unit,*) 'CHECK the fortran source'
       STOP
     END IF
 
@@ -1979,15 +1979,15 @@ CONTAINS
 
 !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'MatRGG',dnba_ind
-      CALL write_Mat(MatRGG,out_unitp,5)
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'MatRGG',dnba_ind
+      CALL write_Mat(MatRGG,out_unit,5)
+      write(out_unit,*) 'END ',name_sub
     END IF
 !-----------------------------------------------------------
   END SUBROUTINE Get3_MatdnRGG
 
   SUBROUTINE Get_MATdnPara_OF_RGB(basis_set,MatRGB,dnba_ind)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       TYPE (basis),intent(in)        :: basis_set
@@ -2005,18 +2005,18 @@ CONTAINS
       IF (.NOT. basis_set%packed) RETURN
       nb = basis_set%nb
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb',nb
-        write(out_unitp,*) 'shape(MatRGB)',shape(MatRGB)
-        write(out_unitp,*) 'alloc dnPara_OF_RGB',basis_set%dnPara_OF_RGB%alloc
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb',nb
+        write(out_unit,*) 'shape(MatRGB)',shape(MatRGB)
+        write(out_unit,*) 'alloc dnPara_OF_RGB',basis_set%dnPara_OF_RGB%alloc
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
       IF (.NOT. basis_set%dnPara_OF_RGB%alloc) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'basis_set%dnPara_OF_RGB is not allocated!!'
-        write(out_unitp,*) 'CHECK the fortran source'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'basis_set%dnPara_OF_RGB is not allocated!!'
+        write(out_unit,*) 'CHECK the fortran source'
         STOP
       END IF
 
@@ -2032,14 +2032,14 @@ CONTAINS
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'MatRGB',dnba_ind
-        CALL write_Mat(MatRGB,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'MatRGB',dnba_ind
+        CALL write_Mat(MatRGB,out_unit,5)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
   END SUBROUTINE Get_MATdnPara_OF_RGB
   SUBROUTINE Get_MATdnPara_OF_RBB(basis_set,MatRBB,dnba_ind)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       TYPE (basis),intent(in)        :: basis_set
@@ -2057,18 +2057,18 @@ CONTAINS
       IF (.NOT. basis_set%packed) RETURN
       nb = basis_set%nb
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb',nb
-        write(out_unitp,*) 'shape(MatRBB)',shape(MatRBB)
-        write(out_unitp,*) 'alloc dnPara_OF_RBB',basis_set%dnPara_OF_RBB%alloc
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb',nb
+        write(out_unit,*) 'shape(MatRBB)',shape(MatRBB)
+        write(out_unit,*) 'alloc dnPara_OF_RBB',basis_set%dnPara_OF_RBB%alloc
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
       IF (.NOT. basis_set%dnPara_OF_RBB%alloc) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'basis_set%dnPara_OF_RBB is not allocated!!'
-        write(out_unitp,*) 'CHECK the fortran source'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'basis_set%dnPara_OF_RBB is not allocated!!'
+        write(out_unit,*) 'CHECK the fortran source'
         STOP
       END IF
 
@@ -2084,14 +2084,14 @@ CONTAINS
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'MatRBB',dnba_ind
-        CALL write_Mat(MatRBB,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'MatRBB',dnba_ind
+        CALL write_Mat(MatRBB,out_unit,5)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 END SUBROUTINE Get_MATdnPara_OF_RBB
 SUBROUTINE Get2_MATdnPara_OF_RBB(basis_set,MatRBB,dnba_ind)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       TYPE (basis),                   intent(in)    :: basis_set
@@ -2107,18 +2107,18 @@ SUBROUTINE Get2_MATdnPara_OF_RBB(basis_set,MatRBB,dnba_ind)
 !-----------------------------------------------------------
       IF (.NOT. basis_set%packed) RETURN
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb',basis_set%nb
-        write(out_unitp,*) 'shape(MatRBB)',shape(MatRBB)
-        write(out_unitp,*) 'alloc dnPara_OF_RBB',basis_set%dnPara_OF_RBB%alloc
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb',basis_set%nb
+        write(out_unit,*) 'shape(MatRBB)',shape(MatRBB)
+        write(out_unit,*) 'alloc dnPara_OF_RBB',basis_set%dnPara_OF_RBB%alloc
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
       IF (.NOT. basis_set%dnPara_OF_RBB%alloc) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'basis_set%dnPara_OF_RBB is not allocated!!'
-        write(out_unitp,*) 'CHECK the fortran source'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'basis_set%dnPara_OF_RBB is not allocated!!'
+        write(out_unit,*) 'CHECK the fortran source'
         STOP
       END IF
 
@@ -2134,16 +2134,16 @@ SUBROUTINE Get2_MATdnPara_OF_RBB(basis_set,MatRBB,dnba_ind)
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'MatRBB',dnba_ind
-        CALL write_Mat(MatRBB,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'MatRBB',dnba_ind
+        CALL write_Mat(MatRBB,out_unit,5)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 END SUBROUTINE Get2_MATdnPara_OF_RBB
 
 
   SUBROUTINE RB_TO_RG_basis(B,G,base,der)
-    USE mod_system
+    USE EVR_system_m
     IMPLICIT NONE
       
     real (kind=Rkind), intent(in)           :: B(:)
@@ -2166,10 +2166,10 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
     !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING RB_TO_RG_basis'
-      write(out_unitp,*) 'nb_basis,nb_B',nb_basis,nb_B
-      write(out_unitp,*) 'nq',nq
-      write(out_unitp,*) 'B',B(:)
+      write(out_unit,*) 'BEGINNING RB_TO_RG_basis'
+      write(out_unit,*) 'nb_basis,nb_B',nb_basis,nb_B
+      write(out_unit,*) 'nq',nq
+      write(out_unit,*) 'B',B(:)
     END IF
     !-----------------------------------------------------------
 
@@ -2177,9 +2177,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
       G(:) = B
     ELSE
       IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
-        write(out_unitp,*) ' ERROR in RB_TO_RG_basis'
-        write(out_unitp,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
-        write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+        write(out_unit,*) ' ERROR in RB_TO_RG_basis'
+        write(out_unit,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
+        write(out_unit,*) ' nq is inconsistent with size(G)',nq,size(G)
         STOP ' ERROR in RB_TO_RG_basis: inconsistent sizes'
       END IF
       nb_mult_BTOG = nb_mult_BTOG + int(nb_B*nq,kind=ILkind)
@@ -2227,13 +2227,13 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
     !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'G',G(:)
-      write(out_unitp,*) 'END RB_TO_RG_basis'
+      write(out_unit,*) 'G',G(:)
+      write(out_unit,*) 'END RB_TO_RG_basis'
     END IF
     !-----------------------------------------------------------
   END SUBROUTINE RB_TO_RG_basis
   SUBROUTINE RG_TO_RB_basis(G,B,base)
-    USE mod_system
+    USE EVR_system_m
     IMPLICIT NONE
 
     real (kind=Rkind), intent(in)    :: G(:)
@@ -2251,10 +2251,10 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     nb_B    = size(B)
 
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING RG_TO_RB_basis'
-      write(out_unitp,*) 'nb_basis,nb_B',nb_basis,nb_B
-      write(out_unitp,*) 'nq',nq
-      write(out_unitp,*) 'G',G(:)
+      write(out_unit,*) 'BEGINNING RG_TO_RB_basis'
+      write(out_unit,*) 'nb_basis,nb_B',nb_basis,nb_B
+      write(out_unit,*) 'nq',nq
+      write(out_unit,*) 'G',G(:)
     END IF
     !-----------------------------------------------------------
 
@@ -2263,9 +2263,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     ELSE
 
       IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
-        write(out_unitp,*) ' ERROR in RG_TO_RB_basis'
-        write(out_unitp,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
-        write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+        write(out_unit,*) ' ERROR in RG_TO_RB_basis'
+        write(out_unit,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
+        write(out_unit,*) ' nq is inconsistent with size(G)',nq,size(G)
         STOP ' ERROR in RG_TO_RB_basis: inconsistent sizes'
       END IF
       nb_mult_GTOB = nb_mult_GTOB + int(nb_B*nq,kind=ILkind)
@@ -2275,14 +2275,14 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
     !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'B',B(:)
-      write(out_unitp,*) 'END RG_TO_RB_basis'
+      write(out_unit,*) 'B',B(:)
+      write(out_unit,*) 'END RG_TO_RB_basis'
     END IF
     !-----------------------------------------------------------
 
   END SUBROUTINE RG_TO_RB_basis
   SUBROUTINE CB_TO_CG_basis(B,G,base,der)
-    USE mod_system
+    USE EVR_system_m
     IMPLICIT NONE
       
     complex (kind=Rkind), intent(in)           :: B(:)
@@ -2306,10 +2306,10 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
     !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING CB_TO_CG_basis'
-      write(out_unitp,*) 'nb_basis,nb_B',nb_basis,nb_B
-      write(out_unitp,*) 'nq',nq
-      write(out_unitp,*) 'B',B(:)
+      write(out_unit,*) 'BEGINNING CB_TO_CG_basis'
+      write(out_unit,*) 'nb_basis,nb_B',nb_basis,nb_B
+      write(out_unit,*) 'nq',nq
+      write(out_unit,*) 'B',B(:)
     END IF
     !-----------------------------------------------------------
 
@@ -2317,9 +2317,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
       G(:) = B
     ELSE
       IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
-        write(out_unitp,*) ' ERROR in CB_TO_CG_basis'
-        write(out_unitp,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
-        write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+        write(out_unit,*) ' ERROR in CB_TO_CG_basis'
+        write(out_unit,*) ' nb_basis is inconsistent with nb_B',nb_basis,nb_B
+        write(out_unit,*) ' nq is inconsistent with size(G)',nq,size(G)
         STOP ' ERROR in CB_TO_CG_basis: inconsistent sizes'
       END IF
       nb_mult_BTOG = nb_mult_BTOG + int(nb_B*nq,kind=ILkind)
@@ -2368,13 +2368,13 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
     !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'G',G(:)
-      write(out_unitp,*) 'END CB_TO_CG_basis'
+      write(out_unit,*) 'G',G(:)
+      write(out_unit,*) 'END CB_TO_CG_basis'
     END IF
     !-----------------------------------------------------------
   END SUBROUTINE CB_TO_CG_basis
   SUBROUTINE CG_TO_CB_basis(G,B,base)
-    USE mod_system
+    USE EVR_system_m
     IMPLICIT NONE
 
     complex (kind=Rkind), intent(in)    :: G(:)
@@ -2392,10 +2392,10 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     nb_B     = size(B)
 
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING CG_TO_CB_basis'
-      write(out_unitp,*) 'nb_basis,nb_B',nb_basis,nb_B
-      write(out_unitp,*) 'nq',nq
-      write(out_unitp,*) 'G',G(:)
+      write(out_unit,*) 'BEGINNING CG_TO_CB_basis'
+      write(out_unit,*) 'nb_basis,nb_B',nb_basis,nb_B
+      write(out_unit,*) 'nq',nq
+      write(out_unit,*) 'G',G(:)
     END IF
     !-----------------------------------------------------------
 
@@ -2404,9 +2404,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     ELSE
 
       IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
-        write(out_unitp,*) ' ERROR in CG_TO_CB_basis'
-        write(out_unitp,*) ' nnb_basis is inconsistent with nb_B',nb_basis,nb_B
-        write(out_unitp,*) ' nq is inconsistent with size(G)',nq,size(G)
+        write(out_unit,*) ' ERROR in CG_TO_CB_basis'
+        write(out_unit,*) ' nnb_basis is inconsistent with nb_B',nb_basis,nb_B
+        write(out_unit,*) ' nq is inconsistent with size(G)',nq,size(G)
         STOP ' ERROR in CG_TO_CB_basis: inconsistent sizes'
       END IF
       nb_mult_GTOB = nb_mult_GTOB + int(nb_B*nq,kind=ILkind)
@@ -2421,8 +2421,8 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
     !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'B',B(:)
-      write(out_unitp,*) 'END CG_TO_CB_basis'
+      write(out_unit,*) 'B',B(:)
+      write(out_unit,*) 'END CG_TO_CB_basis'
     END IF
     !-----------------------------------------------------------
 
@@ -2436,7 +2436,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
       !!@param: TODO
       !!@param: TODO
       RECURSIVE SUBROUTINE RecWrite_basis(basis_set,write_all)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        TYPE (basis) :: basis_set
@@ -2464,141 +2464,141 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        IF (present(write_all)) write_all_loc = write_all
 
        nb_basis = basis_set%nb_basis
-       write(out_unitp,*) Rec_line,'BEGINNING RecWrite_basis'
-       write(out_unitp,*) Rec_line,'write_all: ',write_all_loc
-       write(out_unitp,*)
+       write(out_unit,*) Rec_line,'BEGINNING RecWrite_basis'
+       write(out_unit,*) Rec_line,'write_all: ',write_all_loc
+       write(out_unit,*)
 
-       write(out_unitp,*) Rec_line,'ndim',basis_set%ndim
-       write(out_unitp,*) Rec_line,'nb,nq',basis_set%nb,          &
+       write(out_unit,*) Rec_line,'ndim',basis_set%ndim
+       write(out_unit,*) Rec_line,'nb,nq',basis_set%nb,          &
                                             get_nq_FROM_basis(basis_set)
-       write(out_unitp,*) Rec_line,'nb_init,nq_init (before contraction)',&
+       write(out_unit,*) Rec_line,'nb_init,nq_init (before contraction)',&
                      basis_set%nb_init,get_nq_FROM_basis(basis_set,init=.TRUE.)
-       write(out_unitp,*) Rec_line,'nq_extra',basis_set%nq_extra
-       write(out_unitp,*) Rec_line,'allo x_extra?',allocated(basis_set%x_extra)
+       write(out_unit,*) Rec_line,'nq_extra',basis_set%nq_extra
+       write(out_unit,*) Rec_line,'allo x_extra?',allocated(basis_set%x_extra)
 
-       write(out_unitp,*) Rec_line,'Nested,nq_max_Nested',basis_set%Nested,basis_set%nq_max_Nested
+       write(out_unit,*) Rec_line,'Nested,nq_max_Nested',basis_set%Nested,basis_set%nq_max_Nested
 
        CALL Write_Basis_Grid_Param(basis_set%Basis_Grid_Para,Rec_line)
 
-       write(out_unitp,*) Rec_line,'print_info_OF_basisDP',basis_set%print_info_OF_basisDP
-       IF (allocated(basis_set%nrho)) write(out_unitp,*) Rec_line,'nrho_OF_Qbasis',basis_set%nrho(:)
+       write(out_unit,*) Rec_line,'print_info_OF_basisDP',basis_set%print_info_OF_basisDP
+       IF (allocated(basis_set%nrho)) write(out_unit,*) Rec_line,'nrho_OF_Qbasis',basis_set%nrho(:)
 
-       write(out_unitp,*)
+       write(out_unit,*)
        CALL Write_SymAbelian(basis_set%P_SymAbelian)
 
-       write(out_unitp,*) Rec_line,'check_basis',basis_set%check_basis
-       write(out_unitp,*) Rec_line,'check_nq_OF_basis',basis_set%check_nq_OF_basis
-       write(out_unitp,*) Rec_line,'packed,packed_done',basis_set%packed,basis_set%packed_done
-       write(out_unitp,*) Rec_line,'primitive',basis_set%primitive
-       write(out_unitp,*) Rec_line,'primitive_done',basis_set%primitive_done
-       write(out_unitp,*) Rec_line,'BuildBasis_done',basis_set%BuildBasis_done
+       write(out_unit,*) Rec_line,'check_basis',basis_set%check_basis
+       write(out_unit,*) Rec_line,'check_nq_OF_basis',basis_set%check_nq_OF_basis
+       write(out_unit,*) Rec_line,'packed,packed_done',basis_set%packed,basis_set%packed_done
+       write(out_unit,*) Rec_line,'primitive',basis_set%primitive
+       write(out_unit,*) Rec_line,'primitive_done',basis_set%primitive_done
+       write(out_unit,*) Rec_line,'BuildBasis_done',basis_set%BuildBasis_done
 
-       write(out_unitp,*) Rec_line,'contrac',basis_set%contrac
-       write(out_unitp,*) Rec_line,'auto_contrac',basis_set%auto_contrac
-       write(out_unitp,*) Rec_line,'contrac_analysis',basis_set%contrac_analysis
-       write(out_unitp,*) Rec_line,'contrac_RVecOnly',basis_set%contrac_RVecOnly
+       write(out_unit,*) Rec_line,'contrac',basis_set%contrac
+       write(out_unit,*) Rec_line,'auto_contrac',basis_set%auto_contrac
+       write(out_unit,*) Rec_line,'contrac_analysis',basis_set%contrac_analysis
+       write(out_unit,*) Rec_line,'contrac_RVecOnly',basis_set%contrac_RVecOnly
 
-       write(out_unitp,*) Rec_line,'POGridRep,POGridRep_polyortho',basis_set%POGridRep,basis_set%POGridRep_polyortho
-       write(out_unitp,*) Rec_line,'nqPLUSnbc_TO_nqc',basis_set%nqPLUSnbc_TO_nqc
-       write(out_unitp,*) Rec_line,'max_ene_contrac',basis_set%max_ene_contrac
-       write(out_unitp,*) Rec_line,'min_nbc,max_nbc',basis_set%min_nbc,basis_set%max_nbc
-       write(out_unitp,*) Rec_line,'auto_contrac_type1_TO',basis_set%auto_contrac_type1_TO
-       write(out_unitp,*) Rec_line,'auto_contrac_type21_TO',basis_set%auto_contrac_type21_TO
-       write(out_unitp,*) Rec_line,'nbc,nqc',basis_set%nbc,basis_set%nqc
-       write(out_unitp,*) Rec_line,'read_contrac_file',basis_set%read_contrac_file
+       write(out_unit,*) Rec_line,'POGridRep,POGridRep_polyortho',basis_set%POGridRep,basis_set%POGridRep_polyortho
+       write(out_unit,*) Rec_line,'nqPLUSnbc_TO_nqc',basis_set%nqPLUSnbc_TO_nqc
+       write(out_unit,*) Rec_line,'max_ene_contrac',basis_set%max_ene_contrac
+       write(out_unit,*) Rec_line,'min_nbc,max_nbc',basis_set%min_nbc,basis_set%max_nbc
+       write(out_unit,*) Rec_line,'auto_contrac_type1_TO',basis_set%auto_contrac_type1_TO
+       write(out_unit,*) Rec_line,'auto_contrac_type21_TO',basis_set%auto_contrac_type21_TO
+       write(out_unit,*) Rec_line,'nbc,nqc',basis_set%nbc,basis_set%nqc
+       write(out_unit,*) Rec_line,'read_contrac_file',basis_set%read_contrac_file
        IF (basis_set%read_contrac_file)                                      &
-          write(out_unitp,*) Rec_line,'name_contract_file',basis_set%file_contrac%name
-       write(out_unitp,*)
+          write(out_unit,*) Rec_line,'name_contract_file',basis_set%file_contrac%name
+       write(out_unit,*)
 
-       write(out_unitp,*) Rec_line,'type,name',basis_set%type,basis_set%name
-       write(out_unitp,*)
-       write(out_unitp,*) Rec_line,'dnBBRep,dnBBRep_done',basis_set%dnBBRep,basis_set%dnBBRep_done
+       write(out_unit,*) Rec_line,'type,name',basis_set%type,basis_set%name
+       write(out_unit,*)
+       write(out_unit,*) Rec_line,'dnBBRep,dnBBRep_done',basis_set%dnBBRep,basis_set%dnBBRep_done
 
-       write(out_unitp,*)
+       write(out_unit,*)
        IF ( allocated(basis_set%iQdyn) ) THEN
-         write(out_unitp,*) Rec_line,'iQdyn',basis_set%iQdyn(1:basis_set%ndim)
-         write(out_unitp,*)
+         write(out_unit,*) Rec_line,'iQdyn',basis_set%iQdyn(1:basis_set%ndim)
+         write(out_unit,*)
        END IF
        IF (allocated(basis_set%Tabder_Qdyn_TO_Qbasis) ) THEN
-         write(out_unitp,*) Rec_line,'Tabder_Qdyn_TO_Qbasis',basis_set%Tabder_Qdyn_TO_Qbasis(:)
+         write(out_unit,*) Rec_line,'Tabder_Qdyn_TO_Qbasis',basis_set%Tabder_Qdyn_TO_Qbasis(:)
        END IF
 
-       write(out_unitp,*) Rec_line,'alloc tab_ndim_index',allocated(basis_set%tab_ndim_index)
+       write(out_unit,*) Rec_line,'alloc tab_ndim_index',allocated(basis_set%tab_ndim_index)
        IF (allocated(basis_set%tab_ndim_index) ) THEN
          DO ib=1,basis_set%nb
-           write(out_unitp,*) 'ib,index',ib,basis_set%tab_ndim_index(:,ib)
+           write(out_unit,*) 'ib,index',ib,basis_set%tab_ndim_index(:,ib)
          END DO
        END IF
 
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'SparseGrid_type        :',basis_set%SparseGrid_type
-       write(out_unitp,*) Rec_line,'SparseGrid_With_Cuba   :',basis_set%SparseGrid_With_Cuba
-       write(out_unitp,*) Rec_line,'SparseGrid_With_Smolyak:',basis_set%SparseGrid_With_Smolyak
-       write(out_unitp,*) Rec_line,'SparseGrid_With_DP     :',basis_set%SparseGrid_With_DP
-       write(out_unitp,*) Rec_line,'nb_basis',basis_set%nb_basis
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'SparseGrid_type        :',basis_set%SparseGrid_type
+       write(out_unit,*) Rec_line,'SparseGrid_With_Cuba   :',basis_set%SparseGrid_With_Cuba
+       write(out_unit,*) Rec_line,'SparseGrid_With_Smolyak:',basis_set%SparseGrid_With_Smolyak
+       write(out_unit,*) Rec_line,'SparseGrid_With_DP     :',basis_set%SparseGrid_With_DP
+       write(out_unit,*) Rec_line,'nb_basis',basis_set%nb_basis
 
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- nDindG ---------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- nDindG ---------------------------------------'
        CALL Write_nDindex(basis_set%nDindG,name_info=Rec_line)
 
-       write(out_unitp,*) Rec_line,'- nDindB ---------------------------------------'
-       write(out_unitp,*) Rec_line,'Type_OF_nDindB',basis_set%Type_OF_nDindB
-       write(out_unitp,*) Rec_line,'Norm_OF_nDindB',basis_set%Norm_OF_nDindB
-       write(out_unitp,*) Rec_line,'weight_OF_nDindB',basis_set%weight_OF_nDindB
-       write(out_unitp,*) Rec_line,'nDinit_OF_nDindB',basis_set%nDinit_OF_nDindB
-       write(out_unitp,*) Rec_line,'MaxCoupling_OF_nDindB',basis_set%MaxCoupling_OF_nDindB
-       write(out_unitp,*) Rec_line,'contrac_WITH_nDindB',basis_set%contrac_WITH_nDindB
-       write(out_unitp,*) Rec_line,'asso nDindB',associated(basis_set%nDindB)
+       write(out_unit,*) Rec_line,'- nDindB ---------------------------------------'
+       write(out_unit,*) Rec_line,'Type_OF_nDindB',basis_set%Type_OF_nDindB
+       write(out_unit,*) Rec_line,'Norm_OF_nDindB',basis_set%Norm_OF_nDindB
+       write(out_unit,*) Rec_line,'weight_OF_nDindB',basis_set%weight_OF_nDindB
+       write(out_unit,*) Rec_line,'nDinit_OF_nDindB',basis_set%nDinit_OF_nDindB
+       write(out_unit,*) Rec_line,'MaxCoupling_OF_nDindB',basis_set%MaxCoupling_OF_nDindB
+       write(out_unit,*) Rec_line,'contrac_WITH_nDindB',basis_set%contrac_WITH_nDindB
+       write(out_unit,*) Rec_line,'asso nDindB',associated(basis_set%nDindB)
 
        IF (associated(basis_set%nDindB)) CALL Write_nDindex(basis_set%nDindB,name_info=Rec_line)
 
 
-       write(out_unitp,*) Rec_line,'tab_basis_done',basis_set%tab_basis_done
-       write(out_unitp,*) Rec_line,' tab_basis_linked',basis_set%tab_basis_linked
+       write(out_unit,*) Rec_line,'tab_basis_done',basis_set%tab_basis_done
+       write(out_unit,*) Rec_line,' tab_basis_linked',basis_set%tab_basis_linked
        IF (basis_set%nb_basis > 0 .AND. .NOT. basis_set%packed .AND. associated(basis_set%tab_Pbasis)) THEN
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'- tab_Pbasis for direct_product or SparseBasis -'
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'- tab_Pbasis for direct_product or SparseBasis -'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
          DO i=1,basis_set%nb_basis
            IF (write_all_loc) THEN
-             write(out_unitp,*) Rec_line,'  tab_Pbasis:',i
+             write(out_unit,*) Rec_line,'  tab_Pbasis:',i
              CALL RecWrite_basis(basis_set%tab_Pbasis(i)%Pbasis,write_all_loc)
            ELSE
-             write(out_unitp,*) Rec_line,'  tab_Pbasis:',i,' is not written'
+             write(out_unit,*) Rec_line,'  tab_Pbasis:',i,' is not written'
            END IF
          END DO
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'- END tab_Pbasis -------------------------------'
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'- END tab_Pbasis -------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
 
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'- Tab_OF_Tabnb2 for SparseBasis ----------------'
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'- Tab_OF_Tabnb2 for SparseBasis ----------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
          IF (associated(basis_set%Tab_OF_Tabnb2)) THEN
            DO i=1,basis_set%nb_basis
              IF (allocated(basis_set%Tab_OF_Tabnb2(i)%vec) ) THEN
-               write(out_unitp,*) Rec_line,'ibasis,nbb',i,get_Size(basis_set%Tab_OF_Tabnb2(i))
-               write(out_unitp,*) Rec_line,'Tab_OF_Tabnb2(ibasis)',basis_set%Tab_OF_Tabnb2(i)%vec
+               write(out_unit,*) Rec_line,'ibasis,nbb',i,get_Size(basis_set%Tab_OF_Tabnb2(i))
+               write(out_unit,*) Rec_line,'Tab_OF_Tabnb2(ibasis)',basis_set%Tab_OF_Tabnb2(i)%vec
              END IF
            END DO
          END IF
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'- END Tab_OF_Tabnb2-----------------------------'
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'- END Tab_OF_Tabnb2-----------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
        END IF
 
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- for Sparse Grid (Basis) ----------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,' SparseGrid_type',basis_set%SparseGrid_type
-       write(out_unitp,*) Rec_line,' With_L',basis_set%With_L
-       write(out_unitp,*) Rec_line,' L_SparseGrid ',basis_set%L_SparseGrid
-       write(out_unitp,*) Rec_line,' L_SparseBasis',basis_set%L_SparseBasis
-       write(out_unitp,*) Rec_line,' Parameters: nq(L) = A + B * L**expo'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- for Sparse Grid (Basis) ----------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,' SparseGrid_type',basis_set%SparseGrid_type
+       write(out_unit,*) Rec_line,' With_L',basis_set%With_L
+       write(out_unit,*) Rec_line,' L_SparseGrid ',basis_set%L_SparseGrid
+       write(out_unit,*) Rec_line,' L_SparseBasis',basis_set%L_SparseBasis
+       write(out_unit,*) Rec_line,' Parameters: nq(L) = A + B * L**expo'
        CALL Write_Basis_L_TO_n(basis_set%L_TO_nq,Rec_line)
-       write(out_unitp,*) Rec_line,' Parameters: nb(L) = A + B * L**expo'
+       write(out_unit,*) Rec_line,' Parameters: nb(L) = A + B * L**expo'
        CALL Write_Basis_L_TO_n(basis_set%L_TO_nb,Rec_line)
 
        IF (basis_set%SparseGrid_type == 1) THEN
@@ -2609,96 +2609,96 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
              tab_nq(j) =                                                &
               get_nq_FROM_basis(basis_set%tab_PbasisSG(i)%Pbasis%tab_Pbasis(j)%Pbasis)
            END DO
-           write(out_unitp,*) Rec_line,'  tab_PbasisSG + WeightSG:',&
+           write(out_unit,*) Rec_line,'  tab_PbasisSG + WeightSG:',&
                                                   i,basis_set%WeightSG(i)
-           write(out_unitp,*) Rec_line,'  nq_tot,nq(:):',         &
+           write(out_unit,*) Rec_line,'  nq_tot,nq(:):',         &
                    get_nq_FROM_basis(basis_set%tab_PbasisSG(i)%Pbasis), &
                                                          ' : ',tab_nq(:)
-           write(out_unitp,*) Rec_line,'  tab_PbasisSG:',i,' not written'
+           write(out_unit,*) Rec_line,'  tab_PbasisSG:',i,' not written'
            !CALL RecWrite_basis(basis_set%tab_PbasisSG(i)%Pbasis,write_all_loc)
          END DO
          CALL dealloc_NParray(tab_nq,"tab_nq","RecWrite_basis")
 
          IF (associated(basis_set%tab_basisPrimSG)) THEN
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'- tab_basisPrimSG ------------------------------'
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'- tab_basisPrimSG ------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
          DO L=0,ubound(basis_set%tab_basisPrimSG,dim=2)
          DO i=1,ubound(basis_set%tab_basisPrimSG,dim=1)
            IF (write_all_loc) THEN
-             write(out_unitp,*) Rec_line,'  tab_basisPrimSG(i,L): ',i,L
+             write(out_unit,*) Rec_line,'  tab_basisPrimSG(i,L): ',i,L
              CALL RecWrite_basis(basis_set%tab_basisPrimSG(i,L),write_all_loc)
            ELSE
-             write(out_unitp,*) Rec_line,'  tab_basisPrimSG(i,L):',i,L,' is not written'
+             write(out_unit,*) Rec_line,'  tab_basisPrimSG(i,L):',i,L,' is not written'
            END IF
          END DO
          END DO
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'- END tab_basisPrimSG --------------------------'
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'- END tab_basisPrimSG --------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
          END IF
 
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'- END Sparse Grid (Basis) ----------------------'
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'- END Sparse Grid (Basis) ----------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
        END IF
 
        IF (basis_set%nb_Transfo > 0 .AND. allocated(basis_set%cte_Transfo)) THEN
          DO i=1,basis_set%nb_Transfo
-           write(out_unitp,*) Rec_line,'cte_Transfo',i,basis_set%cte_Transfo(:,i)
+           write(out_unit,*) Rec_line,'cte_Transfo',i,basis_set%cte_Transfo(:,i)
          END DO
        END IF
 
        IF (basis_set%ndim > 0 ) THEN
          IF ( allocated(basis_set%A) .AND. allocated(basis_set%opt_A)) THEN
-           write(out_unitp,*) Rec_line,'A    ',basis_set%A
-           write(out_unitp,*) Rec_line,'opt_A',basis_set%opt_A
+           write(out_unit,*) Rec_line,'A    ',basis_set%A
+           write(out_unit,*) Rec_line,'opt_A',basis_set%opt_A
          END IF
          IF ( allocated(basis_set%B) .AND. allocated(basis_set%opt_B)) THEN
-           write(out_unitp,*) Rec_line,'B    ',basis_set%B
-           write(out_unitp,*) Rec_line,'opt_B',basis_set%opt_B
+           write(out_unit,*) Rec_line,'B    ',basis_set%B
+           write(out_unit,*) Rec_line,'opt_B',basis_set%opt_B
          END IF
          IF ( allocated(basis_set%Q0) .AND. allocated(basis_set%opt_Q0)) THEN
-           write(out_unitp,*) Rec_line,'Q0    ',basis_set%Q0
-           write(out_unitp,*) Rec_line,'opt_Q0',basis_set%opt_Q0
+           write(out_unit,*) Rec_line,'Q0    ',basis_set%Q0
+           write(out_unit,*) Rec_line,'opt_Q0',basis_set%opt_Q0
          END IF
          IF ( allocated(basis_set%scaleQ) .AND. allocated(basis_set%opt_scaleQ)) THEN
-           write(out_unitp,*) Rec_line,'scaleQ    ',basis_set%scaleQ
-           write(out_unitp,*) Rec_line,'opt_scaleQ',basis_set%opt_scaleQ
+           write(out_unit,*) Rec_line,'scaleQ    ',basis_set%scaleQ
+           write(out_unit,*) Rec_line,'opt_scaleQ',basis_set%opt_scaleQ
          END IF
        END IF
-       write(out_unitp,*) Rec_line,'Parameter(s) to be optimized?: ',basis_set%opt_param
+       write(out_unit,*) Rec_line,'Parameter(s) to be optimized?: ',basis_set%opt_param
 
 
        IF ( allocated(basis_set%x_extra) .AND. write_all_loc) THEN
-        write(out_unitp,*) Rec_line,'-------------------------------------------'
-        write(out_unitp,*) Rec_line,'x_extra'
-        CALL Write_Mat(basis_set%x_extra,out_unitp,8,info=Rec_line)
-        write(out_unitp,*) Rec_line,'-------------------------------------------'
-        write(out_unitp,*)
+        write(out_unit,*) Rec_line,'-------------------------------------------'
+        write(out_unit,*) Rec_line,'x_extra'
+        CALL Write_Mat(basis_set%x_extra,out_unit,8,info=Rec_line)
+        write(out_unit,*) Rec_line,'-------------------------------------------'
+        write(out_unit,*)
        END IF
 
        nq = get_nq_FROM_basis(basis_set)
        IF (nq > 0 .AND.  basis_set%ndim > 0  .AND. write_all_loc) THEN
          IF ( allocated(basis_set%x) ) THEN
-           write(out_unitp,*) Rec_line,'x'
-           CALL Write_Mat(basis_set%x,out_unitp,8,info=Rec_line)
-           write(out_unitp,*)
+           write(out_unit,*) Rec_line,'x'
+           CALL Write_Mat(basis_set%x,out_unit,8,info=Rec_line)
+           write(out_unit,*)
          END IF
          IF ( allocated(basis_set%w) ) THEN
-           write(out_unitp,*) Rec_line,'w'
-           CALL Write_Vec(basis_set%w,out_unitp,8,info=Rec_line)
-           write(out_unitp,*)
+           write(out_unit,*) Rec_line,'w'
+           CALL Write_Vec(basis_set%w,out_unit,8,info=Rec_line)
+           write(out_unit,*)
          END IF
          IF ( allocated(basis_set%wrho) ) THEN
-           write(out_unitp,*) Rec_line,'w*rho'
-           CALL Write_Vec(basis_set%wrho,out_unitp,8,info=Rec_line)
-           write(out_unitp,*)
+           write(out_unit,*) Rec_line,'w*rho'
+           CALL Write_Vec(basis_set%wrho,out_unit,8,info=Rec_line)
+           write(out_unit,*)
          END IF
          IF ( allocated(basis_set%rho) ) THEN
-           write(out_unitp,*) Rec_line,'rho'
-           CALL Write_Vec(basis_set%rho,out_unitp,8,info=Rec_line)
-           write(out_unitp,*)
+           write(out_unit,*) Rec_line,'rho'
+           CALL Write_Vec(basis_set%rho,out_unit,8,info=Rec_line)
+           write(out_unit,*)
          END IF
 
        END IF
@@ -2706,54 +2706,54 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        IF (basis_set%nb > 0 .AND. nq > 0 .AND. basis_set%ndim > 0       &
                                          .AND. write_all_loc) THEN
 
-         write(out_unitp,*) Rec_line,'dnRGB'
+         write(out_unit,*) Rec_line,'dnRGB'
          CALL Write_dnSVM(basis_set%dnRGB)
-         write(out_unitp,*) Rec_line,'dnRBG'
+         write(out_unit,*) Rec_line,'dnRBG'
          CALL Write_dnSVM(basis_set%dnRBG)
 
-         write(out_unitp,*) Rec_line,'dnGGRep:      ',basis_set%dnGGRep
-         write(out_unitp,*) Rec_line,'dnGGRep_done: ',basis_set%dnGGRep_done
-         write(out_unitp,*) Rec_line,'alloc dnRGG:  ',basis_set%dnRGG%alloc
+         write(out_unit,*) Rec_line,'dnGGRep:      ',basis_set%dnGGRep
+         write(out_unit,*) Rec_line,'dnGGRep_done: ',basis_set%dnGGRep_done
+         write(out_unit,*) Rec_line,'alloc dnRGG:  ',basis_set%dnRGG%alloc
          CALL Write_dnMat(basis_set%dnRGG)
 
-         write(out_unitp,*) Rec_line,'dnRBB'
+         write(out_unit,*) Rec_line,'dnRBB'
          CALL Write_dnMat(basis_set%dnRBB)
 
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'- for Time-Dependent parameters ----------------'
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
-         write(out_unitp,*) Rec_line,'alloc TD_Q0,TD_scaleQ',                    &
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'- for Time-Dependent parameters ----------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'alloc TD_Q0,TD_scaleQ',                    &
                       allocated(basis_set%TD_Q0),allocated(basis_set%TD_scaleQ)
          if ( allocated(basis_set%TD_Q0) ) then
-           write(out_unitp,*) Rec_line,'TD_Q0',basis_set%TD_Q0
+           write(out_unit,*) Rec_line,'TD_Q0',basis_set%TD_Q0
          end if
          if ( allocated(basis_set%TD_scaleQ) ) then
-           write(out_unitp,*) Rec_line,'TD_scaleQ',basis_set%TD_scaleQ
+           write(out_unit,*) Rec_line,'TD_scaleQ',basis_set%TD_scaleQ
          end if
 
-         write(out_unitp,*) Rec_line,'alloc dnPara_OF_RGB',basis_set%dnPara_OF_RGB%alloc
+         write(out_unit,*) Rec_line,'alloc dnPara_OF_RGB',basis_set%dnPara_OF_RGB%alloc
          CALL Write_dnMat(basis_set%dnPara_OF_RGB)
-         write(out_unitp,*) Rec_line,'alloc dnPara_OF_RBB',basis_set%dnPara_OF_RBB%alloc
+         write(out_unit,*) Rec_line,'alloc dnPara_OF_RBB',basis_set%dnPara_OF_RBB%alloc
          CALL Write_dnMat(basis_set%dnPara_OF_RBB)
-         write(out_unitp,*) Rec_line,'------------------------------------------------'
+         write(out_unit,*) Rec_line,'------------------------------------------------'
 
        END IF
 
 
 
          IF (allocated(basis_set%EneH0)) THEN
-           IF(MPI_id==0) write(out_unitp,*) Rec_line,'EneH0 = <d0b(:,ib) I H0 I d0b(:,ib)>'
-           CALL Write_Vec(basis_set%EneH0,out_unitp,8,info=Rec_line)
+           IF(MPI_id==0) write(out_unit,*) Rec_line,'EneH0 = <d0b(:,ib) I H0 I d0b(:,ib)>'
+           CALL Write_Vec(basis_set%EneH0,out_unit,8,info=Rec_line)
          END IF
 
-       write(out_unitp,*) Rec_line,'END RecWrite_basis'
+       write(out_unit,*) Rec_line,'END RecWrite_basis'
        iRec = iRec - 1
        deallocate(Rec_line)
 
        END SUBROUTINE RecWrite_basis
 
       RECURSIVE SUBROUTINE RecWriteMini_basis(basis_set)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        TYPE (basis) :: basis_set
@@ -2778,181 +2778,181 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        nq_init = get_nq_FROM_basis(basis_set,init=.TRUE.)
 
        nb_basis = basis_set%nb_basis
-       write(out_unitp,*) Rec_line,'BEGINNING RecWriteMini_basis'
-       write(out_unitp,*)
-       write(out_unitp,*) Rec_line,'ndim',basis_set%ndim
-       write(out_unitp,*) Rec_line,'nb,nq',basis_set%nb,nq
-       write(out_unitp,*) Rec_line,'nb,nq (before contraction)',basis_set%nb_init,nq_init
-       write(out_unitp,*) Rec_line,'nq_extra',basis_set%nq_extra
-       write(out_unitp,*) Rec_line,'allo x_extra?',allocated(basis_set%x_extra)
+       write(out_unit,*) Rec_line,'BEGINNING RecWriteMini_basis'
+       write(out_unit,*)
+       write(out_unit,*) Rec_line,'ndim',basis_set%ndim
+       write(out_unit,*) Rec_line,'nb,nq',basis_set%nb,nq
+       write(out_unit,*) Rec_line,'nb,nq (before contraction)',basis_set%nb_init,nq_init
+       write(out_unit,*) Rec_line,'nq_extra',basis_set%nq_extra
+       write(out_unit,*) Rec_line,'allo x_extra?',allocated(basis_set%x_extra)
 
-       write(out_unitp,*) Rec_line,'Nested,nq_max_Nested',basis_set%Nested,basis_set%nq_max_Nested
+       write(out_unit,*) Rec_line,'Nested,nq_max_Nested',basis_set%Nested,basis_set%nq_max_Nested
        CALL Write_Basis_Grid_Param(basis_set%Basis_Grid_Para,Rec_line)
 
 
 
-       write(out_unitp,*) Rec_line,'print_info_OF_basisDP',basis_set%print_info_OF_basisDP
+       write(out_unit,*) Rec_line,'print_info_OF_basisDP',basis_set%print_info_OF_basisDP
 
-       write(out_unitp,*) Rec_line,'alloc nrho_OF_Qbasis',allocated(basis_set%nrho)
-       IF (allocated(basis_set%nrho)) write(out_unitp,*) Rec_line,'nrho_OF_Qbasis',basis_set%nrho(:)
-       write(out_unitp,*)
-       write(out_unitp,*) Rec_line,'asso SymAbelian',associated(basis_set%P_SymAbelian)
+       write(out_unit,*) Rec_line,'alloc nrho_OF_Qbasis',allocated(basis_set%nrho)
+       IF (allocated(basis_set%nrho)) write(out_unit,*) Rec_line,'nrho_OF_Qbasis',basis_set%nrho(:)
+       write(out_unit,*)
+       write(out_unit,*) Rec_line,'asso SymAbelian',associated(basis_set%P_SymAbelian)
 
 
-       write(out_unitp,*) Rec_line,'check_basis',basis_set%check_basis
-       write(out_unitp,*) Rec_line,'check_nq_OF_basis',basis_set%check_nq_OF_basis
-       write(out_unitp,*) Rec_line,'packed,packed_done',basis_set%packed,basis_set%packed_done
-       write(out_unitp,*) Rec_line,'primitive',basis_set%primitive
-       write(out_unitp,*) Rec_line,'primitive_done',basis_set%primitive_done
-       write(out_unitp,*) Rec_line,'BuildBasis_done',basis_set%BuildBasis_done
+       write(out_unit,*) Rec_line,'check_basis',basis_set%check_basis
+       write(out_unit,*) Rec_line,'check_nq_OF_basis',basis_set%check_nq_OF_basis
+       write(out_unit,*) Rec_line,'packed,packed_done',basis_set%packed,basis_set%packed_done
+       write(out_unit,*) Rec_line,'primitive',basis_set%primitive
+       write(out_unit,*) Rec_line,'primitive_done',basis_set%primitive_done
+       write(out_unit,*) Rec_line,'BuildBasis_done',basis_set%BuildBasis_done
 
-       write(out_unitp,*) Rec_line,'contrac',basis_set%contrac
-       write(out_unitp,*) Rec_line,'auto_contrac',basis_set%auto_contrac
-       write(out_unitp,*) Rec_line,'contrac_analysis',basis_set%contrac_analysis
-       write(out_unitp,*) Rec_line,'contrac_RVecOnly',basis_set%contrac_RVecOnly
+       write(out_unit,*) Rec_line,'contrac',basis_set%contrac
+       write(out_unit,*) Rec_line,'auto_contrac',basis_set%auto_contrac
+       write(out_unit,*) Rec_line,'contrac_analysis',basis_set%contrac_analysis
+       write(out_unit,*) Rec_line,'contrac_RVecOnly',basis_set%contrac_RVecOnly
 
-       write(out_unitp,*) Rec_line,'POGridRep,POGridRep_polyortho',basis_set%POGridRep,basis_set%POGridRep_polyortho
-       write(out_unitp,*) Rec_line,'nqPLUSnbc_TO_nqc',basis_set%nqPLUSnbc_TO_nqc
-       write(out_unitp,*) Rec_line,'max_ene_contrac',basis_set%max_ene_contrac
-       write(out_unitp,*) Rec_line,'min_nbc,max_nbc',basis_set%min_nbc,basis_set%max_nbc
-       write(out_unitp,*) Rec_line,'auto_contrac_type1_TO',basis_set%auto_contrac_type1_TO
-       write(out_unitp,*) Rec_line,'auto_contrac_type21_TO',basis_set%auto_contrac_type21_TO
-       write(out_unitp,*) Rec_line,'nbc,nqc',basis_set%nbc,basis_set%nqc
-       write(out_unitp,*) Rec_line,'read_contrac_file',basis_set%read_contrac_file
+       write(out_unit,*) Rec_line,'POGridRep,POGridRep_polyortho',basis_set%POGridRep,basis_set%POGridRep_polyortho
+       write(out_unit,*) Rec_line,'nqPLUSnbc_TO_nqc',basis_set%nqPLUSnbc_TO_nqc
+       write(out_unit,*) Rec_line,'max_ene_contrac',basis_set%max_ene_contrac
+       write(out_unit,*) Rec_line,'min_nbc,max_nbc',basis_set%min_nbc,basis_set%max_nbc
+       write(out_unit,*) Rec_line,'auto_contrac_type1_TO',basis_set%auto_contrac_type1_TO
+       write(out_unit,*) Rec_line,'auto_contrac_type21_TO',basis_set%auto_contrac_type21_TO
+       write(out_unit,*) Rec_line,'nbc,nqc',basis_set%nbc,basis_set%nqc
+       write(out_unit,*) Rec_line,'read_contrac_file',basis_set%read_contrac_file
        IF (basis_set%read_contrac_file)                                      &
-          write(out_unitp,*) Rec_line,'name_contract_file',basis_set%file_contrac%name
-       write(out_unitp,*)
+          write(out_unit,*) Rec_line,'name_contract_file',basis_set%file_contrac%name
+       write(out_unit,*)
 
-       write(out_unitp,*) Rec_line,'type,name',basis_set%type,basis_set%name
-       write(out_unitp,*)
-       write(out_unitp,*) Rec_line,'dnBBRep,dnBBRep_done',basis_set%dnBBRep,basis_set%dnBBRep_done
-       write(out_unitp,*)
+       write(out_unit,*) Rec_line,'type,name',basis_set%type,basis_set%name
+       write(out_unit,*)
+       write(out_unit,*) Rec_line,'dnBBRep,dnBBRep_done',basis_set%dnBBRep,basis_set%dnBBRep_done
+       write(out_unit,*)
 
-       write(out_unitp,*) Rec_line,'alloc dnPara_OF_RGB',basis_set%dnPara_OF_RGB%alloc
-       write(out_unitp,*) Rec_line,'alloc dnPara_OF_RBB',basis_set%dnPara_OF_RBB%alloc
-       write(out_unitp,*) Rec_line,'alloc TD_Q0,TD_scaleQ',                     &
+       write(out_unit,*) Rec_line,'alloc dnPara_OF_RGB',basis_set%dnPara_OF_RGB%alloc
+       write(out_unit,*) Rec_line,'alloc dnPara_OF_RBB',basis_set%dnPara_OF_RBB%alloc
+       write(out_unit,*) Rec_line,'alloc TD_Q0,TD_scaleQ',                     &
                       allocated(basis_set%TD_Q0),allocated(basis_set%TD_scaleQ)
 
-       write(out_unitp,*)
-       write(out_unitp,*) Rec_line,'alloc iQdyn',allocated(basis_set%iQdyn)
+       write(out_unit,*)
+       write(out_unit,*) Rec_line,'alloc iQdyn',allocated(basis_set%iQdyn)
        IF ( allocated(basis_set%iQdyn) ) THEN
-         write(out_unitp,*) Rec_line,'iQdyn',basis_set%iQdyn(1:basis_set%ndim)
-         write(out_unitp,*)
+         write(out_unit,*) Rec_line,'iQdyn',basis_set%iQdyn(1:basis_set%ndim)
+         write(out_unit,*)
        END IF
-       write(out_unitp,*) Rec_line,'alloc Tabder_Qdyn_TO_Qbasis',allocated(basis_set%Tabder_Qdyn_TO_Qbasis)
+       write(out_unit,*) Rec_line,'alloc Tabder_Qdyn_TO_Qbasis',allocated(basis_set%Tabder_Qdyn_TO_Qbasis)
        IF (allocated(basis_set%Tabder_Qdyn_TO_Qbasis) ) THEN
-         write(out_unitp,*) Rec_line,'Tabder_Qdyn_TO_Qbasis',basis_set%Tabder_Qdyn_TO_Qbasis(:)
+         write(out_unit,*) Rec_line,'Tabder_Qdyn_TO_Qbasis',basis_set%Tabder_Qdyn_TO_Qbasis(:)
        END IF
-       write(out_unitp,*) Rec_line,'alloc tab_ndim_index',allocated(basis_set%tab_ndim_index)
+       write(out_unit,*) Rec_line,'alloc tab_ndim_index',allocated(basis_set%tab_ndim_index)
 
        IF (basis_set%nb_Transfo > 0 .AND. allocated(basis_set%cte_Transfo)) THEN
          DO i=1,basis_set%nb_Transfo
-           write(out_unitp,*) Rec_line,'cte_Transfo',i,basis_set%cte_Transfo(:,i)
+           write(out_unit,*) Rec_line,'cte_Transfo',i,basis_set%cte_Transfo(:,i)
          END DO
        END IF
 
-       write(out_unitp,*) Rec_line,'alloc A,B,Q0,scaleQ',         &
+       write(out_unit,*) Rec_line,'alloc A,B,Q0,scaleQ',         &
                        allocated(basis_set%A),allocated(basis_set%B),   &
                    allocated(basis_set%Q0),allocated(basis_set%scaleQ)
-       write(out_unitp,*) Rec_line,'alloc opt A,B,Q0,scaleQ',     &
+       write(out_unit,*) Rec_line,'alloc opt A,B,Q0,scaleQ',     &
                allocated(basis_set%opt_A),allocated(basis_set%opt_B),   &
             allocated(basis_set%opt_Q0),allocated(basis_set%opt_scaleQ)
 
-       write(out_unitp,*) Rec_line,'alloc x,w,wrho',allocated(basis_set%x), &
+       write(out_unit,*) Rec_line,'alloc x,w,wrho',allocated(basis_set%x), &
                        allocated(basis_set%w),allocated(basis_set%wrho)
 
-       write(out_unitp,*) Rec_line,'dnGGRep:      ',basis_set%dnGGRep
-       write(out_unitp,*) Rec_line,'dnGGRep_done: ',basis_set%dnGGRep_done
-       write(out_unitp,*) Rec_line,'alloc dnRGG:  ',basis_set%dnRGG%alloc
-       write(out_unitp,*) Rec_line,'alloc dnRGB:  ',basis_set%dnRGB%alloc
-       write(out_unitp,*) Rec_line,'alloc dnRBB:  ',basis_set%dnRBB%alloc
+       write(out_unit,*) Rec_line,'dnGGRep:      ',basis_set%dnGGRep
+       write(out_unit,*) Rec_line,'dnGGRep_done: ',basis_set%dnGGRep_done
+       write(out_unit,*) Rec_line,'alloc dnRGG:  ',basis_set%dnRGG%alloc
+       write(out_unit,*) Rec_line,'alloc dnRGB:  ',basis_set%dnRGB%alloc
+       write(out_unit,*) Rec_line,'alloc dnRBB:  ',basis_set%dnRBB%alloc
 
 
 
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'SparseGrid_type        :',basis_set%SparseGrid_type
-       write(out_unitp,*) Rec_line,'SparseGrid_With_Cuba   :',basis_set%SparseGrid_With_Cuba
-       write(out_unitp,*) Rec_line,'SparseGrid_With_Smolyak:',basis_set%SparseGrid_With_Smolyak
-       write(out_unitp,*) Rec_line,'SparseGrid_With_DP     :',basis_set%SparseGrid_With_DP
-       write(out_unitp,*) Rec_line,'nb_basis',basis_set%nb_basis
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'SparseGrid_type        :',basis_set%SparseGrid_type
+       write(out_unit,*) Rec_line,'SparseGrid_With_Cuba   :',basis_set%SparseGrid_With_Cuba
+       write(out_unit,*) Rec_line,'SparseGrid_With_Smolyak:',basis_set%SparseGrid_With_Smolyak
+       write(out_unit,*) Rec_line,'SparseGrid_With_DP     :',basis_set%SparseGrid_With_DP
+       write(out_unit,*) Rec_line,'nb_basis',basis_set%nb_basis
 
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- nDindG ---------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- nDindG ---------------------------------------'
        CALL Write_nDindex(basis_set%nDindG,name_info=Rec_line)
 
-       write(out_unitp,*) Rec_line,'- nDindB ---------------------------------------'
-       write(out_unitp,*) Rec_line,'Type_OF_nDindB',basis_set%Type_OF_nDindB
-       write(out_unitp,*) Rec_line,'Norm_OF_nDindB',basis_set%Norm_OF_nDindB
-       write(out_unitp,*) Rec_line,'weight_OF_nDindB',basis_set%weight_OF_nDindB
-       write(out_unitp,*) Rec_line,'nDinit_OF_nDindB',basis_set%nDinit_OF_nDindB
-       write(out_unitp,*) Rec_line,'MaxCoupling_OF_nDindB',basis_set%MaxCoupling_OF_nDindB
-       write(out_unitp,*) Rec_line,'contrac_WITH_nDindB',basis_set%contrac_WITH_nDindB
+       write(out_unit,*) Rec_line,'- nDindB ---------------------------------------'
+       write(out_unit,*) Rec_line,'Type_OF_nDindB',basis_set%Type_OF_nDindB
+       write(out_unit,*) Rec_line,'Norm_OF_nDindB',basis_set%Norm_OF_nDindB
+       write(out_unit,*) Rec_line,'weight_OF_nDindB',basis_set%weight_OF_nDindB
+       write(out_unit,*) Rec_line,'nDinit_OF_nDindB',basis_set%nDinit_OF_nDindB
+       write(out_unit,*) Rec_line,'MaxCoupling_OF_nDindB',basis_set%MaxCoupling_OF_nDindB
+       write(out_unit,*) Rec_line,'contrac_WITH_nDindB',basis_set%contrac_WITH_nDindB
        CALL Write_nDindex(basis_set%nDindB,name_info=Rec_line)
 
 
-       write(out_unitp,*)
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- tab_Pbasis for direct_product or SparseBasis -'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,' tab_basis_done',basis_set%tab_basis_done
-       write(out_unitp,*) Rec_line,' tab_basis_linked',basis_set%tab_basis_linked
+       write(out_unit,*)
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- tab_Pbasis for direct_product or SparseBasis -'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,' tab_basis_done',basis_set%tab_basis_done
+       write(out_unit,*) Rec_line,' tab_basis_linked',basis_set%tab_basis_linked
 
-       write(out_unitp,*) Rec_line,' asso tab_Pbasis:',associated(basis_set%tab_Pbasis)
+       write(out_unit,*) Rec_line,' asso tab_Pbasis:',associated(basis_set%tab_Pbasis)
        IF ( associated(basis_set%tab_Pbasis) ) THEN
          DO i=1,basis_set%nb_basis
-           write(out_unitp,*) Rec_line,'  tab_Pbasis:',i
+           write(out_unit,*) Rec_line,'  tab_Pbasis:',i
            CALL RecWriteMini_basis(basis_set%tab_Pbasis(i)%Pbasis)
          END DO
        END IF
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- END tab_Pbasis --------------------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- END tab_Pbasis --------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
 
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- Tab_OF_Tabnb2 for SparseBasis ----------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'asso Tab_OF_Tabnb2',associated(basis_set%Tab_OF_Tabnb2)
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- Tab_OF_Tabnb2 for SparseBasis ----------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'asso Tab_OF_Tabnb2',associated(basis_set%Tab_OF_Tabnb2)
        IF (associated(basis_set%Tab_OF_Tabnb2)) THEN
          DO i=1,basis_set%nb_basis
-           write(out_unitp,*) Rec_line,'allo Tab_OF_Tabnb2(i)%vec',i,allocated(basis_set%Tab_OF_Tabnb2(i)%vec)
-           write(out_unitp,*) Rec_line,'ibasis,nbb',i,get_size(basis_set%Tab_OF_Tabnb2(i))
+           write(out_unit,*) Rec_line,'allo Tab_OF_Tabnb2(i)%vec',i,allocated(basis_set%Tab_OF_Tabnb2(i)%vec)
+           write(out_unit,*) Rec_line,'ibasis,nbb',i,get_size(basis_set%Tab_OF_Tabnb2(i))
          END DO
        END IF
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- END Tab_OF_Tabnb2-----------------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- END Tab_OF_Tabnb2-----------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
 
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- for Sparse Grid (Basis) ----------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,' With_L',basis_set%With_L
-       write(out_unitp,*) Rec_line,' Parameters: nq(L) = A + B * L**expo'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- for Sparse Grid (Basis) ----------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,' With_L',basis_set%With_L
+       write(out_unit,*) Rec_line,' Parameters: nq(L) = A + B * L**expo'
        CALL Write_Basis_L_TO_n(basis_set%L_TO_nq,Rec_line)
-       write(out_unitp,*) Rec_line,' Parameters: nb(L) = A + B * L**expo'
+       write(out_unit,*) Rec_line,' Parameters: nb(L) = A + B * L**expo'
        CALL Write_Basis_L_TO_n(basis_set%L_TO_nb,Rec_line)
 
-       write(out_unitp,*) Rec_line,' asso basis_set%tab_PbasisSG',associated(basis_set%tab_PbasisSG)
+       write(out_unit,*) Rec_line,' asso basis_set%tab_PbasisSG',associated(basis_set%tab_PbasisSG)
        IF (associated(basis_set%tab_PbasisSG)) THEN
          DO i=1,basis_set%nb_SG
-           write(out_unitp,*) Rec_line,'  tab_PbasisSG + WeightSG:',i,basis_set%WeightSG(i)
+           write(out_unit,*) Rec_line,'  tab_PbasisSG + WeightSG:',i,basis_set%WeightSG(i)
            CALL RecWriteMini_basis(basis_set%tab_PbasisSG(i)%Pbasis)
          END DO
 
        END IF
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
-       write(out_unitp,*) Rec_line,'- END Sparse Grid (Basis) ----------------------'
-       write(out_unitp,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
+       write(out_unit,*) Rec_line,'- END Sparse Grid (Basis) ----------------------'
+       write(out_unit,*) Rec_line,'------------------------------------------------'
 
-       write(out_unitp,*) Rec_line,'END RecWriteMini_basis'
+       write(out_unit,*) Rec_line,'END RecWriteMini_basis'
        iRec = iRec - 1
 
        deallocate(Rec_line)
        END SUBROUTINE RecWriteMini_basis
 
        RECURSIVE SUBROUTINE RecWriteMiniMini_basis(basis_set)
-       USE mod_system
+       USE EVR_system_m
        USE mod_nDindex
        IMPLICIT NONE
  
@@ -2976,91 +2976,91 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
  
  
  
-        write(out_unitp,*) Rec_line,'BEGINNING RecWriteMiniMini_basis',iRec
-        write(out_unitp,*)
-        write(out_unitp,*) Rec_line,'ndim',basis_set%ndim
-        write(out_unitp,*) Rec_line,'nb,nq',basis_set%nb,get_nq_FROM_basis(basis_set)
+        write(out_unit,*) Rec_line,'BEGINNING RecWriteMiniMini_basis',iRec
+        write(out_unit,*)
+        write(out_unit,*) Rec_line,'ndim',basis_set%ndim
+        write(out_unit,*) Rec_line,'nb,nq',basis_set%nb,get_nq_FROM_basis(basis_set)
  
         !CALL Write_Basis_Grid_Param(basis_set%Basis_Grid_Para,Rec_line) 
  
  
-        write(out_unitp,*) Rec_line,'type,name',basis_set%type,basis_set%name
+        write(out_unit,*) Rec_line,'type,name',basis_set%type,basis_set%name
  
         IF ( allocated(basis_set%iQdyn) ) THEN
-          write(out_unitp,*) Rec_line,'iQdyn',basis_set%iQdyn(1:basis_set%ndim)
+          write(out_unit,*) Rec_line,'iQdyn',basis_set%iQdyn(1:basis_set%ndim)
         ELSE
-          write(out_unitp,*) Rec_line,'iQdyn is not allocated'
+          write(out_unit,*) Rec_line,'iQdyn is not allocated'
         END IF
-        write(out_unitp,*)
+        write(out_unit,*)
 
         IF (basis_set%nb_basis <= 0) THEN
           IF ( allocated(basis_set%A) ) THEN
-            write(out_unitp,*) Rec_line,'A',basis_set%A(1:basis_set%ndim)
+            write(out_unit,*) Rec_line,'A',basis_set%A(1:basis_set%ndim)
           END IF
           IF ( allocated(basis_set%B) ) THEN
-            write(out_unitp,*) Rec_line,'B',basis_set%B(1:basis_set%ndim)
+            write(out_unit,*) Rec_line,'B',basis_set%B(1:basis_set%ndim)
           END IF
           IF ( allocated(basis_set%Q0) ) THEN
-            write(out_unitp,*) Rec_line,'Q0',basis_set%Q0(1:basis_set%ndim)
+            write(out_unit,*) Rec_line,'Q0',basis_set%Q0(1:basis_set%ndim)
           END IF
           IF ( allocated(basis_set%scaleQ) ) THEN
-            write(out_unitp,*) Rec_line,'scaleQ',basis_set%scaleQ(1:basis_set%ndim)
+            write(out_unit,*) Rec_line,'scaleQ',basis_set%scaleQ(1:basis_set%ndim)
           END IF
-          write(out_unitp,*)
+          write(out_unit,*)
         END IF
 
         IF (.NOT. basis_set%packed .AND. basis_set%nb_basis > 0) THEN
-          write(out_unitp,*) Rec_line,'------------------------------------------------'
-          write(out_unitp,*) Rec_line,'------------------------------------------------'
+          write(out_unit,*) Rec_line,'------------------------------------------------'
+          write(out_unit,*) Rec_line,'------------------------------------------------'
           SELECT CASE (basis_set%SparseGrid_type)
           CASE (0)
-            write(out_unitp,*) Rec_line,'  Direct product basis, nb_basis:',basis_set%nb_basis
+            write(out_unit,*) Rec_line,'  Direct product basis, nb_basis:',basis_set%nb_basis
             IF ( associated(basis_set%tab_Pbasis) ) THEN
               DO i=1,basis_set%nb_basis
-                write(out_unitp,*) Rec_line,'  tab_Pbasis:',i
+                write(out_unit,*) Rec_line,'  tab_Pbasis:',i
                 CALL RecWriteMiniMini_basis(basis_set%tab_Pbasis(i)%Pbasis)
               END DO
             ELSE
-              write(out_unitp,*) Rec_line,' basis_set%tab_Pbasis(:) is not associated'
+              write(out_unit,*) Rec_line,' basis_set%tab_Pbasis(:) is not associated'
             END IF
           CASE (1,2)
-            write(out_unitp,*) Rec_line,'  SparseGrid_type',basis_set%SparseGrid_type,': not yet'
-            write(out_unitp,*) Rec_line,'  Sparse grid/basis, nb_basis',basis_set%nb_basis
+            write(out_unit,*) Rec_line,'  SparseGrid_type',basis_set%SparseGrid_type,': not yet'
+            write(out_unit,*) Rec_line,'  Sparse grid/basis, nb_basis',basis_set%nb_basis
 
             IF (associated(basis_set%tab_PbasisSG)) THEN
               allocate(tab_l(basis_set%nb_basis))
               CALL init_nDval_OF_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l)
               DO i_SG=1,basis_set%nb_SG
                 CALL ADD_ONE_TO_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l,iG=i_SG)
-                write(out_unitp,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
-                write(out_unitp,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
+                write(out_unit,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
+                write(out_unit,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
                 CALL RecWriteMiniMini_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
               END DO
               deallocate(tab_l)
             ELSE
-              write(out_unitp,*) Rec_line,' basis_set%tab_PbasisSG(:) is not associated'
+              write(out_unit,*) Rec_line,' basis_set%tab_PbasisSG(:) is not associated'
             END IF
           CASE (4)
-            write(out_unitp,*) Rec_line,'  SparseGrid_type',basis_set%SparseGrid_type
-            write(out_unitp,*) Rec_line,'  Sparse grid/basis, nb_basis',basis_set%nb_basis
+            write(out_unit,*) Rec_line,'  SparseGrid_type',basis_set%SparseGrid_type
+            write(out_unit,*) Rec_line,'  Sparse grid/basis, nb_basis',basis_set%nb_basis
             IF (associated(basis_set%tab_PbasisSG)) THEN
               allocate(tab_l(basis_set%nb_basis))
               CALL init_nDval_OF_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l)
               DO i_SG=1,basis_set%nb_SG
                 CALL ADD_ONE_TO_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l,iG=i_SG)
-                write(out_unitp,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
-                write(out_unitp,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
+                write(out_unit,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
+                write(out_unit,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
                 CALL RecWriteMiniMini_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
               END DO
               deallocate(tab_l)
             ELSE
-              write(out_unitp,*) Rec_line,' basis_set%tab_PbasisSG(:) is not associated'
+              write(out_unit,*) Rec_line,' basis_set%tab_PbasisSG(:) is not associated'
               allocate(tab_l(basis_set%nb_basis))
               CALL init_nDval_OF_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l)
               DO i_SG=1,basis_set%nb_SG
                 CALL ADD_ONE_TO_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l,iG=i_SG)
-                write(out_unitp,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
-                write(out_unitp,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
+                write(out_unit,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
+                write(out_unit,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
               END DO
               deallocate(tab_l)
             END IF
@@ -3068,14 +3068,14 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
           IF (basis_set%SparseGrid_type == 0) THEN
 
           ELSE
-            write(out_unitp,*) Rec_line,'------------------------------------------------'
-            write(out_unitp,*) Rec_line,'------------------------------------------------'
+            write(out_unit,*) Rec_line,'------------------------------------------------'
+            write(out_unit,*) Rec_line,'------------------------------------------------'
 
           END IF
-          write(out_unitp,*) Rec_line,'------------------------------------------------'
+          write(out_unit,*) Rec_line,'------------------------------------------------'
         END IF
  
-        write(out_unitp,*) Rec_line,'END RecWriteMiniMini_basis',iRec
+        write(out_unit,*) Rec_line,'END RecWriteMiniMini_basis',iRec
         iRec = iRec - 1
  
         deallocate(Rec_line)
@@ -3096,9 +3096,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
          integer      :: i,err_mem,memory
 
          IF (para_AllBasis%alloc) THEN
-           write(out_unitp,*) ' ERROR in alloc_AllBasis'
-           write(out_unitp,*) 'para_AllBasis is already allocated!'
-           write(out_unitp,*) ' CHECK the source!!!!!'
+           write(out_unit,*) ' ERROR in alloc_AllBasis'
+           write(out_unit,*) 'para_AllBasis is already allocated!'
+           write(out_unit,*) ' CHECK the source!!!!!'
            STOP
          END IF
 
@@ -3188,9 +3188,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -3199,8 +3199,8 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -3223,10 +3223,10 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWriteMini_basis(basis_set)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -3243,8 +3243,8 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'nq',nq
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'nq',nq
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -3265,10 +3265,10 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWriteMini_basis(basis_set)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -3308,9 +3308,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
           END DO
 
         CASE DEFAULT
-          write(out_unitp,*) ' ERROR in',name_sub
-          write(out_unitp,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
-          write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+          write(out_unit,*) ' ERROR in',name_sub
+          write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+          write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
           STOP
         END SELECT
       END IF
@@ -3318,8 +3318,8 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'nqa',nqa
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'nqa',nqa
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -3339,10 +3339,10 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWriteMini_basis(basis_set)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -3391,18 +3391,18 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
           END DO
 
         CASE DEFAULT
-          write(out_unitp,*) ' ERROR in',name_sub
-          write(out_unitp,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
-          write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+          write(out_unit,*) ' ERROR in',name_sub
+          write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+          write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
           STOP
         END SELECT
       END IF
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -3419,10 +3419,10 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWriteMini_basis(basis_set)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -3435,9 +3435,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -3454,9 +3454,9 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -3469,15 +3469,15 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
       END FUNCTION get_nb_bi_FROM_AllBasis
 
   FUNCTION get_nb_be_FROM_basis(basis_set)
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
 
   integer :: get_nb_be_FROM_basis
@@ -3490,7 +3490,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        logical, parameter :: debug = .FALSE.
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING get_nb_be_FROM_basis'
+    write(out_unit,*) 'BEGINNING get_nb_be_FROM_basis'
   END IF
 
   get_nb_be_FROM_basis = -1
@@ -3510,7 +3510,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
   END IF
 
   IF (debug) THEN
-    write(out_unitp,*) 'END get_nb_be_FROM_basis'
+    write(out_unit,*) 'END get_nb_be_FROM_basis'
   END IF
   END FUNCTION get_nb_be_FROM_basis
 

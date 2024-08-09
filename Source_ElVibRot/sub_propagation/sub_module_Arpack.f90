@@ -57,7 +57,7 @@ CONTAINS
 !=======================================================================================
       SUBROUTINE sub_propagation_Arpack(psi,Ene,nb_diago,max_diago,     &
                                         para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,trie_psi,dealloc_psi,  &
                              param_WP0
       USE mod_Op
@@ -137,12 +137,12 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' nb_diago',nb_diago
-        write(out_unitp,*) ' max_diago',max_diago
-        write(out_unitp,*) ' para_Davidson',para_propa%para_Davidson
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' nb_diago',nb_diago
+        write(out_unit,*) ' max_diago',max_diago
+        write(out_unit,*) ' para_Davidson',para_propa%para_Davidson
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -150,8 +150,8 @@ CONTAINS
       With_Basis = .NOT. para_propa%para_Davidson%With_Grid
       cplx = para_H%cplx
       IF (cplx) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' cplx is not yet possible in this subroutine!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' cplx is not yet possible in this subroutine!'
         STOP
       END IF
 
@@ -175,8 +175,8 @@ CONTAINS
       IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(n,size1_MPI,root_MPI)
 
       IF (nb_diago == 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_diago=0 is not possible with ARPACK'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_diago=0 is not possible with ARPACK'
         STOP
       END IF
 
@@ -288,12 +288,12 @@ CONTAINS
        ENDIF
 
 #else
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) ' The ARPACK library is not present!'
-        write(out_unitp,*) 'Use Arpack=f and Davidson=t'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) ' The ARPACK library is not present!'
+        write(out_unit,*) 'Use Arpack=f and Davidson=t'
         STOP 'ARPACK has been removed'
 #endif
-        !write(out_unitp,*) 'it,ido',it,ido
+        !write(out_unit,*) 'it,ido',it,ido
 
         IF (abs(ido) /= 1) EXIT
 
@@ -337,10 +337,10 @@ CONTAINS
 !       | documentation in DSAUPD. |
 !       %--------------------------%
 
-        write(out_unitp,*)
-        write(out_unitp,*) ' Error with _saupd, info = ', info,' from ', MPI_id
-        write(out_unitp,*) ' Check documentation in _naupd '
-        write(out_unitp,*) ' '
+        write(out_unit,*)
+        write(out_unit,*) ' Error with _saupd, info = ', info,' from ', MPI_id
+        write(out_unit,*) ' Check documentation in _naupd '
+        write(out_unit,*) ' '
 
       else
 
@@ -367,9 +367,9 @@ CONTAINS
 !#endif
        IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(ierr,size1_MPI,root_MPI)
 #else
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) ' The ARPACK library is not present!'
-        write(out_unitp,*) 'Use Arpack=f and Davidson=t'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) ' The ARPACK library is not present!'
+        write(out_unit,*) 'Use Arpack=f and Davidson=t'
         STOP 'ARPACK has been removed'
 #endif
 !       %-----------------------------------------------%
@@ -391,10 +391,10 @@ CONTAINS
 !         | Check the documentation of _neupd  |
 !         %------------------------------------%
 
-          write(out_unitp,*)
-          write(out_unitp,*) ' Error with _seupd, info = ', ierr
-          write(out_unitp,*) ' Check the documentation of _neupd. '
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) ' Error with _seupd, info = ', ierr
+          write(out_unit,*) ' Check the documentation of _neupd. '
+          write(out_unit,*)
 
         else
 
@@ -450,9 +450,9 @@ CONTAINS
               d(j,3) = dnrm2(n, ax, 1)
               d(j,3) = d(j,3) / abs(d(j,1))
 #else
-              write(out_unitp,*) 'ERROR in ',name_sub
-              write(out_unitp,*) ' The ARPACK library is not present!'
-              write(out_unitp,*) 'Use Arpack=f and Davidson=t'
+              write(out_unit,*) 'ERROR in ',name_sub
+              write(out_unit,*) ' The ARPACK library is not present!'
+              write(out_unit,*) 'Use Arpack=f and Davidson=t'
               STOP 'ARPACK has been removed'
 #endif
 
@@ -479,9 +479,9 @@ CONTAINS
               call daxpy(n, d(j,2), v(1,j+1), 1, ax, 1)
               d(j,3) = dnrm2(n, ax, 1)
 #else
-              write(out_unitp,*) 'ERROR in ',name_sub
-              write(out_unitp,*) ' The ARPACK library is not present!'
-              write(out_unitp,*) 'Use Arpack=f and Davidson=t'
+              write(out_unit,*) 'ERROR in ',name_sub
+              write(out_unit,*) ' The ARPACK library is not present!'
+              write(out_unit,*) 'Use Arpack=f and Davidson=t'
               STOP 'ARPACK has been removed'
 #endif
 
@@ -509,16 +509,16 @@ CONTAINS
               d(j+1,3) = d(j,3)
               first = .false.
 #else
-              write(out_unitp,*) 'ERROR in ',name_sub
-              write(out_unitp,*) ' The ARPACK library is not present!'
-              write(out_unitp,*) 'Use Arpack=f and Davidson=t'
+              write(out_unit,*) 'ERROR in ',name_sub
+              write(out_unit,*) ' The ARPACK library is not present!'
+              write(out_unit,*) 'Use Arpack=f and Davidson=t'
               STOP 'ARPACK has been removed'
 #endif
             else
               first = .true.
             end if
 
-            IF (debug) write(out_unitp,*) 'j,cplx ene ?',j,         &
+            IF (debug) write(out_unit,*) 'j,cplx ene ?',j,         &
                              psi(j)%CAvOp * get_Conv_au_TO_unit('E','cm-1')
 
           END DO ! for j=1, nconv
@@ -531,9 +531,9 @@ CONTAINS
 !          IF(MPI_id==0) call dmout(6, nconv, 3, d, maxncv, -6,                     &
 !                     'Ritz values (Real,Imag) and relative residuals')
 #else
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' The ARPACK library is not present!'
-          write(out_unitp,*) 'Use Arpack=f and Davidson=t'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' The ARPACK library is not present!'
+          write(out_unit,*) 'Use Arpack=f and Davidson=t'
           STOP 'ARPACK has been removed'
 #endif
         end if ! for ierr .ne. 0
@@ -596,11 +596,11 @@ CONTAINS
         Evec(:) = real( psi(1:nb_diago)%CAvOp,kind=Rkind)
         ZPE = minval(Evec)
         DO j=1,nb_diago
-           write(out_unitp,*) j,Evec(j)*get_Conv_au_TO_unit('E','cm-1'),   &
+           write(out_unit,*) j,Evec(j)*get_Conv_au_TO_unit('E','cm-1'),   &
                              (Evec(j)-ZPE)*get_Conv_au_TO_unit('E','cm-1')
         END DO
         CALL dealloc_NParray(Evec,'Evec',name_sub)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !----------------------------------------------------------
       END SUBROUTINE sub_propagation_Arpack
@@ -609,7 +609,7 @@ CONTAINS
 !=======================================================================================
       SUBROUTINE sub_OpV1_TO_V2_Arpack(V1,V2,psi1,psi2,                 &
                                        para_H,cplxE,para_propa,n)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Op
       USE mod_psi,    ONLY : param_psi,Overlap_psi1_psi2,Set_symab_OF_psiBasisRep
       USE mod_propa
@@ -638,11 +638,11 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' para_Davidson',para_propa%para_Davidson
-        write(out_unitp,*)
-        write(out_unitp,*) 'n',n
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' para_Davidson',para_propa%para_Davidson
+        write(out_unit,*)
+        write(out_unit,*) 'n',n
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -664,7 +664,7 @@ CONTAINS
 
       IF (debug) THEN
         CALL Overlap_psi1_psi2(cplxE,psi1,psi2,With_Grid=With_Grid)
-        write(out_unitp,*) 'Arpack <psi H psi>:',cplxE
+        write(out_unit,*) 'Arpack <psi H psi>:',cplxE
       END IF
 
       IF (With_Grid) THEN
@@ -675,7 +675,7 @@ CONTAINS
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !----------------------------------------------------------
       END SUBROUTINE sub_OpV1_TO_V2_Arpack
@@ -684,7 +684,7 @@ CONTAINS
 !=======================================================================================
       SUBROUTINE sub_propagation_Arpack_Sym(psi,Ene,nb_diago,max_diago, &
                                           para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,dealloc_psi,param_WP0
 
       USE mod_Op
@@ -763,19 +763,19 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' nb_diago',nb_diago
-        write(out_unitp,*) ' max_diago',max_diago
-        write(out_unitp,*) ' para_Davidson',para_propa%para_Davidson
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' nb_diago',nb_diago
+        write(out_unit,*) ' max_diago',max_diago
+        write(out_unit,*) ' para_Davidson',para_propa%para_Davidson
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
       cplx = para_H%cplx
       IF (cplx) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' cplx is not yet possible in this subroutine!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' cplx is not yet possible in this subroutine!'
         STOP
       END IF
 
@@ -795,8 +795,8 @@ CONTAINS
       IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(n,size1_MPI,root_MPI)
 
       IF (nb_diago == 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_diago=0 is not possible with ARPACK'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_diago=0 is not possible with ARPACK'
         STOP
       END IF
       nev =  nb_diago
@@ -905,9 +905,9 @@ CONTAINS
         ENDIF
 
 #else
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' The ARPACK library is not present!'
-          write(out_unitp,*) 'Use Arpack=f and Davidson=t'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' The ARPACK library is not present!'
+          write(out_unit,*) 'Use Arpack=f and Davidson=t'
           STOP 'ARPACK has been removed'
 #endif
 
@@ -963,10 +963,10 @@ CONTAINS
 !       | documentation in DSAUPD. |
 !       %--------------------------%
 
-         write(out_unitp,*)
-         write(out_unitp,*) ' Error with _saupd, info = ', info,' from ', MPI_id
-         write(out_unitp,*) ' Check documentation in _saupd '
-         write(out_unitp,*) ' '
+         write(out_unit,*)
+         write(out_unit,*) ' Error with _saupd, info = ', info,' from ', MPI_id
+         write(out_unit,*) ' Check documentation in _saupd '
+         write(out_unit,*) ' '
 
       else
 
@@ -1010,10 +1010,10 @@ CONTAINS
 !         | Check the documentation of DSEUPD. |
 !         %------------------------------------%
 
-          write(out_unitp,*)
-          write(out_unitp,*) ' Error with _seupd, info = ', ierr
-          write(out_unitp,*) ' Check the documentation of _seupd. '
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) ' Error with _seupd, info = ', ierr
+          write(out_unit,*) ' Check the documentation of _seupd. '
+          write(out_unit,*)
           STOP
 
         else
@@ -1059,7 +1059,7 @@ CONTAINS
             END IF
 #endif
             IF(keep_MPI) THEN
-              IF (debug) write(out_unitp,*) 'j,ene ?',j,              &
+              IF (debug) write(out_unit,*) 'j,ene ?',j,              &
                              d(j,1) * get_Conv_au_TO_unit('E','cm-1')
 
               Ene(j)          = d(j,1)
@@ -1133,11 +1133,11 @@ CONTAINS
         Evec(:) = real( psi(1:nb_diago)%CAvOp,kind=Rkind)
         ZPE = minval(Evec)
         DO j=1,nb_diago
-           write(out_unitp,*) j,Evec(j)*get_Conv_au_TO_unit('E','cm-1'),   &
+           write(out_unit,*) j,Evec(j)*get_Conv_au_TO_unit('E','cm-1'),   &
                              (Evec(j)-ZPE)*get_Conv_au_TO_unit('E','cm-1')
         END DO
         CALL dealloc_NParray(Evec,'Evec',name_sub)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !----------------------------------------------------------
 
@@ -1145,7 +1145,7 @@ CONTAINS
 !=======================================================================================
 
  SUBROUTINE ReadWP0_Arpack(psi,nb_diago,max_diago,para_Davidson,cplx)
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,    ONLY : param_psi,norm2_psi,renorm_psi,dealloc_psi,     &
                         Set_symab_OF_psiBasisRep,copy_psi2TOpsi1,       &
                         sub_PsiBasisRep_TO_GridRep,alloc_psi,           &
@@ -1176,13 +1176,13 @@ CONTAINS
  !-----------------------------------------------------------
 
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) ' nb_diago',nb_diago
-   write(out_unitp,*) ' max_diago',max_diago
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) ' nb_diago',nb_diago
+   write(out_unit,*) ' max_diago',max_diago
 
-   write(out_unitp,*) ' para_Davidson',para_Davidson
-   write(out_unitp,*)
-   flush(out_unitp)
+   write(out_unit,*) ' para_Davidson',para_Davidson
+   write(out_unit,*)
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
 
@@ -1211,10 +1211,10 @@ CONTAINS
    para_Davidson%nb_WP0 = para_WP0%nb_WP0
 
    IF (nb_diago < 1) THEN
-     write(out_unitp,*) ' ERROR while reading the vector(s)'
-     write(out_unitp,*) ' ... the number is 0'
-     write(out_unitp,*) ' Probably, in the namelist (davidson)...'
-     write(out_unitp,*) '   ... you select a wrong symmetry',para_Davidson%symab
+     write(out_unit,*) ' ERROR while reading the vector(s)'
+     write(out_unit,*) ' ... the number is 0'
+     write(out_unit,*) ' Probably, in the namelist (davidson)...'
+     write(out_unit,*) '   ... you select a wrong symmetry',para_Davidson%symab
      STOP
    END IF
 
@@ -1222,10 +1222,10 @@ CONTAINS
    DO i=1,nb_diago
      psi = psi + psi0(i)
      CALL norm2_psi(psi0(i))
-     IF (debug) write(out_unitp,*) '   norm^2 of psi0(i)',i,psi0(i)%norm2
+     IF (debug) write(out_unit,*) '   norm^2 of psi0(i)',i,psi0(i)%norm2
      IF ( abs(psi0(i)%norm2-ONE) > ONETENTH**8) THEN
-       write(out_unitp,*) ' ERROR while reading the vector(s)'
-       write(out_unitp,*) ' ... the norm^2 of psi0(i) is /= 1',i,psi0(i)%norm2
+       write(out_unit,*) ' ERROR while reading the vector(s)'
+       write(out_unit,*) ' ... the norm^2 of psi0(i) is /= 1',i,psi0(i)%norm2
        STOP
      END IF
    END DO
@@ -1248,9 +1248,9 @@ CONTAINS
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'psi, nb_diago',nb_diago
+   write(out_unit,*) 'psi, nb_diago',nb_diago
    CALL ecri_init_psi(psi)
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 

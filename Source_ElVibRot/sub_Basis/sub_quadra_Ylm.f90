@@ -52,7 +52,7 @@
 !
 !=============================================================
       SUBROUTINE sub_quadra_Ylm(base,isyml,isymm)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       IMPLICIT NONE
@@ -100,10 +100,10 @@
        nq = get_nq_FROM_basis(base)
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'nb,nq',base%nb,nq
-         write(out_unitp,*) 'L_SparseBasis',base%L_SparseBasis
-         write(out_unitp,*) 'L_SparseGrid',base%L_SparseGrid
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'nb,nq',base%nb,nq
+         write(out_unit,*) 'L_SparseBasis',base%L_SparseBasis
+         write(out_unit,*) 'L_SparseGrid',base%L_SparseGrid
        END IF
 !-----------------------------------------------------------
        num   = .FALSE.
@@ -120,13 +120,13 @@
 !      test sur nb_fourier et nb_quadra
 !----------------------------------------------------------------------------
       nb = base%nb
-      write(out_unitp,*) '    Basis: Ylm'
-      write(out_unitp,*) '      old nb_Ylm',nb
+      write(out_unit,*) '    Basis: Ylm'
+      write(out_unit,*) '      old nb_Ylm',nb
 
       IF (base%xPOGridRep_done) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'xPOGridRep_done=t and a 2D-basis is impossible'
-        write(out_unitp,*) 'CHECK the source'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'xPOGridRep_done=t and a 2D-basis is impossible'
+        write(out_unit,*) 'CHECK the source'
         STOP
       END IF
 
@@ -140,8 +140,8 @@
       END IF
       max_m = 2*max_l+1
 
-      write(out_unitp,*) '      new nb_Ylm (without symmetry): ',nb
-      write(out_unitp,*) '      max_l, max_m',max_l,max_m
+      write(out_unit,*) '      new nb_Ylm (without symmetry): ',nb
+      write(out_unit,*) '      max_l, max_m',max_l,max_m
 
       IF (base%L_SparseGrid > -1) THEN
          max_ql = Get_nq_FROM_l_OF_PrimBasis(base%L_SparseGrid,base)-1
@@ -150,16 +150,16 @@
          max_ql = -1
          max_ql = max_l
       END IF
-      write(out_unitp,*) 'max_ql',max_ql
+      write(out_unit,*) 'max_ql',max_ql
 
       lebedev = 2*max_ql+1
       !lebedev = -1
 
       IF (lebedev >= 0) THEN
 
-        write(out_unitp,*) '      old nb_quadra',nq
-        write(out_unitp,*) '      max_ql',max_ql
-        write(out_unitp,*) '      lebedev',lebedev
+        write(out_unit,*) '      old nb_quadra',nq
+        write(out_unit,*) '      max_ql',max_ql
+        write(out_unit,*) '      lebedev',lebedev
 
         DO
           write(name_i,'(i3)') lebedev
@@ -168,10 +168,10 @@
 
           Lebedev_file%name = trim(EVRT_path) //                        &
            '/Internal_data/Lebedev-grid/lebedev_' // trim(name_i) // '.txt'
-          !write(out_unitp,*) 'Lebedev_file%name: ',Lebedev_file%name
+          !write(out_unit,*) 'Lebedev_file%name: ',Lebedev_file%name
           CALL file_open(Lebedev_file,nio,old=.TRUE.,err_file=err_io)
           IF (err_io == 0) THEN
-            write(out_unitp,*) ' Lebedev parameter: ',lebedev
+            write(out_unit,*) ' Lebedev parameter: ',lebedev
             ! first the grid file and then the number of grid points
             iq = 0
             DO
@@ -184,9 +184,9 @@
           ELSE
             lebedev = lebedev + 2
             IF (lebedev > 131) THEN
-              write(out_unitp,*) 'WARNING in ',name_sub
-              write(out_unitp,*) 'the lebedev parameter is too large',lebedev
-              write(out_unitp,*) ' => Do not use sparse grid (L_SparseGrid=-1)'
+              write(out_unit,*) 'WARNING in ',name_sub
+              write(out_unit,*) 'the lebedev parameter is too large',lebedev
+              write(out_unit,*) ' => Do not use sparse grid (L_SparseGrid=-1)'
               lebedev = -1
               EXIT
             END IF
@@ -194,12 +194,12 @@
         END DO
         CALL file_close(Lebedev_file)
 
-        write(out_unitp,*) '      new nb_quadra',nq
+        write(out_unit,*) '      new nb_quadra',nq
       END IF
 
       IF (lebedev < 0) THEN
-        write(out_unitp,*) '      old nb_quadra',nq
-        write(out_unitp,*) '  not lebedev',lebedev
+        write(out_unit,*) '      old nb_quadra',nq
+        write(out_unit,*) '  not lebedev',lebedev
 
         max_ql = int(sqrt(real(nq,kind=Rkind)))
         IF (max_ql <= max_l) max_ql = max_l+1
@@ -207,19 +207,19 @@
         IF (mod(max_qm,2) .EQ. 1) max_qm = max_qm + 1
         nq = max_ql*max_qm
 
-        write(out_unitp,*) '      new nb_quadra',nq
-        write(out_unitp,*) '      max_ql, max_qm',max_ql,max_qm
+        write(out_unit,*) '      new nb_quadra',nq
+        write(out_unit,*) '      max_ql, max_qm',max_ql,max_qm
       END IF
 
       CALL Set_nq_OF_basis(base,nq)
 
       ! calculation of base%nb with symmetry
-      write(out_unitp,*) 'isyml,isymm',isyml,isymm
+      write(out_unit,*) 'isyml,isymm',isyml,isymm
       IF (isyml >= 0) THEN
         base%nb = 0
         DO ibl = 0,max_l
         IF (mod(ibl,2) /= isyml) CYCLE
-        write(out_unitp,*) 'ibl',ibl
+        write(out_unit,*) 'ibl',ibl
         DO ibm = 1,2*ibl+1
           base%nb = base%nb + 1
         END DO
@@ -232,7 +232,7 @@
         END DO
         END DO
       END IF
-      write(out_unitp,*) '      new nb_Ylm (with symmetry): ',base%nb
+      write(out_unit,*) '      new nb_Ylm (with symmetry): ',base%nb
 
 !----------------------------------------------------------------------------
 
@@ -276,11 +276,11 @@
         !CALL random_number(thetaR)
         !thetaR = thetaR/FIVE ! now thetaR E [-0.2:0.2]
         thetaR = TWO/TEN**2
-        write(out_unitp,*) 'thetaR',thetaR
+        write(out_unit,*) 'thetaR',thetaR
         DO iq=1,nq
           read(nio,*,iostat=err_io) phi,theta,base%wrho(iq)
           IF (err_io /= 0) STOP 'iq > nq STOP in Ylm'
-          !write(out_unitp,*) 'iq,theta,phi,w,(ori)',iq,theta,phi, base%wrho(iq)
+          !write(out_unit,*) 'iq,theta,phi,w,(ori)',iq,theta,phi, base%wrho(iq)
 
           theta = theta / 180._Rkind*pi
           phi   = phi   / 180._Rkind*pi
@@ -292,16 +292,16 @@
           base%rho(iq)  = sin(base%x(1,iq))
           base%w(iq)    = base%wrho(iq) / base%rho(iq)
 
-          !write(out_unitp,*) 'iq,theta,phi,w',iq,base%x(:,iq) * 180._Rkind/pi, base%wrho(iq)
+          !write(out_unit,*) 'iq,theta,phi,w',iq,base%x(:,iq) * 180._Rkind/pi, base%wrho(iq)
 
         END DO
 
         CALL file_close(Lebedev_file)
       END IF
       IF (debug) THEN
-        write(out_unitp,*) 'grid for the Ylm. nq:',nq
+        write(out_unit,*) 'grid for the Ylm. nq:',nq
         DO iq=1,nq
-          write(out_unitp,*) base%x(:,iq)
+          write(out_unit,*) base%x(:,iq)
         END DO
       END IF
 
@@ -342,7 +342,7 @@
             base%nDindB%Tab_Norm(ibb) = real(ibbl,kind=Rkind)
           END DO
           END DO
-          !write(out_unitp,*) 'base%nDindB%Tab_L',base%nDindB%Tab_L
+          !write(out_unit,*) 'base%nDindB%Tab_L',base%nDindB%Tab_L
           !STOP 'With_L'
       ELSE
         CALL init_nDindexPrim(base%nDindB,ndim=1,nDsize=[base%nb],  &
@@ -366,8 +366,8 @@
         !IF (mod(ibm,2) == 0)   symab_mfourier = 1 ! odd, m (the true m)
         !symab = Calc_symab1_EOR_symab2(symab_l,symab_mfourier)
         !CALL Set_symabOFSymAbelian_AT_ib(base%P_SymAbelian,ib,symab)
-        !write(out_unitp,*) 'ib,symab_l,symab_mfourier',ib,symab_l,symab_mfourier
-        !write(out_unitp,*) 'ib,symab',ib,symab
+        !write(out_unit,*) 'ib,symab_l,symab_mfourier',ib,symab_l,symab_mfourier
+        !write(out_unit,*) 'ib,symab',ib,symab
 
         SELECT CASE (Read_symab)
         CASE (-1)
@@ -379,10 +379,10 @@
             CALL Set_symabOFSymAbelian_AT_ib(base%P_SymAbelian,ib,Read_symab)
           END IF
         CASE DEFAULT
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) '  it should never append. The error should come from'
-          write(out_unitp,*) ' "Set_ReadsymabOFSymAbelian" subroutine'
-          write(out_unitp,*) ' CHECK the fortran!!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) '  it should never append. The error should come from'
+          write(out_unit,*) ' "Set_ReadsymabOFSymAbelian" subroutine'
+          write(out_unit,*) ' CHECK the fortran!!'
           STOP
         END SELECT
 
@@ -414,7 +414,7 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END sub_quadra_Ylm'
+        write(out_unit,*) 'END sub_quadra_Ylm'
       END IF
 !-----------------------------------------------------------
 
@@ -428,7 +428,7 @@
 !
 !=============================================================
       SUBROUTINE sub_quadra_ABplusCD(base)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -469,8 +469,8 @@
        nq = get_nq_FROM_basis(base)
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'nb,nq',base%nb,nq
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'nb,nq',base%nb,nq
        END IF
 !-----------------------------------------------------------
 
@@ -485,13 +485,13 @@
 !      test sur nb_fourier et nb_quadra
 !----------------------------------------------------------------------------
       max_l = base%nb
-      write(out_unitp,*) '    Basis: Coll AB+CD'
-      write(out_unitp,*) '      old max_l',max_l
+      write(out_unit,*) '    Basis: Coll AB+CD'
+      write(out_unit,*) '      old max_l',max_l
 
       IF (base%xPOGridRep_done) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'xPOGridRep_done=t and a 3D-basis is impossible'
-        write(out_unitp,*) 'CHECK the source'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'xPOGridRep_done=t and a 3D-basis is impossible'
+        write(out_unit,*) 'CHECK the source'
         STOP
       END IF
 
@@ -512,8 +512,8 @@
       max_ql  = max_l+1
       max_qm  = 2*max_l+1
 
-      write(out_unitp,*) '      new nb       ',nb
-      write(out_unitp,*) '      new nb_quadra',nq
+      write(out_unit,*) '      new nb       ',nb
+      write(out_unit,*) '      new nb_quadra',nq
       CALL Set_nq_OF_basis(base,nq)
 
 
@@ -578,8 +578,8 @@
         im = mmm/2
         IF (abs(im) <= il1 .AND. abs(im) <=il2) THEN
           ib = ib + 1
-          !write(out_unitp,*) 'il1,il2,im,mmm',il1,il2,im,mmm
-          !flush(out_unitp)
+          !write(out_unit,*) 'il1,il2,im,mmm',il1,il2,im,mmm
+          !flush(out_unit)
           DO iq=1,nq
             xq(:) = base%x(:,iq)
 
@@ -624,7 +624,7 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 

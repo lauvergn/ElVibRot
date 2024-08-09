@@ -52,7 +52,7 @@
 !
 !=============================================================
       SUBROUTINE sub_Basis_El(base)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -79,14 +79,14 @@
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'nb',base%nb
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'nb',base%nb
        END IF
 !-----------------------------------------------------------
        IF (NewBasisEl) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) '  A electronic basis is already defined'
-         write(out_unitp,*) '   CHECK your data!!'
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) '  A electronic basis is already defined'
+         write(out_unit,*) '   CHECK your data!!'
          STOP
        END IF
 
@@ -135,7 +135,7 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 

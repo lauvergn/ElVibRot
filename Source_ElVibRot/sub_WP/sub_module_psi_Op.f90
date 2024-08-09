@@ -57,7 +57,7 @@
 !
 !=======================================================================================
       SUBROUTINE Set_symab_OF_psiBasisRep(psi,symab)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -75,11 +75,11 @@
       character (len=*), parameter :: name_sub='Set_symab_OF_psiBasisRep'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_ba',psi%nb_ba
-        write(out_unitp,*) 'present(symab)? ',present(symab)
-        IF (present(symab)) write(out_unitp,*) 'symab',symab
-        write(out_unitp,*) 'psi BasisRep'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_ba',psi%nb_ba
+        write(out_unit,*) 'present(symab)? ',present(symab)
+        IF (present(symab)) write(out_unit,*) 'symab',symab
+        write(out_unit,*) 'psi BasisRep'
         !CALL ecri_psi(ZERO,psi)
       END IF
 
@@ -95,7 +95,7 @@
               ib = maxloc(abs(psi%RvecB),dim=1)
             END IF
             loc_symab = Get_symabOFSymAbelianOFBasis_AT_ib(psi%BasisnD,ib)
-            IF (debug) write(out_unitp,*) 'maxloc,symab',ib,loc_symab
+            IF (debug) write(out_unit,*) 'maxloc,symab',ib,loc_symab
           END IF
         ELSE
           loc_symab = -1
@@ -107,7 +107,7 @@
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'symab, bits(symab)',WriteTOstring_symab(psi%symab)
+        write(out_unit,*) 'symab, bits(symab)',WriteTOstring_symab(psi%symab)
       END IF
 
 !-----------------------------------------------------------
@@ -127,11 +127,11 @@
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'symab psi BasisRep',psi%symab
+        write(out_unit,*)
+        write(out_unit,*) 'symab psi BasisRep',psi%symab
         CALL ecri_psi(ZERO,psi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -148,7 +148,7 @@
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE Overlap_psi1_psi2(Overlap,psi1,psi2,With_Grid,Channel_ie)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -177,15 +177,15 @@
 !     logical,parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'psi1'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'psi1'
         CALL ecri_psi(psi=psi1)
 
-        write(out_unitp,*) 'psi2'
+        write(out_unit,*) 'psi2'
         CALL ecri_psi(psi=psi2)
-        write(out_unitp,*) 'GridRep,BasisRep ?'
-        IF (present(With_Grid)) write(out_unitp,*) 'With_Grid',With_Grid
-        IF (present(Channel_ie)) write(out_unitp,*) 'Channel_ie',Channel_ie
+        write(out_unit,*) 'GridRep,BasisRep ?'
+        IF (present(With_Grid)) write(out_unit,*) 'With_Grid',With_Grid
+        IF (present(Channel_ie)) write(out_unit,*) 'Channel_ie',Channel_ie
       END IF
 !-----------------------------------------------------------
 
@@ -208,16 +208,16 @@
           ELSE IF (.NOT. psi1%cplx .AND.                                  &
            allocated(psi1%RvecG) .AND. allocated(psi2%RvecG)) THEN
           ELSE
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' impossible to calculate the GridRep overlap'
-            write(out_unitp,*) ' With_Grid_loc=t but problem with the allocation GridRep'
-            write(out_unitp,*) 'allocated(psi1%CvecG)',allocated(psi1%CvecG)
-            write(out_unitp,*) 'allocated(psi2%CvecG)',allocated(psi2%CvecG)
-            write(out_unitp,*) 'allocated(psi1%RvecG)',allocated(psi1%RvecG)
-            write(out_unitp,*) 'allocated(psi2%RvecG)',allocated(psi2%RvecG)
-            write(out_unitp,*) ' psi1'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' impossible to calculate the GridRep overlap'
+            write(out_unit,*) ' With_Grid_loc=t but problem with the allocation GridRep'
+            write(out_unit,*) 'allocated(psi1%CvecG)',allocated(psi1%CvecG)
+            write(out_unit,*) 'allocated(psi2%CvecG)',allocated(psi2%CvecG)
+            write(out_unit,*) 'allocated(psi1%RvecG)',allocated(psi1%RvecG)
+            write(out_unit,*) 'allocated(psi2%RvecG)',allocated(psi2%RvecG)
+            write(out_unit,*) ' psi1'
             CALL ecri_psi(psi=psi1,ecri_GridRep=.TRUE.)
-            write(out_unitp,*) ' psi2'
+            write(out_unit,*) ' psi2'
             CALL ecri_psi(psi=psi2,ecri_GridRep=.TRUE.)
             STOP
           END IF
@@ -227,16 +227,16 @@
           ELSE IF (.NOT. psi1%cplx .AND.                                  &
            allocated(psi1%RvecB) .AND. allocated(psi2%RvecB)) THEN
           ELSE
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' impossible to calculate the BasisRep overlap'
-            write(out_unitp,*) ' With_Grid_loc=f (on basis) but problem with the allocation of BasisRep'
-            write(out_unitp,*) 'allocated(psi1%CvecB)',allocated(psi1%CvecB)
-            write(out_unitp,*) 'allocated(psi2%CvecB)',allocated(psi2%CvecB)
-            write(out_unitp,*) 'allocated(psi1%RvecB)',allocated(psi1%RvecB)
-            write(out_unitp,*) 'allocated(psi2%RvecB)',allocated(psi2%RvecB)
-            write(out_unitp,*) ' psi1'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' impossible to calculate the BasisRep overlap'
+            write(out_unit,*) ' With_Grid_loc=f (on basis) but problem with the allocation of BasisRep'
+            write(out_unit,*) 'allocated(psi1%CvecB)',allocated(psi1%CvecB)
+            write(out_unit,*) 'allocated(psi2%CvecB)',allocated(psi2%CvecB)
+            write(out_unit,*) 'allocated(psi1%RvecB)',allocated(psi1%RvecB)
+            write(out_unit,*) 'allocated(psi2%RvecB)',allocated(psi2%RvecB)
+            write(out_unit,*) ' psi1'
             CALL ecri_psi(psi=psi1,ecri_BasisRep=.TRUE.)
-            write(out_unitp,*) ' psi2'
+            write(out_unit,*) ' psi2'
             CALL ecri_psi(psi=psi2,ecri_BasisRep=.TRUE.)
             STOP
           END IF
@@ -304,8 +304,8 @@
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Overlap : ',Overlap
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'Overlap : ',Overlap
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -319,7 +319,7 @@
 !============================================================
 !
       SUBROUTINE trie_psi(psi,ene,nb_wp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -360,7 +360,7 @@
 !
 !================================================================
       SUBROUTINE sub_LCpsi_TO_psi(psi,Vec,ndim,nb_save)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       USE mod_MPI_aux
       IMPLICIT NONE
@@ -386,15 +386,15 @@
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' nb_save,ndim',nb_save,ndim
-        CALL Write_Mat(Vec,out_unitp,5)
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' nb_save,ndim',nb_save,ndim
+        CALL Write_Mat(Vec,out_unit,5)
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
-      IF (debug) write(out_unitp,*) 'sum(abs(Vec))',sum(abs(Vec))
+      IF (debug) write(out_unit,*) 'sum(abs(Vec))',sum(abs(Vec))
       IF (sum(abs(Vec)) > ONETENTH**10) THEN
 
         IF (psi(1)%BasisRep) THEN
@@ -462,8 +462,8 @@
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !----------------------------------------------------------
 
@@ -474,7 +474,7 @@
 !
 !================================================================
       SUBROUTINE sub_Schmidt(psi,nb_psi)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       USE mod_ana_psi
       IMPLICIT NONE
@@ -494,8 +494,8 @@
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_psi',nb_psi
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_psi',nb_psi
        END IF
 !-----------------------------------------------------------
 
@@ -510,28 +510,28 @@
             ROverlap = real(Overlap,kind=Rkind)
             psi(i) = psi(i) - psi(j) * ROverlap
           END IF
-!         write(out_unitp,*) 'j,i,S',j,i,Overlap
-!         flush(out_unitp)
+!         write(out_unit,*) 'j,i,S',j,i,Overlap
+!         flush(out_unit)
         END DO
         IF (i > 1) THEN
           CALL Set_symab_OF_psiBasisRep(psi(i),sym)
 
           !CALL norm2_psi(psi(i))
-          !write(out_unitp,*) ' Ortho: norm2',i,psi(i)%norm2
+          !write(out_unit,*) ' Ortho: norm2',i,psi(i)%norm2
           CALL renorm_psi(psi(i))
-          !write(out_unitp,*) 'symab, bits(symab)',WriteTOstring_symab(psi(i)%symab)
+          !write(out_unit,*) 'symab, bits(symab)',WriteTOstring_symab(psi(i)%symab)
         END IF
       END DO
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_Schmidt
 
       SUBROUTINE sub_Lowdin(psi,nb_psi)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       USE mod_ana_psi
       IMPLICIT NONE
@@ -559,8 +559,8 @@
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_psi',nb_psi
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_psi',nb_psi
        END IF
 !-----------------------------------------------------------
 
@@ -584,12 +584,12 @@
           RS(j,i) =  Real(Overlap,kind=Rkind)
         END DO
         END DO
-        IF (debug) CALL Write_Mat(RS,out_unitp,5)
+        IF (debug) CALL Write_Mat(RS,out_unit,5)
 
         CALL diagonalization(RS,Eig,Vec,nb_psi,1,-1,.FALSE.)
         IF (debug) THEN
-          write(out_unitp,*) 'Eig S ',Eig(:)
-          write(out_unitp,*) 'nb large vp ',count(Eig>ONETENTH**6)
+          write(out_unit,*) 'Eig S ',Eig(:)
+          write(out_unit,*) 'nb large vp ',count(Eig>ONETENTH**6)
         END IF
 
         DO i=1,nb_psi
@@ -613,8 +613,8 @@
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Eig S ',Eig(:)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'Eig S ',Eig(:)
+        write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_Lowdin

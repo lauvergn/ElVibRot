@@ -57,7 +57,7 @@
 !=============================================================
       SUBROUTINE sub_quadra_laguerre(base)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -76,8 +76,8 @@
        nq = get_nq_FROM_basis(base)
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'nb,nq',base%nb,nq
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'nb,nq',base%nb,nq
        END IF
 !-----------------------------------------------------------
 
@@ -90,8 +90,8 @@
 !      nb_quadra > nb_herm
 !----------------------------------------------------------------------------
       IF (base%check_nq_OF_basis .AND. print_level > -1) THEN
-        write(out_unitp,*) '    Basis: Laguerre polynomia'
-        write(out_unitp,*) '      nb_Laguerre',base%nb
+        write(out_unit,*) '    Basis: Laguerre polynomia'
+        write(out_unit,*) '      nb_Laguerre',base%nb
       END IF
       base%packed            = .TRUE.
       base%packed_done       = .TRUE.
@@ -99,9 +99,9 @@
 
       IF (.NOT. base%xPOGridRep_done) THEN
         IF (base%check_nq_OF_basis) THEN
-          IF (print_level > -1) write(out_unitp,*) '      old nb_quadra',nq
+          IF (print_level > -1) write(out_unit,*) '      old nb_quadra',nq
           IF ( nq < base%nb ) nq = base%nb + 1
-          IF (print_level > -1) write(out_unitp,*) '      new nb_quadra',nq
+          IF (print_level > -1) write(out_unit,*) '      new nb_quadra',nq
         END IF
         CALL Set_nq_OF_basis(base,nq)
 
@@ -123,7 +123,7 @@
       CALL alloc_dnb_OF_basis(base)
 
       IF (base%print_info_OF_basisDP .AND. print_level > -1)                    &
-                        write(out_unitp,*) '      All Laguerre polynomials'
+                        write(out_unit,*) '      All Laguerre polynomials'
         base%tab_ndim_index(1,:) = [(ib,ib=1,base%nb)]
         DO ib=1,base%nb
         DO iq=1,nq
@@ -136,7 +136,7 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 

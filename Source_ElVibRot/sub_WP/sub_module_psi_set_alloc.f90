@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
  MODULE mod_psi_set_alloc
- USE mod_system
+ USE EVR_system_m
  USE mod_basis
  USE mod_type_ana_psi
  IMPLICIT NONE
@@ -229,7 +229,7 @@
 !     initialization of psi
 !=======================================================================================
   SUBROUTINE init_psi_t(psi,para_AllBasis,cplx,para_AllBasis_ana)
-    USE mod_system
+    USE EVR_system_m
     IMPLICIT NONE
 
     !----- variables for the WP propagation ----------------------------
@@ -244,7 +244,7 @@
     logical, parameter :: debug = .FALSE.
     !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING init_psi_t : cplx',cplx
+      write(out_unit,*) 'BEGINNING init_psi_t : cplx',cplx
     END IF
 
     !-----------------------------------------------------------
@@ -254,20 +254,20 @@
     IF (associated(psi%para_AllBasis%BasisnD)) THEN
        psi%BasisnD => psi%para_AllBasis%BasisnD
     ELSE
-       write(out_unitp,*) ' ERROR in init_psi_t'
-       write(out_unitp,*) ' BasisnD CANNOT be associated'
-       write(out_unitp,*) ' asso psi%para_AllBasis%BasisnD',associated(psi%para_AllBasis%BasisnD)
-       write(out_unitp,*) ' CHECK the source'
+       write(out_unit,*) ' ERROR in init_psi_t'
+       write(out_unit,*) ' BasisnD CANNOT be associated'
+       write(out_unit,*) ' asso psi%para_AllBasis%BasisnD',associated(psi%para_AllBasis%BasisnD)
+       write(out_unit,*) ' CHECK the source'
        STOP
     END IF
 
     IF (associated(psi%para_AllBasis%Basis2n)) THEN
        psi%Basis2n => psi%para_AllBasis%Basis2n
     ELSE
-       write(out_unitp,*) ' ERROR in init_psi_t'
-       write(out_unitp,*) ' BasisnD CANNOT be associated'
-       write(out_unitp,*) ' asso psi%para_AllBasis%Basis2n',associated(psi%para_AllBasis%Basis2n)
-       write(out_unitp,*) ' CHECK the source'
+       write(out_unit,*) ' ERROR in init_psi_t'
+       write(out_unit,*) ' BasisnD CANNOT be associated'
+       write(out_unit,*) ' asso psi%para_AllBasis%Basis2n',associated(psi%para_AllBasis%Basis2n)
+       write(out_unit,*) ' CHECK the source'
        STOP
     END IF
   !-----------------------------------------------------------
@@ -305,7 +305,7 @@ STOP 'pb in init_psi_t'
 
   IF (debug) THEN
     CALL ecri_init_psi(psi)
-    write(out_unitp,*) 'END init_psi_t'
+    write(out_unit,*) 'END init_psi_t'
   END IF
 END SUBROUTINE init_psi_t
 !=======================================================================================
@@ -329,9 +329,9 @@ END SUBROUTINE init_psi_t
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING alloc_psi'
-        write(out_unitp,*) ' 1 test_alloc_psi'
-        write(out_unitp,*) 'BasisRep,GridRep',psi%BasisRep,psi%GridRep
+        write(out_unit,*) 'BEGINNING alloc_psi'
+        write(out_unit,*) ' 1 test_alloc_psi'
+        write(out_unit,*) 'BasisRep,GridRep',psi%BasisRep,psi%GridRep
       END IF
 !-----------------------------------------------------------
       IF (present(BasisRep))          psi%BasisRep          = BasisRep
@@ -348,13 +348,13 @@ END SUBROUTINE init_psi_t
       END IF
 
       IF (psi%BasisRep .AND. psi%nb_tot < 1) THEN
-        write(out_unitp,*) ' ERROR in alloc_psi'
-        write(out_unitp,*) ' nb_tot <1 ',psi%nb_tot
+        write(out_unit,*) ' ERROR in alloc_psi'
+        write(out_unit,*) ' nb_tot <1 ',psi%nb_tot
         STOP
       END IF
       IF (psi%GridRep .AND. psi%nb_qaie < 1) THEN
-        write(out_unitp,*) ' ERROR in alloc_psi'
-        write(out_unitp,*) ' nb_qaie <1 ',psi%nb_qaie
+        write(out_unit,*) ' ERROR in alloc_psi'
+        write(out_unit,*) ' nb_qaie <1 ',psi%nb_qaie
         STOP
       END IF
 
@@ -362,32 +362,32 @@ END SUBROUTINE init_psi_t
         IF (psi%cplx) THEN
           IF ( .NOT. allocated(psi%CvecB) ) THEN
             IF(keep_MPI) CALL alloc_NParray(psi%CvecB,[psi%nb_tot],'psi%CvecB','alloc_psi')
-            IF (debug) write(out_unitp,*) 'alloc: CvecB'
+            IF (debug) write(out_unit,*) 'alloc: CvecB'
             IF(keep_MPI) psi%CvecB(:) = CZERO
           END IF
           IF ( allocated(psi%RvecB) ) THEN
             CALL dealloc_NParray(psi%RvecB,'psi%RvecB','alloc_psi')
-            IF (debug) write(out_unitp,*) 'dealloc: RvecB'
+            IF (debug) write(out_unit,*) 'dealloc: RvecB'
           END IF
         ELSE
           IF ( .NOT. allocated(psi%RvecB) ) THEN
             IF(keep_MPI) CALL alloc_NParray(psi%RvecB,[psi%nb_tot],'psi%RvecB','alloc_psi')
-            IF (debug) write(out_unitp,*) 'alloc: RvecB'
+            IF (debug) write(out_unit,*) 'alloc: RvecB'
             IF(keep_MPI) psi%RvecB(:) = ZERO
           END IF
           IF ( allocated(psi%CvecB) ) THEN
             CALL dealloc_NParray(psi%CvecB,'psi%CvecB','alloc_psi')
-            IF (debug) write(out_unitp,*) 'dealloc: CvecB'
+            IF (debug) write(out_unit,*) 'dealloc: CvecB'
           END IF
         END IF
       ELSE ! deallocate psi%BasisRep
         IF ( allocated(psi%RvecB) ) THEN
           CALL dealloc_NParray(psi%RvecB,'psi%RvecB','alloc_psi')
-          IF (debug) write(out_unitp,*) 'dealloc: RvecB'
+          IF (debug) write(out_unit,*) 'dealloc: RvecB'
         END IF
         IF ( allocated(psi%CvecB) ) THEN
           CALL dealloc_NParray(psi%CvecB,'psi%CvecB','alloc_psi')
-          IF (debug) write(out_unitp,*) 'dealloc: CvecB'
+          IF (debug) write(out_unit,*) 'dealloc: CvecB'
         END IF
       END IF
 
@@ -396,32 +396,32 @@ END SUBROUTINE init_psi_t
         IF (psi%cplx) THEN
           IF ( .NOT. allocated(psi%CvecG) ) THEN
             IF(keep_MPI) CALL alloc_NParray(psi%CvecG,[psi%nb_qaie],'psi%CvecG','alloc_psi')
-            IF (debug) write(out_unitp,*) 'alloc: CvecG'
+            IF (debug) write(out_unit,*) 'alloc: CvecG'
             IF(keep_MPI) psi%CvecG(:) = CZERO
           END IF
           IF ( allocated(psi%RvecG) ) THEN
             CALL dealloc_NParray(psi%RvecG,'psi%RvecG','alloc_psi')
-            IF (debug) write(out_unitp,*) 'dealloc: RvecG'
+            IF (debug) write(out_unit,*) 'dealloc: RvecG'
           END IF
         ELSE
           IF ( .NOT. allocated(psi%RvecG) ) THEN
             IF(keep_MPI) CALL alloc_NParray(psi%RvecG,[psi%nb_qaie],'psi%RvecG','alloc_psi')
-            IF (debug) write(out_unitp,*) 'alloc: RvecG'
+            IF (debug) write(out_unit,*) 'alloc: RvecG'
             IF(keep_MPI) psi%RvecG(:) = ZERO
           END IF
           IF ( allocated(psi%CvecG) ) THEN
             CALL dealloc_NParray(psi%CvecG,'psi%CvecG','alloc_psi')
-            IF (debug) write(out_unitp,*) 'dealloc: CvecG'
+            IF (debug) write(out_unit,*) 'dealloc: CvecG'
           END IF
         END IF
       ELSE ! deallocate psi%GridRep
         IF ( allocated(psi%RvecG) ) THEN
           IF(keep_MPI) CALL dealloc_NParray(psi%RvecG,'psi%RvecG','alloc_psi')
-          IF (debug) write(out_unitp,*) 'dealloc: RvecG'
+          IF (debug) write(out_unit,*) 'dealloc: RvecG'
         END IF
         IF ( allocated(psi%CvecG) ) THEN
           IF(keep_MPI) CALL dealloc_NParray(psi%CvecG,'psi%CvecG','alloc_psi')
-          IF (debug) write(out_unitp,*) 'dealloc: CvecG'
+          IF (debug) write(out_unit,*) 'dealloc: CvecG'
         END IF
       END IF
 
@@ -469,10 +469,10 @@ END SUBROUTINE init_psi_t
         ! consider deallocate RvecB,RvecG ...
       ENDIF
 
-      IF (debug) write(out_unitp,*) ' 2 test_alloc_psi'
+      IF (debug) write(out_unit,*) ' 2 test_alloc_psi'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END alloc_psi'
+        write(out_unit,*) 'END alloc_psi'
       END IF
 !-----------------------------------------------------------
 
@@ -480,7 +480,7 @@ END SUBROUTINE init_psi_t
 !=======================================================================================
 
  FUNCTION print_alloc_psi(psi)
- USE mod_system
+ USE EVR_system_m
  IMPLICIT NONE
 
   character(len=:), allocatable     :: print_alloc_psi
@@ -508,43 +508,43 @@ END SUBROUTINE init_psi_t
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'BasisRep,GridRep',psi%BasisRep,psi%GridRep
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BasisRep,GridRep',psi%BasisRep,psi%GridRep
       END IF
 !-----------------------------------------------------------
 
       IF (psi%BasisRep .AND. psi%nb_tot < 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_tot <1 ',psi%nb_tot
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_tot <1 ',psi%nb_tot
         STOP
       END IF
 
       IF (psi%cplx) THEN
         IF ( .NOT. allocated(psi%CvecB) ) THEN
           CALL alloc_NParray(psi%CvecB,[psi%nb_tot],'psi%CvecB',name_sub)
-          IF (debug) write(out_unitp,*) 'alloc: CvecB'
+          IF (debug) write(out_unit,*) 'alloc: CvecB'
           psi%CvecB(:) = CZERO
         END IF
         IF ( allocated(psi%RvecB) ) THEN
           CALL dealloc_NParray(psi%RvecB,'psi%RvecB','name_sub')
-          IF (debug) write(out_unitp,*) 'dealloc: RvecB'
+          IF (debug) write(out_unit,*) 'dealloc: RvecB'
         END IF
       ELSE
         IF ( .NOT. allocated(psi%RvecB) ) THEN
           CALL alloc_NParray(psi%RvecB,[psi%nb_tot],'psi%RvecB',name_sub)
-          IF (debug) write(out_unitp,*) 'alloc: RvecB'
+          IF (debug) write(out_unit,*) 'alloc: RvecB'
           psi%RvecB(:) = ZERO
         END IF
         IF ( allocated(psi%CvecB) ) THEN
           CALL dealloc_NParray(psi%CvecB,'psi%CvecB','name_sub')
-          IF (debug) write(out_unitp,*) 'dealloc: CvecB'
+          IF (debug) write(out_unit,*) 'dealloc: CvecB'
         END IF
       END IF
 
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -565,8 +565,8 @@ END SUBROUTINE init_psi_t
       !logical, parameter :: debug=.TRUE.
       !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------
 
@@ -579,8 +579,8 @@ END SUBROUTINE init_psi_t
 
       !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------
 
@@ -603,9 +603,9 @@ END SUBROUTINE init_psi_t
 !      logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' 1 test_',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' 1 test_',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -613,39 +613,39 @@ END SUBROUTINE init_psi_t
       IF (present(delete_all)) delete_all_loc = delete_all
       nb = nb+1
       IF (debug) THEN
-        write(out_unitp,*) 'dealloc_psi:',nb
-        flush(out_unitp)
+        write(out_unit,*) 'dealloc_psi:',nb
+        flush(out_unit)
       END IF
 
       IF (allocated(psi%CvecB)) THEN
         CALL dealloc_NParray(psi%CvecB,'psi%CvecB',name_sub)
         IF (debug) THEN
-          write(out_unitp,*) 'dealloc: CvecB'
-          flush(out_unitp)
+          write(out_unit,*) 'dealloc: CvecB'
+          flush(out_unit)
         END IF
       END IF
 
       IF (allocated(psi%RvecB)) THEN
         CALL dealloc_NParray(psi%RvecB,'psi%RvecB',name_sub)
         IF (debug) THEN
-          write(out_unitp,*) 'dealloc: RvecB'
-          flush(out_unitp)
+          write(out_unit,*) 'dealloc: RvecB'
+          flush(out_unit)
         END IF
       END IF
 
       IF (allocated(psi%CvecG)) THEN
         CALL dealloc_NParray(psi%CvecG,'psi%CvecG',name_sub)
         IF (debug) THEN
-          write(out_unitp,*) 'dealloc: CvecG'
-          flush(out_unitp)
+          write(out_unit,*) 'dealloc: CvecG'
+          flush(out_unit)
         END IF
       END IF
 
       IF (allocated(psi%RvecG)) THEN
         CALL dealloc_NParray(psi%RvecG,'psi%RvecG',name_sub)
         IF (debug) THEN
-          write(out_unitp,*) 'dealloc: RvecG'
-          flush(out_unitp)
+          write(out_unit,*) 'dealloc: RvecG'
+          flush(out_unit)
         END IF
       END IF
 
@@ -656,16 +656,16 @@ END SUBROUTINE init_psi_t
       IF(allocated(psi%SR_G)) THEN
         CALL dealloc_NParray(psi%SR_G,'psi%SR_G',name_sub)
         IF (debug) THEN
-          write(out_unitp,*) 'dealloc: SR_G'
-          flush(out_unitp)
+          write(out_unit,*) 'dealloc: SR_G'
+          flush(out_unit)
         END IF
       ENDIF
 
       IF(allocated(psi%SR_B)) THEN
         CALL dealloc_NParray(psi%SR_B,'psi%SR_B',name_sub)
         IF (debug) THEN
-          write(out_unitp,*) 'dealloc: SR_B'
-          flush(out_unitp)
+          write(out_unit,*) 'dealloc: SR_B'
+          flush(out_unit)
         END IF
       ENDIF
 
@@ -673,7 +673,7 @@ END SUBROUTINE init_psi_t
 
 
       IF (delete_all_loc) THEN
-        IF (debug) write(out_unitp,*) 'dealloc: init param'
+        IF (debug) write(out_unit,*) 'dealloc: init param'
 
         nullify(psi%Basis2n)
         nullify(psi%BasisnD)
@@ -710,8 +710,8 @@ END SUBROUTINE init_psi_t
         psi%CAvOp            = (ZERO,ZERO)
         psi%convAvOp         = .FALSE.
 
-        IF (debug) write(out_unitp,*) 'end dealloc: init param'
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'end dealloc: init param'
+        flush(out_unit)
 
 
       END IF
@@ -719,9 +719,9 @@ END SUBROUTINE init_psi_t
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) ' 2 test_',name_sub
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) ' 2 test_',name_sub
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -859,7 +859,7 @@ END SUBROUTINE init_psi_t
       END SUBROUTINE dealloc_NParray_OF_Psidim1
 
       FUNCTION get_nb_be_FROM_psi(psi)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer                      :: get_nb_be_FROM_psi
@@ -872,15 +872,15 @@ END SUBROUTINE init_psi_t
        logical, parameter :: debug = .FALSE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING get_nb_be_FROM_psi'
+        write(out_unit,*) 'BEGINNING get_nb_be_FROM_psi'
       END IF
 
      IF (NewBasisEl) THEN
        nb_be_NewBasisEl = get_nb_be_FROM_basis(psi%BasisnD)
        IF (nb_be_NewBasisEl == -1) THEN
-         write(out_unitp,*) ' ERROR in get_nb_be_FROM_psi'
-         write(out_unitp,*) ' NewBasisEl = t and no El basis set!!'
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in get_nb_be_FROM_psi'
+         write(out_unit,*) ' NewBasisEl = t and no El basis set!!'
+         write(out_unit,*) ' CHECK the source'
          STOP
        END IF
      ELSE
@@ -891,21 +891,21 @@ END SUBROUTINE init_psi_t
 
 
      IF (NewBasisEl .AND. nb_be_psi /= nb_be_NewBasisEl ) THEN
-       write(out_unitp,*) ' ERROR in get_nb_be_FROM_psi'
-       write(out_unitp,*) ' inconsistent value in psi and NewBasisEl'
-       write(out_unitp,*) ' nb_be in psi        ',nb_be_psi
-       write(out_unitp,*) ' nb_be in NewBasisEl ',nb_be_NewBasisEl
-       write(out_unitp,*) ' CHECK the source'
+       write(out_unit,*) ' ERROR in get_nb_be_FROM_psi'
+       write(out_unit,*) ' inconsistent value in psi and NewBasisEl'
+       write(out_unit,*) ' nb_be in psi        ',nb_be_psi
+       write(out_unit,*) ' nb_be in NewBasisEl ',nb_be_NewBasisEl
+       write(out_unit,*) ' CHECK the source'
        STOP
      END IF
      get_nb_be_FROM_psi = nb_be_psi
 
       IF (debug) THEN
-        write(out_unitp,*) 'END get_nb_be_FROM_psi'
+        write(out_unit,*) 'END get_nb_be_FROM_psi'
       END IF
       END FUNCTION get_nb_be_FROM_psi
       FUNCTION get_nb_bi_FROM_psi(psi)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer                      :: get_nb_bi_FROM_psi
@@ -918,7 +918,7 @@ END SUBROUTINE init_psi_t
        logical, parameter :: debug = .FALSE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING get_nb_bi_FROM_psi'
+        write(out_unit,*) 'BEGINNING get_nb_bi_FROM_psi'
       END IF
 
      nb_bi_psi = psi%nb_bi
@@ -926,18 +926,18 @@ END SUBROUTINE init_psi_t
 !     nb_bi_Basis2n = get_nb_FROM_basis(psi%Basis2n)
 
 !     IF (nb_bi_psi /= nb_bi_Basis2n) THEN
-!       write(out_unitp,*) ' ERROR in get_nb_bi_FROM_psi'
-!       write(out_unitp,*) ' inconsistent value in psi and psi%Basis2n'
-!       write(out_unitp,*) ' nb_bi in psi        ',nb_bi_psi
-!       write(out_unitp,*) ' nb_bi in psi%Basis2n',nb_bi_Basis2n
-!       write(out_unitp,*) ' CHECK the source'
+!       write(out_unit,*) ' ERROR in get_nb_bi_FROM_psi'
+!       write(out_unit,*) ' inconsistent value in psi and psi%Basis2n'
+!       write(out_unit,*) ' nb_bi in psi        ',nb_bi_psi
+!       write(out_unit,*) ' nb_bi in psi%Basis2n',nb_bi_Basis2n
+!       write(out_unit,*) ' CHECK the source'
 !       STOP
 !     END IF
 
      get_nb_bi_FROM_psi = nb_bi_psi
 
       IF (debug) THEN
-        write(out_unitp,*) 'END get_nb_bi_FROM_psi'
+        write(out_unit,*) 'END get_nb_bi_FROM_psi'
       END IF
       END FUNCTION get_nb_bi_FROM_psi
 !================================================================
@@ -958,37 +958,37 @@ END SUBROUTINE init_psi_t
 
       integer  :: i,n1
 
-      !write(out_unitp,*) 'BEGINNING psi2TOpsi1'
+      !write(out_unit,*) 'BEGINNING psi2TOpsi1'
 
       CALL dealloc_psi(psi1)
 
       IF (associated(psi2%para_AllBasis)) THEN
          psi1%para_AllBasis => psi2%para_AllBasis
       ELSE
-         write(out_unitp,*) ' ERROR in psi2TOpsi1'
-         write(out_unitp,*) ' para_AllBasis CANNOT be associated'
-         write(out_unitp,*) ' asso psi2%para_AllBasis',associated(psi2%para_AllBasis)
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in psi2TOpsi1'
+         write(out_unit,*) ' para_AllBasis CANNOT be associated'
+         write(out_unit,*) ' asso psi2%para_AllBasis',associated(psi2%para_AllBasis)
+         write(out_unit,*) ' CHECK the source'
          STOP
       END IF
 
       IF (associated(psi1%para_AllBasis%BasisnD)) THEN
          psi1%BasisnD => psi1%para_AllBasis%BasisnD
       ELSE
-         write(out_unitp,*) ' ERROR in psi2TOpsi1'
-         write(out_unitp,*) ' BasisnD CANNOT be associated'
-         write(out_unitp,*) ' asso psi1%para_AllBasis%BasisnD',associated(psi1%para_AllBasis%BasisnD)
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in psi2TOpsi1'
+         write(out_unit,*) ' BasisnD CANNOT be associated'
+         write(out_unit,*) ' asso psi1%para_AllBasis%BasisnD',associated(psi1%para_AllBasis%BasisnD)
+         write(out_unit,*) ' CHECK the source'
          STOP
       END IF
 
       IF (associated(psi1%para_AllBasis%Basis2n)) THEN
          psi1%Basis2n => psi1%para_AllBasis%Basis2n
       ELSE
-         write(out_unitp,*) ' ERROR in psi2TOpsi1'
-         write(out_unitp,*) ' BasisnD CANNOT be associated'
-         write(out_unitp,*) ' asso psi1%para_AllBasis%Basis2n',associated(psi1%para_AllBasis%Basis2n)
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in psi2TOpsi1'
+         write(out_unit,*) ' BasisnD CANNOT be associated'
+         write(out_unit,*) ' asso psi1%para_AllBasis%Basis2n',associated(psi1%para_AllBasis%Basis2n)
+         write(out_unit,*) ' CHECK the source'
          STOP
       END IF
 
@@ -1034,13 +1034,13 @@ END SUBROUTINE init_psi_t
 
 
       IF (psi1%nb_tot <= 0) THEN
-        write(out_unitp,*) ' ERROR in psi2TOpsi1'
-        write(out_unitp,*) 'nb_tot = 0',psi1%nb_tot
+        write(out_unit,*) ' ERROR in psi2TOpsi1'
+        write(out_unit,*) 'nb_tot = 0',psi1%nb_tot
         STOP
       END IF
       IF (psi1%nb_baie <= 0 .OR. psi1%nb_qaie <= 0) THEN
-        write(out_unitp,*) ' ERROR in psi2TOpsi1'
-        write(out_unitp,*) 'nb_baie OR nb_qaie <= 0',psi1%nb_baie,psi1%nb_qaie
+        write(out_unit,*) ' ERROR in psi2TOpsi1'
+        write(out_unit,*) 'nb_baie OR nb_qaie <= 0',psi1%nb_baie,psi1%nb_qaie
         STOP
       END IF
 
@@ -1095,37 +1095,37 @@ END SUBROUTINE init_psi_t
       logical  :: loc_alloc
       integer  :: i,n1
 
-!     write(out_unitp,*) 'BEGINNING copy_psi2TOpsi1'
+!     write(out_unit,*) 'BEGINNING copy_psi2TOpsi1'
 
       CALL dealloc_psi(psi1)
 
       IF (associated(psi2%para_AllBasis)) THEN
          psi1%para_AllBasis => psi2%para_AllBasis
       ELSE
-         write(out_unitp,*) ' ERROR in copy_psi2TOpsi1'
-         write(out_unitp,*) ' para_AllBasis CANNOT be associated'
-         write(out_unitp,*) ' asso psi2%para_AllBasis',associated(psi2%para_AllBasis)
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in copy_psi2TOpsi1'
+         write(out_unit,*) ' para_AllBasis CANNOT be associated'
+         write(out_unit,*) ' asso psi2%para_AllBasis',associated(psi2%para_AllBasis)
+         write(out_unit,*) ' CHECK the source'
          STOP
       END IF
 
       IF (associated(psi1%para_AllBasis%BasisnD)) THEN
          psi1%BasisnD => psi1%para_AllBasis%BasisnD
       ELSE
-         write(out_unitp,*) ' ERROR in copy_psi2TOpsi1'
-         write(out_unitp,*) ' BasisnD CANNOT be associated'
-         write(out_unitp,*) ' asso psi1%para_AllBasis%BasisnD',associated(psi1%para_AllBasis%BasisnD)
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in copy_psi2TOpsi1'
+         write(out_unit,*) ' BasisnD CANNOT be associated'
+         write(out_unit,*) ' asso psi1%para_AllBasis%BasisnD',associated(psi1%para_AllBasis%BasisnD)
+         write(out_unit,*) ' CHECK the source'
          STOP
       END IF
 
       IF (associated(psi1%para_AllBasis%Basis2n)) THEN
          psi1%Basis2n => psi1%para_AllBasis%Basis2n
       ELSE
-         write(out_unitp,*) ' ERROR in copy_psi2TOpsi1'
-         write(out_unitp,*) ' BasisnD CANNOT be associated'
-         write(out_unitp,*) ' asso psi1%para_AllBasis%Basis2n',associated(psi1%para_AllBasis%Basis2n)
-         write(out_unitp,*) ' CHECK the source'
+         write(out_unit,*) ' ERROR in copy_psi2TOpsi1'
+         write(out_unit,*) ' BasisnD CANNOT be associated'
+         write(out_unit,*) ' asso psi1%para_AllBasis%Basis2n',associated(psi1%para_AllBasis%Basis2n)
+         write(out_unit,*) ' CHECK the source'
          STOP
       END IF
 
@@ -1187,13 +1187,13 @@ END SUBROUTINE init_psi_t
 
 
       IF (psi1%nb_tot <= 0) THEN
-        write(out_unitp,*) ' ERROR in copy_psi2TOpsi1'
-        write(out_unitp,*) 'nb_tot = 0',psi1%nb_tot
+        write(out_unit,*) ' ERROR in copy_psi2TOpsi1'
+        write(out_unit,*) 'nb_tot = 0',psi1%nb_tot
         STOP
       END IF
       IF (psi1%nb_baie <= 0 .OR. psi1%nb_qaie <= 0) THEN
-        write(out_unitp,*) ' ERROR in copy_psi2TOpsi1'
-        write(out_unitp,*) 'nb_baie OR nb_qaie = 0',psi1%nb_baie,psi1%nb_qaie
+        write(out_unit,*) ' ERROR in copy_psi2TOpsi1'
+        write(out_unit,*) 'nb_baie OR nb_qaie = 0',psi1%nb_baie,psi1%nb_qaie
         STOP
       END IF
 
@@ -1239,7 +1239,7 @@ END SUBROUTINE init_psi_t
 
       END IF
 
-!     write(out_unitp,*) 'END copy_psi2TOpsi1'
+!     write(out_unit,*) 'END copy_psi2TOpsi1'
 
       END SUBROUTINE copy_psi2TOpsi1
 !=======================================================================================
@@ -1251,7 +1251,7 @@ END SUBROUTINE init_psi_t
       TYPE (param_psi),  intent(inout) :: RCPsi(2)
       CLASS (param_psi), intent(in)    :: psi
 
-!     write(out_unitp,*) 'BEGINNING CplxPsi_TO_RCpsi'
+!     write(out_unit,*) 'BEGINNING CplxPsi_TO_RCpsi'
       IF (.NOT. Psi%cplx) STOP 'ERROR psi MUST be complex'
 
       CALL copy_psi2TOpsi1(RCPsi(1),psi,alloc=.FALSE.)
@@ -1274,7 +1274,7 @@ END SUBROUTINE init_psi_t
 
 
 
-!     write(out_unitp,*) 'END CplxPsi_TO_RCpsi'
+!     write(out_unit,*) 'END CplxPsi_TO_RCpsi'
 
       END SUBROUTINE CplxPsi_TO_RCpsi
       SUBROUTINE RCPsi_TO_CplxPsi(Psi,RCPsi)
@@ -1283,7 +1283,7 @@ END SUBROUTINE init_psi_t
       TYPE (param_psi),  intent(in)    :: RCPsi(2)
       CLASS (param_psi), intent(inout) :: psi
 
-!     write(out_unitp,*) 'BEGINNING RCPsi_TO_CplxPsi'
+!     write(out_unit,*) 'BEGINNING RCPsi_TO_CplxPsi'
 
       CALL copy_psi2TOpsi1(psi,RCPsi(1),alloc=.FALSE.)
       psi%cplx = .TRUE.
@@ -1299,7 +1299,7 @@ END SUBROUTINE init_psi_t
          psi%CvecG(:) = cmplx(RCPsi(1)%RvecG,RCPsi(2)%RvecG,kind=Rkind)
       END IF
 
-!     write(out_unitp,*) 'END RCPsi_TO_CplxPsi'
+!     write(out_unit,*) 'END RCPsi_TO_CplxPsi'
 
       END SUBROUTINE RCPsi_TO_CplxPsi
 
@@ -1318,38 +1318,38 @@ END SUBROUTINE init_psi_t
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
+      IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
 
       IF (      present(iq) .AND.       present(ib) .OR.                       &
           .NOT. present(iq) .AND. .NOT. present(ib))     THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' present(iq),present(ib)',present(iq),present(ib)
-        write(out_unitp,*) ' One and only one ib or iq must be present'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' present(iq),present(ib)',present(iq),present(ib)
+        write(out_unit,*) ' One and only one ib or iq must be present'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(iq) .AND. .NOT. allocated(psi%RvecG)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%RvecG is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%RvecG is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(ib) .AND. .NOT. allocated(psi%RvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%RvecB is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%RvecB is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
 
       IF (any(shape(RVec_AT_iq) /= [psi%nb_bi*psi%nb_be])) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  Inconsitent shape of RVec_AT_iq'
-        write(out_unitp,*) '  shape(RVec_AT_iq) ',shape(RVec_AT_iq)
-        write(out_unitp,*) '  psi%nb_bi*psi%nb_be',psi%nb_bi*psi%nb_be
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  Inconsitent shape of RVec_AT_iq'
+        write(out_unit,*) '  shape(RVec_AT_iq) ',shape(RVec_AT_iq)
+        write(out_unit,*) '  psi%nb_bi*psi%nb_be',psi%nb_bi*psi%nb_be
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -1398,9 +1398,9 @@ END SUBROUTINE init_psi_t
     END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'RVec_AT_iq ',RVec_AT_iq
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'RVec_AT_iq ',RVec_AT_iq
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
   END SUBROUTINE get_RVec_OF_psi_AT_ind_a
@@ -1419,38 +1419,38 @@ END SUBROUTINE init_psi_t
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
+      IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
 
       IF (      present(iq) .AND.       present(ib) .OR.                       &
           .NOT. present(iq) .AND. .NOT. present(ib))     THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' present(iq),present(ib)',present(iq),present(ib)
-        write(out_unitp,*) ' One and only one ib or iq must be present'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' present(iq),present(ib)',present(iq),present(ib)
+        write(out_unit,*) ' One and only one ib or iq must be present'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(iq) .AND. .NOT. allocated(psi%CvecG)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%CvecG is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%CvecG is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(ib) .AND. .NOT. allocated(psi%CvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%CvecB is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%CvecB is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
 
       IF (any(shape(CVec_AT_iq) /= [psi%nb_bi*psi%nb_be])) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  Inconsitent shape of CVec_AT_iq'
-        write(out_unitp,*) '  shape(CVec_AT_iq) ',shape(CVec_AT_iq)
-        write(out_unitp,*) '  psi%nb_bi*psi%nb_be',psi%nb_bi*psi%nb_be
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  Inconsitent shape of CVec_AT_iq'
+        write(out_unit,*) '  shape(CVec_AT_iq) ',shape(CVec_AT_iq)
+        write(out_unit,*) '  psi%nb_bi*psi%nb_be',psi%nb_bi*psi%nb_be
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -1508,9 +1508,9 @@ END SUBROUTINE init_psi_t
     END IF
 
     IF (debug) THEN
-      write(out_unitp,*) 'CVec_AT_iq ',CVec_AT_iq
-      write(out_unitp,*) 'END ',name_sub
-      flush(out_unitp)
+      write(out_unit,*) 'CVec_AT_iq ',CVec_AT_iq
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
     END IF
 
   END SUBROUTINE get_CVec_OF_psi_AT_ind_a
@@ -1530,40 +1530,40 @@ END SUBROUTINE init_psi_t
     logical, parameter :: debug=.FALSE.
     !logical, parameter :: debug=.TRUE.
 !----------------------------------------------------------
-    IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
-    IF (debug) write(out_unitp,*) 'RVec_AT_iq ',RVec_AT_iq
+    IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
+    IF (debug) write(out_unit,*) 'RVec_AT_iq ',RVec_AT_iq
 
 
     IF (      present(iq) .AND.       present(ib) .OR.                       &
         .NOT. present(iq) .AND. .NOT. present(ib))     THEN
-      write(out_unitp,*) ' ERROR ',name_sub
-      write(out_unitp,*) ' present(iq),present(ib)',present(iq),present(ib)
-      write(out_unitp,*) ' One and only one ib or iq must be present'
-      write(out_unitp,*) ' CHECK the fortran !!'
+      write(out_unit,*) ' ERROR ',name_sub
+      write(out_unit,*) ' present(iq),present(ib)',present(iq),present(ib)
+      write(out_unit,*) ' One and only one ib or iq must be present'
+      write(out_unit,*) ' CHECK the fortran !!'
       STOP
     END IF
 
       IF (present(iq) .AND. .NOT. allocated(psi%RvecG)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%RvecG is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%RvecG is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(ib) .AND. .NOT. allocated(psi%RvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%RvecB is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%RvecB is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
 
     IF (any(shape(RVec_AT_iq) /= [psi%nb_bi*psi%nb_be])) THEN
-      write(out_unitp,*) ' ERROR ',name_sub
-      write(out_unitp,*) '  Inconsitent shape of RVec_AT_iq'
-      write(out_unitp,*) '  shape(RVec_AT_iq) ',shape(RVec_AT_iq)
-      write(out_unitp,*) '  psi%nb_bi*psi%nb_be',psi%nb_bi*psi%nb_be
-      write(out_unitp,*) ' CHECK the fortran !!'
+      write(out_unit,*) ' ERROR ',name_sub
+      write(out_unit,*) '  Inconsitent shape of RVec_AT_iq'
+      write(out_unit,*) '  shape(RVec_AT_iq) ',shape(RVec_AT_iq)
+      write(out_unit,*) '  psi%nb_bi*psi%nb_be',psi%nb_bi*psi%nb_be
+      write(out_unit,*) ' CHECK the fortran !!'
       STOP
     END IF
 
@@ -1612,8 +1612,8 @@ END SUBROUTINE init_psi_t
     END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
   END SUBROUTINE set_RVec_OF_psi_AT_ind_a
@@ -1632,39 +1632,39 @@ END SUBROUTINE init_psi_t
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
-      IF (debug) write(out_unitp,*) 'CVec_AT_iq ',CVec_AT_iq
+      IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
+      IF (debug) write(out_unit,*) 'CVec_AT_iq ',CVec_AT_iq
 
       IF (      present(iq) .AND.       present(ib) .OR.                       &
           .NOT. present(iq) .AND. .NOT. present(ib))     THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' present(iq),present(ib)',present(iq),present(ib)
-        write(out_unitp,*) ' One and only one ib or iq must be present'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' present(iq),present(ib)',present(iq),present(ib)
+        write(out_unit,*) ' One and only one ib or iq must be present'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(iq) .AND. .NOT. allocated(psi%CvecG)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%CvecG is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%CvecG is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(ib) .AND. .NOT. allocated(psi%CvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%CvecB is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%CvecB is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
 
       IF (any(shape(CVec_AT_iq) /= [psi%nb_bi*psi%nb_be])) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  Inconsitent shape of CVec_AT_iq'
-        write(out_unitp,*) '  shape(CVec_AT_iq) ',shape(CVec_AT_iq)
-        write(out_unitp,*) '  psi%nb_bi*psi%nb_be',psi%nb_bi*psi%nb_be
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  Inconsitent shape of CVec_AT_iq'
+        write(out_unit,*) '  shape(CVec_AT_iq) ',shape(CVec_AT_iq)
+        write(out_unit,*) '  psi%nb_bi*psi%nb_be',psi%nb_bi*psi%nb_be
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -1714,8 +1714,8 @@ END SUBROUTINE init_psi_t
     END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
     END SUBROUTINE set_CVec_OF_psi_AT_ind_a
@@ -1735,38 +1735,38 @@ END SUBROUTINE init_psi_t
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
+      IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
 
       IF (      present(iq) .AND.       present(ib) .OR.                       &
           .NOT. present(iq) .AND. .NOT. present(ib))     THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' present(iq),present(ib)',present(iq),present(ib)
-        write(out_unitp,*) ' One and only one ib or iq must be present'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' present(iq),present(ib)',present(iq),present(ib)
+        write(out_unit,*) ' One and only one ib or iq must be present'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(iq) .AND. .NOT. allocated(psi%RvecG)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%RvecG is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%RvecG is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(ib) .AND. .NOT. allocated(psi%RvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%RvecB is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%RvecB is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
 
       IF (any(shape(RMat_AT_iq) /= [psi%nb_bi,psi%nb_be])) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  Inconsitent shape of RMat_AT_iq'
-        write(out_unitp,*) '  shape(RMat_AT_iq) ',shape(RMat_AT_iq)
-        write(out_unitp,*) '  psi%nb_bi,psi%nb_be',psi%nb_bi,psi%nb_be
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  Inconsitent shape of RMat_AT_iq'
+        write(out_unit,*) '  shape(RMat_AT_iq) ',shape(RMat_AT_iq)
+        write(out_unit,*) '  psi%nb_bi,psi%nb_be',psi%nb_bi,psi%nb_be
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -1817,9 +1817,9 @@ END SUBROUTINE init_psi_t
     END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'RMat_AT_iq ',RMat_AT_iq
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'RMat_AT_iq ',RMat_AT_iq
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
   END SUBROUTINE get_RMat_OF_psi_AT_ind_a
@@ -1838,38 +1838,38 @@ END SUBROUTINE init_psi_t
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
+      IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
 
       IF (      present(iq) .AND.       present(ib) .OR.                       &
           .NOT. present(iq) .AND. .NOT. present(ib))     THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' present(iq),present(ib)',present(iq),present(ib)
-        write(out_unitp,*) ' One and only one ib or iq must be present'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' present(iq),present(ib)',present(iq),present(ib)
+        write(out_unit,*) ' One and only one ib or iq must be present'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(iq) .AND. .NOT. allocated(psi%CvecG)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%CvecG is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%CvecG is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(ib) .AND. .NOT. allocated(psi%CvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%CvecB is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%CvecB is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
 
       IF (any(shape(CMat_AT_iq) /= [psi%nb_bi,psi%nb_be])) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  Inconsitent shape of CMat_AT_iq'
-        write(out_unitp,*) '  shape(CMat_AT_iq) ',shape(CMat_AT_iq)
-        write(out_unitp,*) '  psi%nb_bi,psi%nb_be',psi%nb_bi,psi%nb_be
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  Inconsitent shape of CMat_AT_iq'
+        write(out_unit,*) '  shape(CMat_AT_iq) ',shape(CMat_AT_iq)
+        write(out_unit,*) '  psi%nb_bi,psi%nb_be',psi%nb_bi,psi%nb_be
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -1928,9 +1928,9 @@ END SUBROUTINE init_psi_t
     END IF
 
     IF (debug) THEN
-      write(out_unitp,*) 'CMat_AT_iq ',CMat_AT_iq
-      write(out_unitp,*) 'END ',name_sub
-      flush(out_unitp)
+      write(out_unit,*) 'CMat_AT_iq ',CMat_AT_iq
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
     END IF
 
   END SUBROUTINE get_CMat_OF_psi_AT_ind_a
@@ -1950,40 +1950,40 @@ END SUBROUTINE init_psi_t
     logical, parameter :: debug=.FALSE.
     !logical, parameter :: debug=.TRUE.
 !----------------------------------------------------------
-    IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
-    IF (debug) write(out_unitp,*) 'RMat_AT_iq ',RMat_AT_iq
+    IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
+    IF (debug) write(out_unit,*) 'RMat_AT_iq ',RMat_AT_iq
 
 
     IF (      present(iq) .AND.       present(ib) .OR.                       &
         .NOT. present(iq) .AND. .NOT. present(ib))     THEN
-      write(out_unitp,*) ' ERROR ',name_sub
-      write(out_unitp,*) ' present(iq),present(ib)',present(iq),present(ib)
-      write(out_unitp,*) ' One and only one ib or iq must be present'
-      write(out_unitp,*) ' CHECK the fortran !!'
+      write(out_unit,*) ' ERROR ',name_sub
+      write(out_unit,*) ' present(iq),present(ib)',present(iq),present(ib)
+      write(out_unit,*) ' One and only one ib or iq must be present'
+      write(out_unit,*) ' CHECK the fortran !!'
       STOP
     END IF
 
       IF (present(iq) .AND. .NOT. allocated(psi%RvecG)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%RvecG is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%RvecG is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(ib) .AND. .NOT. allocated(psi%RvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%RvecB is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%RvecB is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
 
     IF (any(shape(RMat_AT_iq) /= [psi%nb_bi,psi%nb_be])) THEN
-      write(out_unitp,*) ' ERROR ',name_sub
-      write(out_unitp,*) '  Inconsitent shape of RMat_AT_iq'
-      write(out_unitp,*) '  shape(RMat_AT_iq) ',shape(RMat_AT_iq)
-      write(out_unitp,*) '  psi%nb_bi,psi%nb_be',psi%nb_bi,psi%nb_be
-      write(out_unitp,*) ' CHECK the fortran !!'
+      write(out_unit,*) ' ERROR ',name_sub
+      write(out_unit,*) '  Inconsitent shape of RMat_AT_iq'
+      write(out_unit,*) '  shape(RMat_AT_iq) ',shape(RMat_AT_iq)
+      write(out_unit,*) '  psi%nb_bi,psi%nb_be',psi%nb_bi,psi%nb_be
+      write(out_unit,*) ' CHECK the fortran !!'
       STOP
     END IF
 
@@ -2032,8 +2032,8 @@ END SUBROUTINE init_psi_t
     END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
   END SUBROUTINE set_RMat_OF_psi_AT_ind_a
@@ -2052,39 +2052,39 @@ END SUBROUTINE init_psi_t
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
-      IF (debug) write(out_unitp,*) 'CMat_AT_iq ',CMat_AT_iq
+      IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
+      IF (debug) write(out_unit,*) 'CMat_AT_iq ',CMat_AT_iq
 
       IF (      present(iq) .AND.       present(ib) .OR.                       &
           .NOT. present(iq) .AND. .NOT. present(ib))     THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' present(iq),present(ib)',present(iq),present(ib)
-        write(out_unitp,*) ' One and only one ib or iq must be present'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' present(iq),present(ib)',present(iq),present(ib)
+        write(out_unit,*) ' One and only one ib or iq must be present'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(iq) .AND. .NOT. allocated(psi%CvecG)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%CvecG is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%CvecG is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (present(ib) .AND. .NOT. allocated(psi%CvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  psi%CvecB is not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  psi%CvecB is not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
 
       IF (any(shape(CMat_AT_iq) /= [psi%nb_bi,psi%nb_be])) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) '  Inconsitent shape of CMat_AT_iq'
-        write(out_unitp,*) '  shape(CMat_AT_iq) ',shape(CMat_AT_iq)
-        write(out_unitp,*) '  psi%nb_bi,psi%nb_be',psi%nb_bi,psi%nb_be
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) '  Inconsitent shape of CMat_AT_iq'
+        write(out_unit,*) '  shape(CMat_AT_iq) ',shape(CMat_AT_iq)
+        write(out_unit,*) '  psi%nb_bi,psi%nb_be',psi%nb_bi,psi%nb_be
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -2133,8 +2133,8 @@ END SUBROUTINE init_psi_t
     END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
     END SUBROUTINE set_CMat_OF_psi_AT_ind_a
@@ -2154,7 +2154,7 @@ END SUBROUTINE init_psi_t
 
       integer :: i
 
-!     write(out_unitp,*) 'BEGINNING R_TOpsi'
+!     write(out_unit,*) 'BEGINNING R_TOpsi'
 
        CALL alloc_psi(psi)
 
@@ -2198,7 +2198,7 @@ END SUBROUTINE init_psi_t
         psi%symab = -1
       END IF
 
-!     write(out_unitp,*) 'END R_TOpsi'
+!     write(out_unit,*) 'END R_TOpsi'
 
       END SUBROUTINE R_TOpsi
 
@@ -2214,7 +2214,7 @@ END SUBROUTINE init_psi_t
 
       integer :: i
 
-!     write(out_unitp,*) 'BEGINNING C_TOpsi'
+!     write(out_unit,*) 'BEGINNING C_TOpsi'
 
        CALL alloc_psi(psi)
 
@@ -2259,7 +2259,7 @@ END SUBROUTINE init_psi_t
         psi%symab = -1
       END IF
 
-!     write(out_unitp,*) 'END C_TOpsi'
+!     write(out_unit,*) 'END C_TOpsi'
 
       END SUBROUTINE C_TOpsi
 
@@ -2273,7 +2273,7 @@ END SUBROUTINE init_psi_t
       real(kind=Rkind) :: a,b
 
 
-!     write(out_unitp,*) 'BEGINNING Set_Random_psi'
+!     write(out_unit,*) 'BEGINNING Set_Random_psi'
 
        CALL alloc_psi(psi)
 
@@ -2306,7 +2306,7 @@ END SUBROUTINE init_psi_t
       psi%norm2 = ZERO
       psi%symab = -1
 
-!     write(out_unitp,*) 'END Set_Random_psi'
+!     write(out_unit,*) 'END Set_Random_psi'
 
       END SUBROUTINE Set_Random_psi
 
@@ -2324,25 +2324,25 @@ END SUBROUTINE init_psi_t
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
+      IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
 
       IF (present(ind_aie) .AND. present(ind_a)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' Both ind_aie and ind_a are present !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' Both ind_aie and ind_a are present !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
       IF (.NOT. present(ind_aie) .AND. .NOT. present(ind_a)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' Both ind_aie and ind_a are absent !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' Both ind_aie and ind_a are absent !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (.NOT. allocated(psi%RvecB) .AND. .NOT. allocated(psi%CvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' Both psi%RvecB and psi%CvecB are not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' Both psi%RvecB and psi%CvecB are not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -2368,11 +2368,11 @@ END SUBROUTINE init_psi_t
       END IF
 
       IF (ind_aie_loc < 1 .OR. ind_aie_loc > psi%nb_tot) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' ind_aie_loc is out of range. ind_aie_loc:',ind_aie_loc
-        write(out_unitp,*) '    ind_aie_loc:',ind_aie_loc
-        write(out_unitp,*) '    range: [1   ...',psi%nb_tot,']'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' ind_aie_loc is out of range. ind_aie_loc:',ind_aie_loc
+        write(out_unit,*) '    ind_aie_loc:',ind_aie_loc
+        write(out_unit,*) '    range: [1   ...',psi%nb_tot,']'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -2385,9 +2385,9 @@ END SUBROUTINE init_psi_t
       psi%symab = -1
 
       IF (debug) THEN
-        write(out_unitp,*) 'ind_aie_loc ',ind_aie_loc
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'ind_aie_loc ',ind_aie_loc
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
       END SUBROUTINE Set_psi_With_index_R
@@ -2406,25 +2406,25 @@ END SUBROUTINE init_psi_t
       logical, parameter :: debug=.FALSE.
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'BEGINNING ',name_sub
+      IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
 
       IF (present(ind_aie) .AND. present(ind_a)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' Both ind_aie and ind_a are present !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' Both ind_aie and ind_a are present !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
       IF (.NOT. present(ind_aie) .AND. .NOT. present(ind_a)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' Both ind_aie and ind_a are absent !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' Both ind_aie and ind_a are absent !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
       IF (.NOT. allocated(psi%RvecB) .AND. .NOT. allocated(psi%CvecB)) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' Both psi%RvecB and psi%CvecB are not allocated !!'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' Both psi%RvecB and psi%CvecB are not allocated !!'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -2451,11 +2451,11 @@ END SUBROUTINE init_psi_t
 
 
       IF (ind_aie_loc < 1 .OR. ind_aie_loc > psi%nb_tot) THEN
-        write(out_unitp,*) ' ERROR ',name_sub
-        write(out_unitp,*) ' ind_aie_loc is out of range. ind_aie_loc:',ind_aie_loc
-        write(out_unitp,*) '    ind_aie_loc:',ind_aie_loc
-        write(out_unitp,*) '    range: [1   ...',psi%nb_tot,']'
-        write(out_unitp,*) ' CHECK the fortran !!'
+        write(out_unit,*) ' ERROR ',name_sub
+        write(out_unit,*) ' ind_aie_loc is out of range. ind_aie_loc:',ind_aie_loc
+        write(out_unit,*) '    ind_aie_loc:',ind_aie_loc
+        write(out_unit,*) '    range: [1   ...',psi%nb_tot,']'
+        write(out_unit,*) ' CHECK the fortran !!'
         STOP
       END IF
 
@@ -2467,7 +2467,7 @@ END SUBROUTINE init_psi_t
       psi%norm2 = ZERO
       psi%symab = -1
 
-      IF (debug) write(out_unitp,*) 'END ',name_sub
+      IF (debug) write(out_unit,*) 'END ',name_sub
 
       END SUBROUTINE Set_psi_With_index_C
 !================================================================
@@ -2485,15 +2485,15 @@ END SUBROUTINE init_psi_t
 
             integer           :: err,i
 
-            !write(out_unitp,*) 'BEGINNING psi1_plus_psi2'
+            !write(out_unit,*) 'BEGINNING psi1_plus_psi2'
 
 
             !- define and allocate psi1_plus_psi2 ----
             IF (.NOT. psi1_plus_psi2%init) THEN
-              !write(out_unitp,*) 'psi1_plus_psi2 is not initialized yet'
+              !write(out_unit,*) 'psi1_plus_psi2 is not initialized yet'
               CALL copy_psi2TOpsi1(psi1_plus_psi2,psi1)
             ELSE
-              !write(out_unitp,*) 'psi1_plus_psi2 is initialized already'
+              !write(out_unit,*) 'psi1_plus_psi2 is initialized already'
             END IF
 
 
@@ -2503,8 +2503,8 @@ END SUBROUTINE init_psi_t
               ELSE IF (.NOT. psi1%cplx .AND. .NOT. psi2%cplx) THEN
                 psi1_plus_psi2%RvecG = psi1%RvecG + psi2%RvecG
               ELSE
-                write(out_unitp,*) ' ERROR : I CANNOT mix real and complex psi !!'
-                write(out_unitp,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
+                write(out_unit,*) ' ERROR : I CANNOT mix real and complex psi !!'
+                write(out_unit,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
                 STOP
               END IF
             END IF
@@ -2515,8 +2515,8 @@ END SUBROUTINE init_psi_t
               ELSE IF (.NOT. psi1%cplx .AND. .NOT. psi2%cplx) THEN
                 psi1_plus_psi2%RvecB = psi1%RvecB + psi2%RvecB
               ELSE
-                write(out_unitp,*) ' ERROR : I CANNOT mix real and complex psi !!'
-                write(out_unitp,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
+                write(out_unit,*) ' ERROR : I CANNOT mix real and complex psi !!'
+                write(out_unit,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
                 STOP
               END IF
             END IF
@@ -2531,7 +2531,7 @@ END SUBROUTINE init_psi_t
               psi1_plus_psi2%symab = -1
             END IF
 
-            !write(out_unitp,*) 'END psi1_plus_psi2'
+            !write(out_unit,*) 'END psi1_plus_psi2'
 
           END FUNCTION psi1_plus_psi2
           SUBROUTINE psi1_pluseq_psi2(psi1,psi2)
@@ -2540,15 +2540,15 @@ END SUBROUTINE init_psi_t
 
             integer           :: err,i
 
-            !write(out_unitp,*) 'BEGINNING psi1_pluseq_psi2'
+            !write(out_unit,*) 'BEGINNING psi1_pluseq_psi2'
 
 
             !- define and allocate psi1_plus_psi2 ----
             IF (.NOT. psi1%init) THEN
-              write(out_unitp,*) 'psi1 is not initialized'
+              write(out_unit,*) 'psi1 is not initialized'
               STOP 'ERROR in psi1_pluseq_psi2, psi1 is not initalized'
             ELSE
-              write(out_unitp,*) 'psi1 is initialized'
+              write(out_unit,*) 'psi1 is initialized'
             END IF
 
 
@@ -2558,8 +2558,8 @@ END SUBROUTINE init_psi_t
               ELSE IF (.NOT. psi1%cplx .AND. .NOT. psi2%cplx) THEN
                 psi1%RvecG = psi1%RvecG + psi2%RvecG
               ELSE
-                write(out_unitp,*) ' ERROR : I CANNOT mix real and complex psi !!'
-                write(out_unitp,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
+                write(out_unit,*) ' ERROR : I CANNOT mix real and complex psi !!'
+                write(out_unit,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
                 STOP
               END IF
             END IF
@@ -2570,8 +2570,8 @@ END SUBROUTINE init_psi_t
               ELSE IF (.NOT. psi1%cplx .AND. .NOT. psi2%cplx) THEN
                 psi1%RvecB = psi1%RvecB + psi2%RvecB
               ELSE
-                write(out_unitp,*) ' ERROR : I CANNOT mix real and complex psi !!'
-                write(out_unitp,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
+                write(out_unit,*) ' ERROR : I CANNOT mix real and complex psi !!'
+                write(out_unit,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
                 STOP
               END IF
             END IF
@@ -2586,7 +2586,7 @@ END SUBROUTINE init_psi_t
               psi1%symab = -1
             END IF
 
-            !write(out_unitp,*) 'END psi1_pluseq_psi2'
+            !write(out_unit,*) 'END psi1_pluseq_psi2'
 
           END SUBROUTINE psi1_pluseq_psi2
 
@@ -2601,7 +2601,7 @@ END SUBROUTINE init_psi_t
             integer           :: err,i
 
 
-!           write(out_unitp,*) 'BEGINNING R_plus_psi'
+!           write(out_unit,*) 'BEGINNING R_plus_psi'
 
 !           - define and allocate R_plus_psi ----
             CALL copy_psi2TOpsi1(R_plus_psi,psi)
@@ -2609,8 +2609,8 @@ END SUBROUTINE init_psi_t
 
 
             IF (.NOT. psi%BasisRep) THEN
-              write(out_unitp,*) ' ERROR in R_plus_psi: I CANNOT use psi in GridRep !!'
-              write(out_unitp,*) ' psi%BasisRep',psi%BasisRep
+              write(out_unit,*) ' ERROR in R_plus_psi: I CANNOT use psi in GridRep !!'
+              write(out_unit,*) ' psi%BasisRep',psi%BasisRep
               STOP
             END IF
 
@@ -2627,7 +2627,7 @@ END SUBROUTINE init_psi_t
               R_plus_psi%symab = -1
             END IF
 
-!           write(out_unitp,*) 'END R_plus_psi'
+!           write(out_unit,*) 'END R_plus_psi'
 
           END FUNCTION R_plus_psi
       !!@description: TODO
@@ -2640,7 +2640,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi)  :: psi_plus_R
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING psi_plus_R'
+!           write(out_unit,*) 'BEGINNING psi_plus_R'
 
 !           - define and allocate psi_plus_R ----
             CALL copy_psi2TOpsi1(psi_plus_R,psi)
@@ -2648,8 +2648,8 @@ END SUBROUTINE init_psi_t
 
 
             IF (.NOT. psi%BasisRep) THEN
-              write(out_unitp,*) ' ERROR in psi_plus_R: I CANNOT use psi in GridRep !!'
-              write(out_unitp,*) ' psi%BasisRep',psi%BasisRep
+              write(out_unit,*) ' ERROR in psi_plus_R: I CANNOT use psi in GridRep !!'
+              write(out_unit,*) ' psi%BasisRep',psi%BasisRep
               STOP
             END IF
 
@@ -2666,7 +2666,7 @@ END SUBROUTINE init_psi_t
               psi_plus_R%symab = -1
             END IF
 
-!           write(out_unitp,*) 'END psi_plus_R'
+!           write(out_unit,*) 'END psi_plus_R'
 
           END FUNCTION psi_plus_R
 
@@ -2680,7 +2680,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi)  :: C_plus_psi
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING C_plus_psi'
+!           write(out_unit,*) 'BEGINNING C_plus_psi'
 
 !           - define and allocate C_plus_psi ----
             CALL copy_psi2TOpsi1(C_plus_psi,psi)
@@ -2688,8 +2688,8 @@ END SUBROUTINE init_psi_t
 
 
             IF (.NOT. psi%BasisRep) THEN
-              write(out_unitp,*) ' ERROR C_plus_psi: I CANNOT use psi in GridRep !!'
-              write(out_unitp,*) ' psi%BasisRep',psi%BasisRep
+              write(out_unit,*) ' ERROR C_plus_psi: I CANNOT use psi in GridRep !!'
+              write(out_unit,*) ' psi%BasisRep',psi%BasisRep
               STOP
             END IF
 
@@ -2697,9 +2697,9 @@ END SUBROUTINE init_psi_t
             IF (psi%cplx) THEN
               C_plus_psi%CvecB = psi%CvecB + C
             ELSE
-              write(out_unitp,*) ' ERROR : in C_plus_psi'
-              write(out_unitp,*) ' I cannot sum a real psi and a complex'
-              write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+              write(out_unit,*) ' ERROR : in C_plus_psi'
+              write(out_unit,*) ' I cannot sum a real psi and a complex'
+              write(out_unit,*) 'psi%cplx,C',psi%cplx,C
               STOP
             END IF
 
@@ -2709,7 +2709,7 @@ END SUBROUTINE init_psi_t
               C_plus_psi%symab = -1
             END IF
 
-!           write(out_unitp,*) 'END C_plus_psi'
+!           write(out_unit,*) 'END C_plus_psi'
 
           END FUNCTION C_plus_psi
 
@@ -2723,7 +2723,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi)  :: psi_plus_C
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING psi_plus_C'
+!           write(out_unit,*) 'BEGINNING psi_plus_C'
 
 !           - define and allocate psi_plus_C ----
             CALL copy_psi2TOpsi1(psi_plus_C,psi)
@@ -2731,8 +2731,8 @@ END SUBROUTINE init_psi_t
 
 
             IF (.NOT. psi%BasisRep) THEN
-              write(out_unitp,*) ' ERROR psi_plus_C: I CANNOT use psi in GridRep !!'
-              write(out_unitp,*) ' psi%BasisRep',psi%BasisRep
+              write(out_unit,*) ' ERROR psi_plus_C: I CANNOT use psi in GridRep !!'
+              write(out_unit,*) ' psi%BasisRep',psi%BasisRep
               STOP
             END IF
 
@@ -2740,9 +2740,9 @@ END SUBROUTINE init_psi_t
             IF (psi%cplx) THEN
               psi_plus_C%CvecB = psi%CvecB + C
             ELSE
-              write(out_unitp,*) ' ERROR : in psi_plus_C'
-              write(out_unitp,*) ' I cannot sum a real psi and a complex'
-              write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+              write(out_unit,*) ' ERROR : in psi_plus_C'
+              write(out_unit,*) ' I cannot sum a real psi and a complex'
+              write(out_unit,*) 'psi%cplx,C',psi%cplx,C
               STOP
             END IF
 
@@ -2752,7 +2752,7 @@ END SUBROUTINE init_psi_t
               psi_plus_C%symab = -1
             END IF
 
-!           write(out_unitp,*) 'END psi_plus_C'
+!           write(out_unit,*) 'END psi_plus_C'
 
           END FUNCTION psi_plus_C
           FUNCTION plus_psi(psi)
@@ -2760,11 +2760,11 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi) :: plus_psi
 
 
-!           write(out_unitp,*) 'BEGINNING plus_psi'
+!           write(out_unit,*) 'BEGINNING plus_psi'
 
             CALL copy_psi2TOpsi1(plus_psi,psi)
 
-!           write(out_unitp,*) 'END plus_psi'
+!           write(out_unit,*) 'END plus_psi'
 
           END FUNCTION plus_psi
 !================================================================
@@ -2782,7 +2782,7 @@ END SUBROUTINE init_psi_t
             integer          :: err,i
 
 
-!           write(out_unitp,*) 'BEGINNING psi1_minus_psi2'
+!           write(out_unit,*) 'BEGINNING psi1_minus_psi2'
 
 !           - define and allocate psi1_minus_psi2 ----
             CALL copy_psi2TOpsi1(psi1_minus_psi2,psi1)
@@ -2794,8 +2794,8 @@ END SUBROUTINE init_psi_t
               ELSE IF (.NOT. psi1%cplx .AND. .NOT. psi2%cplx) THEN
                 psi1_minus_psi2%RvecG = psi1%RvecG - psi2%RvecG
               ELSE
-                write(out_unitp,*) ' ERROR : I CANNOT mix real and complex psi !!'
-                write(out_unitp,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
+                write(out_unit,*) ' ERROR : I CANNOT mix real and complex psi !!'
+                write(out_unit,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
                 STOP
               END IF
             END IF
@@ -2806,8 +2806,8 @@ END SUBROUTINE init_psi_t
               ELSE IF (.NOT. psi1%cplx .AND. .NOT. psi2%cplx) THEN
                 psi1_minus_psi2%RvecB = psi1%RvecB - psi2%RvecB
               ELSE
-                write(out_unitp,*) ' ERROR : I CANNOT mix real and complex psi !!'
-                write(out_unitp,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
+                write(out_unit,*) ' ERROR : I CANNOT mix real and complex psi !!'
+                write(out_unit,*) ' psi1%cplx,psi2%cplx',psi1%cplx,psi2%cplx
                 STOP
               END IF
             END IF
@@ -2822,7 +2822,7 @@ END SUBROUTINE init_psi_t
               psi1_minus_psi2%symab = -1
             END IF
 
-!           write(out_unitp,*) 'END psi1_minus_psi2'
+!           write(out_unit,*) 'END psi1_minus_psi2'
 
           END FUNCTION psi1_minus_psi2
 
@@ -2836,7 +2836,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi) :: R_minus_psi
 
 
-!           write(out_unitp,*) 'BEGINNING R_minus_psi'
+!           write(out_unit,*) 'BEGINNING R_minus_psi'
 
 !           - define and allocate R_minus_psi ----
             CALL copy_psi2TOpsi1(R_minus_psi,psi)
@@ -2844,8 +2844,8 @@ END SUBROUTINE init_psi_t
 
 
             IF (.NOT. psi%BasisRep) THEN
-              write(out_unitp,*) ' ERROR R_minus_psi: I CANNOT use psi in GridRep !!'
-              write(out_unitp,*) ' psi%BasisRep',psi%BasisRep
+              write(out_unit,*) ' ERROR R_minus_psi: I CANNOT use psi in GridRep !!'
+              write(out_unit,*) ' psi%BasisRep',psi%BasisRep
               STOP
             END IF
 
@@ -2863,7 +2863,7 @@ END SUBROUTINE init_psi_t
             END IF
 
 
-!           write(out_unitp,*) 'END R_minus_psi'
+!           write(out_unit,*) 'END R_minus_psi'
 
           END FUNCTION R_minus_psi
 
@@ -2877,7 +2877,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi)  :: psi_minus_R
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING psi_minus_R'
+!           write(out_unit,*) 'BEGINNING psi_minus_R'
 
 !           - define and allocate psi_minus_R ----
             CALL copy_psi2TOpsi1(psi_minus_R,psi)
@@ -2885,8 +2885,8 @@ END SUBROUTINE init_psi_t
 
 
             IF (.NOT. psi%BasisRep) THEN
-              write(out_unitp,*) ' ERROR psi_minus_R: I CANNOT use psi in GridRep !!'
-              write(out_unitp,*) ' psi%BasisRep',psi%BasisRep
+              write(out_unit,*) ' ERROR psi_minus_R: I CANNOT use psi in GridRep !!'
+              write(out_unit,*) ' psi%BasisRep',psi%BasisRep
               STOP
             END IF
 
@@ -2903,7 +2903,7 @@ END SUBROUTINE init_psi_t
               psi_minus_R%symab = -1
             END IF
 
-!           write(out_unitp,*) 'END psi_minus_R'
+!           write(out_unit,*) 'END psi_minus_R'
 
           END FUNCTION psi_minus_R
 
@@ -2917,7 +2917,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi)  :: C_minus_psi
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING C_minus_psi'
+!           write(out_unit,*) 'BEGINNING C_minus_psi'
 
 !           - define and allocate C_minus_psi ----
             CALL copy_psi2TOpsi1(C_minus_psi,psi)
@@ -2925,8 +2925,8 @@ END SUBROUTINE init_psi_t
 
 
             IF (.NOT. psi%BasisRep) THEN
-              write(out_unitp,*) ' ERROR C_minus_psi: I CANNOT use psi in GridRep !!'
-              write(out_unitp,*) ' psi%BasisRep',psi%BasisRep
+              write(out_unit,*) ' ERROR C_minus_psi: I CANNOT use psi in GridRep !!'
+              write(out_unit,*) ' psi%BasisRep',psi%BasisRep
               STOP
             END IF
 
@@ -2934,9 +2934,9 @@ END SUBROUTINE init_psi_t
             IF (psi%cplx) THEN
               C_minus_psi%CvecB = C - psi%CvecB
             ELSE
-              write(out_unitp,*) ' ERROR : in C_minus_psi'
-              write(out_unitp,*) ' I cannot sum a real psi and a complex'
-              write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+              write(out_unit,*) ' ERROR : in C_minus_psi'
+              write(out_unit,*) ' I cannot sum a real psi and a complex'
+              write(out_unit,*) 'psi%cplx,C',psi%cplx,C
               STOP
             END IF
 
@@ -2946,7 +2946,7 @@ END SUBROUTINE init_psi_t
               C_minus_psi%symab = -1
             END IF
 
-!           write(out_unitp,*) 'END C_minus_psi'
+!           write(out_unit,*) 'END C_minus_psi'
 
           END FUNCTION C_minus_psi
 
@@ -2957,7 +2957,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi)  :: psi_minus_C
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING psi_minus_C'
+!           write(out_unit,*) 'BEGINNING psi_minus_C'
 
 !           - define and allocate psi_minus_C ----
             CALL copy_psi2TOpsi1(psi_minus_C,psi)
@@ -2965,8 +2965,8 @@ END SUBROUTINE init_psi_t
 
 
             IF (.NOT. psi%BasisRep) THEN
-              write(out_unitp,*) ' ERROR psi_minus_C: I CANNOT use psi in GridRep !!'
-              write(out_unitp,*) ' psi%BasisRep',psi%BasisRep
+              write(out_unit,*) ' ERROR psi_minus_C: I CANNOT use psi in GridRep !!'
+              write(out_unit,*) ' psi%BasisRep',psi%BasisRep
               STOP
             END IF
 
@@ -2974,9 +2974,9 @@ END SUBROUTINE init_psi_t
             IF (psi%cplx) THEN
               psi_minus_C%CvecB = psi%CvecB - C
             ELSE
-              write(out_unitp,*) ' ERROR : in psi_minus_C'
-              write(out_unitp,*) ' I cannot sum a real psi and a complex'
-              write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+              write(out_unit,*) ' ERROR : in psi_minus_C'
+              write(out_unit,*) ' I cannot sum a real psi and a complex'
+              write(out_unit,*) 'psi%cplx,C',psi%cplx,C
               STOP
             END IF
 
@@ -2986,7 +2986,7 @@ END SUBROUTINE init_psi_t
               psi_minus_C%symab = -1
             END IF
 
-!           write(out_unitp,*) 'END psi_minus_C'
+!           write(out_unit,*) 'END psi_minus_C'
 
           END FUNCTION psi_minus_C
 
@@ -2995,7 +2995,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi) :: minus_psi
 
 
-!           write(out_unitp,*) 'BEGINNING minus_psi'
+!           write(out_unit,*) 'BEGINNING minus_psi'
 
 !           - define and allocate minus_psi ----
             CALL copy_psi2TOpsi1(minus_psi,psi)
@@ -3017,7 +3017,7 @@ END SUBROUTINE init_psi_t
             END IF
           END IF
 
-!           write(out_unitp,*) 'END minus_psi'
+!           write(out_unit,*) 'END minus_psi'
 
           END FUNCTION minus_psi
 !================================================================
@@ -3032,7 +3032,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi) :: R_time_psi
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING R_time_psi'
+!           write(out_unit,*) 'BEGINNING R_time_psi'
 
 !           - define and allocate R_time_psi ----
             CALL copy_psi2TOpsi1(R_time_psi,psi)
@@ -3067,7 +3067,7 @@ END SUBROUTINE init_psi_t
 
             R_time_psi%symab = psi%symab
 
-!           write(out_unitp,*) 'END R_time_psi'
+!           write(out_unit,*) 'END R_time_psi'
 
           END FUNCTION R_time_psi
 
@@ -3079,7 +3079,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi)  :: psi_time_R
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING psi_time_R'
+!           write(out_unit,*) 'BEGINNING psi_time_R'
 
 !           - define and allocate psi_time_R ----
             CALL copy_psi2TOpsi1(psi_time_R,psi)
@@ -3114,7 +3114,7 @@ END SUBROUTINE init_psi_t
 
             psi_time_R%symab = psi%symab
 
-!           write(out_unitp,*) 'END psi_time_R'
+!           write(out_unit,*) 'END psi_time_R'
 
           END FUNCTION psi_time_R
 
@@ -3125,7 +3125,7 @@ END SUBROUTINE init_psi_t
             TYPE (param_psi)  :: C_time_psi
             integer           :: err,i
 
-!           write(out_unitp,*) 'BEGINNING C_time_psi'
+!           write(out_unit,*) 'BEGINNING C_time_psi'
 
 !           - define and allocate C_time_psi ----
             CALL copy_psi2TOpsi1(C_time_psi,psi)
@@ -3136,9 +3136,9 @@ END SUBROUTINE init_psi_t
               IF (psi%cplx) THEN
                 C_time_psi%CvecB = psi%CvecB * C
               ELSE
-                write(out_unitp,*) ' ERROR : in C_time_psi'
-                write(out_unitp,*) ' I cannot multiply a real psi and a complex'
-                write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+                write(out_unit,*) ' ERROR : in C_time_psi'
+                write(out_unit,*) ' I cannot multiply a real psi and a complex'
+                write(out_unit,*) 'psi%cplx,C',psi%cplx,C
                 STOP
               END IF
             END IF
@@ -3147,16 +3147,16 @@ END SUBROUTINE init_psi_t
               IF (psi%cplx) THEN
                 C_time_psi%CvecG = psi%CvecG * C
               ELSE
-                write(out_unitp,*) ' ERROR : in C_time_psi'
-                write(out_unitp,*) ' I cannot multiply a real psi and a complex'
-                write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+                write(out_unit,*) ' ERROR : in C_time_psi'
+                write(out_unit,*) ' I cannot multiply a real psi and a complex'
+                write(out_unit,*) 'psi%cplx,C',psi%cplx,C
                 STOP
               END IF
             END IF
 
             C_time_psi%symab = psi%symab
 
-!           write(out_unitp,*) 'END C_time_psi'
+!           write(out_unit,*) 'END C_time_psi'
 
           END FUNCTION C_time_psi
 
@@ -3170,10 +3170,10 @@ END SUBROUTINE init_psi_t
 
             integer           :: err,i
 
-            !write(out_unitp,*) 'BEGINNING psi_time_C'
-            !write(out_unitp,*) 'psi%CvecB',psi%CvecB
-            !write(out_unitp,*) 'C',C
-            !flush(out_unitp)
+            !write(out_unit,*) 'BEGINNING psi_time_C'
+            !write(out_unit,*) 'psi%CvecB',psi%CvecB
+            !write(out_unit,*) 'C',C
+            !flush(out_unit)
 
 !           - define and allocate psi_time_C ----
             CALL copy_psi2TOpsi1(psi_time_C,psi)
@@ -3183,9 +3183,9 @@ END SUBROUTINE init_psi_t
               IF (psi%cplx) THEN
                 IF(keep_MPI) psi_time_C%CvecB(:) = psi%CvecB * C
               ELSE
-                write(out_unitp,*) ' ERROR : in psi_time_C'
-                write(out_unitp,*) ' I cannot multiply a real psi and a complex'
-                write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+                write(out_unit,*) ' ERROR : in psi_time_C'
+                write(out_unit,*) ' I cannot multiply a real psi and a complex'
+                write(out_unit,*) 'psi%cplx,C',psi%cplx,C
                 STOP
               END IF
             END IF
@@ -3194,17 +3194,17 @@ END SUBROUTINE init_psi_t
               IF (psi%cplx) THEN
                 IF(keep_MPI) psi_time_C%CvecG(:) = psi%CvecG * C
               ELSE
-                write(out_unitp,*) ' ERROR : in psi_time_C'
-                write(out_unitp,*) ' I cannot multiply a real psi and a complex'
-                write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+                write(out_unit,*) ' ERROR : in psi_time_C'
+                write(out_unit,*) ' I cannot multiply a real psi and a complex'
+                write(out_unit,*) 'psi%cplx,C',psi%cplx,C
                 STOP
               END IF
             END IF
 
             psi_time_C%symab = psi%symab
 
-            !write(out_unitp,*) 'END psi_time_C'
-            !flush(out_unitp)
+            !write(out_unit,*) 'END psi_time_C'
+            !flush(out_unit)
 
           END FUNCTION psi_time_C
 
@@ -3216,7 +3216,7 @@ END SUBROUTINE init_psi_t
             real (kind=Rkind),    intent (in) :: R
             TYPE (param_psi)  :: psi_over_R
 
-!           write(out_unitp,*) 'BEGINNING psi_over_R'
+!           write(out_unit,*) 'BEGINNING psi_over_R'
 
 !           - define and allocate psi_over_R ----
             CALL copy_psi2TOpsi1(psi_over_R,psi)
@@ -3241,7 +3241,7 @@ END SUBROUTINE init_psi_t
 
             psi_over_R%symab = psi%symab
 
-!           write(out_unitp,*) 'END psi_over_R'
+!           write(out_unit,*) 'END psi_over_R'
 
           END FUNCTION psi_over_R
           FUNCTION psi_over_C(psi,C)
@@ -3250,10 +3250,10 @@ END SUBROUTINE init_psi_t
             CLASS (param_psi),     intent (in) :: psi
             complex (kind=Rkind),  intent (in) :: C
 
-            !write(out_unitp,*) 'BEGINNING psi_over_C'
-            !write(out_unitp,*) 'psi%CvecB',psi%CvecB
-            !write(out_unitp,*) 'C',C
-            !flush(out_unitp)
+            !write(out_unit,*) 'BEGINNING psi_over_C'
+            !write(out_unit,*) 'psi%CvecB',psi%CvecB
+            !write(out_unit,*) 'C',C
+            !flush(out_unit)
 
 !           - define and allocate psi_over_C ----
             CALL copy_psi2TOpsi1(psi_over_C,psi)
@@ -3263,9 +3263,9 @@ END SUBROUTINE init_psi_t
               IF (psi%cplx) THEN
                 IF(keep_MPI) psi_over_C%CvecB(:) = psi%CvecB / C
               ELSE
-                write(out_unitp,*) ' ERROR : in psi_over_C'
-                write(out_unitp,*) ' I cannot divide a real psi by a complex'
-                write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+                write(out_unit,*) ' ERROR : in psi_over_C'
+                write(out_unit,*) ' I cannot divide a real psi by a complex'
+                write(out_unit,*) 'psi%cplx,C',psi%cplx,C
                 STOP
               END IF
             END IF
@@ -3274,17 +3274,17 @@ END SUBROUTINE init_psi_t
               IF (psi%cplx) THEN
                 IF(keep_MPI) psi_over_C%CvecG(:) = psi%CvecG / C
               ELSE
-                write(out_unitp,*) ' ERROR : in psi_over_C'
-                write(out_unitp,*) ' I cannot divide a real psi by a complex'
-                write(out_unitp,*) 'psi%cplx,C',psi%cplx,C
+                write(out_unit,*) ' ERROR : in psi_over_C'
+                write(out_unit,*) ' I cannot divide a real psi by a complex'
+                write(out_unit,*) 'psi%cplx,C',psi%cplx,C
                 STOP
               END IF
             END IF
 
             psi_over_C%symab = psi%symab
 
-            !write(out_unitp,*) 'END psi_over_C'
-            !flush(out_unitp)
+            !write(out_unit,*) 'END psi_over_C'
+            !flush(out_unit)
 
           END FUNCTION psi_over_C
 
@@ -3292,7 +3292,7 @@ END SUBROUTINE init_psi_t
       !> INTERFACE: times_psi_SR_MPI
       !---------------------------------------------------------------------------------
       SUBROUTINE psi_times_R_SR_MPI(psi,R_const)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3311,7 +3311,7 @@ END SUBROUTINE init_psi_t
       !---------------------------------------------------------------------------------
       ! note: psi_new should be already well allocated here
       SUBROUTINE psi_times_C_SR_MPI(psi,C_const,psi_new)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3366,7 +3366,7 @@ END SUBROUTINE init_psi_t
 
       !---------------------------------------------------------------------------------
       SUBROUTINE psi_times_psi_SR_MPI(psi,psi1)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3404,7 +3404,7 @@ END SUBROUTINE init_psi_t
       !> INTERFACE: plus_psi_SR_MPI
       !---------------------------------------------------------------------------------
       SUBROUTINE psi_plus_R_SR_MPI(psi,R_const)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3424,7 +3424,7 @@ END SUBROUTINE init_psi_t
 
       !---------------------------------------------------------------------------------
       SUBROUTINE psi_plus_C_SR_MPI(psi,C_const)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3446,7 +3446,7 @@ END SUBROUTINE init_psi_t
 
       !---------------------------------------------------------------------------------
       SUBROUTINE psi_plus_psi_SR_MPI(psi,psi1)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3474,7 +3474,7 @@ END SUBROUTINE init_psi_t
       !> INTERFACE: minus_psi_SR_MPI
       !---------------------------------------------------------------------------------
       SUBROUTINE psi_minus_R_SR_MPI(psi,R_const)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3494,7 +3494,7 @@ END SUBROUTINE init_psi_t
 
       !---------------------------------------------------------------------------------
       SUBROUTINE psi_minus_C_SR_MPI(psi,C_const)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3516,7 +3516,7 @@ END SUBROUTINE init_psi_t
 
       !---------------------------------------------------------------------------------
       SUBROUTINE psi_minus_psi_SR_MPI(psi,psi1)
-        USE mod_system
+        USE EVR_system_m
         IMPLICIT NONE
 
         TYPE(param_psi),                  intent(inout) :: psi
@@ -3552,56 +3552,56 @@ END SUBROUTINE init_psi_t
       !!@param: TODO
       SUBROUTINE ecri_init_psi(psi)
 
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- variables for the WP propagation ----------------------------
       TYPE (param_psi)   :: psi
 
 
-      write(out_unitp,*) ' BEGINNING Write_init_psi'
+      write(out_unit,*) ' BEGINNING Write_init_psi'
 
-      write(out_unitp,*) 'para_AllBasis     is linked?',associated(psi%para_AllBasis)
-      write(out_unitp,*) 'BasisnD           is linked?',associated(psi%BasisnD)
-      write(out_unitp,*) 'Basis2n           is linked?',associated(psi%Basis2n)
-      write(out_unitp,*) 'symab, bits(symab)',WriteTOstring_symab(psi%symab)
-      write(out_unitp,*) 'para_AllBasis_ana is linked?',associated(psi%para_AllBasis_ana)
+      write(out_unit,*) 'para_AllBasis     is linked?',associated(psi%para_AllBasis)
+      write(out_unit,*) 'BasisnD           is linked?',associated(psi%BasisnD)
+      write(out_unit,*) 'Basis2n           is linked?',associated(psi%Basis2n)
+      write(out_unit,*) 'symab, bits(symab)',WriteTOstring_symab(psi%symab)
+      write(out_unit,*) 'para_AllBasis_ana is linked?',associated(psi%para_AllBasis_ana)
 
-      write(out_unitp,*) 'init,cplx',psi%init,psi%cplx
+      write(out_unit,*) 'init,cplx',psi%init,psi%cplx
 
-      write(out_unitp,*)
-      write(out_unitp,*) 'nb_tot          ',psi%nb_tot
-      write(out_unitp,*) 'nb_tot_contrac  ',psi%nb_tot_contrac
-      write(out_unitp,*) 'nb_tot_uncontrac',psi%nb_tot_uncontrac
-      write(out_unitp,*) 'BasisRep_contrac',psi%BasisRep_contrac
+      write(out_unit,*)
+      write(out_unit,*) 'nb_tot          ',psi%nb_tot
+      write(out_unit,*) 'nb_tot_contrac  ',psi%nb_tot_contrac
+      write(out_unit,*) 'nb_tot_uncontrac',psi%nb_tot_uncontrac
+      write(out_unit,*) 'BasisRep_contrac',psi%BasisRep_contrac
 
-      write(out_unitp,*)
-      write(out_unitp,*) 'nb_ba,nb_bi,nb_be,nb_bRot',psi%nb_ba,psi%nb_bi,psi%nb_be,psi%nb_bRot
-      write(out_unitp,*) 'nb_qa',psi%nb_qa
-      write(out_unitp,*) 'nb_baie,nb_qaie,nb_paie',psi%nb_baie,psi%nb_qaie,psi%nb_paie
-      write(out_unitp,*)
-      write(out_unitp,*) 'nb_act1,nb_act',psi%nb_act1,psi%nb_act
-      write(out_unitp,*) 'nb_basis_act1,nb_basis',psi%nb_basis_act1,psi%nb_basis
-      write(out_unitp,*) 'max_dim',psi%max_dim
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*) 'nb_ba,nb_bi,nb_be,nb_bRot',psi%nb_ba,psi%nb_bi,psi%nb_be,psi%nb_bRot
+      write(out_unit,*) 'nb_qa',psi%nb_qa
+      write(out_unit,*) 'nb_baie,nb_qaie,nb_paie',psi%nb_baie,psi%nb_qaie,psi%nb_paie
+      write(out_unit,*)
+      write(out_unit,*) 'nb_act1,nb_act',psi%nb_act1,psi%nb_act
+      write(out_unit,*) 'nb_basis_act1,nb_basis',psi%nb_basis_act1,psi%nb_basis
+      write(out_unit,*) 'max_dim',psi%max_dim
+      write(out_unit,*)
 
-      write(out_unitp,*) 'nb_TDParam',psi%nb_TDParam
-      write(out_unitp,*)
-
-
-      write(out_unitp,*) 'RvecB_alloc',allocated(psi%RvecB)
-      write(out_unitp,*) 'CvecB_alloc',allocated(psi%CvecB)
-      write(out_unitp,*) 'RvecG_alloc',allocated(psi%RvecG)
-      write(out_unitp,*) 'CvecG_alloc',allocated(psi%CvecG)
-      write(out_unitp,*) 'TDParam_alloc',allocated(psi%TDParam)
-
-      write(out_unitp,*) 'IndAvOp,CAvOp,convAvOp',psi%IndAvOp,psi%CAvOp,psi%convAvOp
-
-      write(out_unitp,*)
-      write(out_unitp,*) 'norm^2',psi%norm2
+      write(out_unit,*) 'nb_TDParam',psi%nb_TDParam
+      write(out_unit,*)
 
 
-      write(out_unitp,*) ' END ecri_init_psi'
+      write(out_unit,*) 'RvecB_alloc',allocated(psi%RvecB)
+      write(out_unit,*) 'CvecB_alloc',allocated(psi%CvecB)
+      write(out_unit,*) 'RvecG_alloc',allocated(psi%RvecG)
+      write(out_unit,*) 'CvecG_alloc',allocated(psi%CvecG)
+      write(out_unit,*) 'TDParam_alloc',allocated(psi%TDParam)
+
+      write(out_unit,*) 'IndAvOp,CAvOp,convAvOp',psi%IndAvOp,psi%CAvOp,psi%convAvOp
+
+      write(out_unit,*)
+      write(out_unit,*) 'norm^2',psi%norm2
+
+
+      write(out_unit,*) ' END ecri_init_psi'
 
       END SUBROUTINE ecri_init_psi
 !===============================================================================
@@ -3672,7 +3672,7 @@ END SUBROUTINE init_psi_t
       IF (present(nioWP)) THEN
         loc_nioWP = nioWP
       ELSE
-        loc_nioWP = out_unitp
+        loc_nioWP = out_unit
       END IF
 
       IF (present(ecri_GridRep)) THEN
@@ -3718,16 +3718,16 @@ END SUBROUTINE init_psi_t
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ecri_psi'
-        write(out_unitp,*) 'T',locT
-        write(out_unitp,*) 'ecri_GridRep,ecri_BasisRep',loc_ecri_GridRep,loc_ecri_BasisRep
-        write(out_unitp,*) 'channel_all,channel_pack',                          &
+        write(out_unit,*) 'BEGINNING ecri_psi'
+        write(out_unit,*) 'T',locT
+        write(out_unit,*) 'ecri_GridRep,ecri_BasisRep',loc_ecri_GridRep,loc_ecri_BasisRep
+        write(out_unit,*) 'channel_all,channel_pack',                          &
                     loc_channel_all,loc_channel_pack
-        write(out_unitp,*)
-        write(out_unitp,*) 'nioWP',loc_nioWP
-        write(out_unitp,*) 'ecri_psi2',loc_ecri_psi2
-        write(out_unitp,*) 'ecri_nume,ecri_numi',loc_ecri_nume,loc_ecri_numi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nioWP',loc_nioWP
+        write(out_unit,*) 'ecri_psi2',loc_ecri_psi2
+        write(out_unit,*) 'ecri_nume,ecri_numi',loc_ecri_nume,loc_ecri_numi
+        write(out_unit,*)
       END IF
 !-----------------------------------------------------------
 
@@ -3798,7 +3798,7 @@ END SUBROUTINE init_psi_t
 
         ELSE IF (new) THEN
           nb_ei = (if_bi-ii_bi+1)*(if_be-ii_be+1)
-          !write(out_unitp,*) 'nb_ei',nb_ei,ii_be,if_be,ii_bi,if_bi
+          !write(out_unit,*) 'nb_ei',nb_ei,ii_be,if_be,ii_bi,if_bi
           ni = 1+psi%nb_act1
           IF (loc_ecri_psi2) THEN
             ni = ni + nb_ei
@@ -3991,7 +3991,7 @@ END SUBROUTINE init_psi_t
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ecri_psi'
+         write(out_unit,*) 'END ecri_psi'
        END IF
 !-----------------------------------------------------------
 

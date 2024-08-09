@@ -63,7 +63,7 @@ CONTAINS
 !================================================================
 
       SUBROUTINE sub_PsiBasisRep_TO_GridRep(psi)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -80,22 +80,22 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
-        write(out_unitp,*) 'nb_act1',psi%nb_act1
-        write(out_unitp,*) 'asso BasisnD ',associated(psi%BasisnD)
-        write(out_unitp,*) 'nb_basis',psi%BasisnD%nb_basis
-        write(out_unitp,*)
-        !write(out_unitp,*) 'psi BasisRep'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
+        write(out_unit,*) 'nb_act1',psi%nb_act1
+        write(out_unit,*) 'asso BasisnD ',associated(psi%BasisnD)
+        write(out_unit,*) 'nb_basis',psi%BasisnD%nb_basis
+        write(out_unit,*)
+        !write(out_unit,*) 'psi BasisRep'
         !CALL ecri_psi(ZERO,psi,ecri_BasisRep=.TRUE.,ecri_GridRep=.FALSE.)
       END IF
 !-----------------------------------------------------------
 
       IF (psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' HADA contraction: ',                       &
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' HADA contraction: ',                       &
                          psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC
-        write(out_unitp,*) ' and ',name_sub,' is not possible'
+        write(out_unit,*) ' and ',name_sub,' is not possible'
         STOP
       END IF
 
@@ -106,8 +106,8 @@ CONTAINS
       IF (psi%cplx) THEN
         psi%CvecG(:) = CZERO
         IF ( .NOT. allocated(psi%CvecB) ) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' psi%CvecB MUST be allocated !!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' psi%CvecB MUST be allocated !!'
           STOP
         END IF
         IF (NewBasisEl) THEN
@@ -132,8 +132,8 @@ CONTAINS
       ELSE
         psi%RvecG(:) = ZERO
         IF ( .NOT. allocated(psi%RvecB) ) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' psi%RvecB MUST be allocated !!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' psi%RvecB MUST be allocated !!'
           STOP
         END IF
         IF (NewBasisEl) THEN
@@ -159,11 +159,11 @@ CONTAINS
 
 !----------------------------------------------------------
       IF (debug) THEN
-         write(out_unitp,*)
-         !write(out_unitp,*) 'psiGridRep'
-         !CALL ecri_psi(ZERO,psi,out_unitp,ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
-         write(out_unitp,*)
-         write(out_unitp,*) ' END in ',name_sub
+         write(out_unit,*)
+         !write(out_unit,*) 'psiGridRep'
+         !CALL ecri_psi(ZERO,psi,out_unit,ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
+         write(out_unit,*)
+         write(out_unit,*) ' END in ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -181,7 +181,7 @@ CONTAINS
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE sub_PsiGridRep_TO_BasisRep(psi)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -197,24 +197,24 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
-        write(out_unitp,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
-        write(out_unitp,*) 'nb_act1',psi%nb_act1
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_basis',psi%BasisnD%nb_basis
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
+        write(out_unit,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
+        write(out_unit,*) 'nb_act1',psi%nb_act1
+        write(out_unit,*)
+        write(out_unit,*) 'nb_basis',psi%BasisnD%nb_basis
+        write(out_unit,*)
 
-        write(out_unitp,*) 'psi GridRep'
-        CALL ecri_psi(ZERO,psi,out_unitp,.TRUE.,.FALSE.)
-        flush(out_unitp)
+        write(out_unit,*) 'psi GridRep'
+        CALL ecri_psi(ZERO,psi,out_unit,.TRUE.,.FALSE.)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
       IF (psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' HADA contraction:',psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC
-        write(out_unitp,*) ' and ',name_sub,' is not possible'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' HADA contraction:',psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC
+        write(out_unit,*) ' and ',name_sub,' is not possible'
         STOP
       END IF
 
@@ -224,8 +224,8 @@ CONTAINS
 !---- end initisalisation -------------------------------
       IF (psi%cplx) THEN
         IF ( .NOT. allocated(psi%CvecG) .AND. keep_MPI) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' psi%CvecG MUST be allocated !!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' psi%CvecG MUST be allocated !!'
           STOP
         END IF
         IF(keep_MPI)psi%CvecB(:) = CZERO
@@ -251,8 +251,8 @@ CONTAINS
 
       ELSE
         IF ( .NOT. allocated(psi%RvecG) .AND. keep_MPI) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' psi%RvecG MUST be allocated !!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' psi%RvecG MUST be allocated !!'
           STOP
         END IF
         psi%RvecB(:) = ZERO
@@ -279,11 +279,11 @@ CONTAINS
 
 !----------------------------------------------------------
       IF (debug) THEN
-         write(out_unitp,*)
-         write(out_unitp,*) 'psiBasisRep'
+         write(out_unit,*)
+         write(out_unit,*) 'psiBasisRep'
          CALL ecri_psi(ZERO,psi)
-         write(out_unitp,*)
-         write(out_unitp,*) 'sub_PsiGridRep_TO_BasisRep'
+         write(out_unit,*)
+         write(out_unit,*) 'sub_PsiGridRep_TO_BasisRep'
       END IF
 !----------------------------------------------------------
 
@@ -300,7 +300,7 @@ CONTAINS
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE sub_d0d1d2PsiBasisRep_TO_GridRep(psi,tab_derQdyn)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -318,23 +318,23 @@ CONTAINS
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
-        write(out_unitp,*) 'nb_act1',psi%nb_act1
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_basis',psi%BasisnD%nb_basis
-        write(out_unitp,*) 'tab_derQdyn',tab_derQdyn
-        write(out_unitp,*)
-        write(out_unitp,*) 'psi BasisRep'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
+        write(out_unit,*) 'nb_act1',psi%nb_act1
+        write(out_unit,*)
+        write(out_unit,*) 'nb_basis',psi%BasisnD%nb_basis
+        write(out_unit,*) 'tab_derQdyn',tab_derQdyn
+        write(out_unit,*)
+        write(out_unit,*) 'psi BasisRep'
         CALL ecri_psi(Psi=psi)
       END IF
 !-----------------------------------------------------------
 
       IF (psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' HADA contraction: ',                       &
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' HADA contraction: ',                       &
                          psi%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC
-        write(out_unitp,*) '  and ',name_sub,' is not possible'
+        write(out_unit,*) '  and ',name_sub,' is not possible'
         STOP
       END IF
 
@@ -346,8 +346,8 @@ CONTAINS
 
       IF (psi%cplx) THEN
         IF ( .NOT. allocated(psi%CvecB) ) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) ' psi%CvecB MUST be allocated !!'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) ' psi%CvecB MUST be allocated !!'
            STOP
         END IF
 
@@ -368,8 +368,8 @@ CONTAINS
         END DO
       ELSE
         IF ( .NOT. allocated(psi%RvecB) ) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' psi%RvecB MUST be allocated !!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' psi%RvecB MUST be allocated !!'
           STOP
         END IF
 
@@ -392,11 +392,11 @@ CONTAINS
 
 !----------------------------------------------------------
       IF (debug) THEN
-         write(out_unitp,*)
-         write(out_unitp,*) 'psiGridRep'
+         write(out_unit,*)
+         write(out_unit,*) 'psiGridRep'
          CALL ecri_psi(Psi=psi)
-         write(out_unitp,*)
-         write(out_unitp,*) 'END in ',name_sub
+         write(out_unit,*)
+         write(out_unit,*) 'END in ',name_sub
       END IF
 !----------------------------------------------------------
 

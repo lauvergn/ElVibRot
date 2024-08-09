@@ -52,7 +52,7 @@
 !
 !=============================================================
       SUBROUTINE sub_quadra_inact(Basis2n,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       use mod_Coord_KEO, only: CoordType
       USE mod_basis
@@ -80,11 +80,11 @@
       logical, parameter :: debug = .FALSE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' SparseGrid_type :',Basis2n%SparseGrid_type
-        write(out_unitp,*) ' nb_inact2n or nb_basis',Basis2n%nb_basis
-        write(out_unitp,*) ' tab_nq',Basis2n%nDindG%nDsize(:)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' SparseGrid_type :',Basis2n%SparseGrid_type
+        write(out_unit,*) ' nb_inact2n or nb_basis',Basis2n%nb_basis
+        write(out_unit,*) ' tab_nq',Basis2n%nDindG%nDsize(:)
       END IF
 !---------------------------------------------------------------------
       num              = .FALSE.
@@ -179,9 +179,9 @@
 
 
       IF (debug) THEN
-        write(out_unitp,*) 'Basis2n functions:',Basis2n%nb
+        write(out_unit,*) 'Basis2n functions:',Basis2n%nb
         CALL Write_nDindex(Basis2n%nDindB)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
 
@@ -191,34 +191,34 @@
                             type_OF_nDindex=0,nDsize=tab_nq)
 
       IF (debug) THEN
-        write(out_unitp,*) 'Basis2n grids:',get_nq_FROM_basis(Basis2n)
+        write(out_unit,*) 'Basis2n grids:',get_nq_FROM_basis(Basis2n)
         CALL Write_nDindex(Basis2n%nDindG)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
       IF (Basis2n%nDindG%max_nDI /= get_nq_FROM_basis(Basis2n)) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nq /= max_nDI'
-        write(out_unitp,*) ' ... nq:     ',get_nq_FROM_basis(Basis2n)
-        write(out_unitp,*) ' ... max_nDI:',Basis2n%nDindG%max_nDI
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nq /= max_nDI'
+        write(out_unit,*) ' ... nq:     ',get_nq_FROM_basis(Basis2n)
+        write(out_unit,*) ' ... max_nDI:',Basis2n%nDindG%max_nDI
         STOP
       END IF
 
 
-      write(out_unitp,*) 'Basis2n%iQdyn',Basis2n%iQdyn(:)
-      write(out_unitp,*) 'Basis2n%Tabder_Qdyn_TO_Qbasis',Basis2n%Tabder_Qdyn_TO_Qbasis(:)
+      write(out_unit,*) 'Basis2n%iQdyn',Basis2n%iQdyn(:)
+      write(out_unit,*) 'Basis2n%Tabder_Qdyn_TO_Qbasis',Basis2n%Tabder_Qdyn_TO_Qbasis(:)
 !----------------------------------------------------------------------------
 
 
 !---------------------------------------------------------------------
       IF (debug) THEN
         DO i=1,Basis2n%nb_basis
-          write(out_unitp,*) 'basis (active order)',i
-          write(out_unitp,*)
+          write(out_unit,*) 'basis (active order)',i
+          write(out_unit,*)
           CALL RecWrite_basis(Basis2n%tab_Pbasis(i)%Pbasis)
         END DO
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 

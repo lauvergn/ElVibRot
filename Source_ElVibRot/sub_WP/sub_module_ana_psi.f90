@@ -67,7 +67,7 @@ CONTAINS
 !
 !================================================================
 SUBROUTINE sub_analyze_tab_Psi(tab_psi,ana_psi,adia,Write_psi)
-  USE mod_system
+  USE EVR_system_m
   USE mod_psi_set_alloc
   USE mod_type_ana_psi
   IMPLICIT NONE
@@ -87,9 +87,9 @@ SUBROUTINE sub_analyze_tab_Psi(tab_psi,ana_psi,adia,Write_psi)
   !logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*)
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*)
+    flush(out_unit)
    END IF
 !-------------------------------------------------------
 
@@ -110,14 +110,14 @@ SUBROUTINE sub_analyze_tab_Psi(tab_psi,ana_psi,adia,Write_psi)
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 !----------------------------------------------------------
 END SUBROUTINE sub_analyze_tab_Psi
 
 SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
-  USE mod_system
+  USE EVR_system_m
   USE mod_Constant
   USE mod_psi_set_alloc
   USE mod_type_ana_psi
@@ -163,10 +163,10 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
 !-----------------------------------------------------------
 
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'ana_psi%GridDone',ana_psi%GridDone
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'ana_psi%GridDone',ana_psi%GridDone
     CALL ecri_psi(psi=psi)
-    flush(out_unitp)
+    flush(out_unit)
   END IF
   IF (adia .AND. .NOT. ana_psi%GridDone) STOP 'adia=t and GridDone=f'
 
@@ -251,7 +251,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
       CALL ADD_TO_string(psi_line,' ',TO_string(tab_WeightChannels(:,i_be),Rformat='f10.7'))
     END DO
 
-    write(out_unitp,*) psi_line
+    write(out_unit,*) psi_line
     IF (present(PsiAna)) CALL ADD_TO_string(PsiAna,NEW_LINE('nl')) ! first line
 
     IF (ana_psi%Coherence > 0) THEN
@@ -270,7 +270,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
           CALL ADD_TO_string(PsiAna,TO_string(Mij(1:2,i,j),Rformat='f12.8'), &
                              NEW_LINE('nl'))
         ELSE
-          write(out_unitp,*) 'M-' // TO_string(i) // '-' //                  &
+          write(out_unit,*) 'M-' // TO_string(i) // '-' //                  &
                             TO_string(j) // ' ' // info // ' ' //            &
                             TO_string(ana_psi%T,Rformat='f12.2') // ': ' //  &
                             TO_string(Mij(1,i,j),Rformat='f12.8'),' ',       &
@@ -316,7 +316,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
           CALL SET_string(lformat,'("lev: ",i0,i0,l3,',TO_string(3+size(moy_Qba)),      &
                                   '(1x,',trim(adjustl(EneIO_format)),'))')
         END IF
-        write(out_unitp,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop,moy_Qba(:)
+        write(out_unit,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop,moy_Qba(:)
       END IF
 
       CALL dealloc_NParray(moy_Qba,"moy_Qba",name_sub)
@@ -328,7 +328,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
         CALL SET_string(lformat,'("lev: ",i0,i0,l3,3(1x,',trim(adjustl(EneIO_format)),'))' )
       END IF
 
-      IF (.NOT. present(PsiAna)) write(out_unitp,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop
+      IF (.NOT. present(PsiAna)) write(out_unit,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop
     END IF
 
     CALL SET_string(info," ",TO_string(E,"f12.6" ),' : ')
@@ -351,8 +351,8 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
       !$OMP  END CRITICAL (sub_analyze_psi_CRIT)
     ELSE
       CALL SET_string(lformat,'("% HAC: ",',TO_string(psi%nb_bi),"(1x,f4.0) )" )
-      write(out_unitp,lformat) (tab_WeightChannels(i_bi,1)*TEN**2,i_bi=1,psi%nb_bi)
-      flush(out_unitp)
+      write(out_unit,lformat) (tab_WeightChannels(i_bi,1)*TEN**2,i_bi=1,psi%nb_bi)
+      flush(out_unit)
     END IF
   END IF
 
@@ -369,8 +369,8 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
       CALL calc_MaxCoef_psi(psi,ana_psi%T,info,PsiAna)
     ELSE
       CALL calc_MaxCoef_psi(psi,ana_psi%T,info,lines)
-      write(out_unitp,*) lines
-      flush(out_unitp)
+      write(out_unit,*) lines
+      flush(out_unit)
       deallocate(lines)
     END IF
   END IF
@@ -381,8 +381,8 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
     ELSE
       CALL psi_Qba_ie_psi(ana_psi%T,psi,ana_psi,info,lines)
       IF (allocated(lines)) THEN
-        write(out_unitp,*) lines
-        flush(out_unitp)
+        write(out_unit,*) lines
+        flush(out_unit)
         deallocate(lines)
       END IF
     END IF
@@ -402,7 +402,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
         ' WARNING Rho1D or Rho2D or 1Dcut or 2Dcut are not possible!',NEW_LINE('nl'))
       !$OMP  END CRITICAL (sub_analyze_psi_CRIT)
     ELSE
-      write(out_unitp,*) ' WARNING Rho1D or Rho2D or 1Dcut or 2Dcut are not possible!'
+      write(out_unit,*) ' WARNING Rho1D or Rho2D or 1Dcut or 2Dcut are not possible!'
     END IF
   END IF
 
@@ -410,8 +410,8 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
   IF (Write_psi_loc) THEN
 
     IF (string_IS_empty(ana_psi%file_Psi%name)) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' The file name in "file_Psi%name" is empty !'
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' The file name in "file_Psi%name" is empty !'
       STOP 'ERROR in sub_analyze_psi: The file name in "file_Psi%name" is empty'
     END IF
 
@@ -518,7 +518,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
 
 !         CALL calc_DM(WP(i),max_ecri,T,info,.TRUE.)
 !         C12 = WP(i)%CvecB(1)*conjg(WP(i)%CvecB(2))
-!         write(out_unitp,31) T,i,C12,abs(C12)
+!         write(out_unit,31) T,i,C12,abs(C12)
 !31       format('C12',f12.1,1x,i2,3(1x,f12.6))
           !CALL calc_nDTk(WP(i),T)
 
@@ -534,7 +534,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna)
   CALL alloc_psi(psi,BasisRep=Basis,GridRep=Grid)
 
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
 
 END SUBROUTINE sub_analyze_psi
@@ -544,7 +544,7 @@ END SUBROUTINE sub_analyze_psi
 !
 !================================================================
       SUBROUTINE sub_Qmoy(Psi,moy_Qba,ana_psi)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_basis
       USE mod_psi_set_alloc
@@ -571,8 +571,8 @@ END SUBROUTINE sub_analyze_psi
       !logical, parameter :: debug =.TRUE.
       !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_Qmoy'
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING sub_Qmoy'
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -603,18 +603,18 @@ END SUBROUTINE sub_analyze_psi
           DO i=1,size(x)
             CALL sub_dntf(ana_psi%Qtransfo_type(i),dnt,x(i),cte,dnErr)
             IF (dnErr /= 0) THEN
-              write(out_unitp,*) ' ERROR in sub_Qmoy'
-              write(out_unitp,*) '   ERROR in the sub_dntf call for the coordinates, iQdyn:',psi%BasisnD%iQdyn(i)
+              write(out_unit,*) ' ERROR in sub_Qmoy'
+              write(out_unit,*) '   ERROR in the sub_dntf call for the coordinates, iQdyn:',psi%BasisnD%iQdyn(i)
               STOP 'ERROR in sub_dntf called from sub_Qmoy'
             END IF
             x(i) = dnt%d0
           END DO
         END IF
-        !write(out_unitp,*) 'x',x
+        !write(out_unit,*) 'x',x
 
         !- calculation of WrhonD ------------------------------
         WrhonD = Rec_WrhonD(Psi%BasisnD,i_q)
-        ! write(out_unitp,*) i,'WrhonD',WrhonD
+        ! write(out_unit,*) i,'WrhonD',WrhonD
 
         psi2 = psi2 * WrhonD
 
@@ -631,14 +631,14 @@ END SUBROUTINE sub_analyze_psi
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END sub_Qmoy'
+        write(out_unit,*) 'END sub_Qmoy'
       END IF
 !----------------------------------------------------------
 
       END SUBROUTINE sub_Qmoy
 
       SUBROUTINE sub_Rhoi_Rhoj_Over_Rho(Psi,Mij,ana_psi)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE mod_psi_set_alloc
       USE mod_psi_B_TO_G
@@ -664,8 +664,8 @@ END SUBROUTINE sub_analyze_psi
       !logical, parameter :: debug =.TRUE.
       !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -709,12 +709,12 @@ END SUBROUTINE sub_analyze_psi
         DO i_ie=1,Psi%nb_bi*Psi%nb_be
         DO j_ie=i_ie+1,Psi%nb_bi*Psi%nb_be
 
-         write(out_unitp,*) 'Mij ',i_ie,j_ie,Mij(:,i_ie,j_ie)
+         write(out_unit,*) 'Mij ',i_ie,j_ie,Mij(:,i_ie,j_ie)
 
         END DO
         END DO
 
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -726,7 +726,7 @@ END SUBROUTINE sub_analyze_psi
 !
 !================================================================
   SUBROUTINE psi_Qba_ie_psi(T,psi,ana_psi,info,PsiAna)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE mod_psi_set_alloc
       USE mod_type_ana_psi
@@ -765,8 +765,8 @@ END SUBROUTINE sub_analyze_psi
       !logical,parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'psi'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'psi'
         CALL ecri_psi(Psi=psi)
       END IF
 !-----------------------------------------------------------
@@ -840,8 +840,8 @@ END SUBROUTINE sub_analyze_psi
       END DO
 
       DO i=1,psi%nb_act1
-        !write(out_unitp,11) 'T <Q',TO_string(i),'>_ie ',info,T,Qmean_ie(i,:,:)
-        !write(out_unitp,11) 'T <Q',TO_string(i),'>    ',info,T,Qmean(i)
+        !write(out_unit,11) 'T <Q',TO_string(i),'>_ie ',info,T,Qmean_ie(i,:,:)
+        !write(out_unit,11) 'T <Q',TO_string(i),'>    ',info,T,Qmean(i)
   11    format(4a,' ',f0.5,100(' ',f0.4))
 
         CALL ADD_TO_string(PsiAna,'T <Q',TO_string(i),'>_ie ',info,' ',TO_string(T,'f0.5'))
@@ -855,8 +855,8 @@ END SUBROUTINE sub_analyze_psi
       END DO
       DO i=1,psi%nb_act1
       DO j=i,psi%nb_act1
-        !write(out_unitp,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>_ie ',info,T,Qmean2_ie(j,i,:,:)
-        !write(out_unitp,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>    ',info,T,Qmean2(j,i)
+        !write(out_unit,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>_ie ',info,T,Qmean2_ie(j,i,:,:)
+        !write(out_unit,21) 'T <Q',TO_string(j),'*Q',TO_string(i),'>    ',info,T,Qmean2(j,i)
 
         CALL ADD_TO_string(PsiAna,'T <Q',TO_string(j),'*Q',TO_string(i),'>_ie ',info,' ',TO_string(T,'f0.5'))
 
@@ -870,28 +870,28 @@ END SUBROUTINE sub_analyze_psi
       END DO
       END DO
  21   format(6a,' ',f0.5,100(' ',f0.4))
-      flush(out_unitp)
+      flush(out_unit)
 
       CALL dealloc_OldParam(OldPara)
 
     !----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'Qmean',Qmean
+      write(out_unit,*) 'Qmean',Qmean
       DO i=1,psi%nb_act1
-        write(out_unitp,*) 'Qmean_ie',i,Qmean_ie(i,:,:)
+        write(out_unit,*) 'Qmean_ie',i,Qmean_ie(i,:,:)
       END DO
-      write(out_unitp,*) '<Qi*Qj>',Qmean2(:,:)
+      write(out_unit,*) '<Qi*Qj>',Qmean2(:,:)
       DO i=1,psi%nb_act1
       DO j=i,psi%nb_act1
-        write(out_unitp,21) 'T iQbasis <Qi*Qj>_ie ',info,T,j,i,Qmean2_ie(j,i,:,:)
-        write(out_unitp,21) 'T iQbasis <Qi*Qj>    ',info,T,j,i,Qmean2(j,i)
+        write(out_unit,21) 'T iQbasis <Qi*Qj>_ie ',info,T,j,i,Qmean2_ie(j,i,:,:)
+        write(out_unit,21) 'T iQbasis <Qi*Qj>    ',info,T,j,i,Qmean2(j,i)
       END DO
       END DO
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
     END IF
   END SUBROUTINE psi_Qba_ie_psi
   SUBROUTINE write1D2D_psi(psi,ana_psi,adia)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE mod_dnSVM
       USE mod_psi_set_alloc
@@ -943,14 +943,14 @@ END SUBROUTINE sub_analyze_psi
       IF (adia) RETURN
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !-----------------------------------------------------------
 
       IF (psi%nb_act1 /= psi%BasisnD%nb_basis) THEN
-        write(out_unitp,*) 'WARNNING in',name_sub
-        write(out_unitp,*) 'nb_act1 /= BasisnD%nb_basis',psi%nb_act1,psi%BasisnD%nb_basis
+        write(out_unit,*) 'WARNNING in',name_sub
+        write(out_unit,*) 'nb_act1 /= BasisnD%nb_basis',psi%nb_act1,psi%BasisnD%nb_basis
         RETURN
       END IF
 
@@ -985,7 +985,7 @@ END SUBROUTINE sub_analyze_psi
         END DO
 
       END DO
-      !write(out_unitp,*) 'nDval0,Qana',nDval0,ana_psi%Qana
+      !write(out_unit,*) 'nDval0,Qana',nDval0,ana_psi%Qana
 
       i_bie = 1
 
@@ -1069,8 +1069,8 @@ END SUBROUTINE sub_analyze_psi
         END DO
 
       ELSE
-        write(out_unitp,*) 'WARNING in ',name_sub
-        write(out_unitp,*) ' Impossible to write CvecG or RvecG'
+        write(out_unit,*) 'WARNING in ',name_sub
+        write(out_unit,*) ' Impossible to write CvecG or RvecG'
         RETURN
       END IF
 
@@ -1181,14 +1181,14 @@ END SUBROUTINE sub_analyze_psi
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
 
 
       END SUBROUTINE write1D2D_psi
       SUBROUTINE Rho1D_Rho2D_psi(psi,ana_psi,adia,PsiAna)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE mod_psi_set_alloc
       USE mod_psi_B_TO_G
@@ -1229,13 +1229,13 @@ END SUBROUTINE sub_analyze_psi
       !logical,parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'psi%basis'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'psi%basis'
         CALL RecWrite_basis(psi%BasisnD)
-        write(out_unitp,*) 'psi'
+        write(out_unit,*) 'psi'
         CALL ecri_psi(psi=psi)
-        write(out_unitp,*) 'ana_psi%ana_level',ana_psi%ana_level
-        write(out_unitp,*) 'ana_psi%Rho1D,ana_psi%Rho2D',ana_psi%Rho1D,ana_psi%Rho2D
+        write(out_unit,*) 'ana_psi%ana_level',ana_psi%ana_level
+        write(out_unit,*) 'ana_psi%Rho1D,ana_psi%Rho2D',ana_psi%Rho1D,ana_psi%Rho2D
       END IF
 !-----------------------------------------------------------
       IF (ana_psi%ana_level > 0 .AND. (ana_psi%Rho1D .OR. ana_psi%Rho2D)) THEN
@@ -1250,7 +1250,7 @@ END SUBROUTINE sub_analyze_psi
               CALL ADD_TO_string(PsiAna,'rho1D of ',   &
                    TO_string(ana_psi%num_psi),' ',TO_string(i_basis_act1))
             ELSE
-              write(out_unitp,*) 'rho1D of ',ana_psi%num_psi,i_basis_act1
+              write(out_unit,*) 'rho1D of ',ana_psi%num_psi,i_basis_act1
             END IF
 
             IF (adia) THEN
@@ -1445,7 +1445,7 @@ END SUBROUTINE sub_analyze_psi
               CALL ADD_TO_string(PsiAna,'rho2D of ',TO_string(ana_psi%num_psi),' ', &
                                  TO_string(i_basis_act1),' ',TO_string(j_basis_act1))
             ELSE
-              write(out_unitp,*) 'rho2D of ',ana_psi%num_psi,i_basis_act1,j_basis_act1
+              write(out_unit,*) 'rho2D of ',ana_psi%num_psi,i_basis_act1,j_basis_act1
             END IF
             IF (ana_psi%propa) THEN
               DO i=1,psi%BasisnD%nDindG%nDsize(i_basis_act1)
@@ -1482,7 +1482,7 @@ END SUBROUTINE sub_analyze_psi
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -1495,7 +1495,7 @@ END SUBROUTINE sub_analyze_psi
 !
 !==============================================================
   SUBROUTINE calc_1Dweight(psi,ana_psi,tab_WeightChannels,max_1D,T,info,print_w,PsiAna)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_basis
       USE mod_psi_set_alloc
@@ -1520,9 +1520,9 @@ END SUBROUTINE sub_analyze_psi
 !      logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(psi%BasisnD,write_all=.TRUE.)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -1538,13 +1538,13 @@ END SUBROUTINE sub_analyze_psi
         END IF
 
         CALL calc_1Dweight_inact2n_elec(psi,ana_psi,tab_WeightChannels,max_1D,T,info,print_w,PsiAna_loc)
-        write(out_unitp,*) PsiAna_loc
+        write(out_unit,*) PsiAna_loc
         deallocate(PsiAna_loc)
       END IF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -1552,7 +1552,7 @@ END SUBROUTINE sub_analyze_psi
 
       SUBROUTINE calc_1Dweight_inact2n_elec(psi,ana_psi,tab_WeightChannels,&
                                             max_1D,T,info,print_w,PsiAna)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_psi_set_alloc
       USE mod_type_ana_psi
@@ -1589,20 +1589,20 @@ END SUBROUTINE sub_analyze_psi
 !      logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_inact2n',psi%Basis2n%nb_basis
-        write(out_unitp,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
-        write(out_unitp,*) 'nb_bie',psi%nb_bi*psi%nb_be
-        !write(out_unitp,*) 'tab_WeightChannels',tab_WeightChannels
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_inact2n',psi%Basis2n%nb_basis
+        write(out_unit,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
+        write(out_unit,*) 'nb_bie',psi%nb_bi*psi%nb_be
+        !write(out_unit,*) 'tab_WeightChannels',tab_WeightChannels
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
       !IF (ana_psi%adia) RETURN
 
       IF (.NOT. allocated(tab_WeightChannels)) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'tab_WeightChannels is not allocated!!'
-        write(out_unitp,*) ' It should be done in sub_analyze or sub_analyze_WP_forPropa'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'tab_WeightChannels is not allocated!!'
+        write(out_unit,*) ' It should be done in sub_analyze or sub_analyze_WP_forPropa'
         STOP
       END IF
 
@@ -1645,7 +1645,7 @@ END SUBROUTINE sub_analyze_psi
 
         IF (print_w .OR. debug) THEN
           DO i=1,psi%Basis2n%nb_basis
-            !write(out_unitp,11) 'harm T W ',trim(info),i,T,             &
+            !write(out_unit,11) 'harm T W ',trim(info),i,T,             &
             !        weight1D(i,0:psi%Basis2n%tab_Pbasis(i)%Pbasis%nb-1)
             CALL ADD_TO_string(PsiAna,'harm T W ',trim(info),' ',TO_string(i), &
                                ' ',TO_string(T,'f15.2'),' ',                   &
@@ -1655,7 +1655,7 @@ END SUBROUTINE sub_analyze_psi
           beg_e = 1
           IF (psi%Basis2n%nb_basis == 0) beg_e = 0
           i = psi%Basis2n%nb_basis+1
-          !write(out_unitp,11) 'elec T W ',trim(info),i,T,               &
+          !write(out_unit,11) 'elec T W ',trim(info),i,T,               &
           !      weight1D(i,beg_e:beg_e+psi%nb_be-1)
 
  11       format(a,a,1x,i3,1x,f15.2,20(1x,f6.3))
@@ -1671,7 +1671,7 @@ END SUBROUTINE sub_analyze_psi
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -1679,7 +1679,7 @@ END SUBROUTINE sub_analyze_psi
     END SUBROUTINE calc_1Dweight_inact2n_elec
 
     SUBROUTINE calc_MaxCoef_psi(psi,T,info,PsiAna)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE mod_psi_set_alloc
       IMPLICIT NONE
@@ -1706,9 +1706,9 @@ END SUBROUTINE sub_analyze_psi
       !logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'asso psi%BasisnD',associated(psi%BasisnD)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'asso psi%BasisnD',associated(psi%BasisnD)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
       IF (psi%nb_baie*psi%nb_bRot /= psi%nb_tot .AND.                   &
@@ -1769,7 +1769,7 @@ END SUBROUTINE sub_analyze_psi
           i_e_maxC2 = i_e
           i_R_maxC2 = i_R
         END IF
-        !write(out_unitp,*) i_bhe,C,'i_b_maxC1,i_b_maxC2',i_b_maxC1,i_b_maxC2
+        !write(out_unit,*) i_bhe,C,'i_b_maxC1,i_b_maxC2',i_b_maxC1,i_b_maxC2
       END DO
       END DO
       END DO
@@ -1827,14 +1827,14 @@ END SUBROUTINE sub_analyze_psi
       CALL ADD_TO_string(PsiAna,'Abelian symmetry (symab): ',TO_string(psi%symab),new_line('nl'))
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
       end subroutine calc_MaxCoef_psi
 
   SUBROUTINE calc_1Dweight_act1(psi,ana_psi,max_1D,T,info,print_w,PsiAna)
-    USE mod_system
+    USE EVR_system_m
     USE mod_nDindex
     USE mod_psi_set_alloc
     USE mod_type_ana_psi
@@ -1877,11 +1877,11 @@ END SUBROUTINE sub_analyze_psi
     !logical, parameter :: debug =.TRUE.
 !---------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*) 'nb_inact2n',psi%Basis2n%nb_basis
-      write(out_unitp,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
-      write(out_unitp,*) 'nb_baie,nb_tot',psi%nb_baie,psi%nb_tot
-      flush(out_unitp)
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'nb_inact2n',psi%Basis2n%nb_basis
+      write(out_unit,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
+      write(out_unit,*) 'nb_baie,nb_tot',psi%nb_baie,psi%nb_tot
+      flush(out_unit)
     END IF
 !---------------------------------------------------------
     IF (psi%nb_baie /= psi%nb_tot) RETURN
@@ -1937,7 +1937,7 @@ END SUBROUTINE sub_analyze_psi
           DO iq=1,psi%BasisnD%nDindB%ndim
             ibiq = nDval(iq)
             ndim_AT_ib(iq) = max(ibiq,ndim_AT_ib(iq))
-            !write(out_unitp,*) 'calc_1Dweight',iq,ibiq,ib
+            !write(out_unit,*) 'calc_1Dweight',iq,ibiq,ib
             weight1Dact(iq,ibiq) = weight1Dact(iq,ibiq) + a
           END DO
         END DO
@@ -1952,13 +1952,13 @@ END SUBROUTINE sub_analyze_psi
           DO iq=1,psi%BasisnD%nDindB%ndim
             ibiq = nDval(iq)
             ndim_AT_ib(iq) = max(ibiq,ndim_AT_ib(iq))
-            !write(out_unitp,*) 'calc_1Dweight',iq,ibiq,ib
+            !write(out_unit,*) 'calc_1Dweight',iq,ibiq,ib
             weight1Dact(iq,ibiq) = weight1Dact(iq,ibiq) + a
           END DO
         END DO
       END IF
 
-      !write(out_unitp,*) 'ndim_AT_ib',ndim_AT_ib(:)
+      !write(out_unit,*) 'ndim_AT_ib',ndim_AT_ib(:)
       IF (print_w .OR. debug) THEN
         DO iq=1,psi%BasisnD%nDindB%ndim
           IF (sum(weight1Dact(iq,1:ndim_AT_ib(iq)))-ONE > ONETENTH**7) THEN
@@ -2003,9 +2003,9 @@ END SUBROUTINE sub_analyze_psi
 
               IF (allocated(RD)) THEN
                 !n = min(ndim_AT_ib(iq),size(RD,dim=1))
-                !write(out_unitp,21) state_name // 'new',trim(info),iq,T,  &
+                !write(out_unit,21) state_name // 'new',trim(info),iq,T,  &
                 !                      [(RD(i,i),i=1,min(max_1D,n))]
-                !flush(out_unitp)
+                !flush(out_unit)
                 CALL dealloc_NParray(RD,'RD',name_sub)
               END IF
 
@@ -2030,7 +2030,7 @@ END SUBROUTINE sub_analyze_psi
                            ' ',TO_string(max_indGr(1:size(max_indGr))),new_line('nl'))
       END IF
 
-      !write(out_unitp,*) 'max_RedDensity
+      !write(out_unit,*) 'max_RedDensity
       IF (.NOT. allocated(ana_psi%max_RedDensity)) THEN
         CALL alloc_NParray(ana_psi%max_RedDensity,[psi%BasisnD%nDindB%ndim], &
                           "ana_psi%max_RedDensity",name_sub)
@@ -2053,9 +2053,9 @@ END SUBROUTINE sub_analyze_psi
 
 !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) PsiAna
-      write(out_unitp,*) 'END ',name_sub
-      flush(out_unitp)
+      write(out_unit,*) PsiAna
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
     END IF
 !-----------------------------------------------------------
 
@@ -2066,7 +2066,7 @@ END SUBROUTINE sub_analyze_psi
 !     norm^2 of psi (BasisRep or GridRep)
 !=======================================================================================
       SUBROUTINE norm2_psi(psi,GridRep,BasisRep,ReNorm)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -2091,11 +2091,11 @@ END SUBROUTINE sub_analyze_psi
       !logical,parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING norm2_psi'
-        IF (present(ReNorm)) write(out_unitp,*) 'Renormalization of psi',ReNorm
-        IF (present(GridRep)) write(out_unitp,*) 'norm2GridRep',GridRep
-        IF (present(BasisRep)) write(out_unitp,*) 'norm2BasisRep',BasisRep
-        write(out_unitp,*) 'psi'
+        write(out_unit,*) 'BEGINNING norm2_psi'
+        IF (present(ReNorm)) write(out_unit,*) 'Renormalization of psi',ReNorm
+        IF (present(GridRep)) write(out_unit,*) 'norm2GridRep',GridRep
+        IF (present(BasisRep)) write(out_unit,*) 'norm2BasisRep',BasisRep
+        write(out_unit,*) 'psi'
         CALL ecri_psi(psi=psi)
       END IF
 !-----------------------------------------------------------
@@ -2129,30 +2129,30 @@ END SUBROUTINE sub_analyze_psi
         END IF
       END IF
 
-      IF (debug) write(out_unitp,*) 'nGridRep,nBasisRep,psiN',norm2GridRep,norm2BasisRep,psiN
+      IF (debug) write(out_unit,*) 'nGridRep,nBasisRep,psiN',norm2GridRep,norm2BasisRep,psiN
       IF (norm2GridRep .AND. norm2BasisRep) THEN
-        write(out_unitp,*) ' ERROR in norm2_psi'
-        write(out_unitp,*) ' norm2GridRep=t and norm2BasisRep=t !'
-        write(out_unitp,*) ' BasisRep,GridRep',psi%BasisRep,psi%GridRep
+        write(out_unit,*) ' ERROR in norm2_psi'
+        write(out_unit,*) ' norm2GridRep=t and norm2BasisRep=t !'
+        write(out_unit,*) ' BasisRep,GridRep',psi%BasisRep,psi%GridRep
         STOP
       END IF
 
       CALL Channel_weight(tab_WeightChannels,psi,norm2GridRep,norm2BasisRep)
 
-      IF (debug)  write(out_unitp,*) 'tab_WeightChannels : ',tab_WeightChannels
+      IF (debug)  write(out_unit,*) 'tab_WeightChannels : ',tab_WeightChannels
 
       psi%norm2 = sum(tab_WeightChannels)
 
       IF (debug) THEN
-        write(out_unitp,*) 'norm2 : ',psi%norm2,tab_WeightChannels
+        write(out_unit,*) 'norm2 : ',psi%norm2,tab_WeightChannels
       END IF
 
 
       IF (psiN) THEN
 
         IF (psi%norm2 .EQ. ZERO ) THEN
-          write(out_unitp,*) ' ERROR in norm2_psi'
-          write(out_unitp,*) ' the norm2 is zero !',psi%norm2
+          write(out_unit,*) ' ERROR in norm2_psi'
+          write(out_unit,*) ' the norm2 is zero !',psi%norm2
           STOP
         END IF
         temp = ONE/psi%norm2
@@ -2183,8 +2183,8 @@ END SUBROUTINE sub_analyze_psi
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'norm2 : ',psi%norm2,tab_WeightChannels
-        write(out_unitp,*) 'END norm2_psi'
+        write(out_unit,*) 'norm2 : ',psi%norm2,tab_WeightChannels
+        write(out_unit,*) 'END norm2_psi'
       END IF
 !----------------------------------------------------------
 
@@ -2193,7 +2193,7 @@ END SUBROUTINE sub_analyze_psi
 
 !=======================================================================================
       SUBROUTINE renorm_psi(psi,GridRep,BasisRep)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -2212,10 +2212,10 @@ END SUBROUTINE sub_analyze_psi
       !logical,parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING renorm_psi'
-        IF (present(GridRep)) write(out_unitp,*) 'norm2GridRep',GridRep
-        IF (present(BasisRep)) write(out_unitp,*) 'norm2BasisRep',BasisRep
-        write(out_unitp,*) 'psi'
+        write(out_unit,*) 'BEGINNING renorm_psi'
+        IF (present(GridRep)) write(out_unit,*) 'norm2GridRep',GridRep
+        IF (present(BasisRep)) write(out_unit,*) 'norm2BasisRep',BasisRep
+        write(out_unit,*) 'psi'
         CALL ecri_psi(psi=psi)
       END IF
 !-----------------------------------------------------------
@@ -2243,27 +2243,27 @@ END SUBROUTINE sub_analyze_psi
        END IF
      END IF
 
-     IF (debug) write(out_unitp,*) 'nGridRep,nBasisRep',norm2GridRep,norm2BasisRep
+     IF (debug) write(out_unit,*) 'nGridRep,nBasisRep',norm2GridRep,norm2BasisRep
       IF (norm2GridRep .AND. norm2BasisRep) THEN
-        write(out_unitp,*) ' ERROR in renorm_psi'
-        write(out_unitp,*) ' norm2GridRep=t and norm2BasisRep=t !'
-        write(out_unitp,*) ' BasisRep,GridRep',psi%BasisRep,psi%GridRep
+        write(out_unit,*) ' ERROR in renorm_psi'
+        write(out_unit,*) ' norm2GridRep=t and norm2BasisRep=t !'
+        write(out_unit,*) ' BasisRep,GridRep',psi%BasisRep,psi%GridRep
         STOP
       END IF
 
       CALL Channel_weight(tab_WeightChannels,psi,norm2GridRep,norm2BasisRep)
 
-      IF (debug)  write(out_unitp,*) 'tab_WeightChannels : ',tab_WeightChannels
+      IF (debug)  write(out_unit,*) 'tab_WeightChannels : ',tab_WeightChannels
 
       psi%norm2 = sum(tab_WeightChannels)
 
       IF (debug) THEN
-        write(out_unitp,*) 'norm2 : ',psi%norm2,tab_WeightChannels
+        write(out_unit,*) 'norm2 : ',psi%norm2,tab_WeightChannels
       END IF
 
       IF (psi%norm2 .EQ. ZERO ) THEN
-        write(out_unitp,*) ' ERROR in renorm_psi'
-        write(out_unitp,*) ' the norm2 is zero !',psi%norm2
+        write(out_unit,*) ' ERROR in renorm_psi'
+        write(out_unit,*) ' the norm2 is zero !',psi%norm2
         STOP
       END IF
       temp = sqrt(ONE/psi%norm2)
@@ -2291,8 +2291,8 @@ END SUBROUTINE sub_analyze_psi
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'norm2 : ',psi%norm2
-        write(out_unitp,*) 'END renorm_psi'
+        write(out_unit,*) 'norm2 : ',psi%norm2
+        write(out_unit,*) 'END renorm_psi'
       END IF
 !----------------------------------------------------------
 
@@ -2301,7 +2301,7 @@ END SUBROUTINE sub_analyze_psi
 
 !=======================================================================================
       SUBROUTINE renorm_psi_With_norm2(psi,GridRep,BasisRep)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -2318,10 +2318,10 @@ END SUBROUTINE sub_analyze_psi
       !logical,parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING renorm_psi_With_norm2'
-        IF (present(GridRep))  write(out_unitp,*) 'norm2GridRep',GridRep
-        IF (present(BasisRep)) write(out_unitp,*) 'norm2BasisRep',BasisRep
-        write(out_unitp,*) 'psi'
+        write(out_unit,*) 'BEGINNING renorm_psi_With_norm2'
+        IF (present(GridRep))  write(out_unit,*) 'norm2GridRep',GridRep
+        IF (present(BasisRep)) write(out_unit,*) 'norm2BasisRep',BasisRep
+        write(out_unit,*) 'psi'
         CALL ecri_psi(psi=psi)
       END IF
 !-----------------------------------------------------------
@@ -2349,21 +2349,21 @@ END SUBROUTINE sub_analyze_psi
        END IF
      END IF
 
-     IF (debug) write(out_unitp,*) 'nGridRep,nBasisRep',norm2GridRep,norm2BasisRep
+     IF (debug) write(out_unit,*) 'nGridRep,nBasisRep',norm2GridRep,norm2BasisRep
       IF (norm2GridRep .AND. norm2BasisRep) THEN
-        write(out_unitp,*) ' ERROR in renorm_psi_With_norm2'
-        write(out_unitp,*) ' norm2GridRep=t and norm2BasisRep=t !'
-        write(out_unitp,*) ' BasisRep,GridRep',psi%BasisRep,psi%GridRep
+        write(out_unit,*) ' ERROR in renorm_psi_With_norm2'
+        write(out_unit,*) ' norm2GridRep=t and norm2BasisRep=t !'
+        write(out_unit,*) ' BasisRep,GridRep',psi%BasisRep,psi%GridRep
         STOP
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'norm2 : ',psi%norm2
+        write(out_unit,*) 'norm2 : ',psi%norm2
       END IF
 
       IF (psi%norm2 .EQ. ZERO ) THEN
-        write(out_unitp,*) ' ERROR in renorm_psi_With_norm2'
-        write(out_unitp,*) ' the norm2 is zero !',psi%norm2
+        write(out_unit,*) ' ERROR in renorm_psi_With_norm2'
+        write(out_unit,*) ' the norm2 is zero !',psi%norm2
         STOP
       END IF
       temp = sqrt(ONE/psi%norm2)
@@ -2387,8 +2387,8 @@ END SUBROUTINE sub_analyze_psi
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'norm2 : ',psi%norm2
-        write(out_unitp,*) 'END renorm_psi_With_norm2'
+        write(out_unit,*) 'norm2 : ',psi%norm2
+        write(out_unit,*) 'END renorm_psi_With_norm2'
       END IF
 !----------------------------------------------------------
 
@@ -2396,7 +2396,7 @@ END SUBROUTINE sub_analyze_psi
 
   SUBROUTINE Channel_weight(tab_WeightChannels,psi,                 &
                             GridRep,BasisRep,Dominant_Channel)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   USE mod_psi_set_alloc
   IMPLICIT NONE
@@ -2426,13 +2426,13 @@ END SUBROUTINE sub_analyze_psi
   !logical,parameter :: debug = .TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'GridRep',GridRep
-    write(out_unitp,*) 'BasisRep',BasisRep
-    write(out_unitp,*) 'alloc tab_WeightChannels',allocated(tab_WeightChannels)
-    !write(out_unitp,*) 'psi'
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'GridRep',GridRep
+    write(out_unit,*) 'BasisRep',BasisRep
+    write(out_unit,*) 'alloc tab_WeightChannels',allocated(tab_WeightChannels)
+    !write(out_unit,*) 'psi'
     !CALL ecri_psi(psi=psi)
-    flush(out_unitp)
+    flush(out_unit)
   END IF
 !-------------------------------------------------------
 
@@ -2440,13 +2440,13 @@ END SUBROUTINE sub_analyze_psi
   nb_bi = get_nb_bi_FROM_psi(psi)
 
   IF (GridRep .AND. BasisRep) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' GridRep=t and BasisRep=t !'
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' GridRep=t and BasisRep=t !'
     STOP
   END IF
   IF (.NOT. GridRep .AND. .NOT. BasisRep) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' GridRep=f and BasisRep=f !'
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' GridRep=f and BasisRep=f !'
     STOP
   END IF
   IF (.NOT. allocated(tab_WeightChannels) .AND. nb_bi > 0 .AND. nb_be > 0) THEN
@@ -2456,9 +2456,9 @@ END SUBROUTINE sub_analyze_psi
   tab_WeightChannels(:,:) = ZERO
 
   IF (debug) THEN
-    write(out_unitp,*) 'nb_bi,nb_be',nb_bi,nb_be
-    write(out_unitp,*) 'shape tab_WeightChannels',shape(tab_WeightChannels)
-    write(out_unitp,*) 'SG4',(psi%BasisnD%SparseGrid_type == 4)
+    write(out_unit,*) 'nb_bi,nb_be',nb_bi,nb_be
+    write(out_unit,*) 'shape tab_WeightChannels',shape(tab_WeightChannels)
+    write(out_unit,*) 'SG4',(psi%BasisnD%SparseGrid_type == 4)
   END IF
 
 IF (psi%BasisnD%SparseGrid_type == 4) THEN
@@ -2523,15 +2523,15 @@ ELSE
 
     ELSE
 
-      write(out_unitp,*) ' ERROR in ',name_sub,' from ',MPI_id
-      IF (GridRep)  write(out_unitp,*) ' impossible to calculate the weights with the Grid'
-      IF (BasisRep) write(out_unitp,*) ' impossible to calculate the weights with the Basis'
-      write(out_unitp,*) 'GridRep',GridRep
-      write(out_unitp,*) 'BasisRep',BasisRep
-      write(out_unitp,*)  'allo CvecG',allocated(psi%CvecG)
-      write(out_unitp,*)  'allo RvecG',allocated(psi%RvecG)
-      write(out_unitp,*)  'allo CvecB',allocated(psi%CvecB)
-      write(out_unitp,*)  'allo RvecB',allocated(psi%RvecB)
+      write(out_unit,*) ' ERROR in ',name_sub,' from ',MPI_id
+      IF (GridRep)  write(out_unit,*) ' impossible to calculate the weights with the Grid'
+      IF (BasisRep) write(out_unit,*) ' impossible to calculate the weights with the Basis'
+      write(out_unit,*) 'GridRep',GridRep
+      write(out_unit,*) 'BasisRep',BasisRep
+      write(out_unit,*)  'allo CvecG',allocated(psi%CvecG)
+      write(out_unit,*)  'allo RvecG',allocated(psi%RvecG)
+      write(out_unit,*)  'allo CvecB',allocated(psi%CvecB)
+      write(out_unit,*)  'allo RvecB',allocated(psi%RvecB)
       STOP
     END IF
 
@@ -2563,15 +2563,15 @@ END IF
 
 !------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'tab_WeightChannels : ',tab_WeightChannels
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'tab_WeightChannels : ',tab_WeightChannels
+    write(out_unit,*) 'END ',name_sub
   END IF
 !------------------------------------------------------
 
   END SUBROUTINE Channel_weight
 
   SUBROUTINE Channel_weight_SG4_grid(tab_WeightChannels,psi)
-  USE mod_system
+  USE EVR_system_m
   USE mod_psi_set_alloc
   USE mod_basis_BtoG_GtoB_SGType4
   USE mod_MPI_aux
@@ -2596,17 +2596,17 @@ END IF
   !logical,parameter :: debug = .TRUE.
   !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'psi'
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'psi'
     CALL ecri_psi(psi=psi)
   END IF
 !-------------------------------------------------------
   IF (.NOT. psi%GridRep) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  This subroutine needs psi with a grid representation'
-    write(out_unitp,*) '  but,  GridRep',psi%GridRep
-    write(out_unitp,*) '  and  BasisRep',psi%BasisRep
-    write(out_unitp,*) '  => use Channel_weight_SG4_basis'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  This subroutine needs psi with a grid representation'
+    write(out_unit,*) '  but,  GridRep',psi%GridRep
+    write(out_unit,*) '  and  BasisRep',psi%BasisRep
+    write(out_unit,*) '  => use Channel_weight_SG4_basis'
     STOP 'ERROR in Channel_weight_SG4_grid: psi%GridRep=F'
   END IF
 
@@ -2701,14 +2701,14 @@ END IF
   CALL dealloc_NParray(wrho,'wrho',name_sub)
 !------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'tab_WeightChannels',tab_WeightChannels
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'tab_WeightChannels',tab_WeightChannels
+    write(out_unit,*) 'END ',name_sub
   END IF
 !------------------------------------------------------
 
 END SUBROUTINE Channel_weight_SG4_grid
   SUBROUTINE Channel_weight_SG4_grid_old(tab_WeightChannels,psi)
-  USE mod_system
+  USE EVR_system_m
   USE mod_psi_set_alloc
   USE mod_basis_BtoG_GtoB_SGType4
   USE mod_MPI_aux
@@ -2733,17 +2733,17 @@ END SUBROUTINE Channel_weight_SG4_grid
   !logical,parameter :: debug = .TRUE.
   !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'psi'
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'psi'
     CALL ecri_psi(psi=psi)
   END IF
 !-------------------------------------------------------
   IF (.NOT. psi%GridRep) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  This subroutine needs psi with a grid representation'
-    write(out_unitp,*) '  but,  GridRep',psi%GridRep
-    write(out_unitp,*) '  and  BasisRep',psi%BasisRep
-    write(out_unitp,*) '  => use Channel_weight_SG4_basis'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  This subroutine needs psi with a grid representation'
+    write(out_unit,*) '  but,  GridRep',psi%GridRep
+    write(out_unit,*) '  and  BasisRep',psi%BasisRep
+    write(out_unit,*) '  => use Channel_weight_SG4_basis'
     STOP 'ERROR in Channel_weight_SG4_grid: psi%GridRep=F'
   END IF
 
@@ -2751,7 +2751,7 @@ END SUBROUTINE Channel_weight_SG4_grid
                           psi%BasisnD%para_SGType2%nDind_SmolyakRep%Tab_nDval,  &
                           psi%BasisnD%tab_basisPrimSG)
 
-   !write(out_unitp,*) 'Weight'
+   !write(out_unit,*) 'Weight'
    !CALL Write_SmolyakRep(WSRep)
 
   nb_be = get_nb_be_FROM_psi(psi)
@@ -2836,14 +2836,14 @@ END SUBROUTINE Channel_weight_SG4_grid
 
 !------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'tab_WeightChannels',tab_WeightChannels
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'tab_WeightChannels',tab_WeightChannels
+    write(out_unit,*) 'END ',name_sub
   END IF
 !------------------------------------------------------
 
 END SUBROUTINE Channel_weight_SG4_grid_old
 SUBROUTINE Channel_weight_SG4_basis(tab_WeightChannels,psi)
-USE mod_system
+USE EVR_system_m
 USE mod_basis
 USE mod_psi_set_alloc
 USE mod_basis_BtoG_GtoB_SGType4
@@ -2876,18 +2876,18 @@ logical,parameter :: debug = .FALSE.
 !logical,parameter :: debug = .TRUE.
 !-------------------------------------------------------
 IF (debug) THEN
-  write(out_unitp,*) 'BEGINNING ',name_sub
-  !write(out_unitp,*) 'psi'
+  write(out_unit,*) 'BEGINNING ',name_sub
+  !write(out_unit,*) 'psi'
   !CALL ecri_psi(psi=psi)
 END IF
 !-------------------------------------------------------
 
 IF (.NOT. psi%BasisRep) THEN
-  write(out_unitp,*) 'ERROR in ',name_sub
-  write(out_unitp,*) '  This subroutine needs psi with a basis representation'
-  write(out_unitp,*) '  but, BasisRep',psi%BasisRep
-  write(out_unitp,*) '  and   GridRep',psi%GridRep
-  write(out_unitp,*) '  => use Channel_weight_SG4_v0grid'
+  write(out_unit,*) 'ERROR in ',name_sub
+  write(out_unit,*) '  This subroutine needs psi with a basis representation'
+  write(out_unit,*) '  but, BasisRep',psi%BasisRep
+  write(out_unit,*) '  and   GridRep',psi%GridRep
+  write(out_unit,*) '  => use Channel_weight_SG4_v0grid'
   STOP 'ERROR in Channel_weight_SG4_basis: psi%BasisRep=F'
 END IF
 
@@ -2901,7 +2901,7 @@ IF (psi%cplx) THEN
   CALL tabPackedBasis_TO_SmolyakRepBasis(SRep,RCPsi(1)%RVecB,        &
                     psi%BasisnD%tab_basisPrimSG,psi%BasisnD%nDindB,  &
                     psi%BasisnD%para_SGType2)
-  !write(out_unitp,*) 'Real Part (Basis)'
+  !write(out_unit,*) 'Real Part (Basis)'
   !CALL Write_SmolyakRep(SRep)
 
   ib0 = 0
@@ -2912,13 +2912,13 @@ IF (psi%cplx) THEN
       dot_product_SmolyakRep_Basis(SRep,SRep,psi%BasisnD%WeightSG,ib0)
   END DO
   END DO
-  !write(out_unitp,*) 'tab_WeightChannels',tab_WeightChannels
+  !write(out_unit,*) 'tab_WeightChannels',tab_WeightChannels
 
   !For the imaginary part
   CALL tabPackedBasis_TO_SmolyakRepBasis(SRep,RCPsi(2)%RVecB,        &
                     psi%BasisnD%tab_basisPrimSG,psi%BasisnD%nDindB,  &
                     psi%BasisnD%para_SGType2)
-  !write(out_unitp,*) 'Imaginary Part (Basis)'
+  !write(out_unit,*) 'Imaginary Part (Basis)'
   !CALL Write_SmolyakRep(SRep)
 
   ib0 = 0
@@ -2946,7 +2946,7 @@ IF (psi%cplx) THEN
   !CALL Write_SmolyakRep(SRep)
 END IF
 
-!write(out_unitp,*) 'Norm2_SG4',Norm2
+!write(out_unit,*) 'Norm2_SG4',Norm2
 
 CALL dealloc_psi(RCPsi(1))
 CALL dealloc_psi(RCPsi(2))
@@ -2954,14 +2954,14 @@ CALL dealloc_psi(RCPsi(2))
 CALL dealloc_SmolyakRep(SRep)
 !------------------------------------------------------
 IF (debug) THEN
-  write(out_unitp,*) 'tab_WeightChannels',tab_WeightChannels
-  write(out_unitp,*) 'END ',name_sub
+  write(out_unit,*) 'tab_WeightChannels',tab_WeightChannels
+  write(out_unit,*) 'END ',name_sub
 END IF
 !------------------------------------------------------
 
 END SUBROUTINE Channel_weight_SG4_basis
       SUBROUTINE Channel_weight_contracHADA(w_harm,psi)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -2976,8 +2976,8 @@ END SUBROUTINE Channel_weight_SG4_basis
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING Channel_weight_contracHADA'
-         write(out_unitp,*) 'nb_bi,nb_ai',psi%nb_bi
+         write(out_unit,*) 'BEGINNING Channel_weight_contracHADA'
+         write(out_unit,*) 'nb_bi,nb_ai',psi%nb_bi
        END IF
 !-----------------------------------------------------------
 
@@ -2998,7 +2998,7 @@ END SUBROUTINE Channel_weight_SG4_basis
 
 !----------------------------------------------------------
         IF (debug) THEN
-          write(out_unitp,*) 'END Channel_weight_contracHADA'
+          write(out_unit,*) 'END Channel_weight_contracHADA'
         END IF
 !----------------------------------------------------------
 
@@ -3009,7 +3009,7 @@ END SUBROUTINE Channel_weight_SG4_basis
 !> MPI version of Channel_weight_contracADA
 !=======================================================================================
 !SUBROUTINE Channel_weight_contracADA_MPI(w_harm,psi)
-!  USE mod_system
+!  USE EVR_system_m
 !  USE mod_psi_set_alloc
 !  IMPLICIT NONE
 !
@@ -3043,7 +3043,7 @@ END SUBROUTINE Channel_weight_SG4_basis
 !
 !==============================================================
       SUBROUTINE calc_DM(psi,max_1D,T,info,print_DM)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -3072,10 +3072,10 @@ END SUBROUTINE Channel_weight_SG4_basis
 !     logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_tot',psi%nb_tot
-        write(out_unitp,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
-        write(out_unitp,*) 'nb_bie',psi%nb_bi*psi%nb_be
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_tot',psi%nb_tot
+        write(out_unit,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
+        write(out_unit,*) 'nb_bie',psi%nb_bi*psi%nb_be
       END IF
 !-----------------------------------------------------------
 
@@ -3083,8 +3083,8 @@ END SUBROUTINE Channel_weight_SG4_basis
         max_print = min(50,psi%nb_tot)
         CALL alloc_NParray(weight,[psi%nb_tot],"weight",name_sub)
         weight(:) = real(conjg(psi%CvecB)*psi%CvecB,kind=Rkind)
-!       write(out_unitp,*) 'T weight_tot',T,weight(1:max_print)
-        write(out_unitp,'(a,f12.1,1x,a,50(1x,f8.6))')                           &
+!       write(out_unit,*) 'T weight_tot',T,weight(1:max_print)
+        write(out_unit,'(a,f12.1,1x,a,50(1x,f8.6))')                           &
                  'T weight_tot ',T,trim(info),weight(1:max_print)
         CALL dealloc_NParray(weight,"weight",name_sub)
       END IF
@@ -3105,7 +3105,7 @@ END SUBROUTINE Channel_weight_SG4_basis
           tr = tr + DM(ibie,ibie)
           tr2 = tr2 + DM2(ibie,ibie)
         END DO
-        write(out_unitp,*) 'T tr(DM),tr(DM2)',T,abs(tr),abs(tr2)
+        write(out_unit,*) 'T tr(DM),tr(DM2)',T,abs(tr),abs(tr2)
         CALL dealloc_NParray(DM ,"DM" ,name_sub)
         CALL dealloc_NParray(DM2,"DM2",name_sub)
       END IF
@@ -3126,7 +3126,7 @@ END SUBROUTINE Channel_weight_SG4_basis
           tr = tr + DM_v1(ib,ib)
           tr2 = tr2 + DM2_v1(ib,ib)
         END DO
-        write(out_unitp,*) 'T v1 tr(DM),tr(DM2)',T,abs(tr),abs(tr2)
+        write(out_unit,*) 'T v1 tr(DM),tr(DM2)',T,abs(tr),abs(tr2)
 
         CALL dealloc_NParray(DM_v1 ,"DM_v1" ,name_sub)
         CALL dealloc_NParray(DM2_v1,"DM2_v1",name_sub)
@@ -3134,7 +3134,7 @@ END SUBROUTINE Channel_weight_SG4_basis
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -3148,7 +3148,7 @@ END SUBROUTINE Channel_weight_SG4_basis
 !
 !==============================================================
       SUBROUTINE calc_nDTk(psi,T)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi_set_alloc
       IMPLICIT NONE
 
@@ -3174,8 +3174,8 @@ END SUBROUTINE Channel_weight_SG4_basis
 !     logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
       END IF
 !-----------------------------------------------------------
 
@@ -3229,7 +3229,7 @@ END SUBROUTINE Channel_weight_SG4_basis
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 

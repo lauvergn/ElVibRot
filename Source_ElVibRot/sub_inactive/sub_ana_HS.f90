@@ -54,7 +54,7 @@
 !
 !=====================================================================
       SUBROUTINE sub_hermitic_H(H,nb_bases,non_hermitic,sym)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !------ active Matrix H ------------------------------------------
@@ -70,7 +70,7 @@
       !logical, parameter :: debug = .TRUE.
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_hermitic_H'
+        write(out_unit,*) 'BEGINNING sub_hermitic_H'
       END IF
 !-----------------------------------------------------------
 
@@ -79,8 +79,8 @@
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'non_hermitique H',non_hermitic
-        write(out_unitp,*) 'END sub_hermitic_H'
+        write(out_unit,*) 'non_hermitique H',non_hermitic
+        write(out_unit,*) 'END sub_hermitic_H'
       END IF
 !-----------------------------------------------------------
 
@@ -92,7 +92,7 @@
 !
 !=====================================================================
       SUBROUTINE sub_hermitic_cplxH(H,nb_bases,non_hermitic,sym)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !------ active Matrix H ------------------------------------------
@@ -111,7 +111,7 @@
 !     parameter (debug=.TRUE.)
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_hermitic_cplxH'
+        write(out_unit,*) 'BEGINNING sub_hermitic_cplxH'
       END IF
 !-----------------------------------------------------------
 
@@ -126,7 +126,7 @@
           END IF
 
           IF ( val > non_hermitic) non_hermitic = val
-!         write(out_unitp,*) 'sub_hermitic_cplxH',val,non_hermitic
+!         write(out_unit,*) 'sub_hermitic_cplxH',val,non_hermitic
         END DO
       END DO
 
@@ -134,8 +134,8 @@
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'non_hermitique cplxH',non_hermitic
-        write(out_unitp,*) 'END sub_hermitic_cplxH'
+        write(out_unit,*) 'non_hermitique cplxH',non_hermitic
+        write(out_unit,*) 'END sub_hermitic_cplxH'
       END IF
 !-----------------------------------------------------------
 
@@ -147,7 +147,7 @@
 !
 !=====================================================================
       SUBROUTINE sub_ana_S(S,nb_bases,max_Sii,max_Sij,write_maxS)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !------ active Matrix H ------------------------------------------
@@ -165,8 +165,8 @@
       !logical, parameter :: debug = .TRUE.
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_ana_S'
-        CALL Write_Mat(S,out_unitp,5)
+        write(out_unit,*) 'BEGINNING sub_ana_S'
+        CALL Write_Mat(S,out_unit,5)
       END IF
 !-----------------------------------------------------------
 
@@ -181,13 +181,13 @@
       END DO
 
       IF (write_maxS) THEN
-         write(out_unitp,"(' Max Overlap:',2e11.3)") max_Sii,max_Sij
-         flush(out_unitp)
+         write(out_unit,"(' Max Overlap:',2e11.3)") max_Sii,max_Sij
+         flush(out_unit)
       END IF
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) ' Max Overlap:',max_Sii,max_Sij
-        write(out_unitp,*) 'END sub_ana_S'
+        write(out_unit,*) ' Max Overlap:',max_Sii,max_Sij
+        write(out_unit,*) 'END sub_ana_S'
       END IF
 !-----------------------------------------------------------
 
@@ -198,7 +198,7 @@
 !
 !=====================================================================
       SUBROUTINE sub_ana_cplxS(S,nb_bases,max_Sii,max_Sij,write_maxS)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !------ active Matrix H ------------------------------------------
@@ -217,7 +217,7 @@
 !     parameter (debug=.TRUE.)
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_ana_cplxS'
+        write(out_unit,*) 'BEGINNING sub_ana_cplxS'
       END IF
 !-----------------------------------------------------------
 
@@ -232,13 +232,13 @@
       END DO
 
       IF (write_maxS) THEN
-         write(out_unitp,"(' Max Overlap:',2e11.3)") max_Sii,max_Sij
+         write(out_unit,"(' Max Overlap:',2e11.3)") max_Sii,max_Sij
       END IF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) max_Sii,max_Sij
-        write(out_unitp,*) 'sub_ana_cplxS'
+        write(out_unit,*) max_Sii,max_Sij
+        write(out_unit,*) 'sub_ana_cplxS'
       END IF
 !-----------------------------------------------------------
 

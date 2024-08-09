@@ -59,7 +59,7 @@
                               tcor2a,tcor2i,tcor1a,trota,               &
                               Basis2n,                                  &
                               wherm,Vinact,ScalOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       use mod_PrimOp, only: PrimOp_t, param_d0matop
       USE mod_basis
@@ -147,46 +147,46 @@
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Basis2n%nb or nb_harm',Basis2n%nb
-        write(out_unitp,*)
-        write(out_unitp,*) 'd0f_harm',d0f_harm
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Basis2n%nb or nb_harm',Basis2n%nb
+        write(out_unit,*)
+        write(out_unit,*) 'd0f_harm',d0f_harm
         !---------------------------------------------------
-        write(out_unitp,*) 'Matrices of Heff',Basis2n%nb
-        write(out_unitp,*)
+        write(out_unit,*) 'Matrices of Heff',Basis2n%nb
+        write(out_unit,*)
 
         DO iOp=1,nb_Op
-          write(out_unitp,*) ' iOp:',iOp
+          write(out_unit,*) ' iOp:',iOp
           DO k_term=1,d0MatHADAOp(iOp)%nb_term
-            write(out_unitp,*) ' deriv_term:',                          &
+            write(out_unit,*) ' deriv_term:',                          &
                              d0MatHADAOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unitp,5)
+            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatHADAOp(iOp)%cplx) THEN
-            write(out_unitp,*) ' cplx Op:'
-            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unitp,5)
+            write(out_unit,*) ' cplx Op:'
+            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
           END IF
         END DO
         !---------------------------------------------------
 
-         write(out_unitp,*) 'nb_inact2n',nb_inact2n
-         write(out_unitp,*)
-         write(out_unitp,*) 'rho,Vinact',rho,Vinact
-         write(out_unitp,*) 'T1,T2',T1,T2
-         write(out_unitp,*)
-         write(out_unitp,*) 'd1xa',d1xa
-         write(out_unitp,*) 'd2xaa',d2xaa
-         write(out_unitp,*) 'd0c',d0c
-         write(out_unitp,*) 'd1c',d1c
-         write(out_unitp,*) 'd2c',d2c
-         write(out_unitp,*) 'd1lnN,d2lnN',d1lnN,d2lnN
-         write(out_unitp,*) 'f2Qaa,f2Qii,f2Qai',f2Qaa,f2Qii,f2Qai
-         write(out_unitp,*) 'tcor2a,tcor2i',tcor2a,tcor2i
-         write(out_unitp,*) 'tcor1a,trota,',tcor1a,trota
+         write(out_unit,*) 'nb_inact2n',nb_inact2n
+         write(out_unit,*)
+         write(out_unit,*) 'rho,Vinact',rho,Vinact
+         write(out_unit,*) 'T1,T2',T1,T2
+         write(out_unit,*)
+         write(out_unit,*) 'd1xa',d1xa
+         write(out_unit,*) 'd2xaa',d2xaa
+         write(out_unit,*) 'd0c',d0c
+         write(out_unit,*) 'd1c',d1c
+         write(out_unit,*) 'd2c',d2c
+         write(out_unit,*) 'd1lnN,d2lnN',d1lnN,d2lnN
+         write(out_unit,*) 'f2Qaa,f2Qii,f2Qai',f2Qaa,f2Qii,f2Qai
+         write(out_unit,*) 'tcor2a,tcor2i',tcor2a,tcor2i
+         write(out_unit,*) 'tcor1a,trota,',tcor1a,trota
 
-         write(out_unitp,*)
-         write(out_unitp,*) 'ind_quadra',ind_quadra
-         write(out_unitp,*) 'wherm,Vinact',wherm,Vinact
+         write(out_unit,*)
+         write(out_unit,*) 'ind_quadra',ind_quadra
+         write(out_unit,*) 'wherm,Vinact',wherm,Vinact
 
        END IF
 !-----------------------------------------------------------
@@ -222,15 +222,15 @@
 !     -------------------------------------------------
 !     -------------------------------------------------
 
-!     write(out_unitp,*) 'ind_quadra',ind_quadra
+!     write(out_unit,*) 'ind_quadra',ind_quadra
 !     --------------------------------------------------------
 !     construction des matrices
       DO ij=1,Basis2n%nb
         CALL calc_nDindex(Basis2n%nDindB,ij,ind_basis(:),err_sub)
 
         IF (err_sub /= 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) '  from Basis2n%nDindB'
+          write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) '  from Basis2n%nDindB'
           STOP 'calc_nDindex'
         END IF
 
@@ -247,7 +247,7 @@
                                            ind_quadra(i),ind_basis(i),1,1)
         END DO
 
-!       write(out_unitp,*) ' tab_Pbasis(i)%nq is odd'
+!       write(out_unit,*) ' tab_Pbasis(i)%nq is odd'
 !       here I should multiply by rho, but since rho MUST not be a function
 !       of the inactive variables, I'll do that after
         CALL calc_Tinact_new(Tinact,Veff,T1,T2,                         &
@@ -357,20 +357,20 @@
 
       !---------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Matrices of Heff',Basis2n%nb
+        write(out_unit,*) 'Matrices of Heff',Basis2n%nb
         DO iOp=1,nb_Op
-          write(out_unitp,*) ' iOp:',iOp
+          write(out_unit,*) ' iOp:',iOp
           DO k_term=1,d0MatHADAOp(iOp)%nb_term
-            write(out_unitp,*) ' deriv_term:',                          &
+            write(out_unit,*) ' deriv_term:',                          &
                              d0MatHADAOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unitp,5)
+            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatHADAOp(iOp)%cplx) THEN
-            write(out_unitp,*) ' cplx Op:'
-            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unitp,5)
+            write(out_unit,*) ' cplx Op:'
+            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
           END IF
         END DO
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
       !---------------------------------------------------------
 

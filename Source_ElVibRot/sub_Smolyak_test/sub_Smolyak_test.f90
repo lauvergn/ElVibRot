@@ -61,7 +61,7 @@ SUBROUTINE sub_main_Smolyak_test()
 END SUBROUTINE sub_main_Smolyak_test
 
 SUBROUTINE sub_main_testHpsi()
-USE mod_system
+USE EVR_system_m
 USE mod_Smolyak_DInd
 USE mod_Smolyak_RDP
 USE mod_Smolyak_ba
@@ -94,22 +94,22 @@ logical, parameter :: debug = .FALSE.
 
 
 
-read(in_unitp,*) AllPara%D
+read(in_unit,*) AllPara%D
 
-read(in_unitp,*) AllPara%LB,AllPara%LG
+read(in_unit,*) AllPara%LB,AllPara%LG
 
 
 !-- the 1D-basis ---------------------------
 CALL Set_tab_ba(AllPara%tab_ba,AllPara%D,AllPara%LB,AllPara%LG)
 
 !-- the nD basis ---------------------------
-write(out_unitp,*)
-write(out_unitp,*) 'Basis ind'
+write(out_unit,*)
+write(out_unit,*) 'Basis ind'
 CALL Set_nDInd_01order(AllPara%ind_Basis,AllPara%D,0,AllPara%LB,0)
 
 !-- the numbers of nD-grids ... ------------
-write(out_unitp,*)
-write(out_unitp,*) 'Grid ind'
+write(out_unit,*)
+write(out_unit,*) 'Grid ind'
 LGmin = AllPara%LG-AllPara%D+1
 CALL Set_nDInd_10order(AllPara%ind_Grid,AllPara%D,LGmin,AllPara%LG)
 
@@ -119,9 +119,9 @@ CALL Set_SmolyakWeight(AllPara%WSG,AllPara%ind_Grid(0),AllPara%D,AllPara%LG)
 
 !-- Potential on the grid ------------------
 CALL V_ON_GRID(V_ON_G,AllPara)
-  !write(out_unitp,*) 'coucou potG',ibbb
+  !write(out_unit,*) 'coucou potG',ibbb
   !CALL Write_TabRDP_pack(V_ON_G)
-  !write(out_unitp,*) 'end coucou potG',ibbb
+  !write(out_unit,*) 'end coucou potG',ibbb
 
 
 CALL Set_BgG_FOR_id(Hpsi_ON_G,AllPara%ind_Grid,AllPara%ind_Basis,AllPara%tab_ba,AllPara%D,AllPara%LG,0)
@@ -129,13 +129,13 @@ CALL Set_BgG_FOR_id(Hpsi_ON_G,AllPara%ind_Grid,AllPara%ind_Basis,AllPara%tab_ba,
 !-- Initialization WP on the basis ----------
 CALL Set_BgG_FOR_id(WPB,AllPara%ind_Grid,AllPara%ind_Basis,AllPara%tab_ba,AllPara%D,AllPara%LG,AllPara%D)
 
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 nb_ba = WPB(1)%n3
 nb_qa = sum(Hpsi_ON_G(:)%n2)
-write(out_unitp,*) 'nb_ba,nb_qa',nb_ba,nb_qa
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) 'nb_ba,nb_qa',nb_ba,nb_qa
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 
 
 !TEST B=>G=>B
@@ -162,16 +162,16 @@ H(:,:) = ZERO
 allocate(Vec(nb_ba,nb_ba))
 allocate(Ene(nb_ba))
 
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '=======D:',AllPara%D,'================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '=======D:',AllPara%D,'================='
 CALL time_perso('sub_main_testHpsi')
-write(out_unitp,*) '====================================='
-flush(out_unitp)
-write(out_unitp,*) 'basis set list:'
+write(out_unit,*) '====================================='
+flush(out_unit)
+write(out_unit,*) 'basis set list:'
 DO ibbb=1,AllPara%ind_Basis(AllPara%D+1)%MaxnD
-  write(out_unitp,*) 'ibb,tab_i',ibbb,':',AllPara%ind_Basis(AllPara%D+1)%tab_ind(:,ibbb)
+  write(out_unit,*) 'ibb,tab_i',ibbb,':',AllPara%ind_Basis(AllPara%D+1)%tab_ind(:,ibbb)
 END DO
 
 
@@ -186,9 +186,9 @@ DO ibbb=1,AllPara%ind_Basis(AllPara%D+1)%MaxnD
   !--------- WP on the grid ------------------
   CALL sub_B_TO_G(WPB,WPG,AllPara)
 
-  write(out_unitp,*) 'coucou WPG',ibbb
+  write(out_unit,*) 'coucou WPG',ibbb
   CALL Write_TabRDP_pack(WPG)
-  write(out_unitp,*) 'end coucou WPG',ibbb
+  write(out_unit,*) 'end coucou WPG',ibbb
 
   IF (debug) CALL Norm_OF_BgG(WPG,AllPara%WSG,AllPara%ind_Grid(0),AllPara%tab_ba,AllPara%D,AllPara%LG)
   IF (debug) CALL time_perso('sub_main_testHpsi: B=>G')
@@ -242,31 +242,31 @@ DO ibbb=1,AllPara%ind_Basis(AllPara%D+1)%MaxnD
   IF (debug) CALL time_perso('sub_main_testHpsi: G=>B')
 
   H(:,ibbb) = Hpsi_ON_B(1)%RDP(1,1,:)
-  write(out_unitp,*) 'ibb',ibbb,Hpsi_ON_B(1)%RDP(1,1,ibbb)
-  flush(out_unitp)
+  write(out_unit,*) 'ibb',ibbb,Hpsi_ON_B(1)%RDP(1,1,ibbb)
+  flush(out_unit)
 
 END DO
 
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 CALL time_perso('sub_main_testHpsi')
-write(out_unitp,*) '====================================='
-flush(out_unitp)
-write(out_unitp,*) 'V matrix'
+write(out_unit,*) '====================================='
+flush(out_unit)
+write(out_unit,*) 'V matrix'
 CALL write_mat(H,6,5)
-write(out_unitp,*) 'END V matrix'
+write(out_unit,*) 'END V matrix'
 
 
 Vec = H-transpose(H)
-write(out_unitp,*) 'non symmetric?',maxval(abs(Vec))
+write(out_unit,*) 'non symmetric?',maxval(abs(Vec))
 CALL diagonalization(H,Ene,Vec,nb_ba,2,1,.TRUE.)
-write(out_unitp,'(a,10f12.6)') 'Ene HL',Ene(1:min(10,nb_ba))
+write(out_unit,'(a,10f12.6)') 'Ene HL',Ene(1:min(10,nb_ba))
 
 END SUBROUTINE sub_main_testHpsi
 
 SUBROUTINE sub_main_testSmat()
-USE mod_system
+USE EVR_system_m
 USE mod_Smolyak_DInd
 USE mod_Smolyak_RDP
 USE mod_Smolyak_ba
@@ -299,25 +299,25 @@ logical, parameter :: debug = .TRUE.
 
 
 
-read(in_unitp,*) AllPara%D
+read(in_unit,*) AllPara%D
 
-read(in_unitp,*) AllPara%LB,AllPara%LG
+read(in_unit,*) AllPara%LB,AllPara%LG
 
 
-write(out_unitp,*) 'nb of threads',BasisTOGrid_maxth
+write(out_unit,*) 'nb of threads',BasisTOGrid_maxth
 
 
 !-- the 1D-basis ---------------------------
 CALL Set_tab_ba(AllPara%tab_ba,AllPara%D,AllPara%LB,AllPara%LG)
 
 !-- the nD basis ---------------------------
-write(out_unitp,*)
-write(out_unitp,*) 'Basis ind'
+write(out_unit,*)
+write(out_unit,*) 'Basis ind'
 CALL Set_nDInd_01order(AllPara%ind_Basis,AllPara%D,0,AllPara%LB,0)
 
 !-- the numbers of nD-grids ... ------------
-write(out_unitp,*)
-write(out_unitp,*) 'Grid ind'
+write(out_unit,*)
+write(out_unit,*) 'Grid ind'
 LGmin = AllPara%LG-AllPara%D+1
 CALL Set_nDInd_10order(AllPara%ind_Grid,AllPara%D,LGmin,AllPara%LG)
 
@@ -331,23 +331,23 @@ CALL Set_BgG_FOR_id(Hpsi_ON_G,AllPara%ind_Grid,AllPara%ind_Basis,AllPara%tab_ba,
 !-- Initialization WP on the basis ----------
 CALL Set_BgG_FOR_id(WPB,AllPara%ind_Grid,AllPara%ind_Basis,AllPara%tab_ba,AllPara%D,AllPara%LG,AllPara%D)
 
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 nb_ba = WPB(1)%n3
 nb_qa = sum(Hpsi_ON_G(:)%n2)
-write(out_unitp,*) 'nb_ba,nb_qa',nb_ba,nb_qa
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) 'nb_ba,nb_qa',nb_ba,nb_qa
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 allocate(H(nb_ba,nb_ba))
 H(:,:) = ZERO
 
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '=======D:',AllPara%D,'================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '=======D:',AllPara%D,'================='
 CALL time_perso('sub_main_testSmat')
-write(out_unitp,*) '====================================='
-flush(out_unitp)
+write(out_unit,*) '====================================='
+flush(out_unit)
 
 DO ibbb=1,AllPara%ind_Basis(AllPara%D+1)%MaxnD
 !ibbb=2
@@ -374,27 +374,27 @@ DO ibbb=1,AllPara%ind_Basis(AllPara%D+1)%MaxnD
   CALL sub_G_TO_B(Hpsi_ON_G,Hpsi_ON_B,AllPara)
   IF (debug) CALL time_perso('sub_main_testSmat: G=>B')
   H(:,ibbb)  = Hpsi_ON_B(1)%RDP(1,1,:)
-  write(out_unitp,*) 'ibb',ibbb
-  CALL Write_VecMat(Hpsi_ON_B(1)%RDP(1,1,:),out_unitp,5)
-  !write(out_unitp,*) 'ibb',ibbb,Hpsi_ON_B(1)%RDP(1,1,:)
-  flush(out_unitp)
+  write(out_unit,*) 'ibb',ibbb
+  CALL Write_VecMat(Hpsi_ON_B(1)%RDP(1,1,:),out_unit,5)
+  !write(out_unit,*) 'ibb',ibbb,Hpsi_ON_B(1)%RDP(1,1,:)
+  flush(out_unit)
 
 END DO
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 CALL time_perso('sub_main_testSmat')
-write(out_unitp,*) '====================================='
-flush(out_unitp)
+write(out_unit,*) '====================================='
+flush(out_unit)
 
 
-write(out_unitp,*) 'H partial'
-CALL Write_VecMat(H,out_unitp,5)
+write(out_unit,*) 'H partial'
+CALL Write_VecMat(H,out_unit,5)
 
 END SUBROUTINE sub_main_testSmat
 
 SUBROUTINE sub_main_test3D()
-USE mod_system
+USE EVR_system_m
 USE mod_Smolyak_DInd
 USE mod_Smolyak_RDP
 USE mod_Smolyak_ba
@@ -420,10 +420,10 @@ integer :: ibb,ibbb,nb_mult_id,nb_BG,nb_not_zero,LGmin
 
 
 
-read(in_unitp,*) AllPara%D
+read(in_unit,*) AllPara%D
 allocate(tablb0(AllPara%D))
 
-read(in_unitp,*) AllPara%LB,AllPara%LG
+read(in_unit,*) AllPara%LB,AllPara%LG
 
 
 !-------------------------------------------
@@ -444,8 +444,8 @@ CALL Set_nDInd_01order(AllPara%ind_Basis,AllPara%D,0,AllPara%LB,0)
 !-------------------------------------------
 !-------------------------------------------
 ! the numbers of nD-grids ...
-write(out_unitp,*)
-write(out_unitp,*) 'Grid ind'
+write(out_unit,*)
+write(out_unit,*) 'Grid ind'
 LGmin = AllPara%LG-AllPara%D+1
 CALL Set_nDInd_10order(AllPara%ind_Grid,AllPara%D,LGmin,AllPara%LG)
 
@@ -495,7 +495,7 @@ END DO
 END SUBROUTINE sub_main_test3D
 
 SUBROUTINE sub_main_test3D_old()
-USE mod_system
+USE EVR_system_m
 USE mod_Smolyak_DInd
 USE mod_Smolyak_RDP
 USE mod_Smolyak_ba
@@ -529,11 +529,11 @@ LG=5
 LB=3
 nb_mult = 0
 
-read(in_unitp,*) D
+read(in_unit,*) D
 allocate(tablb0(D))
 
-read(in_unitp,*) LB,LG
-!read(in_unitp,*) tablb0(:)
+read(in_unit,*) LB,LG
+!read(in_unit,*) tablb0(:)
 
 
 !-------------------------------------------
@@ -554,8 +554,8 @@ CALL Set_nDInd_01order(ind_Basis,D,0,LB,0)
 !-------------------------------------------
 !-------------------------------------------
 ! the numbers of nD-grids ...
-write(out_unitp,*)
-write(out_unitp,*) 'Grid ind'
+write(out_unit,*)
+write(out_unit,*) 'Grid ind'
 CALL Set_nDInd_10order(ind_Grid,D,(LG-D+1),LG)
 
 !weight of the Smolyak grids
@@ -577,34 +577,34 @@ CALL SumSq_TabRDP(NDPBgG)
 !CALL Write_TabRDP(NDPBgG)
 !-------------------------------------------
 !-------------------------------------------
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 CALL time_perso('sub_main_test3D: G=>B')
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
 
 DO id=1,D
   CALL Size_TabRDP(NDPBgG,nb_BG)
-  write(out_unitp,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
-  flush(out_unitp)
+  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  flush(out_unit)
 
   CALL BgG_TO_BbG(NDPBgG,NDPBbG,WSG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id,nb_mult_id)
 
   CALL Size_TabRDP(NDPBbG,nb_BG)
-  write(out_unitp,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
-  write(out_unitp,*) 'id, nb_mult_id ',id,nb_mult_id
-  flush(out_unitp)
+  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, nb_mult_id ',id,nb_mult_id
+  flush(out_unit)
 
   CALL Transfer_BbG_TO_BgG(NDPBbG,NDPBgG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id)
 END DO
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
 CALL time_perso('sub_main_test3D: G=>B')
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 !-------------------------------------------
 ! the print DPbbb
-!write(out_unitp,*) 'shape NDPBgG(1)%RDP',shape(NDPBgG(1)%RDP)
+!write(out_unit,*) 'shape NDPBgG(1)%RDP',shape(NDPBgG(1)%RDP)
 !Norm = ZERO
 !nb_not_zero = 0
 !DO ibb=1,NDPBgG(1)%n3 ! nbb (the others are 1)
@@ -612,79 +612,79 @@ write(out_unitp,*) '====================================='
 !  Norm = Norm + coef**2
 !  IF (abs(coef) > 1.d-10) THEN
 !    nb_not_zero = nb_not_zero + 1
-!    write(out_unitp,*) 'WP',ind_Basis(D+1)%tab_ind(:,ibb),coef
+!    write(out_unit,*) 'WP',ind_Basis(D+1)%tab_ind(:,ibb),coef
 !    IF (sum(abs(tablb0-ind_Basis(D+1)%tab_ind(:,ibb))) == 0) THEN
-!      write(out_unitp,*) 'WP0 OK',ibb,'/',shape(NDPBgG(1)%RDP)
+!      write(out_unit,*) 'WP0 OK',ibb,'/',shape(NDPBgG(1)%RDP)
 !    ELSE
-!      write(out_unitp,*) 'WP0 NOT OK',ibb,'/',shape(NDPBgG(1)%RDP)
+!      write(out_unit,*) 'WP0 NOT OK',ibb,'/',shape(NDPBgG(1)%RDP)
 !    END IF
 !  END IF
 !END DO
 !IF (nb_not_zero == 0) THEN
-!  write(out_unitp,*) 'WP0 NOT OK (0)',ibb,'/',shape(NDPBgG(1)%RDP)
+!  write(out_unit,*) 'WP0 NOT OK (0)',ibb,'/',shape(NDPBgG(1)%RDP)
 !END IF
-!write(out_unitp,*) 'Norm',Norm
+!write(out_unit,*) 'Norm',Norm
 
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 CALL time_perso('sub_main_test3D: B=>G')
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
 
 DO id=D,1,-1
   CALL Size_TabRDP(NDPBgG,nb_BG)
-  write(out_unitp,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
-  flush(out_unitp)
+  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  flush(out_unit)
 
   CALL Transfer_BgG_TO_BbG(NDPBgG,NDPBbG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id)
 
 
   CALL Size_TabRDP(NDPBbG,nb_BG)
-  write(out_unitp,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
-  write(out_unitp,*) 'id, nb_mult_id ',id,nb_mult_id
-  flush(out_unitp)
+  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, nb_mult_id ',id,nb_mult_id
+  flush(out_unit)
 
   CALL BbG_TO_BgG(NDPBbG,NDPBgG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id,nb_mult_id)
 
 END DO
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
 CALL time_perso('sub_main_test3D: B=>G')
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 
 CALL Norm_OFF_Diff_WP0_BgG(RWPG,NDPBgG)
 CALL Norm_OF_BgG(NDPBgG,WSG,ind_Grid(0),tab_ba,D,LG)
 
 
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 CALL time_perso('sub_main_test3D: G=>B')
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
 
 DO id=1,D
   CALL Size_TabRDP(NDPBgG,nb_BG)
-  write(out_unitp,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
-  flush(out_unitp)
+  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  flush(out_unit)
 
   CALL BgG_TO_BbG(NDPBgG,NDPBbG,WSG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id,nb_mult_id)
 
   CALL Size_TabRDP(NDPBbG,nb_BG)
-  write(out_unitp,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
-  write(out_unitp,*) 'id, nb_mult_id ',id,nb_mult_id
-  flush(out_unitp)
+  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, nb_mult_id ',id,nb_mult_id
+  flush(out_unit)
 
   CALL Transfer_BbG_TO_BgG(NDPBbG,NDPBgG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id)
 END DO
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
 CALL time_perso('sub_main_test3D: G=>B')
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
-write(out_unitp,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
+write(out_unit,*) '====================================='
 !-------------------------------------------
 ! the print DPbbb
-write(out_unitp,*) 'shape NDPBgG(1)%RDP',shape(NDPBgG(1)%RDP)
+write(out_unit,*) 'shape NDPBgG(1)%RDP',shape(NDPBgG(1)%RDP)
 Norm = ZERO
 nb_not_zero = 0
 DO ibb=1,NDPBgG(1)%n3 ! nbb (the others are 1)
@@ -692,18 +692,18 @@ DO ibb=1,NDPBgG(1)%n3 ! nbb (the others are 1)
   Norm = Norm + coef**2
   IF (abs(coef) > 1.d-10) THEN
     nb_not_zero = nb_not_zero + 1
-    write(out_unitp,*) 'WP',ind_Basis(D+1)%tab_ind(:,ibb),coef
+    write(out_unit,*) 'WP',ind_Basis(D+1)%tab_ind(:,ibb),coef
     IF (sum(abs(tablb0-ind_Basis(D+1)%tab_ind(:,ibb))) == 0) THEN
-      write(out_unitp,*) 'WP0 OK',ibb,'/',shape(NDPBgG(1)%RDP)
+      write(out_unit,*) 'WP0 OK',ibb,'/',shape(NDPBgG(1)%RDP)
     ELSE
-      write(out_unitp,*) 'WP0 NOT OK',ibb,'/',shape(NDPBgG(1)%RDP)
+      write(out_unit,*) 'WP0 NOT OK',ibb,'/',shape(NDPBgG(1)%RDP)
     END IF
   END IF
 END DO
 IF (nb_not_zero == 0) THEN
-  write(out_unitp,*) 'WP0 NOT OK (0)',ibb,'/',shape(NDPBgG(1)%RDP)
+  write(out_unit,*) 'WP0 NOT OK (0)',ibb,'/',shape(NDPBgG(1)%RDP)
 END IF
-write(out_unitp,*) 'Norm',Norm
+write(out_unit,*) 'Norm',Norm
 
 
 
@@ -712,7 +712,7 @@ END DO
 
 END SUBROUTINE sub_main_test3D_old
 SUBROUTINE sub_main_testnD_new()
-USE mod_system
+USE EVR_system_m
 USE mod_Smolyak_DInd
 USE mod_Smolyak_RDP
 USE mod_Smolyak_ba
@@ -748,9 +748,9 @@ D=4 !! dimension
 LG=3
 LB=3
 
-read(in_unitp,*) D
+read(in_unit,*) D
 
-read(in_unitp,*) LB,LG
+read(in_unit,*) LB,LG
 
 
 !-------------------------------------------
@@ -761,53 +761,53 @@ CALL Set_tab_DelatBa(tab_DelatBa,D,LG,LG)
 !-------------------------------------------
 !-------------------------------------------
 
-write(out_unitp,*)  'D,LB,LG',D,LB,LG
+write(out_unit,*)  'D,LB,LG',D,LB,LG
 !-------------------------------------------
 
-write(out_unitp,*) 'Smolyak Rep (old way): Basis'
+write(out_unit,*) 'Smolyak Rep (old way): Basis'
 CALL Set_nDInd_01order(ind_Basis,D,0,LB,0)
 B_nDind = ind_Basis(D+1)
 B_nDind%tab_ind = B_nDind%tab_ind -1
 !CALL Write_TypeDInd(B_nDind)
-flush(out_unitp)
+flush(out_unit)
 CALL alloc_SmolyakRep(SRep1,B_nDind%tab_ind,tab_DelatBa,Grid=.FALSE.,Delta=.TRUE.)
 SRep1 = ZERO
 nb_Bold = Size_SmolyakRep(SRep1)
 IF (debug) CALL Write_SmolyakRep(Srep1)
-write(out_unitp,*) 'size basis (old)',nb_Bold
+write(out_unit,*) 'size basis (old)',nb_Bold
 
 
-write(out_unitp,*)
-write(out_unitp,*) 'Smolyak ind (new way)'
+write(out_unit,*)
+write(out_unit,*) 'Smolyak ind (new way)'
 CALL Set_Smolyak_nDInd(Smolyak_nDind,D,max(0,(LG-D+1)),LG)
 !CALL Write_TypeDInd(Smolyak_nDind)
-flush(out_unitp)
+flush(out_unit)
 
 
-write(out_unitp,*) 'Weight of the Smolyak grids'
+write(out_unit,*) 'Weight of the Smolyak grids'
 CALL Set_SmolyakWeight(WSG,Smolyak_nDind,D,LG)
-!write(out_unitp,*) 'WSG',WSG
+!write(out_unit,*) 'WSG',WSG
 !-------------------------------------------
 !-------------------------------------------
-write(out_unitp,*) 'the potential'
+write(out_unit,*) 'the potential'
 VSRep = Set_V_TO_SmolyakRep(Smolyak_nDind%tab_ind,tab_ba)
-!write(out_unitp,*) 'coucou pot'
+!write(out_unit,*) 'coucou pot'
 !CALL Write_SmolyakRep_pack(VSRep)
-!write(out_unitp,*) 'end coucou pot'
+!write(out_unit,*) 'end coucou pot'
 
-write(out_unitp,*) 'END the potential'
+write(out_unit,*) 'END the potential'
 !STOP
 
 !-------------------------------------------
 !-------------------------------------------
-write(out_unitp,*) 'Test B=>G=>B'
+write(out_unit,*) 'Test B=>G=>B'
 
-!write(out_unitp,*) 'Alloc Smolyak Rep'
+!write(out_unit,*) 'Alloc Smolyak Rep'
 CALL alloc_SmolyakRep(SRep1,Smolyak_nDind%tab_ind,tab_ba,Grid=.FALSE.)
 nb_B = Size_SmolyakRep(SRep1)
-write(out_unitp,*) 'size basis (old)',nb_Bold
-write(out_unitp,*) 'size Smolyak Rep',nb_B
-flush(out_unitp)
+write(out_unit,*) 'size basis (old)',nb_Bold
+write(out_unit,*) 'size Smolyak Rep',nb_B
+flush(out_unit)
 
 !=======================!TEST B=>G
 
@@ -818,49 +818,49 @@ END DO
 SRep1 = ONE
 CALL R2_TO_SmolyakRep1_with_tab_i(SRep1,TWO,tab_i,tab_ba,tab_ind=Smolyak_nDind%tab_ind)
 SRep2 = SRep1
-write(out_unitp,*) 'Write Smolyak Rep 1: Basis'
+write(out_unit,*) 'Write Smolyak Rep 1: Basis'
 IF (debug) CALL Write_SmolyakRep(Srep1)
 
 
-CALL time_perso('sub_main_testSmat: B=>G') ; flush(out_unitp)
+CALL time_perso('sub_main_testSmat: B=>G') ; flush(out_unit)
 CALL BSmolyakRep_TO_GSmolyakRep_01(SRep1,Smolyak_nDind%tab_ind,tab_ba)
 !CALL BSmolyakRep_TO_GSmolyakRep_01_v2(SRep1,Smolyak_nDind%tab_ind,tab_ba)
 
 !CALL BSmolyakRep_TO_GSmolyakRep(SRep1,Smolyak_nDind%tab_ind,tab_ba)
-CALL time_perso('sub_main_testSmat: B=>G') ; flush(out_unitp)
+CALL time_perso('sub_main_testSmat: B=>G') ; flush(out_unit)
 RETURN
 nb_G = Size_SmolyakRep(SRep1)
 
-write(out_unitp,*) 'Write Smolyak Rep 1: Grid'
+write(out_unit,*) 'Write Smolyak Rep 1: Grid'
 IF (debug) CALL Write_SmolyakRep(Srep1)
 
-CALL time_perso('sub_main_testSmat: G=>B') ; flush(out_unitp)
+CALL time_perso('sub_main_testSmat: G=>B') ; flush(out_unit)
 !CALL GSmolyakRep_TO_BSmolyakRep_01(SRep1,Smolyak_nDind%tab_ind,tab_ba)
 CALL GSmolyakRep_TO_BSmolyakRep(SRep1,Smolyak_nDind%tab_ind,tab_ba)
-CALL time_perso('sub_main_testSmat: G=>B') ; flush(out_unitp)
+CALL time_perso('sub_main_testSmat: G=>B') ; flush(out_unit)
 
-write(out_unitp,*) 'Write Smolyak Rep 1: Basis (after B=>G=>B)'
+write(out_unit,*) 'Write Smolyak Rep 1: Basis (after B=>G=>B)'
 IF (debug) CALL Write_SmolyakRep(Srep1)
 
-write(out_unitp,*) 'Write Smolyak Rep 1: Basis max diff',MaxVal_SmolyakRep(Srep1 - Srep2)
+write(out_unit,*) 'Write Smolyak Rep 1: Basis max diff',MaxVal_SmolyakRep(Srep1 - Srep2)
 
-write(out_unitp,*) 'size basis (old)',nb_Bold
-write(out_unitp,*) 'size Smolyak Rep (basis + Grid)',nb_B,nb_G
+write(out_unit,*) 'size basis (old)',nb_Bold
+write(out_unit,*) 'size Smolyak Rep (basis + Grid)',nb_B,nb_G
 
-write(out_unitp,*)
-write(out_unitp,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
+write(out_unit,*)
+write(out_unit,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
 
-write(out_unitp,*) 'END Test B=>G=>B'
+write(out_unit,*) 'END Test B=>G=>B'
 
 RETURN
 
-write(out_unitp,*) 'Write Smolyak Rep 1 of SRepWeight: Grid'
+write(out_unit,*) 'Write Smolyak Rep 1 of SRepWeight: Grid'
 SRepWeight = Set_weight_TO_SmolyakRep(Smolyak_nDind%tab_ind,tab_ba)
 IF (debug) CALL Write_SmolyakRep(SRepWeight)
 !STOP
 
 !======================= basis set list
-write(out_unitp,*) 'basis set list:'
+write(out_unit,*) 'basis set list:'
 DO ibb=1,B_nDind%MaxnD
   CALL alloc_SmolyakRep(SRep1,Smolyak_nDind%tab_ind,tab_ba)
 
@@ -868,10 +868,10 @@ DO ibb=1,B_nDind%MaxnD
   DO i=1,D
     tab_i(i) = l_TO_n(tab_i(i),1)
   END DO
-  write(out_unitp,*) 'ibb,tab_i',ibb,':',tab_i
+  write(out_unit,*) 'ibb,tab_i',ibb,':',tab_i
 END DO
 
-write(out_unitp,*) 'TEST: V matrix'
+write(out_unit,*) 'TEST: V matrix'
 
 allocate(H(B_nDind%MaxnD,B_nDind%MaxnD))
 
@@ -887,23 +887,23 @@ DO ibb=1,B_nDind%MaxnD
   SRep1 = ZERO
   CALL R2_TO_SmolyakRep1_with_tab_i(SRep1,ONE,tab_i,tab_ba,tab_ind=Smolyak_nDind%tab_ind)
 
-  !write(out_unitp,*) 'psi (on basis)',ibb,tab_i
+  !write(out_unit,*) 'psi (on basis)',ibb,tab_i
   !CALL Write_SmolyakRep(Srep1)
 
   CALL BSmolyakRep_TO_GSmolyakRep_01(SRep1,Smolyak_nDind%tab_ind,tab_ba)
-  write(out_unitp,*) 'coucou psi (on grid)',ibb
+  write(out_unit,*) 'coucou psi (on grid)',ibb
   CALL Write_SmolyakRep_pack(Srep1)
-  write(out_unitp,*) 'end coucou psi (on grid)',ibb
+  write(out_unit,*) 'end coucou psi (on grid)',ibb
 
   SRep1 = SRep1 * VSRep
 
-  write(out_unitp,*) 'coucou V.psi (on grid)',ibb
+  write(out_unit,*) 'coucou V.psi (on grid)',ibb
   CALL Write_SmolyakRep_pack(Srep1)
-  write(out_unitp,*) 'end coucou V.psi (on grid)',ibb
+  write(out_unit,*) 'end coucou V.psi (on grid)',ibb
 
   CALL GSmolyakRep_TO_BSmolyakRep_01(SRep1,Smolyak_nDind%tab_ind,tab_ba)
 
-  !write(out_unitp,*) 'V.psi (on basis)',ibb,tab_i
+  !write(out_unit,*) 'V.psi (on basis)',ibb,tab_i
   !CALL Write_SmolyakRep(Srep1)
 
   DO jbb=1,B_nDind%MaxnD
@@ -919,25 +919,25 @@ DO ibb=1,B_nDind%MaxnD
 
   END DO
 END DO
-write(out_unitp,*) 'V matrix'
+write(out_unit,*) 'V matrix'
 CALL write_mat(H,6,5)
-write(out_unitp,*) 'END V matrix'
+write(out_unit,*) 'END V matrix'
 
 
 Vec = H-transpose(H)
 Ene = H(:,1) ! for the allocation
-write(out_unitp,*) 'non symmetric?',maxval(abs(Vec))
+write(out_unit,*) 'non symmetric?',maxval(abs(Vec))
 CALL diagonalization(H,Ene,Vec,B_nDind%MaxnD,2,1,.TRUE.)
-write(out_unitp,'(a,10f12.6)') 'Ene HL',Ene(1:min(10,B_nDind%MaxnD))
+write(out_unit,'(a,10f12.6)') 'Ene HL',Ene(1:min(10,B_nDind%MaxnD))
 RETURN
 
 deallocate(H,Vec,Ene)
-write(out_unitp,*) 'end TEST: V matrix'
+write(out_unit,*) 'end TEST: V matrix'
 
 STOP
 
 !======================= The overlap Matrix
-write(out_unitp,*) 'The overlap matrix'
+write(out_unit,*) 'The overlap matrix'
 allocate(S(B_nDind%MaxnD,B_nDind%MaxnD))
 
 DO ibb=1,B_nDind%MaxnD
@@ -954,7 +954,7 @@ DO jbb=1,B_nDind%MaxnD
   CALL R2_TO_SmolyakRep1_with_tab_i(SRep1,ONE,tab_i,tab_ba,tab_ind=Smolyak_nDind%tab_ind)
 
   IF (debug) THEN
-    write(out_unitp,*) 'Write Smolyak Rep 1: Basis'
+    write(out_unit,*) 'Write Smolyak Rep 1: Basis'
     CALL Write_SmolyakRep(Srep1)
   END IF
 
@@ -966,12 +966,12 @@ DO jbb=1,B_nDind%MaxnD
   CALL R2_TO_SmolyakRep1_with_tab_i(SRep2,ONE,tab_i,tab_ba,tab_ind=Smolyak_nDind%tab_ind)
 
   IF (debug) THEN
-    write(out_unitp,*) 'Write Smolyak Rep 2: Basis'
+    write(out_unit,*) 'Write Smolyak Rep 2: Basis'
     CALL Write_SmolyakRep(Srep2)
   END IF
 
   S(ibb,jbb)=dot_product_SmolyakRep(SRep1,SRep2,WSG)
-  IF (debug) write(out_unitp,*) 'dot_product: Basis',S(ibb,jbb)
+  IF (debug) write(out_unit,*) 'dot_product: Basis',S(ibb,jbb)
 
   IF (Grid) THEN
 
@@ -979,14 +979,14 @@ DO jbb=1,B_nDind%MaxnD
     CALL BSmolyakRep_TO_GSmolyakRep(SRep2,Smolyak_nDind%tab_ind,tab_ba)
 
     IF (debug) THEN
-      write(out_unitp,*) 'Write Smolyak Rep 1: Grid'
+      write(out_unit,*) 'Write Smolyak Rep 1: Grid'
       CALL Write_SmolyakRep(Srep1)
-      write(out_unitp,*) 'Write Smolyak Rep 2: Grid'
+      write(out_unit,*) 'Write Smolyak Rep 2: Grid'
       CALL Write_SmolyakRep(Srep2)
     END IF
 
     S(ibb,jbb)=dot_product_SmolyakRep(SRep1,SRep2*SRepWeight,WSG)
-    IF (debug) write(out_unitp,*) 'dot_product: Grid',S(ibb,jbb)
+    IF (debug) write(out_unit,*) 'dot_product: Grid',S(ibb,jbb)
   END IF
 
 END DO
@@ -995,14 +995,14 @@ END DO
 DO ibb=1,B_nDind%MaxnD
   S(ibb,ibb) = S(ibb,ibb) - ONE
 END DO
-write(out_unitp,*) 'max(abs(S-Id)) =',maxval(abs(S))
+write(out_unit,*) 'max(abs(S-Id)) =',maxval(abs(S))
 
-write(out_unitp,*) 'END The overlap matrix'
+write(out_unit,*) 'END The overlap matrix'
 
 
 END SUBROUTINE sub_main_testnD_new
 SUBROUTINE sub_main_testnD_DeltaSRep()
-USE mod_system
+USE EVR_system_m
 USE mod_Smolyak_DInd
 USE mod_Smolyak_RDP
 USE mod_Smolyak_ba
@@ -1037,9 +1037,9 @@ D=4 !! dimension
 LG=3
 LB=3
 
-read(in_unitp,*) D
+read(in_unit,*) D
 
-read(in_unitp,*) LB,LG
+read(in_unit,*) LB,LG
 
 
 !-------------------------------------------
@@ -1051,33 +1051,33 @@ CALL Set_tab_DelatBa(tab_DelatBa,D,LB,LG)
 
 
 
-write(out_unitp,*)  'D,LB,LG',D,LB,LG
-write(out_unitp,*) 'Smolyak ind (old way): Basis'
+write(out_unit,*)  'D,LB,LG',D,LB,LG
+write(out_unit,*) 'Smolyak ind (old way): Basis'
 CALL Set_Smolyak_nDInd(B_nDind,D,0,LG)
 
 !-------------------------------------------
-write(out_unitp,*)
-write(out_unitp,*) 'Smolyak ind (new way)'
+write(out_unit,*)
+write(out_unit,*) 'Smolyak ind (new way)'
 CALL Set_Smolyak_nDInd(Smolyak_nDind,D,0,LG)
 
 IF (debug) CALL Write_TypeDInd(Smolyak_nDind)
-flush(out_unitp)
+flush(out_unit)
 
-write(out_unitp,*) 'Weight of the Smolyak grids: ONE'
+write(out_unit,*) 'Weight of the Smolyak grids: ONE'
 allocate(WSG(Smolyak_nDind%MaxnD))
 WSG = ONE
-!write(out_unitp,*) 'WSG',WSG
+!write(out_unit,*) 'WSG',WSG
 !-------------------------------------------
 !-------------------------------------------
 
 !-------------------------------------------
 !-------------------------------------------
-!write(out_unitp,*) 'Alloc Smolyak Rep'
+!write(out_unit,*) 'Alloc Smolyak Rep'
 CALL alloc_SmolyakRep(SRep1,Smolyak_nDind%tab_ind,tab_DelatBa,delta=.TRUE.,grid=.FALSE.)
 nb_B = Size_SmolyakRep(SRep1)
-write(out_unitp,*) 'size basis (old)',B_nDind%MaxnD
-write(out_unitp,*) 'size Smolyak Rep (basis)',nb_B
-flush(out_unitp)
+write(out_unit,*) 'size basis (old)',B_nDind%MaxnD
+write(out_unit,*) 'size Smolyak Rep (basis)',nb_B
+flush(out_unit)
 !TEST B=>G
 !allocate(RPsi(nb_B))
 !RPsi = ZERO
@@ -1094,7 +1094,7 @@ CALL R2_TO_SmolyakRep1_with_tab_i(SRep1,ONE,tab_i,tab_DelatBa,tab_ind=Smolyak_nD
 SRep2 = SRep1
 
 IF (debug) THEN
-  write(out_unitp,*) 'Write Smolyak Rep 1: Basis'
+  write(out_unit,*) 'Write Smolyak Rep 1: Basis'
   CALL Write_SmolyakRep(Srep1)
 END IF
 
@@ -1107,27 +1107,27 @@ CALL time_perso('sub_main_testSmat: G=>B')
 CALL GSmolyakRep_TO_BSmolyakRep(SRep1,Smolyak_nDind%tab_ind,tab_DelatBa)
 CALL time_perso('sub_main_testSmat: G=>B')
 
-write(out_unitp,*) 'size basis (old)',B_nDind%MaxnD
-write(out_unitp,*) 'size Smolyak Rep (basis + Grid)',nb_B,nb_G
+write(out_unit,*) 'size basis (old)',B_nDind%MaxnD
+write(out_unit,*) 'size Smolyak Rep (basis + Grid)',nb_B,nb_G
 
-write(out_unitp,*) 'Write Smolyak Rep 1: Basis (after B=>G=>B)'
+write(out_unit,*) 'Write Smolyak Rep 1: Basis (after B=>G=>B)'
 IF (debug) CALL Write_SmolyakRep(Srep1)
 
-write(out_unitp,*) 'Write Smolyak Rep 1: Basis max diff',MaxVal_SmolyakRep(Srep1 - Srep2)
+write(out_unit,*) 'Write Smolyak Rep 1: Basis max diff',MaxVal_SmolyakRep(Srep1 - Srep2)
 
 
-write(out_unitp,*)
-write(out_unitp,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
+write(out_unit,*)
+write(out_unit,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
 STOP
 IF (debug) THEN
-  write(out_unitp,*) 'Write Smolyak Rep 1: Grid'
+  write(out_unit,*) 'Write Smolyak Rep 1: Grid'
   CALL Write_SmolyakRep(Srep1)
 END IF
 
 
 
 
-write(out_unitp,*) 'Write Smolyak Rep 1 of SRepWeight: Grid'
+write(out_unit,*) 'Write Smolyak Rep 1 of SRepWeight: Grid'
 SRepWeight = Set_weight_TO_SmolyakRep(Smolyak_nDind%tab_ind,tab_DelatBa)
 !CALL Write_SmolyakRep(SRepWeight)
 !STOP
@@ -1146,17 +1146,17 @@ DO ibb=1,B_nDind%MaxnD
   CALL tabR2_TO_SmolyakRep1(SRep1,RPsi)
   !SRep1     = RPsi  ! problem with ifort 16
   IF (debug) THEN
-    write(out_unitp,*) 'Write Smolyak Rep 1: Basis'
+    write(out_unit,*) 'Write Smolyak Rep 1: Basis'
     CALL Write_SmolyakRep(Srep1)
   END IF
 
   IF (Grid) CALL BSmolyakRep_TO_GSmolyakRep(SRep1,Smolyak_nDind%tab_ind,tab_DelatBa)
 
   IF (debug .AND. Grid) THEN
-    write(out_unitp,*) 'Write Smolyak Rep 1: Grid'
+    write(out_unit,*) 'Write Smolyak Rep 1: Grid'
     CALL Write_SmolyakRep(Srep1)
   END IF
-  write(out_unitp,*) 'ibb',ibb ; flush(out_unitp)
+  write(out_unit,*) 'ibb',ibb ; flush(out_unit)
 
   DO jbb=1,B_nDind%MaxnD
 
@@ -1168,26 +1168,26 @@ DO ibb=1,B_nDind%MaxnD
     CALL tabR2_TO_SmolyakRep1(SRep2,RPsi)
     !SRep2     = RPsi   ! problem with ifort 16
     IF (debug) THEN
-      write(out_unitp,*) 'Write Smolyak Rep 2: Basis'
+      write(out_unit,*) 'Write Smolyak Rep 2: Basis'
       CALL Write_SmolyakRep(Srep2)
     END IF
 
     IF (.NOT. Grid) THEN
       S(ibb,jbb)=dot_product_SmolyakRep(SRep1,SRep2,WSG)
-      IF (debug) write(out_unitp,*) 'dot_product: Basis',S(ibb,jbb)
+      IF (debug) write(out_unit,*) 'dot_product: Basis',S(ibb,jbb)
     ELSE
 
     CALL BSmolyakRep_TO_GSmolyakRep(SRep2,Smolyak_nDind%tab_ind,tab_DelatBa)
 
     IF (debug) THEN
-      write(out_unitp,*) 'Write Smolyak Rep 1: Grid'
+      write(out_unit,*) 'Write Smolyak Rep 1: Grid'
       CALL Write_SmolyakRep(Srep1)
-      write(out_unitp,*) 'Write Smolyak Rep 2: Grid'
+      write(out_unit,*) 'Write Smolyak Rep 2: Grid'
       CALL Write_SmolyakRep(Srep2)
     END IF
 
     S(ibb,jbb)=dot_product_SmolyakRep(SRep1,SRep2*SRepWeight,WSG)
-    IF (debug) write(out_unitp,*) 'dot_product: Grid',S(ibb,jbb)
+    IF (debug) write(out_unit,*) 'dot_product: Grid',S(ibb,jbb)
   END IF
 
 END DO
@@ -1196,6 +1196,6 @@ END DO
 DO ibb=1,B_nDind%MaxnD
   S(ibb,ibb) = S(ibb,ibb) - ONE
 END DO
-write(out_unitp,*) 'max(abs(S-Id)) =',maxval(abs(S))
+write(out_unit,*) 'max(abs(S-Id)) =',maxval(abs(S))
 
 END SUBROUTINE sub_main_testnD_DeltaSRep

@@ -49,7 +49,7 @@
 ! POGridRep_basis
 !=====================================================================
 MODULE BasisMakeGrid
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE param_SimulatedAnnealing
@@ -166,15 +166,15 @@ CONTAINS
 
         Restart_Opt         =  0
 
-        read(in_unitp,SimulatedAnnealing,IOSTAT=err_io)
+        read(in_unit,SimulatedAnnealing,IOSTAT=err_io)
         IF (err_io /= 0) THEN
-           write(out_unitp,*) ' WARNING in Read_param_SimulatedAnnealing'
-           write(out_unitp,*) '  while reading the "SimulatedAnnealing" namelist'
-           write(out_unitp,*) ' end of file or end of record'
-           write(out_unitp,*) ' Check your data !!'
+           write(out_unit,*) ' WARNING in Read_param_SimulatedAnnealing'
+           write(out_unit,*) '  while reading the "SimulatedAnnealing" namelist'
+           write(out_unit,*) ' end of file or end of record'
+           write(out_unit,*) ' Check your data !!'
            STOP
         END IF
-        IF (print_level > 1) write(out_unitp,SimulatedAnnealing)
+        IF (print_level > 1) write(out_unit,SimulatedAnnealing)
 
         para_SimulatedAnnealing%nb_mc_tot           =  nb_mc_tot
         para_SimulatedAnnealing%nb_mc_partial       =  nb_mc_partial
@@ -206,38 +206,38 @@ CONTAINS
       SUBROUTINE Write_param_SimulatedAnnealing(para_SimulatedAnnealing)
       TYPE (param_SimulatedAnnealing), intent(in)   :: para_SimulatedAnnealing
 
-      write(out_unitp,*) '  WRITE param_SimulatedAnnealing'
-      write(out_unitp,*)
-      write(out_unitp,*) '  nb_mc_tot          ',para_SimulatedAnnealing%nb_mc_tot
-      write(out_unitp,*) '  nb_mc_partial      ',para_SimulatedAnnealing%nb_mc_partial
-      write(out_unitp,*)
-      write(out_unitp,*) '  TempInit_type      ',para_SimulatedAnnealing%TempInit_type
-      write(out_unitp,*) '  Tmax               ',para_SimulatedAnnealing%Tmax
-      write(out_unitp,*) '  Tmin               ',para_SimulatedAnnealing%Tmin
-      write(out_unitp,*) '  DeltaT             ',para_SimulatedAnnealing%DeltaT
-      write(out_unitp,*)
-      write(out_unitp,*) '  RangeScal          ',para_SimulatedAnnealing%RangeScal
-      write(out_unitp,*) '  RangeScalInit      ',para_SimulatedAnnealing%RangeScalInit
+      write(out_unit,*) '  WRITE param_SimulatedAnnealing'
+      write(out_unit,*)
+      write(out_unit,*) '  nb_mc_tot          ',para_SimulatedAnnealing%nb_mc_tot
+      write(out_unit,*) '  nb_mc_partial      ',para_SimulatedAnnealing%nb_mc_partial
+      write(out_unit,*)
+      write(out_unit,*) '  TempInit_type      ',para_SimulatedAnnealing%TempInit_type
+      write(out_unit,*) '  Tmax               ',para_SimulatedAnnealing%Tmax
+      write(out_unit,*) '  Tmin               ',para_SimulatedAnnealing%Tmin
+      write(out_unit,*) '  DeltaT             ',para_SimulatedAnnealing%DeltaT
+      write(out_unit,*)
+      write(out_unit,*) '  RangeScal          ',para_SimulatedAnnealing%RangeScal
+      write(out_unit,*) '  RangeScalInit      ',para_SimulatedAnnealing%RangeScalInit
 
-      write(out_unitp,*) '  With_RangeInit     ',para_SimulatedAnnealing%With_RangeInit
-      write(out_unitp,*) '  RangeInit          ',para_SimulatedAnnealing%RangeInit
+      write(out_unit,*) '  With_RangeInit     ',para_SimulatedAnnealing%With_RangeInit
+      write(out_unit,*) '  RangeInit          ',para_SimulatedAnnealing%RangeInit
 
-      write(out_unitp,*)
-      write(out_unitp,*) '  TempScheduling_type',para_SimulatedAnnealing%TempScheduling_type
-      write(out_unitp,*) '  ExpCoolParam       ',para_SimulatedAnnealing%ExpCoolParam
-      write(out_unitp,*)
-      write(out_unitp,*) '  ResetTemp          ',para_SimulatedAnnealing%ResetTemp
-      write(out_unitp,*) '  ResetTempScal      ',para_SimulatedAnnealing%ResetTempScal
-      write(out_unitp,*)
-      write(out_unitp,*) '  Restart_Opt        ',para_SimulatedAnnealing%Restart_Opt
-      write(out_unitp,*)
-      write(out_unitp,*) '  END WRITE param_SimulatedAnnealing'
+      write(out_unit,*)
+      write(out_unit,*) '  TempScheduling_type',para_SimulatedAnnealing%TempScheduling_type
+      write(out_unit,*) '  ExpCoolParam       ',para_SimulatedAnnealing%ExpCoolParam
+      write(out_unit,*)
+      write(out_unit,*) '  ResetTemp          ',para_SimulatedAnnealing%ResetTemp
+      write(out_unit,*) '  ResetTempScal      ',para_SimulatedAnnealing%ResetTempScal
+      write(out_unit,*)
+      write(out_unit,*) '  Restart_Opt        ',para_SimulatedAnnealing%Restart_Opt
+      write(out_unit,*)
+      write(out_unit,*) '  END WRITE param_SimulatedAnnealing'
 
       END SUBROUTINE write_param_SimulatedAnnealing
 
 
       SUBROUTINE POGridRep_basis(basis_POGridRep,nb0)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_basis
       IMPLICIT NONE
@@ -270,9 +270,9 @@ CONTAINS
       IF (basis_POGridRep%ndim > 1 .OR. .NOT. basis_POGridRep%POGridRep) RETURN
 
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' The Contracted basis'
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' The Contracted basis'
         !CALL RecWrite_basis(basis_POGridRep)
       END IF
 !---------------------------------------------------------------------
@@ -314,25 +314,25 @@ CONTAINS
 !                    [basis_temp%nb,basis_temp%nb],'Rvec',name_sub)
 !       basis_temp%Rvec = RvpX
 !       CALL sub_contraction_basis(basis_temp,.TRUE.)
-!       write(out_unitp,*) 'POGridRep basis on the grid'
+!       write(out_unit,*) 'POGridRep basis on the grid'
 !       DO i=1,get_nq_FROM_basis(basis_temp)
-!         write(out_unitp,*) i,basis_temp%x(:,i),basis_temp%dnRGB%d0(i,:)
+!         write(out_unit,*) i,basis_temp%x(:,i),basis_temp%dnRGB%d0(i,:)
 !       END DO
-!       flush(out_unitp)
+!       flush(out_unit)
 !       STOP
 !     END IF
 
       !---------------------------------------------------------------
       ! Eigenvalues of Q =>  the POGridRep grid points
       IF (debug) THEN
-         write(out_unitp,*) ' Eigenvalues of Q: POGridRep grid points'
+         write(out_unit,*) ' Eigenvalues of Q: POGridRep grid points'
          DO i=1,basis_temp%nb
-           write(out_unitp,*) i,RdiagX(i)
+           write(out_unit,*) i,RdiagX(i)
          END DO
-         write(out_unitp,*) ' RvpX:'
-         CALL Write_Mat(RvpX,out_unitp,5)
-         !write(out_unitp,*) 'Id?',matmul(transpose(RvpX),RvpX) ; stop
-         flush(out_unitp)
+         write(out_unit,*) ' RvpX:'
+         CALL Write_Mat(RvpX,out_unit,5)
+         !write(out_unit,*) 'Id?',matmul(transpose(RvpX),RvpX) ; stop
+         flush(out_unit)
       END IF
 
       !---------------------------------------------------------------
@@ -362,15 +362,15 @@ CONTAINS
                         [basis_POGridRep%nb,basis_POGridRep%nb], &
                         "basis_POGridRep%Rvec",name_sub)
         basis_POGridRep%Rvec = basis_temp%Rvec
-        !CALL Write_Mat(basis_temp%Rvec,out_unitp,5) ; stop
+        !CALL Write_Mat(basis_temp%Rvec,out_unit,5) ; stop
         basis_POGridRep%nbc = nqc0
         CALL sub_contraction_basis(basis_POGridRep,.TRUE.)
         IF (debug) THEN
-          write(out_unitp,*) 'Eigenvectors on the POGridRep grid:'
+          write(out_unit,*) 'Eigenvectors on the POGridRep grid:'
           DO i=1,get_nq_FROM_basis(basis_POGridRep)
-            write(out_unitp,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
+            write(out_unit,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
           END DO
-          flush(out_unitp)
+          flush(out_unit)
         END IF
       END IF
       nq = get_nq_FROM_basis(basis_POGridRep)
@@ -385,9 +385,9 @@ CONTAINS
         ! second transformation nbc => nbc with nqc
         ! => POGridRep basis on the POGridRep grid points
         ! enable to calculate  the POGridRep weights
-        !write(out_unitp,*) 'shape Rvec',shape(basis_POGridRep%Rvec)
-        !write(out_unitp,*) 'shape RvpX',shape(RvpX)
-        !flush(out_unitp)
+        !write(out_unit,*) 'shape Rvec',shape(basis_POGridRep%Rvec)
+        !write(out_unit,*) 'shape RvpX',shape(RvpX)
+        !flush(out_unit)
         IF (allocated(basis_POGridRep%Rvec))  THEN
           CALL dealloc_NParray(basis_POGridRep%Rvec,"basis_POGridRep%Rvec",name_sub)
         END IF
@@ -396,11 +396,11 @@ CONTAINS
         basis_POGridRep%Rvec = RvpX
         CALL sub_contraction_basis(basis_POGridRep,.TRUE.)
         IF (debug) THEN
-          write(out_unitp,*) 'POGridRep basis on the POGridRep grid'
+          write(out_unit,*) 'POGridRep basis on the POGridRep grid'
           DO i=1,nq
-            write(out_unitp,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
+            write(out_unit,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
           END DO
-          flush(out_unitp)
+          flush(out_unit)
         END IF
 
         ! the POGridRep weights
@@ -411,11 +411,11 @@ CONTAINS
 
       END IF
       IF (debug) THEN
-         write(out_unitp,*) ' Weight on POGridRep grid'
+         write(out_unit,*) ' Weight on POGridRep grid'
          DO i=1,nq
-           write(out_unitp,*) i,basis_POGridRep%x(:,i),basis_POGridRep%w(i)
+           write(out_unit,*) i,basis_POGridRep%x(:,i),basis_POGridRep%w(i)
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !- d1b => d1BasisRep and  d2b => d2BasisRep ------------
       CALL sub_dnGB_TO_dnBB(basis_POGridRep)
@@ -429,11 +429,11 @@ CONTAINS
       CALL ortho_basis_schmidt(basis_POGridRep)
 
       IF (debug) THEN
-         write(out_unitp,*) ' basis on POGridRep grid'
+         write(out_unit,*) ' basis on POGridRep grid'
          DO i=1,nq
-           write(out_unitp,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
+           write(out_unit,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
       CALL dealloc_NParray(matX_basis,"matX_basis",name_sub)
@@ -444,15 +444,15 @@ CONTAINS
 !=====================================================================
 !---------------------------------------------------------------------
       IF (debug) THEN
-        !write(out_unitp,*) ' POGridRep basis'
+        !write(out_unit,*) ' POGridRep basis'
         !CALL RecWrite_basis(basis_POGridRep)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
       END SUBROUTINE POGridRep_basis
       SUBROUTINE POGridRep2_basis(basis_POGridRep,nb0)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_Coord_KEO
       USE mod_basis
@@ -485,9 +485,9 @@ CONTAINS
       IF (basis_POGridRep%ndim > 1 .OR. .NOT. basis_POGridRep%POGridRep) RETURN
 
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' The Contracted basis'
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' The Contracted basis'
         CALL RecWrite_basis(basis_POGridRep)
       END IF
 !---------------------------------------------------------------------
@@ -529,25 +529,25 @@ CONTAINS
 !                      [basis_temp%nb,basis_temp%nb],'Rvec',name_sub)
 !           basis_temp%Rvec = RvpX
 !           CALL sub_contraction_basis(basis_temp,.TRUE.)
-!           write(out_unitp,*) 'POGridRep basis on the grid'
+!           write(out_unit,*) 'POGridRep basis on the grid'
 !           DO i=1,get_nq_FROM_basis(basis_temp)
-!             write(out_unitp,*) i,basis_temp%x(:,i),basis_temp%dnRGB%d0(i,:)
+!             write(out_unit,*) i,basis_temp%x(:,i),basis_temp%dnRGB%d0(i,:)
 !           END DO
-!           flush(out_unitp)
+!           flush(out_unit)
 !           STOP
 !         END IF
 
          !---------------------------------------------------------------
          ! Eigenvalues of Q =>  the POGridRep grid points
          IF (debug) THEN
-            write(out_unitp,*) ' Eigenvalues of Q: POGridRep grid points'
+            write(out_unit,*) ' Eigenvalues of Q: POGridRep grid points'
             DO i=1,basis_temp%nb
-              write(out_unitp,*) i,RdiagX(i)
+              write(out_unit,*) i,RdiagX(i)
             END DO
-            write(out_unitp,*) ' RvpX:'
-            CALL Write_Mat(RvpX,out_unitp,5)
-            !write(out_unitp,*) 'Id?',matmul(transpose(RvpX),RvpX) ; stop
-            flush(out_unitp)
+            write(out_unit,*) ' RvpX:'
+            CALL Write_Mat(RvpX,out_unit,5)
+            !write(out_unit,*) 'Id?',matmul(transpose(RvpX),RvpX) ; stop
+            flush(out_unit)
          END IF
 
          !---------------------------------------------------------------
@@ -573,7 +573,7 @@ CONTAINS
          ! need to unscaled x, because the scaling is done in construct_basis
          basis_POGridRep%x = ( basis_POGridRep%x - basis_POGridRep%Q0(1) ) *     &
                                                   basis_POGridRep%scaleQ(1)
-         !write(out_unitp,*) 'unscaled basis_POGridRep%x',basis_POGridRep%x
+         !write(out_unit,*) 'unscaled basis_POGridRep%x',basis_POGridRep%x
          basis_POGridRep%xPOGridRep_done = .TRUE.
          CALL construct_primitive_basis(basis_POGridRep)
 
@@ -581,8 +581,8 @@ CONTAINS
          basis_POGridRep%w(:)    = ZERO
          basis_POGridRep%w(1:nq) = basis_temp%w(:)
          basis_POGridRep%wrho(:) = basis_POGridRep%w(:) * basis_POGridRep%rho(:)
-         write(out_unitp,*) 'nb,nq',basis_POGridRep%nb,get_nq_FROM_basis(basis_POGridRep)
-         write(out_unitp,*) 'nbc,nqc',basis_POGridRep%nbc,basis_POGridRep%nqc
+         write(out_unit,*) 'nb,nq',basis_POGridRep%nb,get_nq_FROM_basis(basis_POGridRep)
+         write(out_unit,*) 'nbc,nqc',basis_POGridRep%nbc,basis_POGridRep%nqc
 
          !---------------------------------------------------------------
          ! first transformation nb0 => nb with nq
@@ -593,14 +593,14 @@ CONTAINS
                            [basis_POGridRep%nb,basis_POGridRep%nb], &
                                         "basis_POGridRep%Rvec",name_sub)
            basis_POGridRep%Rvec = basis_temp%Rvec
-           !CALL Write_Mat(basis_temp%Rvec,out_unitp,5) ; stop
+           !CALL Write_Mat(basis_temp%Rvec,out_unit,5) ; stop
            CALL sub_contraction_basis(basis_POGridRep,.TRUE.)
            IF (debug) THEN
-             write(out_unitp,*) 'Eigenvectors on the POGridRep grid:'
+             write(out_unit,*) 'Eigenvectors on the POGridRep grid:'
              DO i=1,get_nq_FROM_basis(basis_POGridRep)
-               write(out_unitp,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
+               write(out_unit,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
              END DO
-             flush(out_unitp)
+             flush(out_unit)
            END IF
          END IF
 GOTO 99
@@ -623,7 +623,7 @@ GOTO 99
 !           a = a + basis_POGridRep%dnRGB%d0(i,k)*basis_POGridRep%dnRGB%d0(j,k)
 !           END DO
 !           a = a * basis_POGridRep%w(j)
-!           write(out_unitp,*) 'u_j(xi)',j,i,a
+!           write(out_unit,*) 'u_j(xi)',j,i,a
 !         END DO
 !         END DO
 !         STOP
@@ -633,9 +633,9 @@ GOTO 99
            ! second transformation nbc => nbc with nqc
            ! => POGridRep basis on the POGridRep grid points
            ! enable to calculate  the POGridRep weights
-           write(out_unitp,*) 'shape Rvec',shape(basis_POGridRep%Rvec)
-           write(out_unitp,*) 'shape RvpX',shape(RvpX)
-           flush(out_unitp)
+           write(out_unit,*) 'shape Rvec',shape(basis_POGridRep%Rvec)
+           write(out_unit,*) 'shape RvpX',shape(RvpX)
+           flush(out_unit)
            IF (allocated(basis_POGridRep%Rvec))  THEN
              CALL dealloc_NParray(basis_POGridRep%Rvec,"basis_POGridRep%Rvec",name_sub)
            END IF
@@ -645,11 +645,11 @@ GOTO 99
            basis_POGridRep%Rvec = RvpX
            CALL sub_contraction_basis(basis_POGridRep,.TRUE.)
            IF (debug) THEN
-             write(out_unitp,*) 'POGridRep basis on the POGridRep grid'
+             write(out_unit,*) 'POGridRep basis on the POGridRep grid'
              DO i=1,get_nq_FROM_basis(basis_POGridRep)
-               write(out_unitp,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
+               write(out_unit,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
              END DO
-             flush(out_unitp)
+             flush(out_unit)
            END IF
 
            ! the POGridRep weights
@@ -660,11 +660,11 @@ GOTO 99
 
          END IF
          IF (debug) THEN
-            write(out_unitp,*) ' Weight on POGridRep grid'
+            write(out_unit,*) ' Weight on POGridRep grid'
             DO i=1,get_nq_FROM_basis(basis_POGridRep)
-              write(out_unitp,*) i,basis_POGridRep%x(:,i),basis_POGridRep%w(i)
+              write(out_unit,*) i,basis_POGridRep%x(:,i),basis_POGridRep%w(i)
            END DO
-           flush(out_unitp)
+           flush(out_unit)
          END IF
          99 CONTINUE
          !---------------------------------------------------------------
@@ -677,11 +677,11 @@ GOTO 99
          CALL check_ortho_basis(basis_POGridRep)
 
          IF (debug) THEN
-            write(out_unitp,*) ' basis on POGridRep grid'
+            write(out_unit,*) ' basis on POGridRep grid'
             DO i=1,get_nq_FROM_basis(basis_POGridRep)
-              write(out_unitp,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
+              write(out_unit,*) i,basis_POGridRep%x(:,i),basis_POGridRep%dnRGB%d0(i,:)
            END DO
-           flush(out_unitp)
+           flush(out_unit)
          END IF
 
          CALL dealloc_NParray(matX_basis,"matX_basis",name_sub)
@@ -692,9 +692,9 @@ GOTO 99
 !=====================================================================
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) ' POGridRep basis'
+        write(out_unit,*) ' POGridRep basis'
         CALL RecWrite_basis(basis_POGridRep)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -703,7 +703,7 @@ GOTO 99
 ! POGridRep_basis
 !=====================================================================
       SUBROUTINE sub_make_polyorthobasis(base,Rvp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_basis
       IMPLICIT NONE
@@ -736,10 +736,10 @@ GOTO 99
 !     logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(base)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -749,15 +749,15 @@ GOTO 99
       base%packed_done       = .TRUE.
 
        IF (base%ndim /= 1) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) ' ndim /= 1!',base%ndim
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) ' ndim /= 1!',base%ndim
         STOP
        END IF
 
       IF (Get_symabOFSymAbelianOFBasis_AT_ib(base,1) /= -1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' I cannot use the symmetry'
-        write(out_unitp,*) ' Not yet implemented'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' I cannot use the symmetry'
+        write(out_unit,*) ' Not yet implemented'
         STOP
       END IF
 
@@ -791,13 +791,13 @@ GOTO 99
       Wsuzy(:) = -d1bc(:,j,1)/d0bc(:,j)
       DO i=1,nq
         IF (abs(d0bc(i,j))/phi0max > 0.0001_Rkind)                      &
-        write(out_unitp,*) base%x(1,i),Wsuzy(i),d2bc(i,j,1,1)/d0bc(i,j)
+        write(out_unit,*) base%x(1,i),Wsuzy(i),d2bc(i,j,1,1)/d0bc(i,j)
       END DO
       Sjj = dot_product(d0bc(:,j),base%wrho(:)*d0bc(:,j))
       d0bc(:,j)     = d0bc(:,j)     / sqrt(Sjj)
       d1bc(:,j,1)   = d1bc(:,j,1)   / sqrt(Sjj)
       d2bc(:,j,1,1) = d2bc(:,j,1,1) / sqrt(Sjj)
-      write(out_unitp,*) 'Sjj',j,Sjj
+      write(out_unit,*) 'Sjj',j,Sjj
 
 
       ! recursion for the other vectors + orthonormalization
@@ -824,7 +824,7 @@ GOTO 99
          d1bc(:,j,1)   = d1bc(:,j,1)   / sqrt(Sjj)
          d2bc(:,j,1,1) = d2bc(:,j,1,1) / sqrt(Sjj)
 
-         write(out_unitp,*) 'Sjj',j,Sjj
+         write(out_unit,*) 'Sjj',j,Sjj
       END DO
 !      -------------------------------------------------
 
@@ -835,7 +835,7 @@ GOTO 99
       CALL dealloc_dnMat(base%dnRGB)
       CALL alloc_dnMat(base%dnRGB,nq,base%nbc,base%ndim,nderiv=2)
 
-!     write(out_unitp,*) ' mv dnbc TO dnb'
+!     write(out_unit,*) ' mv dnbc TO dnb'
       base%dnRGB%d0 = d0bc
       base%dnRGB%d1 = d1bc
       base%dnRGB%d2 = d2bc
@@ -851,7 +851,7 @@ GOTO 99
       DO j=1,base%nbc
       DO i=1,nb0
         base%Rvec(i,j) = dot_product(d0b(:,i)*base%wrho(:),d0bc(:,j))
-        !write(out_unitp,*) 'Rvec',j,i,base%Rvec(i,j)
+        !write(out_unit,*) 'Rvec',j,i,base%Rvec(i,j)
       END DO
       END DO
 
@@ -863,10 +863,10 @@ GOTO 99
       CALL dealloc_NParray(d2bc,"d2bc",name_sub)
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL RecWrite_basis(base)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -881,7 +881,7 @@ GOTO 99
 !
 !=============================================================
       SUBROUTINE ortho_basis(basis_temp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -905,10 +905,10 @@ GOTO 99
       character (len=*), parameter :: name_sub='ortho_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -921,7 +921,7 @@ GOTO 99
         matS(:,:) = matmul(tbasiswrho,basis_temp%dnRGB%d0)
         CALL dealloc_NParray(tbasiswrho,"tbasiswrho",name_sub)
 
-        CALL Write_Mat(matS,out_unitp,5)
+        CALL Write_Mat(matS,out_unit,5)
 
         DO i=1,basis_temp%nb
           Sii = matS(i,i) -ONE
@@ -932,17 +932,17 @@ GOTO 99
           END DO
         END DO
 
-        write(out_unitp,11) max_Sii,max_Sij
+        write(out_unit,11) max_Sii,max_Sij
  11     format('     Max Overlap:',2f15.12)
         IF (max_Sii > ONETENTH**5 .OR. max_Sij > ONETENTH**5) THEN
-          write(out_unitp,*) ' WARNING in ',name_sub
-          write(out_unitp,*) ' the basis is not orthonormal !!'
+          write(out_unit,*) ' WARNING in ',name_sub
+          write(out_unit,*) ' the basis is not orthonormal !!'
         END IF
 
         CALL diagonalization(matS,Rdiag,Rvp,basis_temp%nb,2,0,.FALSE.)
 
-        write(out_unitp,*) 'Rvp:'
-        CALL Write_Mat(Rvp,out_unitp,5)
+        write(out_unit,*) 'Rvp:'
+        CALL Write_Mat(Rvp,out_unit,5)
 
 
         IF (max_Sii > ONETENTH**5 .OR. max_Sij > ONETENTH**5) THEN
@@ -968,14 +968,14 @@ GOTO 99
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
 
       end subroutine ortho_basis
       SUBROUTINE ortho_basis_schmidt(basis_temp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -992,10 +992,10 @@ GOTO 99
       character (len=*), parameter :: name_sub='ortho_basis_schmidt'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -1025,7 +1025,7 @@ GOTO 99
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -1037,7 +1037,7 @@ GOTO 99
 !
 !=============================================================
       SUBROUTINE sub_matX_basis(basis_temp,matX_basis)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1055,15 +1055,15 @@ GOTO 99
       character (len=*), parameter :: name_sub='sub_matX_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
       IF (basis_temp%ndim > 1) THEN
-        write(out_unitp,*) ' ERROR in',name_sub
-        write(out_unitp,*) ' This transformation is not possible for basis with ndim>1'
+        write(out_unit,*) ' ERROR in',name_sub
+        write(out_unit,*) ' This transformation is not possible for basis with ndim>1'
         STOP
       END IF
 
@@ -1076,20 +1076,20 @@ GOTO 99
         END DO
         matX_basis(:,:) = matmul(tbasiswrhox,basis_temp%dnRGB%d0)
         CALL dealloc_NParray(tbasiswrhox,"tbasiswrho",name_sub)
-        !CALL Write_Mat(matX_basis,out_unitp,5)
+        !CALL Write_Mat(matX_basis,out_unit,5)
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'matX_basis:'
-        CALL Write_Mat(matX_basis,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'matX_basis:'
+        CALL Write_Mat(matX_basis,out_unit,5)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
 
       END SUBROUTINE sub_matX_basis
       SUBROUTINE sub_matperioX_basis(basis_temp,matX_basis)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1107,16 +1107,16 @@ GOTO 99
       character (len=*), parameter :: name_sub='sub_matperioX_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
-      write(out_unitp,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'BEGINNING ',name_sub
       IF (basis_temp%ndim > 1) THEN
-        write(out_unitp,*) ' ERROR in',name_sub
-        write(out_unitp,*) ' This transformation is not possible for basis with ndim>1'
+        write(out_unit,*) ' ERROR in',name_sub
+        write(out_unit,*) ' This transformation is not possible for basis with ndim>1'
         STOP
       END IF
 
@@ -1130,20 +1130,20 @@ GOTO 99
         matX_basis(:,:) = matmul(tbasiswrhox,basis_temp%dnRGB%d0)
 
         CALL dealloc_NParray(tbasiswrhox,"tbasiswrho",name_sub)
-        !CALL Write_Mat(matX_basis,out_unitp,5)
+        !CALL Write_Mat(matX_basis,out_unit,5)
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'matX_basis:'
-        CALL Write_Mat(matX_basis,out_unitp,5)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'matX_basis:'
+        CALL Write_Mat(matX_basis,out_unit,5)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
 
       END SUBROUTINE sub_matperioX_basis
       SUBROUTINE sub_MatOFdnSX_basis(basis_temp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_basis
       IMPLICIT NONE
@@ -1166,10 +1166,10 @@ GOTO 99
       character (len=*), parameter :: name_sub='sub_MatOFdnSX_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
  
@@ -1188,8 +1188,8 @@ GOTO 99
         END DO
         MatX(:,:) = matmul(tbasiswrhox,basis_temp%dnRGB%d0)
         CALL dealloc_NParray(tbasiswrhox,"tbasiswrho",name_sub)
-        !write(out_unitp,*) 'matX:',i
-        !CALL Write_Mat(matX,out_unitp,5)
+        !write(out_unit,*) 'matX:',i
+        !CALL Write_Mat(matX,out_unit,5)
 
 
         DO i1=1,basis_temp%nb
@@ -1208,7 +1208,7 @@ GOTO 99
         END DO
         END DO
       END DO
-      write(out_unitp,*) 'MatOFdnSX:'
+      write(out_unit,*) 'MatOFdnSX:'
       CALL Write_MatOFdnS(MatOFdnSX)
 
 
@@ -1221,18 +1221,18 @@ GOTO 99
           MatX(i1,i2) = MatOFdnSX(i1,i2)%d1(i)
         END DO
         END DO
-      write(out_unitp,*) 'mat for i:',i
+      write(out_unit,*) 'mat for i:',i
       CALL Write_Mat(MatX,6,5)
 
       END DO
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Diag MatOFdnSX:'
+        write(out_unit,*) 'Diag MatOFdnSX:'
         CALL Write_MatOFdnS(MatOFdnSX)
-        write(out_unitp,*) 'EigVecdnS:'
+        write(out_unit,*) 'EigVecdnS:'
         CALL Write_MatOFdnS(EigVecdnS)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 STOP
@@ -1246,7 +1246,7 @@ STOP
 !
 !=============================================================
       SUBROUTINE sub_sqrtwrhoBasis_TO_basis(basis_temp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1262,10 +1262,10 @@ STOP
       character (len=*), parameter :: name_sub='sub_sqrtwrhoBasis_TO_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -1286,14 +1286,14 @@ STOP
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
       END SUBROUTINE sub_sqrtwrhoBasis_TO_basis
 
       SUBROUTINE Weight_OF_grid(w,d0RGB,nb,nq)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1319,9 +1319,9 @@ STOP
       character (len=*), parameter :: name_sub='Weight_OF_grid'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -1344,8 +1344,8 @@ STOP
       W = LinearSys_Solve(AtA,AtB)
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'w',w
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'w',w
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -1353,7 +1353,7 @@ STOP
       END SUBROUTINE Weight_OF_grid
 
       SUBROUTINE Weight2_OF_grid_basis(basis_temp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1376,17 +1376,17 @@ STOP
       character (len=*), parameter :: name_sub='Weight2_OF_grid_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
       nq = get_nq_FROM_basis(basis_temp)
-      ! write(out_unitp,*) 'nb,nq',basis_temp%nb,nq
+      ! write(out_unit,*) 'nb,nq',basis_temp%nb,nq
       IF (.NOT. allocated(basis_temp%x) ) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' You cannot use this subroutine the grid is not done!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' You cannot use this subroutine the grid is not done!'
         STOP
       END IF
 
@@ -1428,14 +1428,14 @@ STOP
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
 
       END SUBROUTINE Weight2_OF_grid_basis
       SUBROUTINE Weight_OF_grid_basis(basis_temp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1458,21 +1458,21 @@ STOP
       character (len=*), parameter :: name_sub='Weight_OF_grid_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         !CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
       nq = get_nq_FROM_basis(basis_temp)
-      ! write(out_unitp,*) 'nb,nq',basis_temp%nb,nq
+      ! write(out_unit,*) 'nb,nq',basis_temp%nb,nq
       IF (.NOT. allocated(basis_temp%x) ) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' You cannot use this subroutine the grid is not done!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' You cannot use this subroutine the grid is not done!'
         STOP
       END IF
 
-      !write(out_unitp,*) 'nq',nq ; flush(out_unitp)
+      !write(out_unit,*) 'nq',nq ; flush(out_unit)
       CALL alloc_NParray(A, [basis_temp%nb*(basis_temp%nb+1)/2,nq], &
                         "A",  name_sub)
       CALL alloc_NParray(AtA,[nq,nq],"AtA",name_sub)
@@ -1498,7 +1498,7 @@ STOP
 
       ! Solve the linear system AtA.W=AtB
       basis_temp%w = LinearSys_Solve(AtA,AtB)
-      IF (debug) write(out_unitp,*) 'w',basis_temp%w
+      IF (debug) write(out_unit,*) 'w',basis_temp%w
       WHERE (basis_temp%w < ZERO)                                       &
                           basis_temp%w(:) = basis_temp%w(:) * 0.9_Rkind
       basis_temp%wrho(:) = basis_temp%w(:) * basis_temp%rho(:)
@@ -1511,16 +1511,16 @@ STOP
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'w',basis_temp%w
+        write(out_unit,*) 'w',basis_temp%w
         !CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
 
       END SUBROUTINE Weight_OF_grid_basis
       SUBROUTINE ConstantWeight_OF_grid_basis(basis_temp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1539,18 +1539,18 @@ STOP
       character (len=*), parameter :: name_sub='ConstantWeight_OF_grid_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
       nq = get_nq_FROM_basis(basis_temp)
-      ! write(out_unitp,*) 'nb,nq',basis_temp%nb,nq
+      ! write(out_unit,*) 'nb,nq',basis_temp%nb,nq
 
       IF (.NOT. allocated(basis_temp%x) ) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' You cannot use this subroutine the grid is not done!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' You cannot use this subroutine the grid is not done!'
         STOP
       END IF
 
@@ -1571,13 +1571,13 @@ STOP
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
       END SUBROUTINE ConstantWeight_OF_grid_basis
       SUBROUTINE Make_grid_basis(basis_cuba)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1610,14 +1610,14 @@ STOP
       character (len=*), parameter :: name_sub='Make_grid_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_cuba)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
       if ( basis_cuba%read_para_cubature ) then
-        write(out_unitp,*) ' READ SA parameters'
+        write(out_unit,*) ' READ SA parameters'
         CALL Read_param_SimulatedAnnealing(SA_para)
         CALL Write_param_SimulatedAnnealing(SA_para)
         STOP
@@ -1626,20 +1626,20 @@ STOP
       nq = basis_cuba%nqc
       ! Save the old grid in basis_temp
       !CALL basis2TObasis1(basis_temp,basis_cuba)
-      write(out_unitp,*) 'basis_cuba%nb',basis_cuba%nb
-      write(out_unitp,*) 'basis_cuba%nq',nq
+      write(out_unit,*) 'basis_cuba%nb',basis_cuba%nb
+      write(out_unit,*) 'basis_cuba%nq',nq
 
 !      NormA = Norm_OF_grid_basis(basis_cuba,1,err_cuba)
-!      write(out_unitp,*) ' Optimal norm',NormA
+!      write(out_unit,*) ' Optimal norm',NormA
 !      DO iq=1,nq
-!        write(out_unitp,*) iq,basis_cuba%x(:,iq),basis_cuba%w(iq)
+!        write(out_unit,*) iq,basis_cuba%x(:,iq),basis_cuba%w(iq)
 !      END DO
 !
-!      write(out_unitp,*) 'NormA',NormA
+!      write(out_unit,*) 'NormA',NormA
 
       Lq = int(basis_cuba%nDindB%MaxNorm)
       cubature_file%name = TO_String(basis_cuba%ndim) // 'D_deg' // TO_String(Lq)
-      write(out_unitp,*) 'cubature_file%name: ',cubature_file%name
+      write(out_unit,*) 'cubature_file%name: ',cubature_file%name
 
 !      IF (basis_cuba%Read_make_cubature) THEN
 !        STOP 'Read_make_cubature: not yet'
@@ -1682,10 +1682,10 @@ STOP
         CALL file_open(cubature_file,nio,err_file=err_io)
         read(nio,*,iostat=err_io) idum
         IF (idum /= nq) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Wrong cubature file'
-          write(out_unitp,*) ' nq from the file and the basis are different'
-          write(out_unitp,*) ' nq:',idum,nq
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Wrong cubature file'
+          write(out_unit,*) ' nq from the file and the basis are different'
+          write(out_unit,*) ' nq:',idum,nq
           STOP
         END IF
         DO iq=1,nq
@@ -1707,10 +1707,10 @@ STOP
 
 
       NormA = Norm_OF_grid_basis(basis_cuba,1,err_cuba)
-      write(out_unitp,*) ' Optimal norm',NormA
-      write(out_unitp,*) 'av',((sum(basis_cuba%x(i,:)) /                &
+      write(out_unit,*) ' Optimal norm',NormA
+      write(out_unit,*) 'av',((sum(basis_cuba%x(i,:)) /                &
                                real(nq,kind=Rkind)),i=1,basis_cuba%ndim)
-      flush(out_unitp)
+      flush(out_unit)
 
       CALL file_open(cubature_file,nio,err_file=err_io)
       write(nio,*,iostat=err_io) nq
@@ -1729,19 +1729,19 @@ STOP
       CALL check_ortho_basis(basis_cuba,test_stop=.TRUE.)
       basis_cuba%check_basis = check_basis_save
 
-      !write(out_unitp,*) 'new w',basis_temp%w
+      !write(out_unit,*) 'new w',basis_temp%w
 
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_cuba)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
 
       END SUBROUTINE Make_grid_basis
       SUBROUTINE Make_grid_basis_SimulatedAnnealing(basis_cuba,type_weight,SA_para,restart)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -1775,10 +1775,10 @@ STOP
       character (len=*), parameter :: name_sub='Make_grid_basis_SimulatedAnnealing'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_cuba)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
       option_rand_grid = 0
@@ -1795,7 +1795,7 @@ STOP
       IF (restart) THEN
 
         Norm_min  = Norm_OF_grid_basis(basis_cuba,type_weight,err_cuba) ! initial norm
-        write(out_unitp,*) 'Initial Norm',Norm_min
+        write(out_unit,*) 'Initial Norm',Norm_min
 
         SQ(:)     = SQ(:)*min(ONE,Norm_min*SA_para%RangeScalInit)
 
@@ -1817,21 +1817,21 @@ STOP
         CALL ReCentered_grid(x0,basis_cuba%ndim,basis_cuba%nqc)
 
       END IF
-      write(out_unitp,*) 'QA',QA
-      write(out_unitp,*) 'QB',QB
-      write(out_unitp,*) 'SQ',SQ
+      write(out_unit,*) 'QA',QA
+      write(out_unit,*) 'QB',QB
+      write(out_unit,*) 'SQ',SQ
 
       Norm_min  = Norm_OF_grid_basis(basis_cuba,type_weight,err_cuba)
       xmin(:,:) = x0(:,:)
       Norm_max  = ZERO
 
 
-      write(out_unitp,'(a,i0,a)') 'Initial Temperature, with ',SA_para%nb_mc_tot/10,' evaluations'
-      flush(out_unitp)
+      write(out_unit,'(a,i0,a)') 'Initial Temperature, with ',SA_para%nb_mc_tot/10,' evaluations'
+      flush(out_unit)
 
-      write(out_unitp,'(a)') 'Eval (%): [--0-10-20-30-40-50-60-70-80-90-100]'
-      write(out_unitp,'(a)',ADVANCE='no') 'Eval (%): ['
-      flush(out_unitp)
+      write(out_unit,'(a)') 'Eval (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+      write(out_unit,'(a)',ADVANCE='no') 'Eval (%): ['
+      flush(out_unit)
       NormA  = ZERO
       ! first find the average Energy (Norm), then Temp
       DO imc=1,SA_para%nb_mc_tot/10
@@ -1840,7 +1840,7 @@ STOP
           CALL Random_grid(basis_cuba%x,x0,SQ,QA,QB,basis_cuba%ndim,basis_cuba%nqc,option_rand_grid)
           NormB = Norm_OF_grid_basis(basis_cuba,type_weight,err_cuba)
         END DO
-        !write(out_unitp,*) 'NormB',imc,NormB
+        !write(out_unit,*) 'NormB',imc,NormB
         NormA = NormA + NormB
         IF (NormB > Norm_max) Norm_max = NormB
 
@@ -1851,17 +1851,17 @@ STOP
         END IF
 
         IF (mod(imc,max(1,int(SA_para%nb_mc_tot/100))) == 0 .AND. MPI_id==0) THEN
-          write(out_unitp,'(a)',ADVANCE='no') '---'
-          flush(out_unitp)
+          write(out_unit,'(a)',ADVANCE='no') '---'
+          flush(out_unit)
         END IF
 
         IF (NormB < SA_para%Tmin) EXIT
       END DO
-      IF(MPI_id==0) write(out_unitp,'(a)',ADVANCE='yes') '----]'
+      IF(MPI_id==0) write(out_unit,'(a)',ADVANCE='yes') '----]'
 
       NormA = NormA / real(SA_para%nb_mc_tot/10,kind=Rkind)
-      write(out_unitp,*) 'Min, Average, Max Norm',Norm_min,NormA,Norm_max
-      flush(out_unitp)
+      write(out_unit,*) 'Min, Average, Max Norm',Norm_min,NormA,Norm_max
+      flush(out_unit)
 
       IF (NormB < SA_para%Tmin) RETURN
 
@@ -1869,14 +1869,14 @@ STOP
       Norm_min          = Norm_OF_grid_basis(basis_cuba,type_weight,err_cuba)
       x0(:,:)           = basis_cuba%x(:,:)
       NormB             = Norm_min
-      write(out_unitp,*) ' Norm (cubature)',xmin,Norm_min
+      write(out_unit,*) ' Norm (cubature)',xmin,Norm_min
 
       Temp_max = Norm_max-Norm_min
       Temp_max = NormA
 
       Temp     = Temp_max
-      write(out_unitp,*) 'Average Norm, Temp',NormA,Temp
-      flush(out_unitp)
+      write(out_unit,*) 'Average Norm, Temp',NormA,Temp
+      flush(out_unit)
 
       DTemp               = Temp_max/real(SA_para%nb_mc_tot,kind=Rkind)
       imc                 = 1
@@ -1891,31 +1891,31 @@ STOP
           NormA = Norm_OF_grid_basis(basis_cuba,type_weight,err_cuba)
         END DO
         DNorm = NormA - NormB
-        !write(out_unitp,*) 'Norm',imc,NormA
-        flush(out_unitp)
+        !write(out_unit,*) 'Norm',imc,NormA
+        flush(out_unit)
 
         IF ( NormA < Norm_min) THEN
           nb_Norm_min = nb_Norm_min + 1
           xmin(:,:)   = basis_cuba%x(:,:)
           Norm_down   = .TRUE.
           Norm_min    = NormA
-          !write(out_unitp,*) ' imc, Temp, Norm_min',imc,Temp,Norm_min
+          !write(out_unit,*) ' imc, Temp, Norm_min',imc,Temp,Norm_min
         END IF
 
 
         IF ( DNorm < ZERO) THEN
           x0(:,:)     = basis_cuba%x(:,:)
           NormB       = NormA
-          !write(out_unitp,*) ' imc, Temp, Norm (cubature)',imc,Temp,NormA
-          !write(out_unitp,*) ' accepted, DNorm',DNorm
+          !write(out_unit,*) ' imc, Temp, Norm (cubature)',imc,Temp,NormA
+          !write(out_unit,*) ' accepted, DNorm',DNorm
         ELSE
           CALL random_number(PTemp)
           !Ptemp = genrand64_real1()
           IF ( PTemp < exp(-DNorm/Temp) ) THEN
             x0(:,:)   = basis_cuba%x(:,:)
             NormB     = NormA
-            !write(out_unitp,*) ' imc, Temp, Norm (propa)',imc,Temp,NormA
-            !write(out_unitp,*) ' accepted, Proba',PTemp,exp(-DNorm/Temp)
+            !write(out_unit,*) ' imc, Temp, Norm (propa)',imc,Temp,NormA
+            !write(out_unit,*) ' accepted, Proba',PTemp,exp(-DNorm/Temp)
           END IF
         END IF
         imc = imc + 1
@@ -1928,13 +1928,13 @@ STOP
         CASE DEFAULT
           Temp = SA_para%ExpCoolParam * Temp ! Exponential cooling
         END SELECT
-        !write(out_unitp,*) 'imc,Temp,Temp_max,ResetTempScal,Norm_min',imc,Temp,Temp_max,ResetTempScal
+        !write(out_unit,*) 'imc,Temp,Temp_max,ResetTempScal,Norm_min',imc,Temp,Temp_max,ResetTempScal
 
         IF (Temp < SA_para%ResetTempScal*Temp_max) THEN
 
-          write(out_unitp,*) 'imc,Temp_max,nb_Norm_min,Norm_min',imc,   &
+          write(out_unit,*) 'imc,Temp_max,nb_Norm_min,Norm_min',imc,   &
                                            Temp_max,nb_Norm_min,Norm_min
-          flush(out_unitp)
+          flush(out_unit)
 
           SQ(:)               = SQ(:)*SA_para%RangeScal
           Temp_max            = (ONE-SA_para%ResetTempScal)*Temp_max
@@ -1951,8 +1951,8 @@ STOP
         END IF
 
         IF (nb_block_WithoutMin > 20) THEN
-          write(out_unitp,*) 'restart because, nb_block_WithoutMin > 20'
-          flush(out_unitp)
+          write(out_unit,*) 'restart because, nb_block_WithoutMin > 20'
+          flush(out_unit)
           EXIT
         END IF
         IF (Temp < SA_para%Tmin .OR. imc > SA_para%nb_mc_tot) EXIT
@@ -1966,7 +1966,7 @@ STOP
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_cuba)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -1974,7 +1974,7 @@ STOP
       END SUBROUTINE Make_grid_basis_SimulatedAnnealing
 
       FUNCTION Norm_OF_grid_basis(basis_cuba,type_weight,err_cuba)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 !---------------------------------------------------------------------
@@ -2001,10 +2001,10 @@ STOP
       character (len=*), parameter :: name_sub='Norm_OF_grid_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_cuba)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
       nq = get_nq_FROM_basis(basis_cuba)
@@ -2016,7 +2016,7 @@ STOP
       END DO
 
       ! then we calculate the weight
-      !write(out_unitp,*) 'old',basis_cuba%w
+      !write(out_unit,*) 'old',basis_cuba%w
       IF (type_weight == 0) THEN
         CALL ConstantWeight_OF_grid_basis(basis_cuba)
       ELSE
@@ -2068,16 +2068,16 @@ STOP
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) ' Norm (cubature)',Norm
+        write(out_unit,*) ' Norm (cubature)',Norm
         CALL RecWrite_basis(basis_cuba)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
       END FUNCTION Norm_OF_grid_basis
 
       SUBROUTINE ReCentered_grid(x,ndim,nqc)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -2094,12 +2094,12 @@ STOP
       character (len=*), parameter :: name_sub='ReCentered_grid'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         DO i=1,nqc
-          write(out_unitp,*) 'i,x(:,i)',i,x(:,i)
+          write(out_unit,*) 'i,x(:,i)',i,x(:,i)
         END DO
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -2109,18 +2109,18 @@ STOP
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Recentered grid'
+        write(out_unit,*) 'Recentered grid'
         DO i=1,nqc
-          write(out_unitp,*) 'i,x(:,i)',i,x(:,i)
+          write(out_unit,*) 'i,x(:,i)',i,x(:,i)
         END DO
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
 
       END SUBROUTINE ReCentered_grid
       SUBROUTINE ReOriented_grid(x,ndim,nqc)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -2142,12 +2142,12 @@ STOP
       IF (ndim == 1) RETURN
 
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         DO i=1,nqc
-          write(out_unitp,*) 'i,x(:,i)',i,x(:,i)
+          write(out_unit,*) 'i,x(:,i)',i,x(:,i)
         END DO
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -2177,18 +2177,18 @@ STOP
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'ReOriented grid'
+        write(out_unit,*) 'ReOriented grid'
         DO i=1,nqc
-          write(out_unitp,*) 'i,x(:,i)',i,x(:,i)
+          write(out_unit,*) 'i,x(:,i)',i,x(:,i)
         END DO
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
 
       END SUBROUTINE ReOriented_grid
       SUBROUTINE Random_grid(x,x0,SQ,QA,QB,ndim,nqc,option)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -2211,12 +2211,12 @@ STOP
       character (len=*), parameter :: name_sub='Random_grid'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         DO i=1,nqc
-          write(out_unitp,*) 'i,x(:,i)',i,x(:,i)
+          write(out_unit,*) 'i,x(:,i)',i,x(:,i)
         END DO
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
   IF (option == 0) THEN
@@ -2254,11 +2254,11 @@ STOP
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Random grid'
+        write(out_unit,*) 'Random grid'
         DO i=1,nqc
-          write(out_unitp,*) 'i,x(:,i)',i,x(:,i)
+          write(out_unit,*) 'i,x(:,i)',i,x(:,i)
         END DO
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 

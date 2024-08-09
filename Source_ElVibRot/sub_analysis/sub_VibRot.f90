@@ -50,7 +50,7 @@
 !     RoVibrational levels calculation
 !================================================================
       SUBROUTINE sub_VibRot(Tab_Psi,nb_psi,para_H,para_ana)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       use mod_Coord_KEO, only: CoordType, tnum
       use mod_PrimOp,    only: param_d0matop, init_d0matop, write_d0matop, dealloc_d0matop
@@ -107,13 +107,13 @@
       mole       => para_H%mole
       para_Tnum  => para_H%para_Tnum
 
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*) 'nb_psi',nb_psi
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'nb_psi',nb_psi
 
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
@@ -122,9 +122,9 @@
 
       type_Op = para_H%para_ReadOp%Type_HamilOp ! H
       IF (type_Op /= 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '    Type_HamilOp MUST be equal to 1 here!!'
-        write(out_unitp,*) '    CHECK your data!!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '    Type_HamilOp MUST be equal to 1 here!!'
+        write(out_unit,*) '    CHECK your data!!'
         STOP
       END IF
 
@@ -133,29 +133,29 @@
       DO iterm_Op=1,MatRV%nb_term
         DO iv=1,nb_psi
           IF (debug) THEN
-            write(out_unitp,*) '======================================='
-            write(out_unitp,*) '======================================='
-            write(out_unitp,*) '======================================='
-            write(out_unitp,*) "iterm_Op,iv",iterm_Op,iv
-            flush(out_unitp)
+            write(out_unit,*) '======================================='
+            write(out_unit,*) '======================================='
+            write(out_unit,*) '======================================='
+            write(out_unit,*) "iterm_Op,iv",iterm_Op,iv
+            flush(out_unit)
           END IF
 
           CALL sub_OpPsi(Tab_Psi(iv),OpPsi,para_H,MatRV%derive_termQact(:,iterm_Op))
           DO jv=1,nb_psi
             CALL Overlap_psi1_psi2(C_over,Tab_Psi(jv),OpPsi)
-            !write(out_unitp,*) 'jv,iv,C_over',jv,iv,C_over
+            !write(out_unit,*) 'jv,iv,C_over',jv,iv,C_over
             MatRV%ReVal(jv,iv,iterm_Op) = real(C_over,kind=Rkind)
             IF (MatRV%cplx) MatRV%ImVal(jv,iv) = aimag(C_over)
           END DO
         END DO
       END DO
       IF (debug) CALL Write_d0MatOp(MatRV)
-      flush(out_unitp)
+      flush(out_unit)
 
       !SET Rotational basis
       CALL init_RotBasis_Param(para_H%BasisnD%RotBasis,Jrot)
       IF (debug) CALL Write_RotBasis_Param(para_H%BasisnD%RotBasis)
-      flush(out_unitp)
+      flush(out_unit)
 
       nb_bRot = para_H%BasisnD%RotBasis%nb_Rot
       nb_bVR  = nb_psi*nb_bRot
@@ -176,7 +176,7 @@
           J1       = MatRV%derive_termQact(1,iterm_Op)
           J2       = MatRV%derive_termQact(2,iterm_Op)
           iterm_BasisRot = para_H%BasisnD%RotBasis%tab_der_TO_iterm(J1,J2)
-          !write(out_unitp,*) 'J1,J2',J1,J2,'iterm_Op,iterm_BasisRot',iterm_Op,iterm_BasisRot
+          !write(out_unit,*) 'J1,J2',J1,J2,'iterm_Op,iterm_BasisRot',iterm_Op,iterm_BasisRot
 
           DO ibRot=1,nb_bRot
           DO jbRot=1,nb_bRot
@@ -189,9 +189,9 @@
             f2 = nb_psi
 
             !IF (debug) THEN
-            !  write(out_unitp,*) 'J1,J2',J1,J2
-            !  write(out_unitp,*) 'ibRot,i1+1:i1+f1',ibRot,i1+1,i1+f1
-            !  write(out_unitp,*) 'jbRot,i2+1:i2+f2',jbRot,i2+1,i2+f2
+            !  write(out_unit,*) 'J1,J2',J1,J2
+            !  write(out_unit,*) 'ibRot,i1+1:i1+f1',ibRot,i1+1,i1+f1
+            !  write(out_unit,*) 'jbRot,i2+1:i2+f2',jbRot,i2+1,i2+f2
             !END IF
 
             H_VR(i1+1:i1+f1 , i2+1:i2+f2) =                             &
@@ -205,21 +205,21 @@
       END DO
 
       IF (debug) THEN
-        write(out_unitp,*) 'H_VR'
-        CALL Write_Mat(H_VR,out_unitp,5)
+        write(out_unit,*) 'H_VR'
+        CALL Write_Mat(H_VR,out_unit,5)
       END IF
 
       CALL sub_hermitic_H(H_VR,nb_bVR,non_hermitic,para_H%sym_Hamil)
 
       IF (non_hermitic >= FOUR/TEN**4) THEN
-        If(MPI_id==0) write(out_unitp,*) 'WARNING: non_hermitic is BIG'
-        If(MPI_id==0) write(out_unitp,31) non_hermitic
+        If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
+        If(MPI_id==0) write(out_unit,31) non_hermitic
  31     format(' Hamiltonien: ',f16.12,' au')
       ELSE
-        IF (print_level>-1 .AND. MPI_id==0) write(out_unitp,21) non_hermitic*auTOcm_inv
+        IF (print_level>-1 .AND. MPI_id==0) write(out_unit,21) non_hermitic*auTOcm_inv
  21     format(' Hamiltonien: ',f16.12,' cm-1')
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
 
       IF (para_H%sym_Hamil) THEN
@@ -229,29 +229,29 @@
       END IF
       nb_shift = count(Ene_VR(:) <= para_H%ZPE)
       IF (nb_shift > 0) THEN
-        If(MPI_id==0) write(out_unitp,*) 'WARNING the vectors 1 to ',nb_shift,'have negative energies',Ene_VR(1:nb_shift)
-        If(MPI_id==0)  write(out_unitp,*) '=> They will be shifted'
+        If(MPI_id==0) write(out_unit,*) 'WARNING the vectors 1 to ',nb_shift,'have negative energies',Ene_VR(1:nb_shift)
+        If(MPI_id==0)  write(out_unit,*) '=> They will be shifted'
         Vec_VR = cshift(Vec_VR,shift=nb_shift,dim=2)
         Ene_VR = cshift(Ene_VR,shift=nb_shift)
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'Vec_VR (in column)'
-        CALL Write_Mat(Vec_VR,out_unitp,5)
+        write(out_unit,*) 'Vec_VR (in column)'
+        CALL Write_Mat(Vec_VR,out_unit,5)
       END IF
 
 
-      write(out_unitp,*) 'ZPE',para_H%ZPE*auTOcm_inv
+      write(out_unit,*) 'ZPE',para_H%ZPE*auTOcm_inv
       nb_ana = min(nb_bVR,nb_bRot*2)
-      write(out_unitp,'(A,i4,30f15.6)') 'Ene RV',JRot,                  &
+      write(out_unit,'(A,i4,30f15.6)') 'Ene RV',JRot,                  &
                          (Ene_VR(1:nb_bRot)-para_H%ZPE)*auTOcm_inv
-      write(out_unitp,'(A,i4,30f15.6)') 'Ene RV',JRot,                  &
+      write(out_unit,'(A,i4,30f15.6)') 'Ene RV',JRot,                  &
           (Ene_VR(nb_bRot+1:nb_ana)-real(Tab_psi(2)%CAvOp,kind=Rkind))* &
                                                              auTOcm_inv
 
-      write(out_unitp,*) 'Ene RV (all), J:',JRot
+      write(out_unit,*) 'Ene RV (all), J:',JRot
       DO i=1,min(nb_bVR,10*nb_bRot)
-        write(out_unitp,'(A,i5,f15.6)') ' levR:',i,                     &
+        write(out_unit,'(A,i5,f15.6)') ' levR:',i,                     &
                                  (Ene_VR(i)-para_H%ZPE)*auTOcm_inv
         rho_V(:) = ZERO
         DO jR=1,nb_bRot
@@ -259,10 +259,10 @@
           f1 = (jR-1)*nb_psi + nb_psi
           rho_V(:) = rho_V(:) + abs(Vec_VR( i1:f1 ,i))**2
         END DO
-        write(out_unitp,'(A,10f5.2)') ' densVib:',rho_V(1:min(10,nb_psi))
+        write(out_unit,'(A,10f5.2)') ' densVib:',rho_V(1:min(10,nb_psi))
 
       END DO
-      flush(out_unitp)
+      flush(out_unit)
 
       CALL dealloc_NParray(H_VR,  'H_VR',  name_sub)
       CALL dealloc_NParray(Vec_VR,'Vec_VR',name_sub)
@@ -273,8 +273,8 @@
 !----------------------------------------------------------
       IF (debug) THEN
       END IF
-      write(out_unitp,*) 'END ',name_sub
-      flush(out_unitp)
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
 
 !----------------------------------------------------------
 

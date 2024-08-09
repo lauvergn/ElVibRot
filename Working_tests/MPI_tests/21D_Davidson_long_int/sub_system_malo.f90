@@ -9,7 +9,7 @@
       SUBROUTINE calcN_op(mat_V,mat_imV,mat_ScalOp,nb_be,nb_ScalOp, &
                         Qxyz,nb_cart,mole,calc_ScalOp,pot_cplx)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -49,7 +49,7 @@
 !C    fonction pot_rest(x)
 !C================================================================
       FUNCTION pot_rest(Qact,Delta_Qact,nb_inact2n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real(kind=Rkind) :: pot_rest
 
@@ -64,7 +64,7 @@
 !C    fonction im_pot0(x)
 !C================================================================
       FUNCTION im_pot0(Q)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real(kind=Rkind) :: im_pot0
 
@@ -84,7 +84,7 @@
 !C    sub hessian
 !C================================================================
       SUBROUTINE sub_hessian (h)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        real(kind=Rkind) h
@@ -99,7 +99,7 @@
 !C    pour une tri atomique en jacobie
 !C================================================================
       SUBROUTINE sub_ScalarOp(ScalOp,nb_ScalOp,Q,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -120,7 +120,7 @@
 !C    analytical gradient along the path
 !C================================================================
       SUBROUTINE d0d1d2_g(d0g,d1g,d2g,Qdyn,mole,deriv,num,step)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -142,13 +142,13 @@
       logical, parameter :: debug = .FALSE.
 !C---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING d0d1d2_g'
-        write(out_unitp,*) 'nb_var',mole%nb_var
-        write(out_unitp,*) 'nb_act1',mole%nb_act1
-        write(out_unitp,*) 'nb_inact22,nb_inact21',mole%nb_inact22,mole%nb_inact21
-        write(out_unitp,*) 'nb_inact2n',mole%nb_inact2n
-        write(out_unitp,*) 'deriv',deriv
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING d0d1d2_g'
+        write(out_unit,*) 'nb_var',mole%nb_var
+        write(out_unit,*) 'nb_act1',mole%nb_act1
+        write(out_unit,*) 'nb_inact22,nb_inact21',mole%nb_inact22,mole%nb_inact21
+        write(out_unit,*) 'nb_inact2n',mole%nb_inact2n
+        write(out_unit,*) 'deriv',deriv
       END IF
 
 !C---------------------------------------------------------------------
@@ -160,9 +160,9 @@
 
 !C---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'd0g at Qact:',Qact
-        write(out_unitp,*) d0g(:)
-        write(out_unitp,*) 'END d0d1d2_g'
+        write(out_unit,*) 'd0g at Qact:',Qact
+        write(out_unit,*) d0g(:)
+        write(out_unit,*) 'END d0d1d2_g'
       END IF
 !C---------------------------------------------------------------------
 
@@ -171,7 +171,7 @@
 !C    analytical hessian along the path
 !C================================================================
      SUBROUTINE d0d1d2_h(d0h,d1h,d2h,Qdyn,mole,deriv,num,step)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -199,21 +199,21 @@
 !c     logical, parameter :: debug = .TRUE.
 !c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING d0d1d2_h'
-        write(out_unitp,*) 'nb_var',mole%nb_var
-        write(out_unitp,*) 'nb_act1',mole%nb_act1
-        write(out_unitp,*) 'nb_inact22,nb_inact21',mole%nb_inact22,mole%nb_inact21
-        write(out_unitp,*) 'nb_inact2n',mole%nb_inact2n
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING d0d1d2_h'
+        write(out_unit,*) 'nb_var',mole%nb_var
+        write(out_unit,*) 'nb_act1',mole%nb_act1
+        write(out_unit,*) 'nb_inact22,nb_inact21',mole%nb_inact22,mole%nb_inact21
+        write(out_unit,*) 'nb_inact2n',mole%nb_inact2n
       END IF
 !c---------------------------------------------------------------------
 
       Qact = Qdyn(mole%liste_QactTOQsym(1))
 
       IF (deriv) THEN
-        write(out_unitp,*) 'ERROR in d0d1d2_h'
-        write(out_unitp,*) '  deriv CANNOT be true!!'
-        write(out_unitp,*) ' check the fortran source'
+        write(out_unit,*) 'ERROR in d0d1d2_h'
+        write(out_unit,*) '  deriv CANNOT be true!!'
+        write(out_unit,*) ' check the fortran source'
         STOP
       END IF
 
@@ -229,9 +229,9 @@
 
 !c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Qact1',Qact
+        write(out_unit,*) 'Qact1',Qact
         CALL Write_Mat(d0h,6,4)
-        write(out_unitp,*) 'END d0d1d2_h'
+        write(out_unit,*) 'END d0d1d2_h'
       END IF
 !c---------------------------------------------------------------------
 
@@ -241,7 +241,7 @@
 !C    for the variable iq
 !C================================================================
       SUBROUTINE calc_dnQflex(iq,dnQflex,Qact,nb_act,nderiv,it)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM      
       IMPLICIT NONE
 
@@ -262,9 +262,9 @@
 
 !C---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_act',nb_act
-        write(out_unitp,*) 'iq',iq
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_act',nb_act
+        write(out_unit,*) 'iq',iq
       END IF
 !C---------------------------------------------------------------------
 
@@ -273,9 +273,9 @@
 
 !C---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'dnQflex : ',Qact
+        write(out_unit,*) 'dnQflex : ',Qact
         CALL write_dnS(dnQflex,nderiv)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !C---------------------------------------------------------------------
 
@@ -285,7 +285,7 @@
 !C    for the variable i_Qdyn
 !C================================================================
       SUBROUTINE d0d1d2d3_Qeq(i_Qdyn,d0req,d1req,d2req,d3req,Qdyn,mole,nderiv)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -313,10 +313,10 @@
 
 !c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_inact20,nb_act',mole%nb_inact20,mole%nb_act
-        write(out_unitp,*) 'nb_var',mole%nb_var
-        write(out_unitp,*) 'i_Qdyn',i_Qdyn
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_inact20,nb_act',mole%nb_inact20,mole%nb_act
+        write(out_unit,*) 'nb_var',mole%nb_var
+        write(out_unit,*) 'i_Qdyn',i_Qdyn
       END IF
 !c---------------------------------------------------------------------
 
@@ -324,9 +324,9 @@
 !c      Qact value. Rq: only ONE active variable is possible
 !c---------------------------------------------------------------------
        IF (mole%nb_act1 /= 1) THEN
-         write(out_unitp,*) ' ERROR : d0d1d2d3_Qeq'
-         write(out_unitp,*) ' the number of Active variable'
-         write(out_unitp,*) ' should be 1. But nb_act1 =',mole%nb_act1
+         write(out_unit,*) ' ERROR : d0d1d2d3_Qeq'
+         write(out_unit,*) ' the number of Active variable'
+         write(out_unit,*) ' should be 1. But nb_act1 =',mole%nb_act1
          STOP
        END IF
 !c---------------------------------------------------------------------
@@ -342,11 +342,11 @@
 
 !c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'd0req : ',Qact,d0req
-        IF (nderiv > 0) write(out_unitp,*) 'd1req : ',Qact,d1req
-        IF (nderiv > 1) write(out_unitp,*) 'd2req : ',Qact,d2req
-        IF (nderiv > 2) write(out_unitp,*) 'd3req : ',Qact,d3req
-        write(out_unitp,*) 'END d0d1d2d3_Qeq'
+        write(out_unit,*) 'd0req : ',Qact,d0req
+        IF (nderiv > 0) write(out_unit,*) 'd1req : ',Qact,d1req
+        IF (nderiv > 1) write(out_unit,*) 'd2req : ',Qact,d2req
+        IF (nderiv > 2) write(out_unit,*) 'd3req : ',Qact,d3req
+        write(out_unit,*) 'END d0d1d2d3_Qeq'
       END IF
 !c---------------------------------------------------------------------
       END SUBROUTINE d0d1d2d3_Qeq
@@ -10095,7 +10095,7 @@
   end subroutine iorder
 !----------------------------------------------------------------------!
   FUNCTION funcQpath(Qpath,i)
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
 
   real(kind=Rkind) :: funcQpath

@@ -64,7 +64,7 @@ CONTAINS
 !          so this is not a normlization subroutine for general case
 !=======================================================================================      
   SUBROUTINE norm_psi_MPI(psi,ReNorm,GridRep,BasisRep)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     IMPLICIT NONE
 
@@ -114,9 +114,9 @@ CONTAINS
     ENDIF
 
     IF (norm2GridRep .AND. norm2BasisRep) THEN
-      write(out_unitp,*) ' ERROR in norm2_psi'
-      write(out_unitp,*) ' norm2GridRep=t and norm2BasisRep=t !'
-      write(out_unitp,*) ' BasisRep,GridRep',psi%BasisRep,psi%GridRep
+      write(out_unit,*) ' ERROR in norm2_psi'
+      write(out_unit,*) ' norm2GridRep=t and norm2BasisRep=t !'
+      write(out_unit,*) ' BasisRep,GridRep',psi%BasisRep,psi%GridRep
       STOP
     ENDIF
     
@@ -134,8 +134,8 @@ CONTAINS
     
     IF(ReNorm==2 .OR. ReNorm==3) THEN
       IF (psi%norm2 .EQ. ZERO ) THEN
-        write(out_unitp,*) ' ERROR in norm2_psi'
-        write(out_unitp,*) ' the norm2 is zero !',psi%norm2
+        write(out_unit,*) ' ERROR in norm2_psi'
+        write(out_unit,*) ' the norm2 is zero !',psi%norm2
         STOP
       END IF
       
@@ -173,7 +173,7 @@ CONTAINS
 !=======================================================================================  
   SUBROUTINE Channel_weight_MPI(tab_WeightChannels,psi,                                &
                                 GridRep,BasisRep,Dominant_Channel)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_basis,        ONLY:Rec_WrhonD
     USE mod_param_SGType2,ONLY:OldParam
@@ -210,8 +210,8 @@ CONTAINS
     nb_bi=get_nb_bi_FROM_psi(psi)
 
     IF(GridRep .AND. BasisRep) THEN
-      write(out_unitp,*) ' ERROR in Channel_weight'
-      write(out_unitp,*) ' GridRep=t and BasisRep=t !'
+      write(out_unit,*) ' ERROR in Channel_weight'
+      write(out_unit,*) ' GridRep=t and BasisRep=t !'
       STOP
     END IF
 
@@ -282,9 +282,9 @@ CONTAINS
         CALL MPI_Reduce_sum_matrix(tab_WeightChannels,ONE_1,nb_bi,ONE_1,nb_be,root_MPI)
         
       ELSE
-        write(out_unitp,*) ' ERROR in Channel_weight',' from ',MPI_id
-        IF (GridRep)  write(out_unitp,*) ' impossible to calculate the weights with the Grid'
-        IF (BasisRep) write(out_unitp,*) ' impossible to calculate the weights with the Basis'
+        write(out_unit,*) ' ERROR in Channel_weight',' from ',MPI_id
+        IF (GridRep)  write(out_unit,*) ' impossible to calculate the weights with the Grid'
+        IF (BasisRep) write(out_unit,*) ' impossible to calculate the weights with the Basis'
         STOP
       END IF
     ELSE
@@ -335,7 +335,7 @@ CONTAINS
 ! share psi%RvecB with the other processors in MPI scheme 3
 !=======================================================================================
   SUBROUTINE share_psi_nodes_MPI(psi,psi_size)
-    USE mod_system
+    USE EVR_system_m
     USE mod_psi_set_alloc
     USE mod_MPI_aux
 

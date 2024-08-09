@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_BFGS
-      USE mod_system
+      USE EVR_system_m
 
       IMPLICIT NONE
 
@@ -110,35 +110,35 @@
         calc_hessian_always = .FALSE.
         max_Q_ForPrinting   = 11
 
-        read(in_unitp,BFGS,IOSTAT=err_io)
+        read(in_unit,BFGS,IOSTAT=err_io)
         IF (err_io < 0) THEN
-           write(out_unitp,*) ' ERROR in Read_param_BFGS'
-           write(out_unitp,*) '  while reading the "BFGS" namelist'
-           write(out_unitp,*) ' end of file or end of record'
-           write(out_unitp,*) ' Check your data !!'
+           write(out_unit,*) ' ERROR in Read_param_BFGS'
+           write(out_unit,*) '  while reading the "BFGS" namelist'
+           write(out_unit,*) ' end of file or end of record'
+           write(out_unit,*) ' Check your data !!'
            STOP ' ERROR in Read_param_BFGS while reading the "BFGS" namelist'
         END IF
         IF (err_io < 0) THEN
-          write(out_unitp,*) ' ERROR in Read_param_BFGS'
-          write(out_unitp,*) '  while reading the "BFGS" namelist'
-          write(out_unitp,*) ' Probably you are using a wrong keyword'
-          write(out_unitp,*) ' Check your data !!'
+          write(out_unit,*) ' ERROR in Read_param_BFGS'
+          write(out_unit,*) '  while reading the "BFGS" namelist'
+          write(out_unit,*) ' Probably you are using a wrong keyword'
+          write(out_unit,*) ' Check your data !!'
           STOP ' ERROR in Read_param_BFGS while reading the "BFGS" namelist'
        END IF
-        IF (print_level > 1) write(out_unitp,BFGS)
+        IF (print_level > 1) write(out_unit,BFGS)
 
         IF (nb_neg > 0 .AND. .NOT. calc_hessian_always) THEN
-          write(out_unitp,*) ' ERROR in Read_param_BFGS'
-          write(out_unitp,*) '  for nb_neg > 0, calc_hessian_always MUST be .TRUE.'
-          write(out_unitp,*) '  nb_neg             ',nb_neg
-          write(out_unitp,*) '  calc_hessian_always',calc_hessian_always
-          write(out_unitp,*) ' Check your data !!'
+          write(out_unit,*) ' ERROR in Read_param_BFGS'
+          write(out_unit,*) '  for nb_neg > 0, calc_hessian_always MUST be .TRUE.'
+          write(out_unit,*) '  nb_neg             ',nb_neg
+          write(out_unit,*) '  calc_hessian_always',calc_hessian_always
+          write(out_unit,*) ' Check your data !!'
           STOP
         END IF
         IF (calc_hessian .AND. read_hessian) THEN
-          write(out_unitp,*) ' ERROR in Read_param_BFGS'
-          write(out_unitp,*) '  Both calc_hessian and read_hessian are .TRUE., it not possible'
-          write(out_unitp,*) ' Check your data !!'
+          write(out_unit,*) ' ERROR in Read_param_BFGS'
+          write(out_unit,*) '  Both calc_hessian and read_hessian are .TRUE., it not possible'
+          write(out_unit,*) ' Check your data !!'
           STOP
         END IF
         para_BFGS%max_iteration       = max_iteration
@@ -167,19 +167,19 @@
       SUBROUTINE Write_param_BFGS(para_BFGS)
       TYPE (param_BFGS), intent(in)   :: para_BFGS
 
-      write(out_unitp,*) '  WRITE param_BFGS'
-      write(out_unitp,*)
-      write(out_unitp,*) '  max_iteration  ',para_BFGS%max_iteration
-      write(out_unitp,*)
-      write(out_unitp,*) '  max_grad       ',para_BFGS%max_grad
-      write(out_unitp,*) '  RMS_grad       ',para_BFGS%RMS_grad
-      write(out_unitp,*) '  max_step       ',para_BFGS%max_step
-      write(out_unitp,*) '  RMS_step       ',para_BFGS%RMS_step
-      write(out_unitp,*)
-      write(out_unitp,*) '  calc_hessian_always',para_BFGS%calc_hessian_always
-      IF (para_BFGS%calc_hessian_always)  write(out_unitp,*) ' true Newton-Raphson'
+      write(out_unit,*) '  WRITE param_BFGS'
+      write(out_unit,*)
+      write(out_unit,*) '  max_iteration  ',para_BFGS%max_iteration
+      write(out_unit,*)
+      write(out_unit,*) '  max_grad       ',para_BFGS%max_grad
+      write(out_unit,*) '  RMS_grad       ',para_BFGS%RMS_grad
+      write(out_unit,*) '  max_step       ',para_BFGS%max_step
+      write(out_unit,*) '  RMS_step       ',para_BFGS%RMS_step
+      write(out_unit,*)
+      write(out_unit,*) '  calc_hessian_always',para_BFGS%calc_hessian_always
+      IF (para_BFGS%calc_hessian_always)  write(out_unit,*) ' true Newton-Raphson'
 
-      write(out_unitp,*) '  END WRITE param_BFGS'
+      write(out_unit,*) '  END WRITE param_BFGS'
 
   END SUBROUTINE Write_param_BFGS
   SUBROUTINE dealloc_param_BFGS(para_BFGS)
@@ -207,7 +207,7 @@
   SUBROUTINE Sub_BFGS(BasisnD,xOpt_min,SQ,nb_Opt,                   &
                           para_Tnum,mole,PrimOp,Qact,para_BFGS)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       use mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array
       USE mod_PrimOp
@@ -260,25 +260,25 @@
       character (len=*), parameter :: name_sub='Sub_BFGS'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'xopt_min',xopt_min(:)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'xopt_min',xopt_min(:)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
         Qact(1:nb_Opt) = xopt_min(:)
 
 
-        write(out_unitp,*) 'Qact',Qact
+        write(out_unit,*) 'Qact',Qact
         !---------JML-------------------------------------
-        write(out_unitp,*) 'mole%nb_act',mole%nb_act
-        write(out_unitp,*) 'RMS_grad',para_BFGS%RMS_grad
-        write(out_unitp,*) 'RMS_step',para_BFGS%RMS_step
-        write(out_unitp,*) 'max_iteration',para_BFGS%max_iteration
+        write(out_unit,*) 'mole%nb_act',mole%nb_act
+        write(out_unit,*) 'RMS_grad',para_BFGS%RMS_grad
+        write(out_unit,*) 'RMS_step',para_BFGS%RMS_step
+        write(out_unit,*) 'max_iteration',para_BFGS%max_iteration
 
         IF (para_BFGS%calc_hessian) THEN
-          write(out_unitp,*) ' The initial hessian is calculated'
+          write(out_unit,*) ' The initial hessian is calculated'
           !-------- allocation -----------------------------------------------
           CALL Init_Tab_OF_dnMatOp(dnMatOp,nb_Opt,PrimOp%nb_elec,nderiv=2)
           CALL alloc_NParray(para_BFGS%hessian_inv_init,[nb_Opt,nb_Opt],  &
@@ -299,11 +299,11 @@
           !----- Hessian and gradient ------------------------------------
           CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp)
 
-          write(out_unitp,*) 'Energy',Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
+          write(out_unit,*) 'Energy',Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
 
           CALL Get_Grad_FROM_Tab_OF_dnMatOp(grad,dnMatOp)
-          write(out_unitp,*) 'grad'
-          CALL Write_Vec(grad,out_unitp,5)
+          write(out_unit,*) 'grad'
+          CALL Write_Vec(grad,out_unit,5)
           CALL dealloc_NParray(grad,'grad',name_sub)
 
           CALL Get_Hess_FROM_Tab_OF_dnMatOp(hessian,dnMatOp) ! for the ground state
@@ -314,7 +314,7 @@
           !-------- end deallocation -----------------------------------------
 
         ELSE IF (para_BFGS%read_hessian) THEN
-          write(out_unitp,*) ' The initial hessian is read in internal coordinates'
+          write(out_unit,*) ' The initial hessian is read in internal coordinates'
           !-------- allocation -----------------------------------------------
           CALL alloc_NParray(para_BFGS%hessian_inv_init,[nb_Opt,nb_Opt],  &
                             'para_BFGS%hessian_inv_init',name_sub)
@@ -325,21 +325,21 @@
           !-------- end allocation --------------------------------------------
 
           !----- Hessian ------------------------------------
-          read(in_unitp,*,IOSTAT=err) nbcol
+          read(in_unit,*,IOSTAT=err) nbcol
           IF (err /= 0) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' "End of file", while reading nbcol'
-            write(out_unitp,*) ' Check your data !!'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' "End of file", while reading nbcol'
+            write(out_unit,*) ' Check your data !!'
             STOP
           END IF
 
-          IF (print_level > 1) write(out_unitp,*)'nbcol=',nbcol
+          IF (print_level > 1) write(out_unit,*)'nbcol=',nbcol
 
-          CALL Read_Mat(hessian,in_unitp,nbcol,err)
+          CALL Read_Mat(hessian,in_unit,nbcol,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR ',name_sub
-            write(out_unitp,*) ' while reading the matrix "hessian"'
-            write(out_unitp,*) ' Check your data !!'
+            write(out_unit,*) 'ERROR ',name_sub
+            write(out_unit,*) ' while reading the matrix "hessian"'
+            write(out_unit,*) ' Check your data !!'
             STOP
           END IF
           !----- End Hessian ------------------------------------
@@ -348,19 +348,19 @@
 
         IF (allocated(hessian)) THEN
           IF (print_level > 1 .OR. nb_Opt <= para_BFGS%max_Q_ForPrinting) THEN
-            write(out_unitp,*) 'hessian'
-            CALL Write_Mat(hessian,out_unitp,5)
+            write(out_unit,*) 'hessian'
+            CALL Write_Mat(hessian,out_unit,5)
           ELSE
-            write(out_unitp,*) 'The hessian is too large. => No printing'
+            write(out_unit,*) 'The hessian is too large. => No printing'
           END IF
 
           para_BFGS%hessian_inv_init = inv_OF_Mat_TO(hessian)
 
           IF (print_level > 1 .OR. nb_Opt <= para_BFGS%max_Q_ForPrinting) THEN
-            write(out_unitp,*) 'hessian inverse'
-            CALL Write_Mat(para_BFGS%hessian_inv_init,out_unitp,5)
+            write(out_unit,*) 'hessian inverse'
+            CALL Write_Mat(para_BFGS%hessian_inv_init,out_unit,5)
           ELSE
-            write(out_unitp,*) 'The hessian inverse is too large. => No printing'
+            write(out_unit,*) 'The hessian inverse is too large. => No printing'
           END IF
 
           !-------- deallocation ---------------------------------------------
@@ -401,7 +401,7 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -415,7 +415,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
                       gtol,tolx,itmax)
 !---------------------------------------------------------------------------
 !
- USE mod_system
+ USE EVR_system_m
  use mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array
  USE mod_PrimOp
  USE mod_basis
@@ -457,16 +457,16 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 
  p => Qact(1:mole%nb_act)
  n =  mole%nb_act
- !write(out_unitp,*) 'n',n
- !write(out_unitp,*) 'gtol,tolx,itmax',gtol,tolx,itmax
+ !write(out_unit,*) 'n',n
+ !write(out_unit,*) 'gtol,tolx,itmax',gtol,tolx,itmax
  allocate (g(n),hdg(n),pnew(n),dg(n),xi(n),hessin(n,n))
 
  call dfunc(p,g,fp,dnMatOp,mole,PrimOp,para_Tnum,1) ! Calculate starting function value and gradient.
- write(out_unitp,*)
- write(out_unitp,*) 'Iteration=    0 '
- write(out_unitp,*) ' Geometry:'
- write(out_unitp,*) ' p = ', p
- write(out_unitp,*) ' Energy = ',fp
+ write(out_unit,*)
+ write(out_unit,*) 'Iteration=    0 '
+ write(out_unit,*) ' Geometry:'
+ write(out_unit,*) ' p = ', p
+ write(out_unit,*) ' Energy = ',fp
 
  call proescvec(g,g,xxxg,n)
  xxxg=sqrt(xxxg/n)
@@ -478,12 +478,12 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
    if (temp > test) test=temp
   end do
 !!!!!!!!!!!!!!
- write(out_unitp,*) ' RMS Gradient = ',xxxg
- write(out_unitp,*) ' Test on gradient convergence = ',test
- flush(out_unitp)
+ write(out_unit,*) ' RMS Gradient = ',xxxg
+ write(out_unit,*) ' Test on gradient convergence = ',test
+ flush(out_unit)
 
  IF (allocated(para_BFGS%hessian_inv_init)) THEN
-   write(out_unitp,*) ' The initial hessian is transferred'
+   write(out_unit,*) ' The initial hessian is transferred'
    hessin(:,:) = para_BFGS%hessian_inv_init(:,:)
  ELSE
    hessin(:,:) = ZERO
@@ -501,7 +501,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
   ! next line search. It is usually safe to ignore the value of check.
   fp   = fret
   xi   = pnew-p    ! update the line direction
-  IF (print_level > 1) write(out_unitp,*) 'DeltaQ',xi(:)
+  IF (print_level > 1) write(out_unit,*) 'DeltaQ',xi(:)
   p    = pnew      ! and the current point
   test = ZERO
   do i=1,n     ! Test the convergence in Delta(x)
@@ -520,29 +520,29 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
   call proescvec(g,g,xxxg,n)
   xxxg=sqrt(xxxg/n)
 
-  write(out_unitp,*)
-  write(out_unitp,'(a,i4)') ' Iteration= ',its
-  IF (print_level > 0) write(out_unitp,*) ' Geometry: '
-  IF (print_level > 0) write(out_unitp,*) ' p = ', p
-  write(out_unitp,*) ' Energy',fret
-  write(out_unitp,*) ' RMS Gradient',xxxg
-  write(out_unitp,*) ' Test on gradient convergence = ', test
-  flush(out_unitp)
+  write(out_unit,*)
+  write(out_unit,'(a,i4)') ' Iteration= ',its
+  IF (print_level > 0) write(out_unit,*) ' Geometry: '
+  IF (print_level > 0) write(out_unit,*) ' p = ', p
+  write(out_unit,*) ' Energy',fret
+  write(out_unit,*) ' RMS Gradient',xxxg
+  write(out_unit,*) ' Test on gradient convergence = ', test
+  flush(out_unit)
 
    if (test < tolx) then  !!! Testing what happen if this part is removed
-   write(out_unitp,*) ' Geometry coordinates converged !! RMS step criteria'
-   flush(out_unitp)
+   write(out_unit,*) ' Geometry coordinates converged !! RMS step criteria'
+   flush(out_unit)
    deallocate (g,hdg,pnew,dg,xi,hessin)
    return
   end if
 !
   if ( test < gtol ) then
-   write(out_unitp,*) ' Gradient converged !!'
-   write(out_unitp,*) ' Optimized energy: ',fret
-   write(out_unitp,*) ' Optimized RMS gradient: ', xxxg, test
-   write(out_unitp,*) ' gtol: ', gtol
-   write(out_unitp,*) ' Optimized geometry: '
-   write(out_unitp,*) ' p = ', p
+   write(out_unit,*) ' Gradient converged !!'
+   write(out_unit,*) ' Optimized energy: ',fret
+   write(out_unit,*) ' Optimized RMS gradient: ', xxxg, test
+   write(out_unit,*) ' gtol: ', gtol
+   write(out_unit,*) ' Optimized geometry: '
+   write(out_unit,*) ' p = ', p
    deallocate (g,hdg,pnew,dg,xi,hessin)
    return
   end if
@@ -573,10 +573,10 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
   xi=-xi
  end do             ! and go back for another iteration.
  deallocate (g,hdg,pnew,dg,xi,hessin)
- write(out_unitp,*) 'Too many iterations in dfpmin'
- write(out_unitp,*) ' energy: ',fret
- write(out_unitp,*) ' Geometry: '
- write(out_unitp,*) ' p = ', p
+ write(out_unit,*) 'Too many iterations in dfpmin'
+ write(out_unit,*) ' energy: ',fret
+ write(out_unit,*) ' Geometry: '
+ write(out_unit,*) ' p = ', p
  stop
  return
  end subroutine dfpmin_new
@@ -585,7 +585,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
   subroutine lnsrch(n,xold,fold,g,p,x,f,stpmax,check,dnMatOp,mole,PrimOp,para_Tnum)
 !---------------------------------------------------------------------
 !
- USE mod_system
+ USE EVR_system_m
  USE mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array
  USE mod_PrimOp
  USE mod_basis
@@ -609,7 +609,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
  call proescvec(p,p,sum,n)
  sum=sqrt(sum)
 !
-! write(out_unitp,*) 'sum=', sum, 'stpmax=', stpmax
+! write(out_unit,*) 'sum=', sum, 'stpmax=', stpmax
 !
  flush(6)
  if(sum.gt.stpmax)then
@@ -669,7 +669,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 !---------------------------------------------------------------------------
   SUBROUTINE dfunc(xt,df,f,dnMatOp,mole,PrimOp,para_Tnum,nderiv_dnE)
 !---------------------------------------------------------------------------
- USE mod_system
+ USE EVR_system_m
  USE mod_dnSVM
  USE mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array,get_Qact0,sub_QactTOdnx
  USE mod_PrimOp
@@ -694,14 +694,14 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
  TYPE (Type_dnVec)    :: dnx
 
 
- !write(out_unitp,*) 'dfunc subroutine',mole%nb_act,nderiv_dnE
- !write(out_unitp,*) 'xt = ', xt
+ !write(out_unit,*) 'dfunc subroutine',mole%nb_act,nderiv_dnE
+ !write(out_unit,*) 'xt = ', xt
 
  Qact(:) = ZERO
  Qact(1:mole%nb_act)=xt
 
  IF (print_level > 1) THEN
-   write(out_unitp,*) '=== Current geometry (not recenter) ==========='
+   write(out_unit,*) '=== Current geometry (not recenter) ==========='
    CALL alloc_dnSVM(dnx,mole%ncart,mole%nb_act,nderiv=0)
 
    CALL get_Qact0(Qact,mole%ActiveTransfo)
@@ -710,8 +710,8 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
    CALL dealloc_dnSVM(dnx)
  END IF
 
-! write(out_unitp,*) 'Qact = ',Qact
-! flush(out_unitp)
+! write(out_unit,*) 'Qact = ',Qact
+! flush(out_unit)
 !
 ! The subroutine below enables to calculate the energy, the gradient and/or the hessian
 ! nderiv_dnE = 0 : => energy only
@@ -735,17 +735,17 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 !     With nderiv_alloc=2 and nderiv_dnE=1, you can calculate the energy and the gradient
 !     and update the hessian in MatdnE(1,1)%d2(:,:), if you want.
 
-!  write(out_unitp,*) ' MatdnE(1,1)%d0 = ', MatdnE(1,1)%d0
-!  write(out_unitp,*) ' MatdnE(1,1)%d1 = ', MatdnE(1,1)%d1
+!  write(out_unit,*) ' MatdnE(1,1)%d0 = ', MatdnE(1,1)%d0
+!  write(out_unit,*) ' MatdnE(1,1)%d1 = ', MatdnE(1,1)%d1
 !
   f = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp,1)
   if (nderiv_dnE >= 1) CALL Get_Grad_FROM_Tab_OF_dnMatOp(df,dnMatOp,1)
 
-  write(out_unitp,*) ' Energy = ',f
-  IF (nderiv_dnE >= 1) write(out_unitp,*) ' Active modes gradient norm = ',sqrt(dot_product(df,df))
-  IF (print_level > 1) write(out_unitp,*) ' Active modes gradient = ', df
-  !write(out_unitp,*) 'end dfunc subroutine'
-  !flush(out_unitp)
+  write(out_unit,*) ' Energy = ',f
+  IF (nderiv_dnE >= 1) write(out_unit,*) ' Active modes gradient norm = ',sqrt(dot_product(df,df))
+  IF (print_level > 1) write(out_unit,*) ' Active modes gradient = ', df
+  !write(out_unit,*) 'end dfunc subroutine'
+  !flush(out_unit)
 
  END SUBROUTINE dfunc
 ! ------------------------------------------------------------------------
@@ -772,7 +772,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 
   SUBROUTINE Sub_Newton(BasisnD,xOpt_min,SQ,nb_Opt,para_Tnum,mole,PrimOp,Qopt,para_BFGS)
 
-        USE mod_system
+        USE EVR_system_m
         USE mod_dnSVM
         use mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array
         USE mod_PrimOp
@@ -831,39 +831,39 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         character (len=*), parameter :: name_sub='Sub_Newton'
         !---------------------------------------------------------------------
         IF (debug) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) 'BEGINNING ',name_sub
-          write(out_unitp,*) 'xopt_min',xopt_min(:)
-          write(out_unitp,*)
-          write(out_unitp,*) 'mole%nb_act',mole%nb_act
-          write(out_unitp,*) 'RMS_grad',para_BFGS%RMS_grad
-          write(out_unitp,*) 'RMS_step',para_BFGS%RMS_step
-          write(out_unitp,*) 'max_iteration',para_BFGS%max_iteration
-          flush(out_unitp)
+          write(out_unit,*)
+          write(out_unit,*) 'BEGINNING ',name_sub
+          write(out_unit,*) 'xopt_min',xopt_min(:)
+          write(out_unit,*)
+          write(out_unit,*) 'mole%nb_act',mole%nb_act
+          write(out_unit,*) 'RMS_grad',para_BFGS%RMS_grad
+          write(out_unit,*) 'RMS_step',para_BFGS%RMS_step
+          write(out_unit,*) 'max_iteration',para_BFGS%max_iteration
+          flush(out_unit)
         END IF
         !---------------------------------------------------------------------
         
         Qopt(1:nb_Opt) = xopt_min(:)
-        !write(out_unitp,*) 'Qopt',Qopt
+        !write(out_unit,*) 'Qopt',Qopt
 
         CALL Init_Tab_OF_dnMatOp(dnMatOp,nb_Opt,PrimOp%nb_elec,nderiv=2)
         CALL alloc_NParray(hess,[nb_Opt,nb_Opt],'hess',name_sub)
         CALL alloc_NParray(grad,[nb_Opt],       'grad',name_sub)
         CALL alloc_NParray(vec, [nb_Opt,nb_Opt],'vec',name_sub)
         CALL alloc_NParray(diag,[nb_Opt],       'diag',name_sub)
-        write(out_unitp,*) '=================================================='
+        write(out_unit,*) '=================================================='
         DO it=0,para_BFGS%max_iteration
 
           CALL get_Qact0(Qact,mole%ActiveTransfo)
           Qact(1:nb_Opt) = Qopt(:)
-          IF (debug) write(out_unitp,*) 'Qact',Qact
+          IF (debug) write(out_unit,*) 'Qact',Qact
           CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp)
         
           !IF (debug) CALL Write_Tab_OF_dnMatOp(dnMatOp)
           CALL Get_Grad_FROM_Tab_OF_dnMatOp(grad,dnMatOp)  
-          IF (debug) CALL Write_Vec(grad, out_unitp, 5, info='grad')
+          IF (debug) CALL Write_Vec(grad, out_unit, 5, info='grad')
           CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess,dnMatOp) ! for the ground state
-          IF (debug) CALL Write_Mat(hess, out_unitp, 5, info='hess')
+          IF (debug) CALL Write_Mat(hess, out_unit, 5, info='hess')
           Ene = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
 
           IF (allocated(para_BFGS%TS_Vector)) THEN
@@ -878,7 +878,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
             CALL diagonalization(hess,diag,vec_ext(:,2:nb_Opt+1),nb_Opt)
             vec_ext(:,1) = para_BFGS%TS_Vector
             vec_ext(:,:) = Ortho_GramSchmidt(vec_ext)
-            IF (debug) CALL Write_Mat(vec_ext, out_unitp, 5, info='vec_ortho')
+            IF (debug) CALL Write_Mat(vec_ext, out_unit, 5, info='vec_ortho')
             iqq = 0
             DO iq=1,nb_Opt+1
               IF (dot_product(vec_ext(:,iq),vec_ext(:,iq)) > HALF) THEN
@@ -902,7 +902,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
             hess = matmul(vec,matmul(hess,tvec))
           ELSE
             CALL diagonalization(hess,diag,Vec,nb_Opt)
-            IF (debug) write(out_unitp,*) 'diag',diag ; flush(out_unitp)
+            IF (debug) write(out_unit,*) 'diag',diag ; flush(out_unit)
           
             IF (para_BFGS%nb_neg == 0) THEN
               tvec = transpose(vec)
@@ -911,10 +911,10 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
               END DO
               hess = matmul(Vec,tVec)
             ELSE IF (count(diag < ZERO) /= para_BFGS%nb_neg) THEN
-              write(out_unitp,*) 'ERROR in ',name_sub
-              write(out_unitp,*) '    Wrong number of negative hessian eigenvalues!'
-              write(out_unitp,*) '    Expected: ',para_BFGS%nb_neg
-              write(out_unitp,*) '    it has: ',count(diag < ZERO)
+              write(out_unit,*) 'ERROR in ',name_sub
+              write(out_unit,*) '    Wrong number of negative hessian eigenvalues!'
+              write(out_unit,*) '    Expected: ',para_BFGS%nb_neg
+              write(out_unit,*) '    it has: ',count(diag < ZERO)
               STOP 'ERROR in Sub_Newton: Wrong number of negative hessian eigenvalues'
             END IF
           END IF
@@ -922,7 +922,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           !write(out_unit,*) 'hess?',matmul(Vec,tVec)
         
           mDQit = LinearSys_Solve(hess,grad)
-          IF (debug) CALL Write_Vec(mDQit, out_unitp, 5, info='mDQit')
+          IF (debug) CALL Write_Vec(mDQit, out_unit, 5, info='mDQit')
 
         
           max_grad = maxval(abs(grad))
@@ -931,31 +931,31 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           RMS_disp = sqrt(dot_product(mDQit,mDQit)/nb_Opt)
         
         
-          write(out_unitp,*) '--------------------------------------------------'
-          write(out_unitp,*) 'it,E',it,Ene
+          write(out_unit,*) '--------------------------------------------------'
+          write(out_unit,*) 'it,E',it,Ene
 
           IF (debug) THEN
             conv = (max_grad <= para_BFGS%max_grad)
-            write(out_unitp,*) 'max_grad,treshold',max_grad,para_BFGS%max_grad,conv
+            write(out_unit,*) 'max_grad,treshold',max_grad,para_BFGS%max_grad,conv
             conv = (RMS_grad <= para_BFGS%RMS_grad)
-            write(out_unitp,*) 'RMS_grad,treshold',RMS_grad,para_BFGS%RMS_grad,conv
+            write(out_unit,*) 'RMS_grad,treshold',RMS_grad,para_BFGS%RMS_grad,conv
             conv = (max_disp <= para_BFGS%max_step)
-            write(out_unitp,*) 'max_disp,treshold',max_disp,para_BFGS%max_step,conv
+            write(out_unit,*) 'max_disp,treshold',max_disp,para_BFGS%max_step,conv
             conv = (RMS_disp <= para_BFGS%RMS_step)
-            write(out_unitp,*) 'RMS_disp,treshold',RMS_disp,para_BFGS%RMS_step,conv
+            write(out_unit,*) 'RMS_disp,treshold',RMS_disp,para_BFGS%RMS_step,conv
           END IF
         
           norm_disp = sqrt(dot_product(mDQit,mDQit))
           IF (norm_disp > para_BFGS%Largest_step) THEN
-            write(out_unitp,*) ' The displacements are too large.'
-            write(out_unitp,*) ' The displacements:',-mDQit
-            write(out_unitp,*) ' Its norm:',norm_disp
-            write(out_unitp,*) '  => They are scaled by ',para_BFGS%Largest_step/norm_disp
+            write(out_unit,*) ' The displacements are too large.'
+            write(out_unit,*) ' The displacements:',-mDQit
+            write(out_unit,*) ' Its norm:',norm_disp
+            write(out_unit,*) '  => They are scaled by ',para_BFGS%Largest_step/norm_disp
             mDQit = mDQit * para_BFGS%Largest_step/norm_disp
           END IF
         
           DO iq=1,nb_Opt
-            write(out_unitp,*) 'iq,Q(iq),grad(iq),DelatQ(iq)',iq,Qopt(iq),grad(iq),-mDQit(iq)
+            write(out_unit,*) 'iq,Q(iq),grad(iq),DelatQ(iq)',iq,Qopt(iq),grad(iq),-mDQit(iq)
           END DO
         
           conv = (max_grad <= para_BFGS%max_grad) .AND.                               &
@@ -968,16 +968,16 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           IF (conv) EXIT
         END DO
         IF (para_BFGS%max_iteration > 0) THEN
-          write(out_unitp,*) 'Geometry optimization is converged?',conv
-          write(out_unitp,*) 'Optimized geometry:'
+          write(out_unit,*) 'Geometry optimization is converged?',conv
+          write(out_unit,*) 'Optimized geometry:'
           DO iq=1,nb_Opt
-            write(out_unitp,*) 'iq,Qopt(iq),',iq,Qopt(iq)
+            write(out_unit,*) 'iq,Qopt(iq),',iq,Qopt(iq)
           END DO
         ELSE
-          write(out_unitp,*) 'No optimization (Max_it=0)'
+          write(out_unit,*) 'No optimization (Max_it=0)'
         END IF
-        write(out_unitp,*) '=================================================='
-        flush(out_unitp)
+        write(out_unit,*) '=================================================='
+        flush(out_unit)
         
         xopt_min(:) = Qopt(1:nb_Opt)
         
@@ -994,8 +994,8 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         
         !---------------------------------------------------------------------
         IF (debug) THEN
-          write(out_unitp,*) 'END ',name_sub
-          flush(out_unitp)
+          write(out_unit,*) 'END ',name_sub
+          flush(out_unit)
         END IF
         !---------------------------------------------------------------------
 

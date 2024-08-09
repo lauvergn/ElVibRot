@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_analysis
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,      ONLY : param_ana_psi
       USE mod_CRP,      ONLY : param_CRP
       IMPLICIT NONE
@@ -126,7 +126,7 @@
 
 !===============================================================================
       SUBROUTINE read_analyse(para_ana,Qana,mole)
-      USE mod_system
+      USE EVR_system_m
       use mod_Constant, only : real_wu, convRWU_TO_R_WITH_WorkingUnit,  &
                                rwu_write, get_conv_au_to_unit
       USE mod_Coord_KEO,  only : CoordType
@@ -190,7 +190,7 @@
                         MaxWP_TO_Write_MatOp
 
 
-      write(out_unitp,*) ' ANALYSIS PARAMETERS'
+      write(out_unit,*) ' ANALYSIS PARAMETERS'
 
       print                = .FALSE.
       psi2                 = .FALSE.
@@ -245,26 +245,26 @@
       Ezpe            = REAL_WU(huge(ONE),'cm-1','E')
       max_ene         = REAL_WU(TEN**4,   'cm-1','E') ! 10 000 cm-1
 
-      read(in_unitp,analyse)
-      IF (print_level > 0) write(out_unitp,analyse)
-      write(out_unitp,*)
+      read(in_unit,analyse)
+      IF (print_level > 0) write(out_unit,analyse)
+      write(out_unit,*)
 
       IF (ana) THEN
-        write(out_unitp,*) ' WARNING in ',name_sub
-        write(out_unitp,*) ' ana=t'
-        write(out_unitp,*) ' Defined only ana_level instead: ana_level=2'
+        write(out_unit,*) ' WARNING in ',name_sub
+        write(out_unit,*) ' ana=t'
+        write(out_unit,*) ' Defined only ana_level instead: ana_level=2'
       END IF
       IF (ana_level < -1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' ana_level must be >= 0'
-        write(out_unitp,*) ' ana_level',ana_level
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' ana_level must be >= 0'
+        write(out_unit,*) ' ana_level',ana_level
         STOP 'ERROR in read_analyse: ana_level < -1'
       END IF
       IF (ana .AND. ana_level /= -1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' ana=t and ana_level is initialized'
-        write(out_unitp,*) ' ana,ana_level',ana,ana_level
-        write(out_unitp,*) ' Defined only ana_level'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' ana=t and ana_level is initialized'
+        write(out_unit,*) ' ana,ana_level',ana,ana_level
+        write(out_unit,*) ' Defined only ana_level'
         STOP 'ERROR in read_analyse: ana=t and ana_level is initialized.'
       END IF
       IF (ana_level == -1) ana_level = 2
@@ -275,29 +275,29 @@
       IF (arpack)   It_diag = It_diag + 1
       IF (filter)   It_diag = It_diag + 1
       IF (it_diag > 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' Two or more Iterative Diagonalization Procedures are selected!!'
-        write(out_unitp,*) ' davidson,arpack,filter',davidson,arpack,filter
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' Two or more Iterative Diagonalization Procedures are selected!!'
+        write(out_unit,*) ' davidson,arpack,filter',davidson,arpack,filter
 
-        write(out_unitp,*) ' You HAVE to select only one!'
+        write(out_unit,*) ' You HAVE to select only one!'
         STOP 'ERROR in read_analyse: Two or more Iterative Diagonalization Procedures.'
       END IF
 
       IF (.NOT. formatted_file_WP) FilePsiVersion = 1
-      IF(MPI_id==0) write(out_unitp,*) 'name_file_spectralWP,formatted_file_WP: ', &
+      IF(MPI_id==0) write(out_unit,*) 'name_file_spectralWP,formatted_file_WP: ', &
                                         name_file_spectralWP,formatted_file_WP
 
       IF (Qtransfo) THEN
         CALL alloc_NParray(Qtransfo_type,shape(Qana),"Qtransfo_type",name_sub)
-        read(in_unitp,*) name_dum,Qtransfo_type(:)
+        read(in_unit,*) name_dum,Qtransfo_type(:)
       END IF
 
       IF (Wheight_rho) THEN
         CALL alloc_NParray(Qana_Weight,shape(Qana),"Qana_Weight",name_sub)
-        read(in_unitp,*) name_dum,Qana_Weight(:)
+        read(in_unit,*) name_dum,Qana_Weight(:)
 
         CALL alloc_NParray(Weight_Rho,shape(Qana),"Weight_Rho",name_sub)
-        read(in_unitp,*) name_dum,Weight_Rho(:)
+        read(in_unit,*) name_dum,Weight_Rho(:)
       END IF
 
       IF (psi1D_Q0 .OR. psi2D_Q0) THEN
@@ -326,11 +326,11 @@
       MPI_S%davidson                = davidson
 
       IF (len_trim(name_file_spectralWP) == 0 .AND. MPI_id == 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '  Empty file name: "name_file_spectralWP" !!'
-        write(out_unitp,*) 'name_file_spectralWP,formatted_file_WP: ',  &
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '  Empty file name: "name_file_spectralWP" !!'
+        write(out_unit,*) 'name_file_spectralWP,formatted_file_WP: ',  &
                                   name_file_spectralWP,formatted_file_WP
-        write(out_unitp,*) '  Check your data!!'
+        write(out_unit,*) '  Check your data!!'
         STOP 'ERROR in read_analyse: Empty file name.'
       END IF
 
@@ -356,8 +356,8 @@
       para_ana%JJmax           = JJmax
       IF (.NOT. VibRot) para_ana%JJmax = -1
 
-      IF (debug)  write(out_unitp,*) 'Ezpe   : ',RWU_Write(Ezpe,WithUnit=.TRUE.,WorkingUnit=.FALSE.)
-      IF (debug)  write(out_unitp,*) 'max_ene: ',RWU_Write(max_ene,WithUnit=.TRUE.,WorkingUnit=.FALSE.)
+      IF (debug)  write(out_unit,*) 'Ezpe   : ',RWU_Write(Ezpe,WithUnit=.TRUE.,WorkingUnit=.FALSE.)
+      IF (debug)  write(out_unit,*) 'max_ene: ',RWU_Write(max_ene,WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
       IF (AvPi) AvOp = .TRUE.
 
@@ -418,7 +418,7 @@
 !===============================================================================
 
       SUBROUTINE dealloc_para_ana(para_ana)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,      ONLY : param_ana_psi,dealloc_ana_psi
       IMPLICIT NONE
 
@@ -431,7 +431,7 @@
 
 
       SUBROUTINE read_intensity(para_intensity)
-      USE mod_system
+      USE EVR_system_m
       use mod_Constant, only : real_wu, convRWU_TO_R_WITH_WorkingUnit,  &
                                rwu_write, get_conv_au_to_unit
       IMPLICIT NONE
@@ -466,7 +466,7 @@
 
 
 !--------------------------------------------------------------------
-      write(out_unitp,*) ' INTENSITY PARAMETERS'
+      write(out_unit,*) ' INTENSITY PARAMETERS'
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 
         l_Int           = .TRUE.
@@ -493,7 +493,7 @@
         file_intensity  = 'intensity'
         file_resart_int = 'restart.int'
 
-        read(in_unitp,intensity)
+        read(in_unit,intensity)
         nb_t = 0
         IF (l_Int) nb_t = nb_t + 1
         IF (l_CrossSec) nb_t = nb_t + 1
@@ -501,24 +501,24 @@
         IF (l_Aif) nb_t = nb_t + 1
         IF (l_Tau) nb_t = nb_t + 1
         IF (nb_t /= 1) THEN
-          write(out_unitp,*) ' ERROR in read_intensity'
-          write(out_unitp,*) ' You have to chose ONE option:'
-          write(out_unitp,*) '     l_Int=t or'
-          write(out_unitp,*) '     l_CrossSec=t or'
-          write(out_unitp,*) '     l_IntVR=t or'
-          write(out_unitp,*) '     l_Aif=t or'
-          write(out_unitp,*) '     l_Tau=t'
-          write(out_unitp,*) ' but l_Int,l_IntVR,l_Aif,l_Tau:',l_Int,l_CrossSec,l_IntVR,l_Aif,l_Tau
+          write(out_unit,*) ' ERROR in read_intensity'
+          write(out_unit,*) ' You have to chose ONE option:'
+          write(out_unit,*) '     l_Int=t or'
+          write(out_unit,*) '     l_CrossSec=t or'
+          write(out_unit,*) '     l_IntVR=t or'
+          write(out_unit,*) '     l_Aif=t or'
+          write(out_unit,*) '     l_Tau=t'
+          write(out_unit,*) ' but l_Int,l_IntVR,l_Aif,l_Tau:',l_Int,l_CrossSec,l_IntVR,l_Aif,l_Tau
           STOP 'ERROR in read_intensity: chose ONE option among l_Int, l_CrossSec ...'
         END IF
 
-        IF (print_level > 0) write(out_unitp,intensity)
-        write(out_unitp,*)
+        IF (print_level > 0) write(out_unit,intensity)
+        write(out_unit,*)
         Min_relativeI0 = max(ZERO,Min_relativeI0)
         IF (Min_relativeI0 > ONE ) THEN
-          write(out_unitp,*) ' ERROR in read_intensity'
-          write(out_unitp,*) '  Min_relativeI0 MUST be smaller than ONE'
-          write(out_unitp,*) '  Min_relativeI0',Min_relativeI0
+          write(out_unit,*) ' ERROR in read_intensity'
+          write(out_unit,*) '  Min_relativeI0 MUST be smaller than ONE'
+          write(out_unit,*) '  Min_relativeI0',Min_relativeI0
           STOP 'ERROR in read_intensity: Min_relativeI0 MUST be smaller than ONE'
         END IF
 

@@ -51,7 +51,7 @@ c     write(6,*) 'Qloc',Qloc,mat_V(1,1)
       RETURN
       END
       SUBROUTINE pot_ori(V,Qdyn)
-      USE mod_system
+      USE EVR_system_m
       USE mod_file
       implicit none
 

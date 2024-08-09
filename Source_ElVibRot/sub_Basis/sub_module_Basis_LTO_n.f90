@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_Basis_L_TO_n
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
         PRIVATE
@@ -93,9 +93,9 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -103,8 +103,8 @@
       CALL dealloc_Basis_L_TO_n(L_TO_n_para)
 
       IF (Lmax < 0 ) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' Wrong Lmax value',Lmax
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' Wrong Lmax value',Lmax
         STOP
       END IF
 
@@ -118,10 +118,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_Basis_L_TO_n(L_TO_n_para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -142,9 +142,9 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -173,10 +173,10 @@
       END IF
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_Basis_L_TO_n(L_TO_n_para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -197,72 +197,72 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
 
 
       IF (present(Rec_line)) THEN
-        write(out_unitp,*) trim(Rec_line),'L_TO_n_type     ',L_TO_n_para%L_TO_n_type
-        write(out_unitp,*) trim(Rec_line),'Lmax            ',L_TO_n_para%Lmax
-        write(out_unitp,*) trim(Rec_line),'A               ',L_TO_n_para%A
-        write(out_unitp,*) trim(Rec_line),'B               ',L_TO_n_para%B
-        write(out_unitp,*) trim(Rec_line),'C               ',L_TO_n_para%C
-        write(out_unitp,*) trim(Rec_line),'expo            ',L_TO_n_para%expo
-        write(out_unitp,*) trim(Rec_line),'max_n           ',L_TO_n_para%max_n
+        write(out_unit,*) trim(Rec_line),'L_TO_n_type     ',L_TO_n_para%L_TO_n_type
+        write(out_unit,*) trim(Rec_line),'Lmax            ',L_TO_n_para%Lmax
+        write(out_unit,*) trim(Rec_line),'A               ',L_TO_n_para%A
+        write(out_unit,*) trim(Rec_line),'B               ',L_TO_n_para%B
+        write(out_unit,*) trim(Rec_line),'C               ',L_TO_n_para%C
+        write(out_unit,*) trim(Rec_line),'expo            ',L_TO_n_para%expo
+        write(out_unit,*) trim(Rec_line),'max_n           ',L_TO_n_para%max_n
 
-        write(out_unitp,*) trim(Rec_line),'alloc tab_L_TO_n',allocated(L_TO_n_para%tab_L_TO_n)
+        write(out_unit,*) trim(Rec_line),'alloc tab_L_TO_n',allocated(L_TO_n_para%tab_L_TO_n)
         IF (allocated(L_TO_n_para%tab_L_TO_n)) THEN
-          write(out_unitp,*) trim(Rec_line),'tab_L_TO_n'
-          write(out_unitp,*) trim(Rec_line),':  ',L_TO_n_para%tab_L_TO_n
+          write(out_unit,*) trim(Rec_line),'tab_L_TO_n'
+          write(out_unit,*) trim(Rec_line),':  ',L_TO_n_para%tab_L_TO_n
         END IF
 
-        write(out_unitp,*) trim(Rec_line),'alloc tab_n_TO_L',allocated(L_TO_n_para%tab_n_TO_L)
+        write(out_unit,*) trim(Rec_line),'alloc tab_n_TO_L',allocated(L_TO_n_para%tab_n_TO_L)
         IF (allocated(L_TO_n_para%tab_n_TO_L)) THEN
-          write(out_unitp,*) trim(Rec_line),'tab_n_TO_L'
-          write(out_unitp,*) trim(Rec_line),':  ',L_TO_n_para%tab_n_TO_L
+          write(out_unit,*) trim(Rec_line),'tab_n_TO_L'
+          write(out_unit,*) trim(Rec_line),':  ',L_TO_n_para%tab_n_TO_L
         END IF
 
-        write(out_unitp,*) trim(Rec_line),'alloc skip_deltaL',allocated(L_TO_n_para%skip_deltaL)
+        write(out_unit,*) trim(Rec_line),'alloc skip_deltaL',allocated(L_TO_n_para%skip_deltaL)
         IF (allocated(L_TO_n_para%skip_deltaL)) THEN
-          write(out_unitp,*) trim(Rec_line),'skip_deltaL',L_TO_n_para%skip_deltaL
+          write(out_unit,*) trim(Rec_line),'skip_deltaL',L_TO_n_para%skip_deltaL
         END IF
 
       ELSE
-        write(out_unitp,*) 'L_TO_n_type     ',L_TO_n_para%L_TO_n_type
-        write(out_unitp,*) 'Lmax            ',L_TO_n_para%Lmax
-        write(out_unitp,*) 'A               ',L_TO_n_para%A
-        write(out_unitp,*) 'B               ',L_TO_n_para%B
-        write(out_unitp,*) 'C               ',L_TO_n_para%C
-        write(out_unitp,*) 'expo            ',L_TO_n_para%expo
-        write(out_unitp,*) 'max_n           ',L_TO_n_para%max_n
+        write(out_unit,*) 'L_TO_n_type     ',L_TO_n_para%L_TO_n_type
+        write(out_unit,*) 'Lmax            ',L_TO_n_para%Lmax
+        write(out_unit,*) 'A               ',L_TO_n_para%A
+        write(out_unit,*) 'B               ',L_TO_n_para%B
+        write(out_unit,*) 'C               ',L_TO_n_para%C
+        write(out_unit,*) 'expo            ',L_TO_n_para%expo
+        write(out_unit,*) 'max_n           ',L_TO_n_para%max_n
 
-        write(out_unitp,*) 'alloc tab_L_TO_n',allocated(L_TO_n_para%tab_L_TO_n)
+        write(out_unit,*) 'alloc tab_L_TO_n',allocated(L_TO_n_para%tab_L_TO_n)
         IF (allocated(L_TO_n_para%tab_L_TO_n)) THEN
-          write(out_unitp,*) 'tab_L_TO_n'
-          write(out_unitp,*) '   ',L_TO_n_para%tab_L_TO_n
+          write(out_unit,*) 'tab_L_TO_n'
+          write(out_unit,*) '   ',L_TO_n_para%tab_L_TO_n
         END IF
 
-        write(out_unitp,*) 'alloc tab_n_TO_L',allocated(L_TO_n_para%tab_n_TO_L)
+        write(out_unit,*) 'alloc tab_n_TO_L',allocated(L_TO_n_para%tab_n_TO_L)
         IF (allocated(L_TO_n_para%tab_n_TO_L)) THEN
-          write(out_unitp,*) 'tab_n_TO_L'
-          write(out_unitp,*) '   ',L_TO_n_para%tab_n_TO_L
+          write(out_unit,*) 'tab_n_TO_L'
+          write(out_unit,*) '   ',L_TO_n_para%tab_n_TO_L
         END IF
 
-        write(out_unitp,*) 'alloc skip_deltaL',allocated(L_TO_n_para%skip_deltaL)
+        write(out_unit,*) 'alloc skip_deltaL',allocated(L_TO_n_para%skip_deltaL)
         IF (allocated(L_TO_n_para%skip_deltaL)) THEN
-          write(out_unitp,*) 'skip_deltaL',L_TO_n_para%skip_deltaL
+          write(out_unit,*) 'skip_deltaL',L_TO_n_para%skip_deltaL
         END IF
 
       END IF
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -284,9 +284,9 @@
       !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         CALL Write_Basis_L_TO_n(L_TO_n_para)
 
       END IF
@@ -299,8 +299,8 @@
            CALL dealloc_NParray(L_TO_n_para%tab_L_TO_n,"L_TO_n_para%tab_L_TO_n",name_sub)
 
       IF (Lmax < 0 ) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' Wrong Lmax value',Lmax
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' Wrong Lmax value',Lmax
         STOP
       END IF
 
@@ -337,8 +337,8 @@
         END DO
 
       CASE Default
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) '  WRONG L_TO_n_type',L_TO_n_para%L_TO_n_type
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) '  WRONG L_TO_n_type',L_TO_n_para%L_TO_n_type
         STOP
       END SELECT
 
@@ -349,10 +349,10 @@
       CALL check_Basis_L_TO_n(L_TO_n_para%tab_L_TO_n,errBasis_L_TO_n)
 
       IF (errBasis_L_TO_n /= 0) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) '  Problem with initialization'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) '  Problem with initialization'
         CALL Write_Basis_L_TO_n(L_TO_n_para)
-        write(out_unitp,*)
+        write(out_unit,*)
         STOP
       END IF
 
@@ -360,7 +360,7 @@
       nmin = get_L_FROM_Basis_L_TO_n(L_TO_n_para,nmax) ! to set up the table
 
       ! set skip_deltaL(:)
-      !write(out_unitp,*) 'init skip_deltaL'
+      !write(out_unit,*) 'init skip_deltaL'
       CALL alloc_NParray(L_TO_n_para%skip_deltaL,[Lmax],                      &
                         "L_TO_n_para%skip_deltaL",name_sub,[0] )
       L_TO_n_para%skip_deltaL(:) = .FALSE.
@@ -370,10 +370,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_Basis_L_TO_n(L_TO_n_para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -397,13 +397,13 @@
       !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'L',L
-        write(out_unitp,*) 'L2?',present(L2)
-        IF (present(L2)) write(out_unitp,*) 'L2',L2
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'L',L
+        write(out_unit,*) 'L2?',present(L2)
+        IF (present(L2)) write(out_unit,*) 'L2',L2
         CALL Write_Basis_L_TO_n(L_TO_n_para)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -411,12 +411,12 @@
 
 
     IF (L < 0) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) 'L',L
-      write(out_unitp,*) 'L2?',present(L2)
-      IF (present(L2)) write(out_unitp,*) 'L2',L2
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) 'L',L
+      write(out_unit,*) 'L2?',present(L2)
+      IF (present(L2)) write(out_unit,*) 'L2',L2
       CALL Write_Basis_L_TO_n(L_TO_n_para)
-      write(out_unitp,*) ' ERROR:  L < 0',L
+      write(out_unit,*) ' ERROR:  L < 0',L
       STOP 'ERROR in Get_n_FROM_Basis_L_TO_n: L < 0'
     END IF
 
@@ -424,12 +424,12 @@
     IF (present(L2)) L2_loc = L2
 
     IF (L2_loc < 0) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) 'L',L
-      write(out_unitp,*) 'L2?',present(L2)
-      IF (present(L2)) write(out_unitp,*) 'L2',L2
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) 'L',L
+      write(out_unit,*) 'L2?',present(L2)
+      IF (present(L2)) write(out_unit,*) 'L2',L2
       CALL Write_Basis_L_TO_n(L_TO_n_para)
-      write(out_unitp,*) ' ERROR:  L2 < 0',L2_loc
+      write(out_unit,*) ' ERROR:  L2 < 0',L2_loc
       STOP 'ERROR in Get_n_FROM_Basis_L_TO_n: L2 < 0'
     END IF
 
@@ -462,8 +462,8 @@
         END DO
 
       CASE (2) ! read tab_L_TO_n
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) '   L_TO_n_type=2 and tab_L_TO_n is not allocated !'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) '   L_TO_n_type=2 and tab_L_TO_n is not allocated !'
         STOP 'ERROR in Get_n_FROM_Basis_L_TO_n: L_TO_n_type=2 and tab_L_TO_n is not allocated'
 
       CASE (3)
@@ -477,8 +477,8 @@
           int( real(L_TO_n_para%B,kind=Rkind) * tanh(real(L,kind=Rkind)/FOUR) )
 
       CASE Default
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) '  WRONG L_TO_n_type',L_TO_n_para%L_TO_n_type
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) '  WRONG L_TO_n_type',L_TO_n_para%L_TO_n_type
         STOP 'ERROR in Get_n_FROM_Basis_L_TO_n: WRONG L_TO_n_type'
       END SELECT
 
@@ -487,25 +487,25 @@
     n = min(n,L_TO_n_para%max_n)
 
     IF (n < 0) THEN
-     write(out_unitp,*) 'ERROR in ',name_sub
-     write(out_unitp,*) '  n < 0, n:',n
-     write(out_unitp,*) 'L',L
-     write(out_unitp,*) 'L2?',present(L2)
-     IF (present(L2)) write(out_unitp,*) 'L2',L2
+     write(out_unit,*) 'ERROR in ',name_sub
+     write(out_unit,*) '  n < 0, n:',n
+     write(out_unit,*) 'L',L
+     write(out_unit,*) 'L2?',present(L2)
+     IF (present(L2)) write(out_unit,*) 'L2',L2
      CALL Write_Basis_L_TO_n(L_TO_n_para)
-     write(out_unitp,*)
+     write(out_unit,*)
      STOP 'ERROR in Get_n_FROM_Basis_L_TO_n: n<0'
     END IF
 
     IF (n == 0) THEN
-     write(out_unitp,*) 'WARNING in ',name_sub, '  n == 0'
-     flush(out_unitp)
+     write(out_unit,*) 'WARNING in ',name_sub, '  n == 0'
+     flush(out_unit)
     END IF
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'L,max_n,n',L,L_TO_n_para%max_n,n
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'L,max_n,n',L,L_TO_n_para%max_n,n
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
       END FUNCTION Get_n_FROM_Basis_L_TO_n
@@ -525,11 +525,11 @@
       !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'n',n
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'n',n
         CALL Write_Basis_L_TO_n(L_TO_n_para)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -538,11 +538,11 @@
     nmin = get_n_FROM_Basis_L_TO_n(L_TO_n_para,0)
 
     IF (n < nmin .OR. n > nmax) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' ERROR in ',name_sub
       CALL Write_Basis_L_TO_n(L_TO_n_para)
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) 'n is out of range. n:',n
-      write(out_unitp,*) '   range:',nmin,nmax
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) 'n is out of range. n:',n
+      write(out_unit,*) '   range:',nmin,nmax
       STOP
     END IF
 
@@ -561,9 +561,9 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'L',L
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'L',L
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
       END FUNCTION Get_L_FROM_Basis_L_TO_n
@@ -586,9 +586,9 @@
       !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -628,10 +628,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_Basis_L_TO_n(L_TO_n_para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -654,9 +654,9 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -680,8 +680,8 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -702,11 +702,11 @@
       !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'L_TO_n_para2'
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'L_TO_n_para2'
         CALL Write_Basis_L_TO_n(L_TO_n_para2)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -726,11 +726,11 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'L_TO_n_para1'
+        write(out_unit,*)
+        write(out_unit,*) 'L_TO_n_para1'
         CALL Write_Basis_L_TO_n(L_TO_n_para1)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 

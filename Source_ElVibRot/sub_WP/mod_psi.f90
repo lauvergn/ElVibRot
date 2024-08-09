@@ -59,7 +59,7 @@ MODULE mod_psi
   PRIVATE :: psi0_gaussGridRep
 CONTAINS
       SUBROUTINE init_psi0(WP0,para_WP0,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_basis
       USE mod_psi_set_alloc
@@ -88,22 +88,22 @@ CONTAINS
       !logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING init_psi0'
-        write(out_unitp,*) 'WP0n_h,WP0nb_elec',para_WP0%WP0n_h,para_WP0%WP0nb_elec
-        write(out_unitp,*)
-        write(out_unitp,*) 'WP0(:)%symab',WP0(:)%symab
+        write(out_unit,*) 'BEGINNING init_psi0'
+        write(out_unit,*) 'WP0n_h,WP0nb_elec',para_WP0%WP0n_h,para_WP0%WP0nb_elec
+        write(out_unit,*)
+        write(out_unit,*) 'WP0(:)%symab',WP0(:)%symab
 
         CALL ecri_init_psi(WP0(1))
 
-        write(out_unitp,*)
-        write(out_unitp,*) 'WP0BasisRep',para_WP0%WP0BasisRep
-        write(out_unitp,*) 'lect_WP0GridRep,lect_WP0BasisRep',         &
+        write(out_unit,*)
+        write(out_unit,*) 'WP0BasisRep',para_WP0%WP0BasisRep
+        write(out_unit,*) 'lect_WP0GridRep,lect_WP0BasisRep',         &
                   para_WP0%lect_WP0GridRep,para_WP0%lect_WP0BasisRep
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_basis_act1',WP0(1)%BasisnD%nb_basis
+        write(out_unit,*)
+        write(out_unit,*) 'nb_basis_act1',WP0(1)%BasisnD%nb_basis
         CALL RecWrite_basis(WP0(1)%BasisnD)
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 
 !-----------------------------------------------------------
@@ -140,29 +140,29 @@ CONTAINS
 
 
           IF (debug) THEN
-            write(out_unitp,*) 'psiGridRep ini'
-            CALL ecri_psi(ZERO,WP0(1),out_unitp,.TRUE.,.FALSE.)
+            write(out_unit,*) 'psiGridRep ini'
+            CALL ecri_psi(ZERO,WP0(1),out_unit,.TRUE.,.FALSE.)
           END IF
 
           CALL norm2_psi(WP0(1),GridRep=.TRUE.)
           IF(openmpi) CALL MPI_Bcast_(WP0(1)%norm2,size1_MPI,root_MPI)
-          write(out_unitp,*) 'norm2WP GridRep',WP0(1)%norm2
-          flush(out_unitp)
+          write(out_unit,*) 'norm2WP GridRep',WP0(1)%norm2
+          flush(out_unit)
 
 
           IF (WP0(1)%norm2 < ZERO) THEN
-            write(out_unitp,*) 'WARNING norm2WP < 0',WP0(1)%norm2
-            write(out_unitp,*) ' ... Bug in the Smolyak implementation!'
-            write(out_unitp,*) ' The renormalization is not performed'
+            write(out_unit,*) 'WARNING norm2WP < 0',WP0(1)%norm2
+            write(out_unit,*) ' ... Bug in the Smolyak implementation!'
+            write(out_unit,*) ' The renormalization is not performed'
           ELSE
             CALL renorm_psi_WITH_norm2(WP0(1),GridRep=.TRUE.)
             IF(openmpi) CALL MPI_Bcast_(WP0(1)%norm2,size1_MPI,root_MPI)
-            write(out_unitp,*) 'norm2WP GridRep',WP0(1)%norm2
-            flush(out_unitp)
+            write(out_unit,*) 'norm2WP GridRep',WP0(1)%norm2
+            flush(out_unit)
 
             IF (debug) THEN
-              write(out_unitp,*) 'psiGridRep normalized'
-              CALL ecri_psi(ZERO,WP0(1),out_unitp,.TRUE.,.FALSE.)
+              write(out_unit,*) 'psiGridRep normalized'
+              CALL ecri_psi(ZERO,WP0(1),out_unit,.TRUE.,.FALSE.)
             END IF
           END IF
 
@@ -173,17 +173,17 @@ CONTAINS
 
             IF(keep_MPI) CALL norm2_psi(WP0(1),BasisRep=.TRUE.)
             IF(openmpi) CALL MPI_Bcast_(WP0(1)%norm2,size1_MPI,root_MPI)
-            write(out_unitp,*) 'norm2WP BasisRep',WP0(1)%norm2
+            write(out_unit,*) 'norm2WP BasisRep',WP0(1)%norm2
 
             IF (debug) THEN
-              write(out_unitp,*) 'psiBasisRep unnormalized'
-              CALL ecri_psi(ZERO,WP0(1),out_unitp,.FALSE.,.TRUE.)
+              write(out_unit,*) 'psiBasisRep unnormalized'
+              CALL ecri_psi(ZERO,WP0(1),out_unit,.FALSE.,.TRUE.)
             END IF
 
             IF (abs(ONE-WP0(1)%norm2) >= ONETENTH**5) THEN
-              write(out_unitp,*) ' WARNNIG in psi0'
-              write(out_unitp,*) ' the transformation GridRep to BasisRep is NOT exact'
-              write(out_unitp,*) ' => used more basis functions'
+              write(out_unit,*) ' WARNNIG in psi0'
+              write(out_unit,*) ' the transformation GridRep to BasisRep is NOT exact'
+              write(out_unit,*) ' => used more basis functions'
               !CALL ecri_psi(psi=WP0(1),                                      &
               !              ecri_BasisRep=.TRUE.,ecri_GridRep=.TRUE.)
             END IF
@@ -191,7 +191,7 @@ CONTAINS
           END IF
 
         ELSE IF (para_WP0%WP0restart ) THEN
-          !write(out_unitp,*) 'WP0%cplx',WP0%cplx
+          !write(out_unit,*) 'WP0%cplx',WP0%cplx
           CALL file_open(para_WP0%file_WP0,nio)
           read(nio,*) nb_WPdum
           CALL lect_psiBasisRepnotall_nD(WP0(1),nio,WP0(1)%cplx,para_WP0%file_WP0%formatted)
@@ -214,8 +214,8 @@ CONTAINS
 
           CALL lect_psiBasisRepnotall(WP0(1),para_WP0%WP0cplx)
         ELSE
-          write(out_unitp,*) ' ERROR in psi0'
-          write(out_unitp,*) ' I do not know what to do!!!'
+          write(out_unit,*) ' ERROR in psi0'
+          write(out_unit,*) ' I do not know what to do!!!'
           STOP
         END IF ! for .NOT. para_WP0%lect_WP0BasisRep
 
@@ -230,7 +230,7 @@ CONTAINS
       IF(keep_MPI) CALL renorm_psi(WP0(1),BasisRep=.TRUE.)
       ! ENDIF
 
-      IF(keep_MPI) write(out_unitp,*) 'norm2WP BasisRep',WP0(1)%norm2
+      IF(keep_MPI) write(out_unit,*) 'norm2WP BasisRep',WP0(1)%norm2
 
       !- clear WP0%...GridRep, if not need ------------------
       IF (para_WP0%WP0BasisRep) THEN
@@ -240,16 +240,16 @@ CONTAINS
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'WP0(:)%symab',WP0(:)%symab
-        write(out_unitp,*) 'WP0BasisRep',WP0(1)%norm2
+        write(out_unit,*)
+        write(out_unit,*) 'WP0(:)%symab',WP0(:)%symab
+        write(out_unit,*) 'WP0BasisRep',WP0(1)%norm2
         IF (para_WP0%WP0BasisRep) THEN
-          CALL ecri_psi(ZERO,WP0(1),out_unitp,.FALSE.,.TRUE.)
+          CALL ecri_psi(ZERO,WP0(1),out_unit,.FALSE.,.TRUE.)
         ELSE
-          CALL ecri_psi(ZERO,WP0(1),out_unitp,.TRUE.,.FALSE.)
+          CALL ecri_psi(ZERO,WP0(1),out_unit,.TRUE.,.FALSE.)
         END IF
-        write(out_unitp,*) 'END psi0'
-        flush(out_unitp)
+        write(out_unit,*) 'END psi0'
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -265,7 +265,7 @@ CONTAINS
 !
 !==============================================================
       SUBROUTINE psi0_gaussGridRep(WP0,para_WP0,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_basis
       USE mod_psi_set_alloc
@@ -301,15 +301,15 @@ CONTAINS
       !logical,parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING psi0_gaussGridRep'
-        write(out_unitp,*) 'nb_act1',WP0%nb_act1
-        write(out_unitp,*) 'nq_a,n_h,nb_elec',WP0%nb_qa,WP0%nb_bi,WP0%nb_be
-        write(out_unitp,*) 'WP0n_h,WP0nb_elec',para_WP0%WP0n_h,para_WP0%WP0nb_elec
-        write(out_unitp,*) 'sigma,Qeq,imp_k',                                   &
+        write(out_unit,*) 'BEGINNING psi0_gaussGridRep'
+        write(out_unit,*) 'nb_act1',WP0%nb_act1
+        write(out_unit,*) 'nq_a,n_h,nb_elec',WP0%nb_qa,WP0%nb_bi,WP0%nb_be
+        write(out_unit,*) 'WP0n_h,WP0nb_elec',para_WP0%WP0n_h,para_WP0%WP0nb_elec
+        write(out_unit,*) 'sigma,Qeq,imp_k',                                   &
            para_WP0%WP0sigma,para_WP0%WP0Qeq,para_WP0%WP0imp_k
-        write(out_unitp,*) 'WP0_DIP',para_WP0%WP0_DIP
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'WP0_DIP',para_WP0%WP0_DIP
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -357,26 +357,26 @@ CONTAINS
 
         IF (WP0%cplx) THEN
           WP0%CvecG(i_qaie) = cmplx(czk*ze,szk*ze,kind=Rkind)
-          IF (debug) write(out_unitp,11) Qact,WP0%CvecG(i_qaie)
+          IF (debug) write(out_unit,11) Qact,WP0%CvecG(i_qaie)
  11       format(10f15.5)
         ELSE
           WP0%RvecG(i_qaie) = ze
-          IF (debug) write(out_unitp,11) Qact,WP0%RvecG(i_qaie)
+          IF (debug) write(out_unit,11) Qact,WP0%RvecG(i_qaie)
         END IF
 
       END DO
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END psi0_gaussGridRep'
-         flush(out_unitp)
+         write(out_unit,*) 'END psi0_gaussGridRep'
+         flush(out_unit)
        END IF
 !-----------------------------------------------------------
 
 
       END SUBROUTINE psi0_gaussGridRep
       SUBROUTINE New_WP0_GridRep(WP0,para_WP0,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_basis
       USE mod_psi_set_alloc
@@ -407,11 +407,11 @@ CONTAINS
       !logical,parameter :: debug = .TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING New_WP0_GridRep'
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING New_WP0_GridRep'
+        write(out_unit,*)
         CALL Write_Tab_GWP(para_WP0%tab_GWP0)
-        write(out_unitp,*) 'WP0nrho',para_WP0%WP0nrho
-        flush(out_unitp)
+        write(out_unit,*) 'WP0nrho',para_WP0%WP0nrho
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -444,9 +444,9 @@ CONTAINS
 
         IF (debug) THEN
           IF (WP0%cplx) THEN
-            write(out_unitp,*) 'i_qa,i_qaie,Qact',i_qa,i_qaie,Qact,WP0%CvecG(i_qaie)
+            write(out_unit,*) 'i_qa,i_qaie,Qact',i_qa,i_qaie,Qact,WP0%CvecG(i_qaie)
           ELSE
-            write(out_unitp,*) 'i_qa,i_qaie,Qact',i_qa,i_qaie,Qact,WP0%RvecG(i_qaie)
+            write(out_unit,*) 'i_qa,i_qaie,Qact',i_qa,i_qaie,Qact,WP0%RvecG(i_qaie)
           END IF
         END If
 
@@ -454,8 +454,8 @@ CONTAINS
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END New_WP0_GridRep'
-         flush(out_unitp)
+         write(out_unit,*) 'END New_WP0_GridRep'
+         flush(out_unit)
        END IF
 !-----------------------------------------------------------
 

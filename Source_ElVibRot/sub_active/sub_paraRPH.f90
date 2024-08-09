@@ -53,7 +53,7 @@ PUBLIC Set_paraPRH
 CONTAINS
 
       SUBROUTINE Set_paraPRH(mole,para_Tnum,BasisnD)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_dnSVM
       USE mod_Constant
@@ -97,18 +97,18 @@ CONTAINS
       nb_inact21_RPH = mole%RPHTransfo%nb_inact21
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
 
-        write(out_unitp,*) 'nb_qa',get_nq_FROM_basis(BasisnD)
+        write(out_unit,*) 'nb_qa',get_nq_FROM_basis(BasisnD)
 
         !CALL RecWrite_basis(BasisnD)
 
-        write(out_unitp,*) 'nb_act1_RPH',nb_act1_RPH
-        write(out_unitp,*) 'nb_inact21_RPH',nb_inact21_RPH
+        write(out_unit,*) 'nb_act1_RPH',nb_act1_RPH
+        write(out_unit,*) 'nb_inact21_RPH',nb_inact21_RPH
 
         CALL Write_RPHTransfo(mole%RPHTransfo)
 
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
       DO it=mole%nb_Qtransfo-1,mole%itRPH+1,-1
@@ -118,7 +118,7 @@ CONTAINS
 
       ! for tab_RPHpara_AT_Qact1
       IF (.NOT. associated(mole%RPHTransfo%tab_RPHpara_AT_Qact1)) THEN
-        IF (debug) write(out_unitp,*) ' tab_RPHpara_AT_Qact1'
+        IF (debug) write(out_unit,*) ' tab_RPHpara_AT_Qact1'
         CALL alloc_array(mole%RPHTransfo%tab_RPHpara_AT_Qact1,[0],      &
                         'mole%RPHTransfo%tab_RPHpara_AT_Qact1',name_sub,[0])
 
@@ -127,28 +127,28 @@ CONTAINS
                                   Qact,para_Tnum,mole)
         mole%RPHTransfo%init_Qref = .TRUE.
 
-        write(out_unitp,*) ' Frequencies, normal modes at the reference geometry'
+        write(out_unit,*) ' Frequencies, normal modes at the reference geometry'
 
-        write(out_unitp,11) Qact(1:nb_act1_RPH), &
+        write(out_unit,11) Qact(1:nb_act1_RPH), &
                mole%RPHTransfo%tab_RPHpara_AT_Qact1(0)%dnEHess%d0(:)*get_Conv_au_TO_unit('E','cm-1')
  11     format(' frequencies : ',30f10.4)
-        write(out_unitp,*) 'dnQopt'
+        write(out_unit,*) 'dnQopt'
         CALL Write_dnVec(mole%RPHTransfo%tab_RPHpara_AT_Qact1(0)%dnQopt)
-        write(out_unitp,*) 'dnC_inv'
+        write(out_unit,*) 'dnC_inv'
         CALL Write_dnMat(mole%RPHTransfo%tab_RPHpara_AT_Qact1(0)%dnC_inv)
-        flush(out_unitp)
+        flush(out_unit)
 
       END IF
 
       ! Check if the nb_act1_RPH coordinates belong to one basis set (primitive ?)
       ! 1) RPHTransfo MUST be the 2d transformation after the active one.
-      !write(out_unitp,*) 'asso RPH, itRPH,nb_Qtransfo',associated(mole%RPHTransfo),mole%itRPH,mole%nb_Qtransfo
+      !write(out_unit,*) 'asso RPH, itRPH,nb_Qtransfo',associated(mole%RPHTransfo),mole%itRPH,mole%nb_Qtransfo
       RPHCoord_IN_OneBasis = associated(mole%RPHTransfo) .AND.          &
                                       (mole%itRPH == mole%nb_Qtransfo-1)
 
       RPHCoord_IN_OneBasis = RPHCoord_IN_OneBasis .AND.                 &
         (count(mole%RPHTransfo%list_act_OF_Qdyn(1:nb_act1_RPH) == 1) == nb_act1_RPH)
-      !write(out_unitp,*) 'list_act_OF_Qdyn',mole%RPHTransfo%list_act_OF_Qdyn
+      !write(out_unit,*) 'list_act_OF_Qdyn',mole%RPHTransfo%list_act_OF_Qdyn
 
 
       ! 2) basis functions of BasisnD are defined as a product (BasisnD%nb_basis > 0)
@@ -158,7 +158,7 @@ CONTAINS
       ! 3) Check nb_act1_RPH coordinates belong to one primitive basis set
       IF (RPHCoord_IN_OneBasis) THEN
         DO ib=1,BasisnD%nb_basis
-          !write(out_unitp,*) 'ib,iQdyn',ib,':',BasisnD%tab_Pbasis(ib)%Pbasis%iQdyn(:)
+          !write(out_unit,*) 'ib,iQdyn',ib,':',BasisnD%tab_Pbasis(ib)%Pbasis%iQdyn(:)
           IF (BasisnD%tab_Pbasis(ib)%Pbasis%ndim == nb_act1_RPH) THEN
             IF (all(BasisnD%tab_Pbasis(ib)%Pbasis%iQdyn ==              &
                   mole%RPHTransfo%list_QactTOQdyn(1:nb_act1_RPH)) ) EXIT
@@ -167,8 +167,8 @@ CONTAINS
         RPHCoord_IN_OneBasis = RPHCoord_IN_OneBasis .AND. (ib <= BasisnD%nb_basis)
       END IF
 
-      write(out_unitp,*) 'RPHCoord_IN_OneBasis',RPHCoord_IN_OneBasis
-      flush(out_unitp)
+      write(out_unit,*) 'RPHCoord_IN_OneBasis',RPHCoord_IN_OneBasis
+      flush(out_unit)
 
       IF (RPHCoord_IN_OneBasis) THEN
         CALL Set_paraPRH_ONEBasis(mole,para_Tnum,BasisnD,ib)
@@ -176,7 +176,7 @@ CONTAINS
         CALL Set_paraPRH_gene(mole,para_Tnum,BasisnD)
       END IF
 
-      flush(out_unitp)
+      flush(out_unit)
       mole%RPHTransfo%init = .TRUE.
 
       DO it=mole%nb_Qtransfo-1,mole%itRPH+1,-1
@@ -185,12 +185,12 @@ CONTAINS
 !     -------------------------------------------------------
       IF (debug) THEN
         CALL Write_RPHTransfo(mole%RPHTransfo)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
       END SUBROUTINE Set_paraPRH
       SUBROUTINE Set_paraPRH_OneBasis(mole,para_Tnum,BasisnD,ib)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_dnSVM
       USE mod_Constant
@@ -235,13 +235,13 @@ CONTAINS
       nb_inact21_RPH = mole%RPHTransfo%nb_inact21
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'ib',ib
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'ib',ib
 
         !CALL RecWrite_basis(BasisnD)
 
-        write(out_unitp,*) 'nb_act1_RPH',nb_act1_RPH
-        write(out_unitp,*) 'nb_inact21_RPH',nb_inact21_RPH
+        write(out_unit,*) 'nb_act1_RPH',nb_act1_RPH
+        write(out_unit,*) 'nb_inact21_RPH',nb_inact21_RPH
 
         CALL Write_RPHTransfo(mole%RPHTransfo)
 
@@ -251,7 +251,7 @@ CONTAINS
       !----------------------------------------------------------------
       !--- First the number of grid points ----------------------------
       CALL time_perso('Grid RPH')
-      write(out_unitp,*) 'Grid RPH'
+      write(out_unit,*) 'Grid RPH'
 
       CALL alloc_NParray(Qact1_fromBasisnD,[nb_act1_RPH],'Qact1_fromBasisnD',name_sub)
 
@@ -268,7 +268,7 @@ CONTAINS
       CASE Default
          STOP ' no default'
       END SELECT
-      write(out_unitp,*) 'L,ib,nq',L,ib,nq ; flush(out_unitp)
+      write(out_unit,*) 'L,ib,nq',L,ib,nq ; flush(out_unit)
 
       DO
 
@@ -297,7 +297,7 @@ CONTAINS
            STOP ' no default'
         END SELECT
 
-        !write(out_unitp,*) 'L,iq,Qact1_fromBasisnD',L,iq-1,':',Qact1_fromBasisnD
+        !write(out_unit,*) 'L,iq,Qact1_fromBasisnD',L,iq-1,':',Qact1_fromBasisnD
 
 
         IF (.NOT. allocated(List_Qact1)) THEN ! first point
@@ -347,8 +347,8 @@ CONTAINS
 
       END DO
       CALL time_perso('Grid RPH')
-      write(out_unitp,*) 'nb of Qact1 grid points',size(List_Qact1,dim=2)
-      flush(out_unitp)
+      write(out_unit,*) 'nb of Qact1 grid points',size(List_Qact1,dim=2)
+      flush(out_unit)
 
       !----------------------------------------------------------------
       !----------------------------------------------------------------
@@ -382,10 +382,10 @@ CONTAINS
           Qact(1:nb_act1_RPH) = List_Qact1(:,iq_list)
 
           CALL Adding_InactiveCoord_TO_Qact(Qact,mole%ActiveTransfo) ! add rigid, flexible coordinates
-          write(out_unitp,*) 'new RPH point',iq_list
-          !write(out_unitp,*) 'new RPH point',Qact(:)
+          write(out_unit,*) 'new RPH point',iq_list
+          !write(out_unit,*) 'new RPH point',Qact(:)
 
-          flush(out_unitp)
+          flush(out_unit)
 
           CALL Set_RPHpara_AT_Qact1(                                    &
                           mole%RPHTransfo%tab_RPHpara_AT_Qact1(iq_list),&
@@ -393,8 +393,8 @@ CONTAINS
 
         END DO
 
-      write(out_unitp,*) 'END Grid RPH'
-      flush(out_unitp)
+      write(out_unit,*) 'END Grid RPH'
+      flush(out_unit)
 
       CALL dealloc_NParray(List_Qact1,'List_Qact1',name_sub)
       CALL dealloc_NParray(Qact1_fromBasisnD,'Qact1_fromBasisnD',name_sub)
@@ -402,12 +402,12 @@ CONTAINS
 !     -------------------------------------------------------
       IF (debug) THEN
         CALL Write_RPHTransfo(mole%RPHTransfo)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
       END SUBROUTINE Set_paraPRH_OneBasis
       SUBROUTINE Set_paraPRH_gene(mole,para_Tnum,BasisnD)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_dnSVM
       USE mod_Constant
@@ -452,14 +452,14 @@ CONTAINS
       nb_inact21_RPH = mole%RPHTransfo%nb_inact21
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
 
-        write(out_unitp,*) 'nb_qa',get_nq_FROM_basis(BasisnD)
+        write(out_unit,*) 'nb_qa',get_nq_FROM_basis(BasisnD)
 
         !CALL RecWrite_basis(BasisnD)
 
-        write(out_unitp,*) 'nb_act1_RPH',nb_act1_RPH
-        write(out_unitp,*) 'nb_inact21_RPH',nb_inact21_RPH
+        write(out_unit,*) 'nb_act1_RPH',nb_act1_RPH
+        write(out_unit,*) 'nb_inact21_RPH',nb_inact21_RPH
 
         CALL Write_RPHTransfo(mole%RPHTransfo)
 
@@ -469,7 +469,7 @@ CONTAINS
       !----------------------------------------------------------------
       !--- First the number of grid points ----------------------------
       CALL time_perso('Grid RPH')
-      write(out_unitp,*) 'Grid RPH'
+      write(out_unit,*) 'Grid RPH'
 
       CALL alloc_NParray(Qact1_fromBasisnD,[nb_act1_RPH],'Qact1_fromBasisnD',name_sub)
 
@@ -477,20 +477,20 @@ CONTAINS
       DO iq=1,get_nq_FROM_basis(BasisnD)
 
         IF (debug .AND. (mod(iq,nq_part)==0)) THEN
-          write(out_unitp,*) 'iq,nq',iq,get_nq_FROM_basis(BasisnD)
-          flush(out_unitp)
+          write(out_unit,*) 'iq,nq',iq,get_nq_FROM_basis(BasisnD)
+          flush(out_unit)
         END IF
 
         Qact(:) = ZERO
         CALL Rec_Qact(Qact,BasisnD,iq,mole,OldPara)
-        !write(out_unitp,*) 'iq,size(List_Qact1,dim=2),Qact',iq,size(List_Qact1,dim=2),Qact
-        !flush(out_unitp)
+        !write(out_unit,*) 'iq,size(List_Qact1,dim=2),Qact',iq,size(List_Qact1,dim=2),Qact
+        !flush(out_unit)
         CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn,mole%ActiveTransfo)
-        !write(out_unitp,*) 'Qdyn',Qdyn
-        !flush(out_unitp)
+        !write(out_unit,*) 'Qdyn',Qdyn
+        !flush(out_unit)
 
         Qact1_fromBasisnD(:) = Qdyn(mole%RPHTransfo%list_QactTOQdyn(1:nb_act1_RPH))
-        !write(out_unitp,*) 'Qact1_fromBasisnD',Qact1_fromBasisnD
+        !write(out_unit,*) 'Qact1_fromBasisnD',Qact1_fromBasisnD
 
 
         IF (.NOT. allocated(List_Qact1)) THEN ! first point
@@ -536,8 +536,8 @@ CONTAINS
 
       END DO
       CALL time_perso('Grid RPH')
-      write(out_unitp,*) 'nb of Qact1 grid points',size(List_Qact1,dim=2)
-      flush(out_unitp)
+      write(out_unit,*) 'nb of Qact1 grid points',size(List_Qact1,dim=2)
+      flush(out_unit)
       !----------------------------------------------------------------
       !----------------------------------------------------------------
 
@@ -557,8 +557,8 @@ CONTAINS
           Qact(1:nb_act1_RPH) = List_Qact1(:,iq_list)
           CALL Adding_InactiveCoord_TO_Qact(Qact,mole%ActiveTransfo) ! add rigid, flexible coordinates
 
-          write(out_unitp,*) 'new RPH point',iq_list
-          flush(out_unitp)
+          write(out_unit,*) 'new RPH point',iq_list
+          flush(out_unit)
 
           CALL Set_RPHpara_AT_Qact1(                                    &
                           mole%RPHTransfo%tab_RPHpara_AT_Qact1(iq_list),&
@@ -566,8 +566,8 @@ CONTAINS
 
         END DO
 
-      write(out_unitp,*) 'END Grid RPH'
-      flush(out_unitp)
+      write(out_unit,*) 'END Grid RPH'
+      flush(out_unit)
 
       CALL dealloc_NParray(List_Qact1,'List_Qact1',name_sub)
       CALL dealloc_NParray(Qact1_fromBasisnD,'Qact1_fromBasisnD',name_sub)
@@ -575,13 +575,13 @@ CONTAINS
 !     -------------------------------------------------------
       IF (debug) THEN
         CALL Write_RPHTransfo(mole%RPHTransfo)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
       END SUBROUTINE Set_paraPRH_gene
 
       FUNCTION compar_GridPoint(Q1,Q2,n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
         integer :: compar_GridPoint
         integer, intent(in) :: n

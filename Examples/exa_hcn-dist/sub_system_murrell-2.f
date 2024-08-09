@@ -10,7 +10,7 @@ C================================================================
      *                   Q,nb_var,mole,
      *                   calc_ScalOp,pot_cplx)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -64,7 +64,7 @@ c    R2 = R_CN
 c    R3 = R_HN
 c=================================================================
       FUNCTION murrell(Q)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real(kind=Rkind) :: murrell
 
@@ -103,7 +103,7 @@ c     T=cos(TT)
       R1=sqrt(r1)
       R2=gR
       R3=sqrt(pR**2+(RC*gR)**2+TWO*pR*gR*RC*T)
-      !write(out_unitp,*) r1,r2,r3
+      !write(out_unit,*) r1,r2,r3
       R1=R1*autoA
       R2=R2*autoA
       R3=R3*autoA
@@ -125,7 +125,7 @@ C.....NH
       Z32=Z3*Z3
       V3=-3.9938_Rkind*(ONE+3.0704_Rkind*Z3)*exp(-3.0704_Rkind*Z3)
 
-c     write(out_unitp,*) v1,v2,v3
+c     write(out_unit,*) v1,v2,v3
 
 C.....THREE BODY TERMS
       Z1=R1-1.9607_Rkind
@@ -170,7 +170,7 @@ C.....THREE BODY TERMS
       SWITCH=(ONE-HY1)*(ONE-HY2)*(ONE-HY3)
       V123=SWITCH*POLY
 
-c     write(out_unitp,*) v123,V1+V2+V3+V123
+c     write(out_unit,*) v123,V1+V2+V3+V123
 
       murrell=(V1+V2+V3+V123)/autoeV
 
@@ -181,7 +181,7 @@ C================================================================
 C    fonction pot_rest(x)
 C================================================================
       FUNCTION pot_rest(Qact,Delta_Qact,nb_inact2n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real(kind=Rkind) :: pot_rest
 
@@ -196,7 +196,7 @@ C================================================================
 C    fonction im_pot0(x)
 C================================================================
       FUNCTION im_pot0(Q)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real(kind=Rkind) :: im_pot0
 
@@ -216,7 +216,7 @@ C================================================================
 C    sub hessian
 C================================================================
       SUBROUTINE sub_hessian (h)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
        real(kind=Rkind) h
@@ -231,7 +231,7 @@ C    fonction pot0(x) 1 D (avec x=cos(theta))
 c    pour une tri atomique en jacobie
 C================================================================
       SUBROUTINE sub_ScalarOp(ScalOp,nb_ScalOp,Q,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -259,7 +259,7 @@ C================================================================
 C    analytical gradient along the path
 C================================================================
       SUBROUTINE d0d1d2_g(d0g,d1g,d2g,Qdyn,mole,deriv,num,step)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -282,14 +282,14 @@ c     logical, parameter :: debug = .TRUE.
       logical, parameter :: debug = .FALSE.
 c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING d0d1d2_g'
-        write(out_unitp,*) 'nb_var',mole%nb_var
-        write(out_unitp,*) 'nb_act1',mole%nb_act1
-        write(out_unitp,*) 'nb_inact22,nb_inact21',
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING d0d1d2_g'
+        write(out_unit,*) 'nb_var',mole%nb_var
+        write(out_unit,*) 'nb_act1',mole%nb_act1
+        write(out_unit,*) 'nb_inact22,nb_inact21',
      *                   mole%nb_inact22,mole%nb_inact21
-        write(out_unitp,*) 'nb_inact2n',mole%nb_inact2n
-        write(out_unitp,*) 'deriv',deriv
+        write(out_unit,*) 'nb_inact2n',mole%nb_inact2n
+        write(out_unit,*) 'deriv',deriv
       END IF
 
 c---------------------------------------------------------------------
@@ -301,9 +301,9 @@ c---------------------------------------------------------------------
 
 c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'd0g at Qact:',Qact
-        write(out_unitp,*) d0g(:)
-        write(out_unitp,*) 'END d0d1d2_g'
+        write(out_unit,*) 'd0g at Qact:',Qact
+        write(out_unit,*) d0g(:)
+        write(out_unit,*) 'END d0d1d2_g'
       END IF
 c---------------------------------------------------------------------
 
@@ -313,7 +313,7 @@ C    analytical hessian along the path
 C================================================================
       SUBROUTINE d0d1d2_h(d0h,d1h,d2h,
      *                     Qdyn,mole,deriv,num,step)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -346,13 +346,13 @@ c----- for debuging ----------------------------------
 c     logical, parameter :: debug = .TRUE.
 c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING d0d1d2_h'
-        write(out_unitp,*) 'nb_var',mole%nb_var
-        write(out_unitp,*) 'nb_act1',mole%nb_act1
-        write(out_unitp,*) 'nb_inact22,nb_inact21',
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING d0d1d2_h'
+        write(out_unit,*) 'nb_var',mole%nb_var
+        write(out_unit,*) 'nb_act1',mole%nb_act1
+        write(out_unit,*) 'nb_inact22,nb_inact21',
      *            mole%nb_inact22,mole%nb_inact21
-        write(out_unitp,*) 'nb_inact2n',mole%nb_inact2n
+        write(out_unit,*) 'nb_inact2n',mole%nb_inact2n
       END IF
 c---------------------------------------------------------------------
 
@@ -363,8 +363,8 @@ c$OMP CRITICAL (d0d1d2_h_CRIT)
       IF (begin) THEN
 
         IF (nb_inactb < mole%nb_inact2n ) THEN
-          write(out_unitp,*) 'ERROR : nb_inactb is TO small',nb_inactb
-          write(out_unitp,*) 'it should at least equal to',
+          write(out_unit,*) 'ERROR : nb_inactb is TO small',nb_inactb
+          write(out_unit,*) 'it should at least equal to',
      *                       mole%nb_inact2n
           STOP
         END IF
@@ -382,8 +382,8 @@ c$OMP CRITICAL (d0d1d2_h_CRIT)
 
           CALL read_para0d(F(1,i,j),nn(i,j),max_points,nom,exist)
           IF ( .NOT. exist ) THEN
-            write(out_unitp,*) 'F(1,i,i) tq d0h = 1 ...'
-            write(out_unitp,*) '... and F(1,i,j) tq d0h = 0'
+            write(out_unit,*) 'F(1,i,i) tq d0h = 1 ...'
+            write(out_unit,*) '... and F(1,i,j) tq d0h = 0'
             nn(i,j) = 1
             IF ( i .EQ. j ) THEN
               F(1,i,j) = ONE/poly_legendre(ONE,1,0)
@@ -406,9 +406,9 @@ c---------------------------------------------------------------------
       c_act = Qdyn(mole%liste_QactTOQsym(1))
  
       IF (deriv) THEN
-        write(out_unitp,*) 'ERROR in d0d1d2_h'
-        write(out_unitp,*) '  deriv CANNOT be true!!'
-        write(out_unitp,*) ' check the fortran source'
+        write(out_unit,*) 'ERROR in d0d1d2_h'
+        write(out_unit,*) '  deriv CANNOT be true!!'
+        write(out_unit,*) ' check the fortran source'
         STOP
       END IF
 
@@ -419,22 +419,22 @@ c---------------------------------------------------------------------
            d0h(i,j) = d0h(i,j) + F(kl,i,j)*poly_legendre(c_act,kl,0)
         END DO
         d0h(j,i) = d0h(i,j)
-c       write(out_unitp,*) 'd0h(i,j)',i,j,d0h(i,j)
+c       write(out_unit,*) 'd0h(i,j)',i,j,d0h(i,j)
       END DO
       END DO
 
 c---------------------------------------------------------------------
       IF (debug) THEN       
-        write(out_unitp,*) 'Qact1',c_act
+        write(out_unit,*) 'Qact1',c_act
         DO i=1,mole%nb_inact2n
         DO j=i,mole%nb_inact2n
-          write(out_unitp,*) 'F(.,i,j)',i,j,nn(i,j)
-          write(out_unitp,*) (F(k,i,j),k=1,nn(i,j))
+          write(out_unit,*) 'F(.,i,j)',i,j,nn(i,j)
+          write(out_unit,*) (F(k,i,j),k=1,nn(i,j))
         END DO
         END DO
-        write(out_unitp,*) 'd0h at c_act:',c_act
+        write(out_unit,*) 'd0h at c_act:',c_act
         CALL Write_Mat(d0h,6,4)
-        write(out_unitp,*) 'END d0d1d2_h'
+        write(out_unit,*) 'END d0d1d2_h'
       END IF
 c---------------------------------------------------------------------
 
@@ -444,7 +444,7 @@ C    analytical derivative (dnQflex : Qflex Qflex' Qflex" Qflex'") calculation
 c    for the variable iq
 C================================================================
       SUBROUTINE calc_dnQflex(iq,dnQflex,Qact,nb_act,nderiv,it)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM      
       IMPLICIT NONE
 
@@ -480,9 +480,9 @@ c----- for debuging ----------------------------------
 
 c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_act',nb_act
-        write(out_unitp,*) 'iq',iq
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_act',nb_act
+        write(out_unit,*) 'iq',iq
       END IF
 c---------------------------------------------------------------------
 
@@ -490,9 +490,9 @@ c---------------------------------------------------------------------
 c      Qact value. Rq: only ONE active variable is possible
 c---------------------------------------------------------------------
        IF (nb_act /= 1) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) ' the number of Active variable'
-         write(out_unitp,*) ' should be 1. But nb_act =',nb_act
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) ' the number of Active variable'
+         write(out_unit,*) ' should be 1. But nb_act =',nb_act
          STOP
        END IF
 
@@ -505,20 +505,20 @@ c---------------------------------------------------------------------
 c      initialization (only once)
 c$OMP    CRITICAL (dnQflex_CRIT)
        IF (begin) THEN
-         write(out_unitp,*) ' INITIALIZATION of ',name_sub
+         write(out_unit,*) ' INITIALIZATION of ',name_sub
          begin=.FALSE.
          nn(:) = 0
          F(:,:) = ZERO
          DO vi=2,3
            nom=nom_i('inter12___',vi)
-           write(out_unitp,*) 'read file :',nom,vi
+           write(out_unit,*) 'read file :',nom,vi
 
            CALL read_para0d(F(1,vi),nn(vi),max_points,nom,exist)
            IF ( .NOT. exist ) STOP
 
-c          write(out_unitp,*) vi,(F(k,vi),k=1,nn(vi))
+c          write(out_unit,*) vi,(F(k,vi),k=1,nn(vi))
          END DO
-         write(out_unitp,*) ' END INITIALIZATION of ',name_sub
+         write(out_unit,*) ' END INITIALIZATION of ',name_sub
 
        END IF
 c$OMP    END CRITICAL (dnQflex_CRIT)
@@ -548,9 +548,9 @@ c---------------------------------------------------------------------
 
 c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'dnQflex : ',Qact
+        write(out_unit,*) 'dnQflex : ',Qact
         CALL write_dnS(dnQflex,nderiv)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 c---------------------------------------------------------------------
 
@@ -562,7 +562,7 @@ C================================================================
       SUBROUTINE d0d1d2d3_Qeq(i_Qdyn,
      *                        d0req,d1req,d2req,d3req,
      *                        Qdyn,mole,nderiv)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
@@ -605,11 +605,11 @@ c----- for debuging ----------------------------------
 
 c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_inact20,nb_act',
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_inact20,nb_act',
      *                     mole%nb_inact20,mole%nb_act
-        write(out_unitp,*) 'nb_var',mole%nb_var
-        write(out_unitp,*) 'i_Qdyn',i_Qdyn
+        write(out_unit,*) 'nb_var',mole%nb_var
+        write(out_unit,*) 'i_Qdyn',i_Qdyn
       END IF
 c---------------------------------------------------------------------
 
@@ -617,9 +617,9 @@ c---------------------------------------------------------------------
 c      Qact value. Rq: only ONE active variable is possible
 c---------------------------------------------------------------------
        IF (mole%nb_act1 /= 1) THEN
-         write(out_unitp,*) ' ERROR : d0d1d2d3_Qeq'
-         write(out_unitp,*) ' the number of Active variable'
-         write(out_unitp,*) ' should be 1. But nb_act1 =',mole%nb_act1
+         write(out_unit,*) ' ERROR : d0d1d2d3_Qeq'
+         write(out_unit,*) ' the number of Active variable'
+         write(out_unit,*) ' should be 1. But nb_act1 =',mole%nb_act1
          STOP
        END IF
 
@@ -638,8 +638,8 @@ c        -------------------------------------------------------------
 c         nb_inact (=nb_inact20+nb_inact21+nb_inact22) > nb_inactb ??
 c        -------------------------------------------------------------
          IF (mole%nb_inact > nb_inactb) THEN
-           write(out_unitp,*) ' ERROR : in ',name_sub
-           write(out_unitp,*) 'nb_inact(',mole%nb_inact,
+           write(out_unit,*) ' ERROR : in ',name_sub
+           write(out_unit,*) 'nb_inact(',mole%nb_inact,
      *                    ')>nb_inactb(',nb_inactb,')'
            STOP
          END IF
@@ -648,12 +648,12 @@ c        -------------------------------------------------------------
          F(:,:) = ZERO
          DO vi=2,3
            nom=nom_i('inter12___',vi)
-           write(out_unitp,*) 'read file :',nom,vi
+           write(out_unit,*) 'read file :',nom,vi
 
            CALL read_para0d(F(1,vi),nn(vi),max_points,nom,exist)
            IF ( .NOT. exist ) STOP
 
-c          write(out_unitp,*) vi,(F(k,vi),k=1,nn(vi))
+c          write(out_unit,*) vi,(F(k,vi),k=1,nn(vi))
          END DO
        END IF
 c$OMP  END CRITICAL (d0d1d2d3_Qeq_CRIT)
@@ -696,11 +696,11 @@ c---------------------------------------------------------------------
 
 c---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'd0req : ',c_act,d0req
-        write(out_unitp,*) 'd1req : ',c_act,d1req
-        write(out_unitp,*) 'd2req : ',c_act,d2req
-        write(out_unitp,*) 'd3req : ',c_act,d3req
-        write(out_unitp,*) 'END d0d1d2d3_Qeq'
+        write(out_unit,*) 'd0req : ',c_act,d0req
+        write(out_unit,*) 'd1req : ',c_act,d1req
+        write(out_unit,*) 'd2req : ',c_act,d2req
+        write(out_unit,*) 'd3req : ',c_act,d3req
+        write(out_unit,*) 'END d0d1d2d3_Qeq'
       END IF
 c---------------------------------------------------------------------
 

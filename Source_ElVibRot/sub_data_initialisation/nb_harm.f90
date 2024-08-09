@@ -56,7 +56,7 @@
 !
 !=====================================================================
       SUBROUTINE sub2_ind_harm(Basis2n,PrimOp,para_Tnum,mole)
-      use mod_system
+      use EVR_system_m
       USE mod_nDindex
       use mod_Constant,  only: get_conv_au_to_unit
       USE mod_Coord_KEO, only: CoordType, Tnum, gaussian_width, get_Qact0
@@ -90,18 +90,18 @@
       logical, parameter :: debug=.FALSE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) ' BEGINNING ',name_sub
-        write(out_unitp,*) '  Qdyn0',mole%ActiveTransfo%Qdyn0
-        write(out_unitp,*) '  nb_inact2n',mole%nb_inact2n
-        write(out_unitp,*) '  nb_var',mole%nb_var
+        write(out_unit,*) ' BEGINNING ',name_sub
+        write(out_unit,*) '  Qdyn0',mole%ActiveTransfo%Qdyn0
+        write(out_unit,*) '  nb_inact2n',mole%nb_inact2n
+        write(out_unit,*) '  nb_var',mole%nb_var
       END IF
 !---------------------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 
       IF (mole%nb_inact2n == 0 .AND. PrimOp%nb_elec == 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_inact2n (nb_inact21+nb_inact22)= 0'
-        write(out_unitp,*) ' no harmonic inactive variables !!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_inact2n (nb_inact21+nb_inact22)= 0'
+        write(out_unit,*) ' no harmonic inactive variables !!'
         STOP
       END IF
 !------------------------------------------------------------
@@ -117,15 +117,15 @@
                       para_Tnum,mole,mole%RPHTransfo_inact2n,nderiv=0,  &
                       test=.FALSE.,cHAC=.TRUE.)
 
-      write(out_unitp,*) '------------------------------------------'
-      write(out_unitp,*) '------------------------------------------'
-      write(out_unitp,*) ' Parameters for the Basis2n (HADA or cHAC)'
-      write(out_unitp,*) 'freq',RPHpara_AT_Qact1%dneHess%d0(:)*auTOcm_inv
+      write(out_unit,*) '------------------------------------------'
+      write(out_unit,*) '------------------------------------------'
+      write(out_unit,*) ' Parameters for the Basis2n (HADA or cHAC)'
+      write(out_unit,*) 'freq',RPHpara_AT_Qact1%dneHess%d0(:)*auTOcm_inv
 
-      write(out_unitp,*) 'd0Qeq',RPHpara_AT_Qact1%dnQopt%d0
-      write(out_unitp,*) 'd0c'
-      CALL Write_Mat(RPHpara_AT_Qact1%dnC%d0,out_unitp,5)
-      write(out_unitp,*)
+      write(out_unit,*) 'd0Qeq',RPHpara_AT_Qact1%dnQopt%d0
+      write(out_unit,*) 'd0c'
+      CALL Write_Mat(RPHpara_AT_Qact1%dnC%d0,out_unit,5)
+      write(out_unit,*)
 !-----------------------------------------------------------------
       n_h = Basis2n%nDindB%Max_nDI
 
@@ -151,24 +151,24 @@
         Ene = ZPE + sum(real(Basis2n%nDindB%Tab_nDval(:,i),kind=Rkind) *&
                                           RPHpara_AT_Qact1%dneHess%d0(:))
         Basis2n%EneH0(i) = Ene ! this enables the NewVec_type=4 in Davidson
-        write(out_unitp,'(i4,2(1x,f16.4))',advance='no') i,             &
+        write(out_unit,'(i4,2(1x,f16.4))',advance='no') i,             &
                                      Ene*auTOcm_inv,(Ene-ZPE)*auTOcm_inv
         DO k=1,mole%nb_inact2n
-          write(out_unitp,'(i4)',advance='no') Basis2n%nDindB%Tab_nDval(k,i)
+          write(out_unit,'(i4)',advance='no') Basis2n%nDindB%Tab_nDval(k,i)
         END DO
-        write(out_unitp,*)
+        write(out_unit,*)
       END DO
 !     -----------------------------------------------------
-      write(out_unitp,*) ' number of nD inactive harmonic functions, nb_bi: ', &
+      write(out_unit,*) ' number of nD inactive harmonic functions, nb_bi: ', &
                     Basis2n%nDindB%max_nDI
       IF (Basis2n%nDindB%max_nDI < 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_bi < 1 !!',Basis2n%nDindB%max_nDI
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_bi < 1 !!',Basis2n%nDindB%max_nDI
         STOP
       END IF
 
-      write(out_unitp,*) '------------------------------------------'
-      write(out_unitp,*) '------------------------------------------'
+      write(out_unit,*) '------------------------------------------'
+      write(out_unit,*) '------------------------------------------'
 
       CALL dealloc_RPHpara_AT_Qact1(RPHpara_AT_Qact1)
 
@@ -176,7 +176,7 @@
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL write_nDindex(Basis2n%nDindB,'Basis2n%nDindB')
-        write(out_unitp,*) ' END ',name_sub
+        write(out_unit,*) ' END ',name_sub
       END IF
 !---------------------------------------------------------------------
 

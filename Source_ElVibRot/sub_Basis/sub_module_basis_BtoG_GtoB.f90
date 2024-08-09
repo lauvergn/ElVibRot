@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_basis_BtoG_GtoB
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_set_alloc
       USE mod_basis_BtoG_GtoB_SGType2
       USE mod_param_SGType2
@@ -98,8 +98,8 @@
         !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
         IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING ',name_sub
-          write(out_unitp,*) 'RVecG(:)',RVecG(:)
+          write(out_unit,*) 'BEGINNING ',name_sub
+          write(out_unit,*) 'RVecG(:)',RVecG(:)
         END IF
 
         IF (basis_set%packed_done) THEN
@@ -128,15 +128,15 @@
 
               CALL alloc_NParray(RTempG,[nnq,nq2,nnb],"RTempG",name_sub)
               RTempG(:,:,:) = reshape(RTempB,shape=[nnq,nq2,nnb])
-              !write(out_unitp,*) 'ibasis shape G',ibasis,shape(RTempG)
+              !write(out_unit,*) 'ibasis shape G',ibasis,shape(RTempG)
               nbb = sum(basis_set%Tab_OF_Tabnb2(ibasis)%vec)
 
-!              write(out_unitp,*) 'G=>B ibasis,nnb,Tab_OF_Tabnb2',ibasis,nnb,   &
+!              write(out_unit,*) 'G=>B ibasis,nnb,Tab_OF_Tabnb2',ibasis,nnb,   &
 !                                        basis_set%Tab_OF_Tabnb2(ibasis)%vec
 
               CALL dealloc_NParray(RTempB,"RTempB",name_sub)
               CALL alloc_NParray(RTempB,[nnq,nbb],"RTempB",name_sub)
-              !write(out_unitp,*) 'ibasis shape B',ibasis,shape(RTempB)
+              !write(out_unit,*) 'ibasis shape B',ibasis,shape(RTempB)
 
 
               CALL alloc_NParray(RG,[nq2],"RG",name_sub)
@@ -216,7 +216,7 @@
                                      LG=basis_set%L_SparseGrid,         &
                                      LB=basis_set%L_SparseBasis)
 
-            !write(out_unitp,*) ' ERROR in ',name_sub
+            !write(out_unit,*) ' ERROR in ',name_sub
             !STOP 'SparseGrid_type=2'
 
           CASE (4) ! Sparse basis (Smolyak 4th implementation)
@@ -243,17 +243,17 @@
             CALL dealloc_SmolyakRep(SRep)
 
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
-            write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+            write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
             STOP
           END SELECT
 
         END IF
 
        IF (debug) THEN
-         write(out_unitp,*) 'RvecB(:)',RvecB(:)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'RvecB(:)',RvecB(:)
+         write(out_unit,*) 'END ',name_sub
        END IF
       END SUBROUTINE RecRVecG_TO_RvecB
 
@@ -303,11 +303,11 @@
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) ' BEGINNING in ',name_sub
-        write(out_unitp,*) 'nq,nb',nq,nb
-        write(out_unitp,*) 'shape CVecG',shape(CVecG)
-        write(out_unitp,*) 'shape CVecB',shape(CVecB)
-        flush(out_unitp)
+        write(out_unit,*) ' BEGINNING in ',name_sub
+        write(out_unit,*) 'nq,nb',nq,nb
+        write(out_unit,*) 'shape CVecG',shape(CVecG)
+        write(out_unit,*) 'shape CVecB',shape(CVecB)
+        flush(out_unit)
       END IF
 
         IF (basis_set%packed_done) THEN
@@ -338,7 +338,7 @@
 
               nbb = sum(basis_set%Tab_OF_Tabnb2(ibasis)%vec)
 
-              !write(out_unitp,*) 'G=>B ibasis,nnb,Tab_OF_Tabnb2',ibasis,nnb,      &
+              !write(out_unit,*) 'G=>B ibasis,nnb,Tab_OF_Tabnb2',ibasis,nnb,      &
               !                          basis_set%Tab_OF_Tabnb2(ibasis)%vec
 
               CALL dealloc_NParray(CTempB,"CTempB",name_sub)
@@ -493,14 +493,14 @@
             CALL dealloc_NParray(RVecB,'RVecB',name_sub)
 
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
-            write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+            write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
             STOP
           END SELECT
         END IF
 
-      IF (debug) write(out_unitp,*) ' END in ',name_sub
+      IF (debug) write(out_unit,*) ' END in ',name_sub
 
 
       END SUBROUTINE RecCVecG_TO_CVecB
@@ -547,12 +547,12 @@
 !---------------------------------------------------------------------
 
         IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING ',name_sub
-          write(out_unitp,*) 'size RVecG',size(RVecG)
-          write(out_unitp,*) 'size RVecB',size(RVecB)
-          write(out_unitp,*) 'RvecB(:)',RvecB(:)
+          write(out_unit,*) 'BEGINNING ',name_sub
+          write(out_unit,*) 'size RVecG',size(RVecG)
+          write(out_unit,*) 'size RVecB',size(RVecB)
+          write(out_unit,*) 'RvecB(:)',RvecB(:)
           !CALL RecWrite_basis(basis_set)
-          flush(out_unitp)
+          flush(out_unit)
         END IF
 
         IF (present(tab_der)) THEN
@@ -567,7 +567,7 @@
         ELSE
           nb_thread = BasisTOGrid_maxth
         END IF
-        !write(out_unitp,*) 'nb_thread in ',name_sub,' : ',nb_thread
+        !write(out_unit,*) 'nb_thread in ',name_sub,' : ',nb_thread
 
         IF (basis_set%packed_done) THEN ! Packed basis
           CALL RB_TO_RG_basis(RvecB,RVecG,basis_set,tab_der_loc)
@@ -643,7 +643,7 @@
             iq1_SG = 0
             DO i_SG=1,basis_set%nb_SG
                nq_SG = get_nq_FROM_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
-               !write(out_unitp,*) 'i_SG,nq_SG',i_SG,nq_SG
+               !write(out_unit,*) 'i_SG,nq_SG',i_SG,nq_SG
 !               iq1_SG = iq1_SG + nq_SG
                iq0_SG = 1
                DO ii_SG=1,i_SG-1
@@ -651,7 +651,7 @@
                  iq0_SG = iq0_SG + nq0_SG
                END DO
                iq1_SG = iq0_SG-1 + nq_SG
-               !write(out_unitp,*) 'iq0_SG,iq1_SG',iq0_SG,iq1_SG
+               !write(out_unit,*) 'iq0_SG,iq1_SG',iq0_SG,iq1_SG
                CALL RecRvecB_TO_RVecG(RvecB,RVecG(iq0_SG:iq1_SG),       &
                                       nb,nq_SG,                         &
                                      basis_set%tab_PbasisSG(i_SG)%Pbasis,&
@@ -689,17 +689,17 @@
 
 
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
-            write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+            write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
             STOP
           END SELECT
 
         END IF
 
        IF (debug) THEN
-         write(out_unitp,*) 'RvecG(:)',RvecG(:)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'RvecG(:)',RvecG(:)
+         write(out_unit,*) 'END ',name_sub
        END IF
 
       END SUBROUTINE RecRvecB_TO_RVecG
@@ -782,7 +782,7 @@
               nq2 = get_nq_FROM_basis(basis_set%tab_Pbasis(ibasis)%Pbasis)
               nnb = get_size(basis_set%Tab_OF_Tabnb2(ibasis))
 
-!             write(out_unitp,*) 'B=>G ibasis,Tab_OF_Tabnb2',ibasis,              &
+!             write(out_unit,*) 'B=>G ibasis,Tab_OF_Tabnb2',ibasis,              &
 !                                        basis_set%Tab_OF_Tabnb2(ibasis)%vec
 
               CALL alloc_NParray(CTempB,[nnq,nbb],"CTempB",name_sub)
@@ -865,7 +865,7 @@
 
             CALL dealloc_NParray(RVecB,'RVecB',name_sub)
             CALL dealloc_NParray(RVecG,'RVecG',name_sub)
-            !write(out_unitp,*) ' ERROR in ',name_sub
+            !write(out_unit,*) ' ERROR in ',name_sub
             !STOP 'SparseGrid_type=2'
 
           CASE (4) ! Sparse basis (Smolyak 4th implementation)
@@ -931,9 +931,9 @@
             CALL dealloc_NParray(RVecB,'RVecB',name_sub)
 
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
-            write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+            write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
             STOP
           END SELECT
 
@@ -976,14 +976,14 @@
 !---------------------------------------------------------------------
 
         IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING ',name_sub
-          write(out_unitp,*) 'RvecG(:)',RvecG(:)
-          write(out_unitp,*) 'packed_done',basis_set%packed_done
-          write(out_unitp,*) 'nb_basis',basis_set%nb_basis
-          write(out_unitp,*) 'SparseGrid_type',basis_set%SparseGrid_type
+          write(out_unit,*) 'BEGINNING ',name_sub
+          write(out_unit,*) 'RvecG(:)',RvecG(:)
+          write(out_unit,*) 'packed_done',basis_set%packed_done
+          write(out_unit,*) 'nb_basis',basis_set%nb_basis
+          write(out_unit,*) 'SparseGrid_type',basis_set%SparseGrid_type
 
           !CALL RecWrite_basis(basis_set)
-          flush(out_unitp)
+          flush(out_unit)
         END IF
 
         IF (present(tab_der)) THEN
@@ -991,7 +991,7 @@
         ELSE
           tab_der_loc(:) = 0
         END IF
-        IF (debug) write(out_unitp,*) 'tab_der_loc',tab_der_loc
+        IF (debug) write(out_unit,*) 'tab_der_loc',tab_der_loc
         WHERE (tab_der_loc < 0) tab_der_loc = 0
 
         IF (BasisTOGrid_omp == 0) THEN
@@ -999,13 +999,13 @@
         ELSE
           nb_thread = BasisTOGrid_maxth
         END IF
-        !write(out_unitp,*) 'nb_thread in ',name_sub,' : ',nb_thread
+        !write(out_unit,*) 'nb_thread in ',name_sub,' : ',nb_thread
 
         IF (basis_set%packed_done) THEN ! Packed basis
 
           dnba_ind(:) = basis_set%Tabder_Qdyn_TO_Qbasis(tab_der_loc(:))
 
-          flush(out_unitp)
+          flush(out_unit)
           IF (dnba_ind(1) == 0 .AND. dnba_ind(2) == 0) THEN ! dnba_ind(:)=0 => no derivative
             CONTINUE ! notthing to do
           ELSE
@@ -1078,15 +1078,15 @@
             CALL dealloc_NParray(RG1,"RG1",name_sub)
 
           CASE (1) ! Sparse basis (Smolyak 1st implementation)
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' it does not work with SparseGrid_type=1'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' it does not work with SparseGrid_type=1'
             STOP 'SparseGrid_type=1'
 
             iq0_SG = 1
             iq1_SG = 0
             DO i_SG=1,basis_set%nb_SG
                nq_SG = get_nq_FROM_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
-               !write(out_unitp,*) 'i_SG,nq_SG',i_SG,nq_SG
+               !write(out_unit,*) 'i_SG,nq_SG',i_SG,nq_SG
 !               iq1_SG = iq1_SG + nq_SG
                iq0_SG = 1
                DO ii_SG=1,i_SG-1
@@ -1094,7 +1094,7 @@
                  iq0_SG = iq0_SG + nq0_SG
                END DO
                iq1_SG = iq0_SG-1 + nq_SG
-               !write(out_unitp,*) 'iq0_SG,iq1_SG',iq0_SG,iq1_SG
+               !write(out_unit,*) 'iq0_SG,iq1_SG',iq0_SG,iq1_SG
                CALL DerivOp_TO_RVecG(RVecG(iq0_SG:iq1_SG),nq_SG,        &
                                     basis_set%tab_PbasisSG(i_SG)%Pbasis,&
                                                             tab_der_loc)
@@ -1144,17 +1144,17 @@
             END IF
 
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
-            write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+            write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
             STOP
           END SELECT
 
         END IF
 
        IF (debug) THEN
-         write(out_unitp,*) 'RvecG(:)',RvecG(:)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'RvecG(:)',RvecG(:)
+         write(out_unit,*) 'END ',name_sub
        END IF
 
       END SUBROUTINE DerivOp_TO_RVecG
@@ -1194,10 +1194,10 @@
 !---------------------------------------------------------------------
 
         IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING ',name_sub
-          write(out_unitp,*) 'CvecG(:)',CvecG(:)
+          write(out_unit,*) 'BEGINNING ',name_sub
+          write(out_unit,*) 'CvecG(:)',CvecG(:)
           !CALL RecWrite_basis(basis_set)
-          flush(out_unitp)
+          flush(out_unit)
         END IF
 
         IF (present(tab_der)) THEN
@@ -1212,7 +1212,7 @@
         ELSE
           nb_thread = BasisTOGrid_maxth
         END IF
-        !write(out_unitp,*) 'nb_thread in ',name_sub,' : ',nb_thread
+        !write(out_unit,*) 'nb_thread in ',name_sub,' : ',nb_thread
 
         IF (basis_set%packed_done) THEN ! Packed basis
 
@@ -1291,15 +1291,15 @@
             CALL dealloc_NParray(CG1,"CG1",name_sub)
 
           CASE (1) ! Sparse basis (Smolyak 1st implementation)
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' it does not work with SparseGrid_type=1'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' it does not work with SparseGrid_type=1'
             STOP 'SparseGrid_type=1'
 
             iq0_SG = 1
             iq1_SG = 0
             DO i_SG=1,basis_set%nb_SG
                nq_SG = get_nq_FROM_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
-               !write(out_unitp,*) 'i_SG,nq_SG',i_SG,nq_SG
+               !write(out_unit,*) 'i_SG,nq_SG',i_SG,nq_SG
 !               iq1_SG = iq1_SG + nq_SG
                iq0_SG = 1
                DO ii_SG=1,i_SG-1
@@ -1307,7 +1307,7 @@
                  iq0_SG = iq0_SG + nq0_SG
                END DO
                iq1_SG = iq0_SG-1 + nq_SG
-               !write(out_unitp,*) 'iq0_SG,iq1_SG',iq0_SG,iq1_SG
+               !write(out_unit,*) 'iq0_SG,iq1_SG',iq0_SG,iq1_SG
                CALL DerivOp_TO_CVecG(CVecG(iq0_SG:iq1_SG),nq_SG,        &
                                     basis_set%tab_PbasisSG(i_SG)%Pbasis,&
                                                             tab_der_loc)
@@ -1381,17 +1381,17 @@
             END IF
 
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
-            write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+            write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
             STOP
           END SELECT
 
         END IF
 
        IF (debug) THEN
-         write(out_unitp,*) 'CvecG(:)',CvecG(:)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'CvecG(:)',CvecG(:)
+         write(out_unit,*) 'END ',name_sub
        END IF
 
       END SUBROUTINE DerivOp_TO_CVecG
@@ -1417,8 +1417,8 @@ SUBROUTINE RVecBC_TO_RvecB(RVecBC,RvecB,nbc,nb,basis_set)
   !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'size RVecBC(:)',size(RVecBC)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'size RVecBC(:)',size(RVecBC)
   END IF
 
   IF (basis_set%packed_done) THEN
@@ -1486,8 +1486,8 @@ SUBROUTINE RVecBC_TO_RvecB(RVecBC,RvecB,nbc,nb,basis_set)
   END IF
 
   IF (debug) THEN
-    write(out_unitp,*) 'RvecB(:)',RvecB(:)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'RvecB(:)',RvecB(:)
+    write(out_unit,*) 'END ',name_sub
   END IF
 END SUBROUTINE RVecBC_TO_RvecB
 SUBROUTINE RVecB_TO_RvecBC(RvecB,RVecBC,nb,nbc,basis_set)
@@ -1511,8 +1511,8 @@ SUBROUTINE RVecB_TO_RvecBC(RvecB,RVecBC,nb,nbc,basis_set)
   !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'size RVecB(:)',size(RVecB)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'size RVecB(:)',size(RVecB)
   END IF
 
   IF (basis_set%packed_done) THEN
@@ -1581,8 +1581,8 @@ SUBROUTINE RVecB_TO_RvecBC(RvecB,RVecBC,nb,nbc,basis_set)
   END IF
 
   IF (debug) THEN
-    write(out_unitp,*) 'RvecBC(:)',RvecBC(:)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'RvecBC(:)',RvecBC(:)
+    write(out_unit,*) 'END ',name_sub
   END IF
 END SUBROUTINE RVecB_TO_RvecBC
 
@@ -1608,8 +1608,8 @@ SUBROUTINE CVecBC_TO_CvecB(CVecBC,CvecB,nbc,nb,basis_set)
   !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'size CvecBC(:)',size(CvecBC)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'size CvecBC(:)',size(CvecBC)
   END IF
 
   IF (basis_set%packed_done) THEN
@@ -1677,8 +1677,8 @@ SUBROUTINE CVecBC_TO_CvecB(CVecBC,CvecB,nbc,nb,basis_set)
   END IF
 
   IF (debug) THEN
-    write(out_unitp,*) 'CvecB(:)',CvecB(:)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'CvecB(:)',CvecB(:)
+    write(out_unit,*) 'END ',name_sub
   END IF
 END SUBROUTINE CVecBC_TO_CvecB
 SUBROUTINE CVecB_TO_CvecBC(CvecB,CvecBC,nb,nbc,basis_set)
@@ -1702,8 +1702,8 @@ SUBROUTINE CVecB_TO_CvecBC(CvecB,CvecBC,nb,nbc,basis_set)
   !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'size CvecB(:)',size(CvecB)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'size CvecB(:)',size(CvecB)
   END IF
 
   IF (basis_set%packed_done) THEN
@@ -1772,8 +1772,8 @@ SUBROUTINE CVecB_TO_CvecBC(CvecB,CvecBC,nb,nbc,basis_set)
   END IF
 
   IF (debug) THEN
-    write(out_unitp,*) 'CvecBC(:)',CvecBC(:)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'CvecBC(:)',CvecBC(:)
+    write(out_unit,*) 'END ',name_sub
   END IF
 END SUBROUTINE CVecB_TO_CvecBC
 

@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_param_WP0
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
 
         TYPE GWP1D_t
@@ -144,37 +144,37 @@ CONTAINS
     m        = -ONE
     G        = -ONE
 
-    read(in_unitp,defWP0,iostat=Rerr)
+    read(in_unit,defWP0,iostat=Rerr)
     IF (Rerr /= 0) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' problem while reading the namelist "defWP0"'
-      write(out_unitp,defWP0)
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' problem while reading the namelist "defWP0"'
+      write(out_unit,defWP0)
       STOP 'ERROR in Read_GWP1D: problem while reading the namelist "defWP0"'
     END IF
 
 
     IF (iQact > 0 .AND. iQdyn > 0) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' both iQact and iQdyn are defined.'
-      write(out_unitp,*) ' You MUST define only one.'
-      write(out_unitp,*) ' iQact,iQdyn: ',iQact,iQdyn
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' both iQact and iQdyn are defined.'
+      write(out_unit,*) ' You MUST define only one.'
+      write(out_unit,*) ' iQact,iQdyn: ',iQact,iQdyn
       STOP 'ERROR in Read_GWP1D: both iQact and iQdyn are defined'
     END IF
 
     IF ((k > ZERO .OR. m > ZERO .OR. G > ZERO) .AND. sigma > ZERO) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' both sigma and (k or m or G) are defined.'
-      write(out_unitp,*) ' You MUST define sigma or (k or m or G)'
-      write(out_unitp,*) ' sigma,k,m,G: ',sigma,k,m,G
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' both sigma and (k or m or G) are defined.'
+      write(out_unit,*) ' You MUST define sigma or (k or m or G)'
+      write(out_unit,*) ' sigma,k,m,G: ',sigma,k,m,G
       STOP 'ERROR in Read_GWP1D:  both sigma and (k or m or G) are defined'
     END IF
     IF (sigma < ZERO) THEN
       IF (k < ZERO .OR. (m > ZERO .AND. G > ZERO)) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' sigma is not defined and:'
-        write(out_unitp,*) '   k < 0 or '
-        write(out_unitp,*) '   m > 0 and H > 0 '
-        write(out_unitp,*) ' sigma,k,m,G: ',sigma,k,m,G
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' sigma is not defined and:'
+        write(out_unit,*) '   k < 0 or '
+        write(out_unit,*) '   m > 0 and H > 0 '
+        write(out_unit,*) ' sigma,k,m,G: ',sigma,k,m,G
         STOP 'ERROR in Read_GWP1D:  some inconsistencies on k or m or G'
       END IF
       IF (m > 0) sigma = sqrt(TWO)/sqrt(sqrt(k*m))
@@ -182,7 +182,7 @@ CONTAINS
     END IF
     GWP1D = GWP1D_t(sigma,Qeq,imp_k,phase,iQact,iQdyn)
 
-    IF (print_level > 0) write(out_unitp,*) 'iQact,iQdyn,sigma,Q0,imp_k,phase', &
+    IF (print_level > 0) write(out_unit,*) 'iQact,iQdyn,sigma,Q0,imp_k,phase', &
                                              iQact,iQdyn,sigma,Qeq,imp_k,phase
 
 
@@ -196,10 +196,10 @@ CONTAINS
     !logical, parameter :: debug =.TRUE.
     !-----------------------------------------------------------
 
-    IF (debug) write(out_unitp,*) 'iQact,iQdyn,Q0,sigma,imp_k,phase',           &
+    IF (debug) write(out_unit,*) 'iQact,iQdyn,Q0,sigma,imp_k,phase',           &
            GWP1D%iQact,GWP1D%iQdyn,GWP1D%Q0,GWP1D%sigma,GWP1D%imp_k,GWP1D%phase
 
-    write(out_unitp,'(2i6,4f12.6)')                                             &
+    write(out_unit,'(2i6,4f12.6)')                                             &
            GWP1D%iQact,GWP1D%iQdyn,GWP1D%Q0,GWP1D%sigma,GWP1D%imp_k,GWP1D%phase
 
   END SUBROUTINE Write_GWP1D
@@ -247,35 +247,35 @@ CONTAINS
     !-----------------------------------------------------------
 
     IF (print_level > 0)                                                        &
-       write(out_unitp,*) 'WP0(Q)=exp[-((Q-Q0)/sigma)^2+i*imp_k*(Q-Q0)+i*phase]'
+       write(out_unit,*) 'WP0(Q)=exp[-((Q-Q0)/sigma)^2+i*imp_k*(Q-Q0)+i*phase]'
 
     I_ElecChannel  = -1
     I_HAChannel    = -1
     Coef           = CZERO
 
-    read(in_unitp,defGWP,iostat=Rerr)
+    read(in_unit,defGWP,iostat=Rerr)
     IF (Rerr /= 0) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' problem while reading the namelist "defGWP"'
-      write(out_unitp,defGWP)
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' problem while reading the namelist "defGWP"'
+      write(out_unit,defGWP)
       STOP 'ERROR in Read_GWP: problem while reading the namelist "defGWP"'
     END IF
 
     IF (I_ElecChannel  == -1) I_ElecChannel  = 1
     IF (I_ElecChannel < 1 .OR. I_ElecChannel > nb_elec) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) '  I_ElecChannel is out-of-range.'
-      write(out_unitp,*) ' I_ElecChannel',I_ElecChannel
-      write(out_unitp,*) ' The number of electronic states is: ',nb_elec
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) '  I_ElecChannel is out-of-range.'
+      write(out_unit,*) ' I_ElecChannel',I_ElecChannel
+      write(out_unit,*) ' The number of electronic states is: ',nb_elec
       STOP 'ERROR in Read_GWP: I_ElecChannel is out-of-range'
     END IF
 
     IF (I_HAChannel    == -1) I_HAChannel    = 1
     IF (I_HAChannel < 1 .OR. I_HAChannel > nb_bi) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) '  I_HAChannel is out-of-range.'
-      write(out_unitp,*) ' I_HAChannel',I_HAChannel
-      write(out_unitp,*) ' The number of adiabatic (HAC) channel is: ',nb_bi
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) '  I_HAChannel is out-of-range.'
+      write(out_unit,*) ' I_HAChannel',I_HAChannel
+      write(out_unit,*) ' The number of adiabatic (HAC) channel is: ',nb_bi
       STOP 'ERROR in Read_GWP: I_HAChannel is out-of-range'
     END IF
 
@@ -295,20 +295,20 @@ CONTAINS
     nb_Qdynm1 = count(tab_iQdyn == -1)
 
     IF ((nb_Qactm1 > 0 .AND. nb_Qactm1 < ndim) .OR. (nb_Qdynm1 > 0 .AND. nb_Qdynm1 < ndim)) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) '  All or none iQact must be defined'
-      write(out_unitp,*) '    or'
-      write(out_unitp,*) '  all or none iQdyn must be defined'
-      write(out_unitp,*) ' tab_iQact',tab_iQact
-      write(out_unitp,*) ' tab_iQdyn',tab_iQdyn
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) '  All or none iQact must be defined'
+      write(out_unit,*) '    or'
+      write(out_unit,*) '  all or none iQdyn must be defined'
+      write(out_unit,*) ' tab_iQact',tab_iQact
+      write(out_unit,*) ' tab_iQdyn',tab_iQdyn
       STOP 'ERROR in Read_GWP: wrong iQact and/or iQdyn'
     END IF
     IF (nb_Qactm1 == 0 .AND. nb_Qdynm1 == 0) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) '  All iQact and all iQact are defined'
-      write(out_unitp,*) '  You MUST define only iQact or iQact'
-      write(out_unitp,*) ' tab_iQact',tab_iQact
-      write(out_unitp,*) ' tab_iQdyn',tab_iQdyn
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) '  All iQact and all iQact are defined'
+      write(out_unit,*) '  You MUST define only iQact or iQact'
+      write(out_unit,*) ' tab_iQact',tab_iQact
+      write(out_unit,*) ' tab_iQdyn',tab_iQdyn
       STOP 'ERROR in Read_GWP: wrong iQact and/or iQdyn'
     END IF
 
@@ -346,8 +346,8 @@ CONTAINS
     !logical, parameter :: debug =.TRUE.
     !-----------------------------------------------------------
 
-    write(out_unitp,*) 'I_HAChannel,I_ElecChannel,Coef',GWP%I_HAChannel,GWP%I_ElecChannel,GWP%Coef
-    write(out_unitp,'(a)') ' iQact iQdyn Qeq         sigma       imp_k       phase'
+    write(out_unit,*) 'I_HAChannel,I_ElecChannel,Coef',GWP%I_HAChannel,GWP%I_ElecChannel,GWP%Coef
+    write(out_unit,'(a)') ' iQact iQdyn Qeq         sigma       imp_k       phase'
     DO i=1,size(GWP%tab_GWP1D)
       CALL Write_GWP1D(GWP%tab_GWP1D(i))
     END DO

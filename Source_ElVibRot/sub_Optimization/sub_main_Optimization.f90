@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       SUBROUTINE sub_Optimization_OF_VibParam(max_mem)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_dnSVM
       USE mod_Constant
@@ -125,12 +125,12 @@
 !=====================================================================
 
 
-      write(out_unitp,*)
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' VIB: BEGINNING ini_data'
+      write(out_unit,*)
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' VIB: BEGINNING ini_data'
       CALL time_perso('ini_data')
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
       CALL     ini_data(const_phys,para_Tnum,mole,                      &
                         para_AllBasis,para_AllOp,                       &
                         para_ana,para_intensity,intensity_only,         &
@@ -139,12 +139,12 @@
       para_H => para_AllOp%tab_Op(1)
       CALL basis2TObasis1(BasisnD_Save,para_AllBasis%BasisnD) ! basis saved here
 
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
       CALL time_perso('ini_data')
-      write(out_unitp,*) ' VIB: END ini_data'
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*)
+      write(out_unit,*) ' VIB: END ini_data'
+      write(out_unit,*) '================================================='
+      write(out_unit,*)
 !=====================================================================
 
       CALL Read_param_Optimization(para_Optimization,mole,para_AllBasis%BasisnD,read_nml=.TRUE.)
@@ -158,22 +158,22 @@
                             para_Tnum,mole,para_H%para_ReadOp%PrimOp_t,&
                             Qopt,para_Optimization)
 
-      write(out_unitp,*) '============ FINAL ANLYSIS =================='
+      write(out_unit,*) '============ FINAL ANLYSIS =================='
 
       allocate(Qact(mole%nb_var))
       CALL get_Qact0(Qact,mole%ActiveTransfo)
       Qact(1:para_Optimization%nb_Opt) = Qopt
       IF (para_Optimization%FinalEnergy) THEN
-        write(out_unitp,*) '============ ENERGY:'
+        write(out_unit,*) '============ ENERGY:'
         CALL set_print_level(0,force=.TRUE.)  ! print_level = 0
         CALL Sub_Energ_OF_ParamBasis(Energ,para_Optimization%xOpt_min,para_Optimization%nb_Opt,BasisnD_Save,&
                                      para_Tnum,mole,                    &
                                      para_H%para_ReadOp%PrimOp_t,Qact)
-        write(out_unitp,*) 'Optimal param',xOpt_min,' Energy',Energ
+        write(out_unit,*) 'Optimal param',xOpt_min,' Energy',Energ
 
       END IF
       IF (para_Optimization%Freq) THEN
-        write(out_unitp,*) '============ Freq:'
+        write(out_unit,*) '============ Freq:'
         CALL alloc_NParray(freq,[para_Optimization%nb_Opt],'freq',name_sub)
         CALL sub_freq_AT_Qact(freq,Qact,para_Tnum,mole,                 &
                            para_H%para_ReadOp%PrimOp_t,print_freq=.TRUE.)
@@ -181,7 +181,7 @@
       END IF
 
       IF (para_Optimization%Grad) THEN
-        write(out_unitp,*) '============ GRAD:'
+        write(out_unit,*) '============ GRAD:'
         CALL alloc_NParray(Grad,[nb_Opt],'Grad',name_sub)
 
         CALL Init_Tab_OF_dnMatOp(dnMatOp,mole%nb_act,                   &
@@ -191,8 +191,8 @@
                                  para_H%para_ReadOp%PrimOp_t)
 
         CALL Get_Grad_FROM_Tab_OF_dnMatOp(Grad,dnMatOp) ! for the first electronic state
-        write(out_unitp,*) 'Grad: size, RMS',size(grad),sqrt(sum(grad**2)/size(grad))
-        write(out_unitp,*) 'Grad',Grad
+        write(out_unit,*) 'Grad: size, RMS',size(grad),sqrt(sum(grad**2)/size(grad))
+        write(out_unit,*) 'Grad',Grad
 
         CALL dealloc_Tab_OF_dnMatOp(dnMatOp)
         CALL dealloc_NParray(Grad,'Grad',name_sub)
@@ -200,32 +200,32 @@
       END IF
 
       IF (para_Optimization%Optimization_param == 'geometry') THEN
-        write(out_unitp,*) '============ GEOM:'
+        write(out_unit,*) '============ GEOM:'
         CALL alloc_dnSVM(dnx,mole%ncart,mole%nb_act,nderiv=0)
 
         CALL sub_QactTOdnx(Qact,dnx,mole,nderiv=0,Gcenter=.FALSE.,WriteCC=.TRUE.)
 
         CALL dealloc_dnSVM(dnx)
-        write(out_unitp,*) 'Qact geometry:'
+        write(out_unit,*) 'Qact geometry:'
         DO i=1,size(Qact)
-          write(out_unitp,*) Qact(i)
+          write(out_unit,*) Qact(i)
         END DO
-        write(out_unitp,*) 'END Qact geometry:'
+        write(out_unit,*) 'END Qact geometry:'
 
 
         CALL alloc_NParray(Qdyn,[mole%nb_var],'Qdyn',name_sub)
         CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn,mole%ActiveTransfo)
-        write(out_unitp,*) 'Qdyn geometry:'
+        write(out_unit,*) 'Qdyn geometry:'
         DO i=1,size(Qdyn)
-          write(out_unitp,*) Qdyn(i)
+          write(out_unit,*) Qdyn(i)
         END DO
-        write(out_unitp,*) 'END Qdyn geometry:'
+        write(out_unit,*) 'END Qdyn geometry:'
 
         CALL dealloc_NParray(Qdyn,'Qdyn',name_sub)
         CALL dealloc_NParray(Qact,'Qact',name_sub)
 
       END IF
-      write(out_unitp,*) '========= END FINAL ANLYSIS =================='
+      write(out_unit,*) '========= END FINAL ANLYSIS =================='
 
 
       CALL dealloc_NParray(para_FOR_optimization%Val_RVec,'para_FOR_optimization%Val_RVec',name_sub)
@@ -247,13 +247,13 @@
 
       CALL dealloc_AllBasis(para_AllBasis)
 
-      write(out_unitp,*) 'mem_tot',para_mem%mem_tot
+      write(out_unit,*) 'mem_tot',para_mem%mem_tot
 
   END SUBROUTINE sub_Optimization_OF_VibParam
 
   SUBROUTINE Sub_Energ_OF_ParamBasis(Energ,xOpt,nb_Opt,BasisnD,     &
                                          para_Tnum,mole,PrimOp,Qact)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_Constant
       use mod_Coord_KEO, only: CoordType, tnum
@@ -311,11 +311,11 @@
       character (len=*), parameter :: name_sub = 'Sub_Energ_OF_ParamBasis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         !CALL Write_CoordType(mole)
-        write(out_unitp,*) 'basis to be optimized'
-        write(out_unitp,*)
+        write(out_unit,*) 'basis to be optimized'
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_temp)
       END IF
 !---------------------------------------------------------------------
@@ -420,22 +420,22 @@
       IF (print_level > -1) THEN
         ! Energy levels
         ene0 = para_AllOp_loc%tab_Op(1)%Rdiag(1)
-        write(out_unitp,*) 'levels: '
+        write(out_unit,*) 'levels: '
         DO i=1,para_AllOp_loc%tab_Op(1)%nb_tot
 
           RWU_E  = REAL_WU(para_AllOp_loc%tab_Op(1)%Rdiag(i),     'au','E')
           RWU_DE = REAL_WU(para_AllOp_loc%tab_Op(1)%Rdiag(i)-ene0,'au','E')
 
-          write(out_unitp,*) i,                                         &
+          write(out_unit,*) i,                                         &
                RWU_Write(RWU_E, WithUnit=.FALSE.,WorkingUnit=.FALSE.),  &
                RWU_Write(RWU_DE,WithUnit=.TRUE., WorkingUnit=.FALSE.)
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'Eigenvectors of ',name_sub
-        CALL Write_Mat(para_AllOp_loc%tab_Op(1)%Rvp,out_unitp,5)
+        write(out_unit,*) 'Eigenvectors of ',name_sub
+        CALL Write_Mat(para_AllOp_loc%tab_Op(1)%Rvp,out_unit,5)
       END IF
       !---------------------------------------------------------------
 
@@ -456,8 +456,8 @@
 
     CASE ('geometry') ! potential (find a minimum)
 
-      IF (debug) write(out_unitp,*) 'xOpt',xOpt
-      IF (debug) write(out_unitp,*) 'Qact',Qact
+      IF (debug) write(out_unit,*) 'xOpt',xOpt
+      IF (debug) write(out_unit,*) 'Qact',Qact
 
 
       CALL Init_Tab_OF_dnMatOp(dnMatOp,mole%nb_act,PrimOp%nb_elec,nderiv=0)
@@ -475,16 +475,16 @@
     END SELECT
 
     IF (debug) THEN
-      write(out_unitp,*) 'xOpt,Energ',xOpt,':',Energ
-      write(out_unitp,*) 'END ',name_sub
-      flush(out_unitp)
+      write(out_unit,*) 'xOpt,Energ',xOpt,':',Energ
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
     END IF
 
 
     END SUBROUTINE Sub_Energ_OF_ParamBasis
       SUBROUTINE Set_ALL_para_FOR_optimization(mole,BasisnD,Qact,Set_Val)
 
-      USE mod_system
+      USE EVR_system_m
       use mod_Coord_KEO, only: CoordType
       USE mod_basis
       IMPLICIT NONE
@@ -503,7 +503,7 @@
       character (len=*), parameter :: name_sub = 'Set_ALL_para_FOR_optimization'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
       para_FOR_optimization%nb_OptParam = 0
@@ -526,15 +526,15 @@
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'nb_OptParam ',para_FOR_optimization%nb_OptParam
+        write(out_unit,*) 'nb_OptParam ',para_FOR_optimization%nb_OptParam
 
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
       END SUBROUTINE Set_ALL_para_FOR_optimization
       SUBROUTINE Sub_Energ_FOR_cubature(Energ,xOpt,nb_Opt,BasisnD)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       USE BasisMakeGrid
@@ -571,10 +571,10 @@
       character (len=*), parameter :: name_sub = 'Sub_Energ_FOR_cubature'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
-        write(out_unitp,*) 'basis to be optimized'
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'basis to be optimized'
+        write(out_unit,*)
         CALL RecWrite_basis(BasisnD)
       END IF
 !---------------------------------------------------------------------
@@ -584,7 +584,7 @@
       Xopt = reshape(x0,shape(xOpt))
 
       deg = int(BasisnD%Norm_OF_nDindB)
-      !write(out_unitp,*) 'ndim,deg,nqc',BasisnD%ndim,deg,BasisnD%nqc
+      !write(out_unit,*) 'ndim,deg,nqc',BasisnD%ndim,deg,BasisnD%nqc
 
       nDsize(:) = deg+1
       nDinit(:) = 1
@@ -617,8 +617,8 @@
         END DO
 
       END DO
-      !CALL Write_VecMat(R,out_unitp,5)
-      !CALL Write_VecMat(M,out_unitp,5)
+      !CALL Write_VecMat(R,out_unit,5)
+      !CALL Write_VecMat(M,out_unit,5)
 
 
       ! matrices of the linear (square nq*nq) system (Mt.M).W=(Mt.R)
@@ -631,15 +631,15 @@
 
       WHERE (W < ZERO) W = W * 0.9_Rkind
 
-      !CALL Write_VecMat(W,out_unitp,5)
+      !CALL Write_VecMat(W,out_unit,5)
 
 
       ER(:) = matmul(M,W)-R(:)
-      !CALL Write_VecMat(ER,out_unitp,5)
+      !CALL Write_VecMat(ER,out_unit,5)
 
       Energ = sqrt(dot_product(ER,ER)/real(nDindB%Max_nDI,kind=Rkind))
 
-      !write(out_unitp,*) 'Energ',Energ
+      !write(out_unit,*) 'Energ',Energ
 
       CALL dealloc_NParray(M,'M',name_sub)
       CALL dealloc_NParray(W,'W',name_sub)
@@ -651,14 +651,14 @@
       CALL dealloc_nDindex(nDindB)
 !---------------------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'END ',name_sub
-      flush(out_unitp)
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
     END IF
 !---------------------------------------------------------------------
 
     END SUBROUTINE Sub_Energ_FOR_cubature
       SUBROUTINE Sub_Energ_FOR_cubatureWeight(Energ,xOpt,nb_Opt,BasisnD)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       USE BasisMakeGrid
@@ -695,10 +695,10 @@
       character (len=*), parameter :: name_sub = 'Sub_Energ_FOR_cubatureWeight'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
-        write(out_unitp,*) 'basis to be optimized'
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'basis to be optimized'
+        write(out_unit,*)
         CALL RecWrite_basis(BasisnD)
       END IF
 !---------------------------------------------------------------------
@@ -710,7 +710,7 @@
       Xopt(1:size(x0)) = reshape(x0,[size(x0)] )
 
       deg = int(BasisnD%Norm_OF_nDindB)
-      !write(out_unitp,*) 'ndim,deg,nqc',BasisnD%ndim,deg,BasisnD%nqc
+      !write(out_unit,*) 'ndim,deg,nqc',BasisnD%ndim,deg,BasisnD%nqc
 
       nDsize(:) = deg+1
       nDinit(:) = 1
@@ -739,16 +739,16 @@
         END DO
 
       END DO
-      !CALL Write_VecMat(R,out_unitp,5)
-      !CALL Write_VecMat(M,out_unitp,5)
+      !CALL Write_VecMat(R,out_unit,5)
+      !CALL Write_VecMat(M,out_unit,5)
 
 
       ER(:) = matmul(M,W)-R(:)
-      !CALL Write_VecMat(ER,out_unitp,5)
+      !CALL Write_VecMat(ER,out_unit,5)
 
       Energ = sqrt(dot_product(ER,ER)/real(nDindB%Max_nDI,kind=Rkind))
 
-      !write(out_unitp,*) 'Energ',Energ
+      !write(out_unit,*) 'Energ',Energ
 
       CALL dealloc_NParray(M,'M',name_sub)
       CALL dealloc_NParray(R,'R',name_sub)
@@ -757,8 +757,8 @@
       CALL dealloc_nDindex(nDindB)
 !---------------------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'END ',name_sub
-      flush(out_unitp)
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
     END IF
 !---------------------------------------------------------------------
 

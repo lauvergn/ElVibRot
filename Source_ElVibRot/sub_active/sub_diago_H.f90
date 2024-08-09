@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       SUBROUTINE sub_diago_H(H,E,Vec,n,sym)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant, ONLY: get_Conv_au_TO_unit
       IMPLICIT NONE
 
@@ -74,9 +74,9 @@
       !logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'n',n
-         flush(out_unitp)
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'n',n
+         flush(out_unit)
        END IF
 !---------------------------------------------------------------------------------------
 !       H matrix diagonalisation
@@ -98,8 +98,8 @@
   END IF
 
   IF (debug) THEN
-    write(out_unitp,*) 'OpMin,OpMax (ua)  : ',minval(E),maxval(E)
-    write(out_unitp,*) 'OpMin,OpMax (cm-1): ',minval(E)*auTOcm_inv,maxval(E)*auTOcm_inv
+    write(out_unit,*) 'OpMin,OpMax (ua)  : ',minval(E),maxval(E)
+    write(out_unit,*) 'OpMin,OpMax (cm-1): ',minval(E)*auTOcm_inv,maxval(E)*auTOcm_inv
   END IF
 
   IF(keep_MPI) THEN
@@ -114,12 +114,12 @@
     IF (residual) THEN
       DO i=1,n
         r(:) = matmul(Hsave,Vec(:,i))-E(i)*Vec(:,i)
-        write(out_unitp,*) 'residual (cm-1)',i,sqrt(dot_product(r,r))*&
+        write(out_unit,*) 'residual (cm-1)',i,sqrt(dot_product(r,r))*&
                                                          auTOcm_inv
-        write(out_unitp,*) 'residual (au)',i,sqrt(dot_product(r,r))
-        write(out_unitp,*) 'err (cm-1)',i,dot_product(Vec(:,i),r)*    &
+        write(out_unit,*) 'residual (au)',i,sqrt(dot_product(r,r))
+        write(out_unit,*) 'err (cm-1)',i,dot_product(Vec(:,i),r)*    &
                                                          auTOcm_inv
-        write(out_unitp,*) 'err (au)',i,dot_product(Vec(:,i),r)
+        write(out_unit,*) 'err (au)',i,dot_product(Vec(:,i),r)
       END DO
       CALL dealloc_NParray(Hsave,'Hsave',name_sub)
       CALL dealloc_NParray(r,'r',name_sub)
@@ -129,16 +129,16 @@
 !------------------------------------------------------
   IF (debug) THEN
 
-    write(out_unitp,*) ' level energy :'
+    write(out_unit,*) ' level energy :'
     DO i=1,n
-      write(out_unitp,*) i,E(i)*auTOcm_inv,(E(i)-E(1))*auTOcm_inv
+      write(out_unit,*) i,E(i)*auTOcm_inv,(E(i)-E(1))*auTOcm_inv
     END DO
 
-    write(out_unitp,*) ' Vec:'
-    CALL Write_Mat(Vec,out_unitp,5)
+    write(out_unit,*) ' Vec:'
+    CALL Write_Mat(Vec,out_unit,5)
 
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 !------------------------------------------------------
 
@@ -152,7 +152,7 @@ END SUBROUTINE sub_diago_H
 !
 !=====================================================================
       SUBROUTINE sub_diago_CH(CH,CE,CVec,n)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant, ONLY: get_Conv_au_TO_unit
       IMPLICIT NONE
       !
@@ -174,7 +174,7 @@ END SUBROUTINE sub_diago_H
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_diago_CH'
+        write(out_unit,*) 'BEGINNING sub_diago_CH'
       END IF
 !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
@@ -195,16 +195,16 @@ END SUBROUTINE sub_diago_H
 !-----------------------------------------------------------
       IF (debug) THEN
 
-        write(out_unitp,*) ' level energy :'
+        write(out_unit,*) ' level energy :'
         DO i=1,n
-          write(out_unitp,*) i,CE(i)*cmplx(auTOcm_inv,kind=Rkind),     &
+          write(out_unit,*) i,CE(i)*cmplx(auTOcm_inv,kind=Rkind),     &
                              (CE(i)-CE(1))*cmplx(auTOcm_inv,kind=Rkind)
         END DO
 
-        write(out_unitp,*) ' Vec:'
-        CALL Write_Mat(CVec,out_unitp,5)
+        write(out_unit,*) ' Vec:'
+        CALL Write_Mat(CVec,out_unit,5)
 
-        write(out_unitp,*) 'END sub_diago_CH'
+        write(out_unit,*) 'END sub_diago_CH'
       END IF
 !-----------------------------------------------------------
 

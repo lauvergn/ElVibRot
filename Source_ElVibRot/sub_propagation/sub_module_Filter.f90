@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_Filter
-USE mod_system
+USE EVR_system_m
 USE mod_Constant
 USE mod_psi, ONLY : param_psi,alloc_psi,dealloc_psi
 IMPLICIT NONE
@@ -74,7 +74,7 @@ CONTAINS
 
       SUBROUTINE sub_GaussianFilterDiagonalization(psi,Ene,nb_diago,max_diago, &
                                                    para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,Set_Random_psi,        &
                              Set_symab_OF_psiBasisRep,renorm_psi,       &
                              Overlap_psi1_psi2,norm2_psi,dealloc_psi
@@ -139,24 +139,24 @@ CONTAINS
       nb_diago = para_propa%para_Davidson%L_filter
       DeltaL   = para_propa%para_Davidson%L_filter
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
-        write(out_unitp,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
-        write(out_unitp,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
-        write(out_unitp,*) 'Lmax_filter   : ',para_propa%para_Davidson%Lmax_filter
-        write(out_unitp,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
-        write(out_unitp,*) 'Mmax_filter   : ',para_propa%para_Davidson%Mmax_filter
-        !write(out_unitp,*) 'nb_diago      : ',nb_diago
-        write(out_unitp,*) 'max_diago     : ',max_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
+        write(out_unit,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
+        write(out_unit,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
+        write(out_unit,*) 'Lmax_filter   : ',para_propa%para_Davidson%Lmax_filter
+        write(out_unit,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
+        write(out_unit,*) 'Mmax_filter   : ',para_propa%para_Davidson%Mmax_filter
+        !write(out_unit,*) 'nb_diago      : ',nb_diago
+        write(out_unit,*) 'max_diago     : ',max_diago
 
       END IF
 !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 !-----------------------------------------------------------
 
-      write(out_unitp,*) ' Propagation: ',para_propa%name_WPpropa
+      write(out_unit,*) ' Propagation: ',para_propa%name_WPpropa
       CALL Set_ZPE_OF_Op(para_H,ZPE=para_propa%Hmin,forced=.TRUE.)
-      write(out_unitp,*) 'ZPE (cm-1)',para_H%ZPE * auTOcm_inv
+      write(out_unit,*) 'ZPE (cm-1)',para_H%ZPE * auTOcm_inv
 
       ! change Hmin and Hmax to be sure that the spectral range is between Hmin and Hmax.
       para_propa%Hmin = para_propa%Hmin - ONETENTH**2 * (para_propa%Hmax - para_propa%Hmin)
@@ -171,12 +171,12 @@ CONTAINS
       para_H%E0     = para_propa%para_poly%E0
       para_H%Esc    = para_propa%para_poly%Esc
 
-      write(out_unitp,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
+      write(out_unit,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
                                             para_H%E0,para_H%Esc
 !-----------------------------------------------------------
 
-     write(out_unitp,*) 'W_filter (ua)  : ',para_propa%para_Davidson%W_filter
-     write(out_unitp,*) 'W_filter (cm-1): ',para_propa%para_Davidson%W_filter*&
+     write(out_unit,*) 'W_filter (ua)  : ',para_propa%para_Davidson%W_filter
+     write(out_unit,*) 'W_filter (cm-1): ',para_propa%para_Davidson%W_filter*&
                                                                    auTOcm_inv
 
 
@@ -186,17 +186,17 @@ CONTAINS
 !     Delta_Lambda = para_propa%para_Davidson%W_filter *TWO /            &
 !                    real(para_propa%para_Davidson%L_filter-1,kind=Rkind)
 
-     write(out_unitp,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
-     write(out_unitp,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
+     write(out_unit,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
+     write(out_unit,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
 
      para_propa%para_Davidson%LambdaMin = max(para_H%ZPE,         &
          para_propa%para_Davidson%E0_filter - HALF*para_propa%para_Davidson%W_filter)
      para_propa%para_Davidson%LambdaMax =                               &
          para_propa%para_Davidson%LambdaMin + para_propa%para_Davidson%W_filter
-     write(out_unitp,*) ' LambdaMin,LambdaMax (cm-1): ',                &
+     write(out_unit,*) ' LambdaMin,LambdaMax (cm-1): ',                &
                         para_propa%para_Davidson%LambdaMin * auTOcm_inv,&
                         para_propa%para_Davidson%LambdaMax * auTOcm_inv
-     flush(out_unitp)
+     flush(out_unit)
 
 !-----------------------------------------------------------
 ! define the number of chebychev polynomials automatically
@@ -208,8 +208,8 @@ B_filter = El+Delta_Lambda/para_H%Esc/TWO
 nq       = pi / abs(acos(B_filter)-acos(A_filter))/3
 nb0      = nq
 nb       = nb0
-write(out_unitp,*) ' nb,nq init: ',nb,nq
-flush(out_unitp)
+write(out_unit,*) ' nb,nq init: ',nb,nq
+flush(out_unit)
 
 CALL alloc_NParray(x_cheby,[nq],'x_cheby',name_sub)
 CALL alloc_NParray(w_cheby,[nq],'w_cheby',name_sub)
@@ -241,13 +241,13 @@ DO
 
   CALL gauss_chebyWeight(x_cheby,w_cheby,nq)
   sqw_cheby = ONE/sqrt(sqrt(1-x_cheby*x_cheby)) * sqrt(TWO/pi)
-  !write(out_unitp,*) 'x_cheby',x_cheby
-  !write(out_unitp,*) 'w_cheby',w_cheby
+  !write(out_unit,*) 'x_cheby',x_cheby
+  !write(out_unit,*) 'w_cheby',w_cheby
   !CALL d0poly_chebyWeight_grid(x_cheby,d0P_cheby,nb,nq)
   !DO i=1,nb
   !DO j=i,nb
-  !  write(out_unitp,*) 'Sij',i,j,dot_product(d0P_cheby(:,j),w_cheby*d0P_cheby(:,i))
-  !  flush(out_unitp)
+  !  write(out_unit,*) 'Sij',i,j,dot_product(d0P_cheby(:,j),w_cheby*d0P_cheby(:,i))
+  !  flush(out_unit)
   !END DO
   !END DO
   !-----------------------------------------------------------
@@ -302,8 +302,8 @@ DO
 
 
 
-  write(out_unitp,*) 'nb,filter_err',nb,filter_err
-  flush(out_unitp)
+  write(out_unit,*) 'nb,filter_err',nb,filter_err
+  flush(out_unit)
   IF (filter_err < filter_err_thresh .OR. nb > para_propa%para_Davidson%M_filter) EXIT
 
 
@@ -330,8 +330,8 @@ nb = size(P0_cheby)
     !CALL Set_filter(filter,3,A=A_filter,B=B_filter,beta=FOUR)
     !CALL Set_filter(filter,4,A=A_filter,B=B_filter)
 
-    IF (debug) write(out_unitp,*) 'l,El',l,El
-    flush(out_unitp)
+    IF (debug) write(out_unit,*) 'l,El',l,El
+    flush(out_unit)
 
 
     ! l-filter values x weight on the grid
@@ -355,11 +355,11 @@ nb = size(P0_cheby)
       P1_cheby = P2_cheby
     END DO
 
-    IF (debug) write(out_unitp,*) 'l,end err of f',l,sum(abs(f(nb-10:nb,l)))/TEN
-    flush(out_unitp)
-    !write(out_unitp,*) '========================================='
-    !write(out_unitp,*) 'f(:,l)',l
-    !write(out_unitp,'(10f10.6)') ,f(:,l)
+    IF (debug) write(out_unit,*) 'l,end err of f',l,sum(abs(f(nb-10:nb,l)))/TEN
+    flush(out_unit)
+    !write(out_unit,*) '========================================='
+    !write(out_unit,*) 'f(:,l)',l
+    !write(out_unit,'(10f10.6)') ,f(:,l)
 
   END DO
   CALL dealloc_NParray(x_cheby,'x_cheby',name_sub)
@@ -370,8 +370,8 @@ nb = size(P0_cheby)
   CALL dealloc_NParray(P1_cheby,'P1_cheby',name_sub)
   CALL dealloc_NParray(P2_cheby,'P2_cheby',name_sub)
 
-  IF (debug) write(out_unitp,*) 'chebychev coef: done',nb
-  flush(out_unitp)
+  IF (debug) write(out_unit,*) 'chebychev coef: done',nb
+  flush(out_unit)
 !-----------------------------------------------------------
 
 !- vector initialization:  q1 -----------
@@ -391,16 +391,16 @@ nb = size(P0_cheby)
 
        !- chebychev recursion -------------------------------------------
        CALL sub_chebychev_recursion(Tnq1,q1,0,nb-1,para_H)
-       IF (debug) write(out_unitp,*) 'chebychev recursion: done',nb
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'chebychev recursion: done',nb
+       flush(out_unit)
 
        !- Coefficient of the chebychev expansion (with the filter)  -----
 
        !- z vectors --------------------------------------------
        CALL sub_newZ_vectors_withf(z,Tnq1,nb,para_H,para_propa,f)
        nb_diago = count(abs(z(:)%CAvOp)>ONETENTH**9)
-       IF (debug) write(out_unitp,*) 'ortho z vectors: done',nb_diago
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'ortho z vectors: done',nb_diago
+       flush(out_unit)
        !- z vectors -------------------------------------------
 
         !- diagonalization -----------------------------------
@@ -413,10 +413,10 @@ nb = size(P0_cheby)
           H(i,j) = real(Overlap,kind=Rkind)
         END DO
         END DO
-        !IF (debug) write(out_unitp,*) 'S matrix: done'
-        flush(out_unitp)
+        !IF (debug) write(out_unit,*) 'S matrix: done'
+        flush(out_unit)
         CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
 
 
 
@@ -429,18 +429,18 @@ nb = size(P0_cheby)
             H(i,j) = real(Overlap,kind=Rkind)
           END DO
         END DO
-        !IF (debug) write(out_unitp,*) 'H matrix: done'
-        flush(out_unitp)
+        !IF (debug) write(out_unit,*) 'H matrix: done'
+        flush(out_unit)
 
         CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
-          If(MPI_id==0) write(out_unitp,*) 'WARNING: non_hermitic is BIG'
-          If(MPI_id==0) write(out_unitp,31) non_hermitic
+          If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
+          If(MPI_id==0) write(out_unit,31) non_hermitic
  31       format(' Hamiltonien: ',f16.12,' au')
         ELSE
-          If(MPI_id==0) write(out_unitp,51) non_hermitic*auTOcm_inv
+          If(MPI_id==0) write(out_unit,51) non_hermitic*auTOcm_inv
  51       format(' Hamiltonien: ',f16.12,' cm-1')
         END IF
         epsi = max(para_propa%para_Davidson%conv_resi,                    &
@@ -453,15 +453,15 @@ nb = size(P0_cheby)
           CALL diagonalization(H,Ene(1:nb_diago),Vec,nb_diago,4,1,.FALSE.)
         END IF
 
-         write(out_unitp,21) Ene(1:nb_diago)*auTOcm_inv
-         write(out_unitp,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
+         write(out_unit,21) Ene(1:nb_diago)*auTOcm_inv
+         write(out_unit,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
  21      format(' Filter: ',50(1x,f18.4))
 
 
         !----------------------------------------------------------
         !- residual vector ---------------------------
-        IF (debug) write(out_unitp,*) 'residual'
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'residual'
+        flush(out_unit)
         DO j=1,nb_diago
           g = ZERO
           DO i=1,nb_diago
@@ -473,11 +473,11 @@ nb = size(P0_cheby)
           convergeResi(j) = tab_norm2g(j) < epsi
 
         END DO
-        write(out_unitp,41) 'tab_norm2g(:):      ',tab_norm2g(1:nb_diago)
-        write(out_unitp,42) 'convergenceResi(:): ',convergeResi(1:nb_diago)
+        write(out_unit,41) 'tab_norm2g(:):      ',tab_norm2g(1:nb_diago)
+        write(out_unit,42) 'convergenceResi(:): ',convergeResi(1:nb_diago)
  41     format(a,100(1x,e9.2))
  42     format(a,100(1x,l9))
-        IF (debug) write(out_unitp,*) 'residual: done'
+        IF (debug) write(out_unit,*) 'residual: done'
 
         nb_Vec_IN_Window     = 0
         nb_ConvVec_IN_Window = 0
@@ -491,11 +491,11 @@ nb = size(P0_cheby)
         END DO
         Conv = (nb_ConvVec_IN_Window == nb_Vec_IN_Window) .AND. nb_ConvVec_IN_Window > 0
 
-        write(out_unitp,*)  ' Converged levels:               ',count(convergeResi(1:nb_diago))
-        write(out_unitp,*)  ' Converged levels in the windox: ',nb_ConvVec_IN_Window
-        write(out_unitp,*)  ' Levels in the window:           ',nb_Vec_IN_Window
-        write(out_unitp,*)  ' Convergence ?:                  ',Conv
-        flush(out_unitp)
+        write(out_unit,*)  ' Converged levels:               ',count(convergeResi(1:nb_diago))
+        write(out_unit,*)  ' Converged levels in the windox: ',nb_ConvVec_IN_Window
+        write(out_unit,*)  ' Levels in the window:           ',nb_Vec_IN_Window
+        write(out_unit,*)  ' Convergence ?:                  ',Conv
+        flush(out_unit)
         !- residual vector and convergence ------------------------
         !----------------------------------------------------------
         !IF (Conv .OR. mf >= para_propa%para_Davidson%Mmax_filter) EXIT
@@ -541,8 +541,8 @@ STOP
       END DO
       nb_diago = jsave
       IF (nb_diago < 1) THEN
-        write(out_unitp,*) 'WARNING in ',name_sub
-        write(out_unitp,*) ' There is no vector in the filter range!!'
+        write(out_unit,*) 'WARNING in ',name_sub
+        write(out_unit,*) ' There is no vector in the filter range!!'
         !STOP 'filter diago'
       END IF
 
@@ -563,7 +563,7 @@ STOP
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -573,7 +573,7 @@ STOP
       ! ONE filter, but several initial vector
       SUBROUTINE sub_BlockFilterDiagonalization(psi,Ene,nb_diago,max_diago, &
                                                    para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,Set_Random_psi,        &
                              Set_symab_OF_psiBasisRep,renorm_psi,       &
                              Overlap_psi1_psi2,norm2_psi,dealloc_psi
@@ -633,24 +633,24 @@ STOP
       nb_diago = para_propa%para_Davidson%L_filter
       DeltaL   = para_propa%para_Davidson%L_filter
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
-        write(out_unitp,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
-        write(out_unitp,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
-        write(out_unitp,*) 'Lmax_filter   : ',para_propa%para_Davidson%Lmax_filter
-        write(out_unitp,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
-        write(out_unitp,*) 'Mmax_filter   : ',para_propa%para_Davidson%Mmax_filter
-        !write(out_unitp,*) 'nb_diago      : ',nb_diago
-        write(out_unitp,*) 'max_diago     : ',max_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
+        write(out_unit,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
+        write(out_unit,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
+        write(out_unit,*) 'Lmax_filter   : ',para_propa%para_Davidson%Lmax_filter
+        write(out_unit,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
+        write(out_unit,*) 'Mmax_filter   : ',para_propa%para_Davidson%Mmax_filter
+        !write(out_unit,*) 'nb_diago      : ',nb_diago
+        write(out_unit,*) 'max_diago     : ',max_diago
 
       END IF
 !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 !-----------------------------------------------------------
 
-      write(out_unitp,*) ' Propagation: ',para_propa%name_WPpropa
+      write(out_unit,*) ' Propagation: ',para_propa%name_WPpropa
       CALL Set_ZPE_OF_Op(para_H,ZPE=para_propa%Hmin,forced=.TRUE.)
-      write(out_unitp,*) 'ZPE (cm-1)',para_H%ZPE * auTOcm_inv
+      write(out_unit,*) 'ZPE (cm-1)',para_H%ZPE * auTOcm_inv
 
       ! change Hmin and Hmax to be sure that the spectral range is between Hmin and Hmax.
       para_propa%Hmin = para_propa%Hmin - ONETENTH**2 * (para_propa%Hmax - para_propa%Hmin)
@@ -665,25 +665,25 @@ STOP
       para_H%E0     = para_propa%para_poly%E0
       para_H%Esc    = para_propa%para_poly%Esc
 
-      write(out_unitp,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
+      write(out_unit,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
                                             para_H%E0,para_H%Esc
 !-----------------------------------------------------------
 
-     write(out_unitp,*) 'W_filter (ua)  : ',para_propa%para_Davidson%W_filter
-     write(out_unitp,*) 'W_filter (cm-1): ',para_propa%para_Davidson%W_filter*&
+     write(out_unit,*) 'W_filter (ua)  : ',para_propa%para_Davidson%W_filter
+     write(out_unit,*) 'W_filter (cm-1): ',para_propa%para_Davidson%W_filter*&
                                                                    auTOcm_inv
 
 
      Delta_Lambda = para_propa%para_Davidson%W_filter /                 &
                     real(para_propa%para_Davidson%L_filter-1,kind=Rkind)
-     write(out_unitp,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
-     write(out_unitp,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
+     write(out_unit,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
+     write(out_unit,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
 
      para_propa%para_Davidson%LambdaMin = max(para_H%ZPE,         &
          para_propa%para_Davidson%E0_filter - HALF*para_propa%para_Davidson%W_filter)
      para_propa%para_Davidson%LambdaMax =                               &
          para_propa%para_Davidson%LambdaMin + para_propa%para_Davidson%W_filter
-     write(out_unitp,*) ' LambdaMin,LambdaMax (cm-1): ',                &
+     write(out_unit,*) ' LambdaMin,LambdaMax (cm-1): ',                &
                         para_propa%para_Davidson%LambdaMin * auTOcm_inv,&
                         para_propa%para_Davidson%LambdaMax * auTOcm_inv
 
@@ -695,13 +695,13 @@ STOP
   CALL alloc_NParray(w_cheby,[nq],'w_cheby',name_sub)
   CALL alloc_NParray(d0P_cheby,[nq,nb],'d0P_cheby',name_sub)
   CALL gauss_chebyWeight(x_cheby,w_cheby,nq)
-  !write(out_unitp,*) 'x_cheby',x_cheby
-  !write(out_unitp,*) 'w_cheby',w_cheby
+  !write(out_unit,*) 'x_cheby',x_cheby
+  !write(out_unit,*) 'w_cheby',w_cheby
   CALL d0poly_chebyWeight_grid(x_cheby,d0P_cheby,nb,nq)
   !DO i=1,nb
   !DO j=i,nb
-  !  write(out_unitp,*) 'Sij',i,j,dot_product(d0P_cheby(:,j),w_cheby*d0P_cheby(:,i))
-  !  flush(out_unitp)
+  !  write(out_unit,*) 'Sij',i,j,dot_product(d0P_cheby(:,j),w_cheby*d0P_cheby(:,i))
+  !  flush(out_unit)
   !END DO
   !END DO
 !-----------------------------------------------------------
@@ -716,8 +716,8 @@ STOP
     El = para_propa%para_Davidson%LambdaMin + real(l-1,kind=Rkind)*Delta_Lambda
 
     El = (El-para_H%E0)/para_H%Esc ! to scale the energy between [-1,1]
-    IF (debug) write(out_unitp,*) 'l,El',l,El
-    flush(out_unitp)
+    IF (debug) write(out_unit,*) 'l,El',l,El
+    flush(out_unit)
 
 
     ! l-filter values x weight on the grid
@@ -729,21 +729,21 @@ STOP
       f(j,l) = dot_product(wfl,d0P_cheby(:,j))
     END DO
 
-    IF (debug) write(out_unitp,*) 'l,end err of f',l,sum(abs(f(nb-10:nb,l)))/TEN
-    flush(out_unitp)
-    !write(out_unitp,*) '========================================='
-    !write(out_unitp,*) 'f(:,l)',l
-    !write(out_unitp,'(10f10.6)') ,f(:,l)
+    IF (debug) write(out_unit,*) 'l,end err of f',l,sum(abs(f(nb-10:nb,l)))/TEN
+    flush(out_unit)
+    !write(out_unit,*) '========================================='
+    !write(out_unit,*) 'f(:,l)',l
+    !write(out_unit,'(10f10.6)') ,f(:,l)
 
     !DO k=1,nq
     !  ff_filter = dot_product(f(:,l),d0P_cheby(k,:))
     !  wfl(k) = f_filter_gauss(x_cheby(k),El,sigma)
-    !  write(out_unitp6,*) x_cheby(k),wfl(k),ff_filter,log10(abs(ff_filter-wfl(k)))
+    !  write(out_unit6,*) x_cheby(k),wfl(k),ff_filter,log10(abs(ff_filter-wfl(k)))
     !END DO
 
   END DO
-  IF (debug) write(out_unitp,*) 'chebychev coef: done',nb
-  flush(out_unitp)
+  IF (debug) write(out_unit,*) 'chebychev coef: done',nb
+  flush(out_unit)
 !-----------------------------------------------------------
 
 !- vector initialization:  q1 -----------
@@ -765,16 +765,16 @@ STOP
 
        !- chebychev recursion -------------------------------------------
        CALL sub_chebychev_recursion(Tnq1,q1,0,nb-1,para_H)
-       IF (debug) write(out_unitp,*) 'chebychev recursion: done',nb
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'chebychev recursion: done',nb
+       flush(out_unit)
 
        !- Coefficient of the chebychev expansion (with the filter)  -----
 
        !- z vectors --------------------------------------------
        CALL sub_newZ_vectors_withf(z,Tnq1,nb,para_H,para_propa,f)
        nb_diago = count(abs(z(:)%CAvOp)>ONETENTH**9)
-       IF (debug) write(out_unitp,*) 'ortho z vectors: done',nb_diago
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'ortho z vectors: done',nb_diago
+       flush(out_unit)
        !- z vectors -------------------------------------------
 
         !- diagonalization -----------------------------------
@@ -787,10 +787,10 @@ STOP
           H(i,j) = real(Overlap,kind=Rkind)
         END DO
         END DO
-        !IF (debug) write(out_unitp,*) 'S matrix: done'
-        flush(out_unitp)
+        !IF (debug) write(out_unit,*) 'S matrix: done'
+        flush(out_unit)
         CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
 
 
 
@@ -803,18 +803,18 @@ STOP
             H(i,j) = real(Overlap,kind=Rkind)
           END DO
         END DO
-        !IF (debug) write(out_unitp,*) 'H matrix: done'
-        flush(out_unitp)
+        !IF (debug) write(out_unit,*) 'H matrix: done'
+        flush(out_unit)
 
         CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
-          If(MPI_id==0) write(out_unitp,*) 'WARNING: non_hermitic is BIG'
-          If(MPI_id==0) write(out_unitp,31) non_hermitic
+          If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
+          If(MPI_id==0) write(out_unit,31) non_hermitic
  31       format(' Hamiltonien: ',f16.12,' au')
         ELSE
-          If(MPI_id==0) write(out_unitp,51) non_hermitic*auTOcm_inv
+          If(MPI_id==0) write(out_unit,51) non_hermitic*auTOcm_inv
  51       format(' Hamiltonien: ',f16.12,' cm-1')
         END IF
         epsi = max(para_propa%para_Davidson%conv_resi,                    &
@@ -827,15 +827,15 @@ STOP
           CALL diagonalization(H,Ene(1:nb_diago),Vec,nb_diago,4,1,.FALSE.)
         END IF
 
-         write(out_unitp,21) Ene(1:nb_diago)*auTOcm_inv
-         write(out_unitp,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
+         write(out_unit,21) Ene(1:nb_diago)*auTOcm_inv
+         write(out_unit,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
  21      format(' Filter: ',50(1x,f18.4))
 
 
         !----------------------------------------------------------
         !- residual vector ---------------------------
-        IF (debug) write(out_unitp,*) 'residual'
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'residual'
+        flush(out_unit)
         DO j=1,nb_diago
           g = ZERO
           DO i=1,nb_diago
@@ -847,11 +847,11 @@ STOP
           convergeResi(j) = tab_norm2g(j) < epsi
 
         END DO
-        write(out_unitp,41) 'tab_norm2g(:):      ',tab_norm2g(1:nb_diago)
-        write(out_unitp,42) 'convergenceResi(:): ',convergeResi(1:nb_diago)
+        write(out_unit,41) 'tab_norm2g(:):      ',tab_norm2g(1:nb_diago)
+        write(out_unit,42) 'convergenceResi(:): ',convergeResi(1:nb_diago)
  41     format(a,100(1x,e9.2))
  42     format(a,100(1x,l9))
-        IF (debug) write(out_unitp,*) 'residual: done'
+        IF (debug) write(out_unit,*) 'residual: done'
 
         nb_Vec_IN_Window     = 0
         nb_ConvVec_IN_Window = 0
@@ -865,11 +865,11 @@ STOP
         END DO
         Conv = (nb_ConvVec_IN_Window == nb_Vec_IN_Window) .AND. nb_ConvVec_IN_Window > 0
 
-        write(out_unitp,*)  ' Converged levels:               ',count(convergeResi(1:nb_diago))
-        write(out_unitp,*)  ' Converged levels in the windox: ',nb_ConvVec_IN_Window
-        write(out_unitp,*)  ' Levels in the window:           ',nb_Vec_IN_Window
-        write(out_unitp,*)  ' Convergence ?:                  ',Conv
-        flush(out_unitp)
+        write(out_unit,*)  ' Converged levels:               ',count(convergeResi(1:nb_diago))
+        write(out_unit,*)  ' Converged levels in the windox: ',nb_ConvVec_IN_Window
+        write(out_unit,*)  ' Levels in the window:           ',nb_Vec_IN_Window
+        write(out_unit,*)  ' Convergence ?:                  ',Conv
+        flush(out_unit)
         !- residual vector and convergence ------------------------
         !----------------------------------------------------------
         !IF (Conv .OR. mf >= para_propa%para_Davidson%Mmax_filter) EXIT
@@ -915,8 +915,8 @@ STOP
       END DO
       nb_diago = jsave
       IF (nb_diago < 1) THEN
-        write(out_unitp,*) 'WARNING in ',name_sub
-        write(out_unitp,*) ' There is no vector in the filter range!!'
+        write(out_unit,*) 'WARNING in ',name_sub
+        write(out_unit,*) ' There is no vector in the filter range!!'
         !STOP 'filter diago'
       END IF
 
@@ -937,7 +937,7 @@ STOP
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -947,7 +947,7 @@ STOP
 
       SUBROUTINE sub_GaussianFilterDiagonalization_v0(psi,Ene,nb_diago,max_diago, &
                                                    para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,Set_Random_psi,        &
                              Set_symab_OF_psiBasisRep,renorm_psi,       &
                              Overlap_psi1_psi2,norm2_psi,dealloc_psi
@@ -1002,24 +1002,24 @@ STOP
       nb_diago = para_propa%para_Davidson%L_filter
       DeltaL   = para_propa%para_Davidson%L_filter
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
-        write(out_unitp,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
-        write(out_unitp,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
-        write(out_unitp,*) 'Lmax_filter   : ',para_propa%para_Davidson%Lmax_filter
-        write(out_unitp,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
-        write(out_unitp,*) 'Mmax_filter   : ',para_propa%para_Davidson%Mmax_filter
-        !write(out_unitp,*) 'nb_diago      : ',nb_diago
-        write(out_unitp,*) 'max_diago     : ',max_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
+        write(out_unit,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
+        write(out_unit,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
+        write(out_unit,*) 'Lmax_filter   : ',para_propa%para_Davidson%Lmax_filter
+        write(out_unit,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
+        write(out_unit,*) 'Mmax_filter   : ',para_propa%para_Davidson%Mmax_filter
+        !write(out_unit,*) 'nb_diago      : ',nb_diago
+        write(out_unit,*) 'max_diago     : ',max_diago
 
       END IF
 !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 !-----------------------------------------------------------
 
-      write(out_unitp,*) ' Propagation: ',para_propa%name_WPpropa
+      write(out_unit,*) ' Propagation: ',para_propa%name_WPpropa
       CALL Set_ZPE_OF_Op(para_H,ZPE=para_propa%Hmin,forced=.TRUE.)
-      write(out_unitp,*) 'ZPE (cm-1)',para_H%ZPE * auTOcm_inv
+      write(out_unit,*) 'ZPE (cm-1)',para_H%ZPE * auTOcm_inv
 
       ! change Hmin and Hmax to be sure that the spectral range is between Hmin and Hmax.
       para_propa%Hmin = para_propa%Hmin - ONETENTH**2 * (para_propa%Hmax - para_propa%Hmin)
@@ -1034,7 +1034,7 @@ STOP
       para_H%E0     = para_propa%para_poly%E0
       para_H%Esc    = para_propa%para_poly%Esc
 
-      write(out_unitp,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
+      write(out_unit,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
                                             para_H%E0,para_H%Esc
 !-----------------------------------------------------------
 
@@ -1048,21 +1048,21 @@ STOP
       CALL renorm_psi(q1,BasisRep=.TRUE.)
       !- vector initialization:  q1 + others -----------
 
-     write(out_unitp,*) 'W_filter (ua)  : ',para_propa%para_Davidson%W_filter
-     write(out_unitp,*) 'W_filter (cm-1): ',para_propa%para_Davidson%W_filter*&
+     write(out_unit,*) 'W_filter (ua)  : ',para_propa%para_Davidson%W_filter
+     write(out_unit,*) 'W_filter (cm-1): ',para_propa%para_Davidson%W_filter*&
                                                                    auTOcm_inv
 
 
      Delta_Lambda = para_propa%para_Davidson%W_filter /                 &
                     real(para_propa%para_Davidson%L_filter-1,kind=Rkind)
-     write(out_unitp,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
-     write(out_unitp,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
+     write(out_unit,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
+     write(out_unit,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
 
      para_propa%para_Davidson%LambdaMin = max(para_H%ZPE,         &
          para_propa%para_Davidson%E0_filter - HALF*para_propa%para_Davidson%W_filter)
      para_propa%para_Davidson%LambdaMax =                               &
          para_propa%para_Davidson%LambdaMin + para_propa%para_Davidson%W_filter
-     write(out_unitp,*) ' LambdaMin,LambdaMax (cm-1): ',                &
+     write(out_unit,*) ' LambdaMin,LambdaMax (cm-1): ',                &
                         para_propa%para_Davidson%LambdaMin * auTOcm_inv,&
                         para_propa%para_Davidson%LambdaMax * auTOcm_inv
 !----------------------------------------------------------
@@ -1079,8 +1079,8 @@ STOP
 
        !- chebychev recursion -------------------------------------------
        CALL sub_chebychev_recursion(Tnq1,q1,m0,mf,para_H)
-       IF (debug) write(out_unitp,*) 'chebychev recursion: done',mf
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'chebychev recursion: done',mf
+       flush(out_unit)
 
        !- Coefficient of the chebychev expansion (with the filter)  -----
        DO l=1,para_propa%para_Davidson%L_filter
@@ -1088,14 +1088,14 @@ STOP
 
          El = (El-para_H%E0)/para_H%Esc ! to scale the energy between [-1,1]
 
-         IF (debug) write(out_unitp,*) 'l,El',l,El
-         flush(out_unitp)
+         IF (debug) write(out_unit,*) 'l,El',l,El
+         flush(out_unit)
          DO k=0,mf
            f(k,l) = ZERO
 
            acDeltaj = pi/real(JJ,kind=Rkind)
            acEj = -HALF*acDeltaj
-           !write(out_unitp,*) 'acDeltaj,acEj',acDeltaj,acEj
+           !write(out_unit,*) 'acDeltaj,acEj',acDeltaj,acEj
            DO j=1,JJ
              acEj = acEj + acDeltaj
 
@@ -1107,11 +1107,11 @@ STOP
              f(k,l) = f(k,l) * TWO
            END IF
          END DO
-         IF (debug) write(out_unitp,*) 'l,end err of f',l,sum(abs(f(mf-10:mf,l)))/TEN
-         flush(out_unitp)
-         !write(out_unitp,*) '========================================='
-         !write(out_unitp,*) 'f(:,l)',l
-         !write(out_unitp,'(10f10.6)') ,f(:,l)
+         IF (debug) write(out_unit,*) 'l,end err of f',l,sum(abs(f(mf-10:mf,l)))/TEN
+         flush(out_unit)
+         !write(out_unit,*) '========================================='
+         !write(out_unit,*) 'f(:,l)',l
+         !write(out_unit,'(10f10.6)') ,f(:,l)
 
          acDeltaj = pi/real(JJ,kind=Rkind)
          acEj = -HALF*acDeltaj
@@ -1130,14 +1130,14 @@ STOP
          END DO
          STOP
        END DO
-       IF (debug) write(out_unitp,*) 'chebychev coef: done',mf
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'chebychev coef: done',mf
+       flush(out_unit)
 
        !- z vectors --------------------------------------------
        CALL sub_Z_vectors_withf(z,Tnq1,mf,para_H,para_propa,f)
        nb_diago = count(abs(z(:)%CAvOp)>ONETENTH**9)
-       IF (debug) write(out_unitp,*) 'ortho z vectors: done',nb_diago
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'ortho z vectors: done',nb_diago
+       flush(out_unit)
        !- z vectors -------------------------------------------
 
         !- diagonalization -----------------------------------
@@ -1150,10 +1150,10 @@ STOP
           H(i,j) = real(Overlap,kind=Rkind)
         END DO
         END DO
-        !IF (debug) write(out_unitp,*) 'S matrix: done'
-        flush(out_unitp)
+        !IF (debug) write(out_unit,*) 'S matrix: done'
+        flush(out_unit)
         CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
 
 
 
@@ -1166,18 +1166,18 @@ STOP
             H(i,j) = real(Overlap,kind=Rkind)
           END DO
         END DO
-        !IF (debug) write(out_unitp,*) 'H matrix: done'
-        flush(out_unitp)
+        !IF (debug) write(out_unit,*) 'H matrix: done'
+        flush(out_unit)
 
         CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
-          If(MPI_id==0) write(out_unitp,*) 'WARNING: non_hermitic is BIG'
-          If(MPI_id==0) write(out_unitp,31) non_hermitic
+          If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
+          If(MPI_id==0) write(out_unit,31) non_hermitic
  31       format(' Hamiltonien: ',f16.12,' au')
         ELSE
-          If(MPI_id==0) write(out_unitp,51) non_hermitic*auTOcm_inv
+          If(MPI_id==0) write(out_unit,51) non_hermitic*auTOcm_inv
  51       format(' Hamiltonien: ',f16.12,' cm-1')
         END IF
         epsi = max(para_propa%para_Davidson%conv_resi,                    &
@@ -1190,15 +1190,15 @@ STOP
           CALL diagonalization(H,Ene(1:nb_diago),Vec,nb_diago,4,1,.FALSE.)
         END IF
 
-         write(out_unitp,21) Ene(1:nb_diago)*auTOcm_inv
-         write(out_unitp,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
+         write(out_unit,21) Ene(1:nb_diago)*auTOcm_inv
+         write(out_unit,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
  21      format(' Filter: ',50(1x,f18.4))
 
 
         !----------------------------------------------------------
         !- residual vector ---------------------------
-        IF (debug) write(out_unitp,*) 'residual'
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'residual'
+        flush(out_unit)
         DO j=1,nb_diago
           g = ZERO
           DO i=1,nb_diago
@@ -1210,11 +1210,11 @@ STOP
           convergeResi(j) = tab_norm2g(j) < epsi
 
         END DO
-        write(out_unitp,41) 'tab_norm2g(:):      ',tab_norm2g(1:nb_diago)
-        write(out_unitp,42) 'convergenceResi(:): ',convergeResi(1:nb_diago)
+        write(out_unit,41) 'tab_norm2g(:):      ',tab_norm2g(1:nb_diago)
+        write(out_unit,42) 'convergenceResi(:): ',convergeResi(1:nb_diago)
  41     format(a,100(1x,e9.2))
  42     format(a,100(1x,l9))
-        IF (debug) write(out_unitp,*) 'residual: done'
+        IF (debug) write(out_unit,*) 'residual: done'
 
         nb_Vec_IN_Window     = 0
         nb_ConvVec_IN_Window = 0
@@ -1228,11 +1228,11 @@ STOP
         END DO
         Conv = (nb_ConvVec_IN_Window == nb_Vec_IN_Window) .AND. nb_ConvVec_IN_Window > 0
 
-        write(out_unitp,*)  ' Converged levels:               ',count(convergeResi(1:nb_diago))
-        write(out_unitp,*)  ' Converged levels in the windox: ',nb_ConvVec_IN_Window
-        write(out_unitp,*)  ' Levels in the window:           ',nb_Vec_IN_Window
-        write(out_unitp,*)  ' Convergence ?:                  ',Conv
-        flush(out_unitp)
+        write(out_unit,*)  ' Converged levels:               ',count(convergeResi(1:nb_diago))
+        write(out_unit,*)  ' Converged levels in the windox: ',nb_ConvVec_IN_Window
+        write(out_unit,*)  ' Levels in the window:           ',nb_Vec_IN_Window
+        write(out_unit,*)  ' Convergence ?:                  ',Conv
+        flush(out_unit)
         !- residual vector and convergence ------------------------
         !----------------------------------------------------------
         IF (Conv .OR. mf >= para_propa%para_Davidson%Mmax_filter) EXIT
@@ -1276,8 +1276,8 @@ STOP
       END DO
       nb_diago = jsave
       IF (nb_diago < 1) THEN
-        write(out_unitp,*) 'WARNING in ',name_sub
-        write(out_unitp,*) ' There is no vector in the filter range!!'
+        write(out_unit,*) 'WARNING in ',name_sub
+        write(out_unit,*) ' There is no vector in the filter range!!'
         !STOP 'filter diago'
       END IF
 
@@ -1298,7 +1298,7 @@ STOP
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -1313,7 +1313,7 @@ STOP
 !================================================================
       SUBROUTINE sub_FilterDiagonalization(psi,Ene,nb_diago,max_diago, &
                                            para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,Set_Random_psi,        &
                              Set_symab_OF_psiBasisRep,renorm_psi,       &
                              Overlap_psi1_psi2,norm2_psi,dealloc_psi
@@ -1364,24 +1364,24 @@ STOP
       nb_diago = para_propa%para_Davidson%L_filter
       DeltaL   = para_propa%para_Davidson%L_filter
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
-        write(out_unitp,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
-        write(out_unitp,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
-        write(out_unitp,*) 'Lmax_filter   : ',para_propa%para_Davidson%Lmax_filter
-        write(out_unitp,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
-        write(out_unitp,*) 'Mmax_filter   : ',para_propa%para_Davidson%Mmax_filter
-        !write(out_unitp,*) 'nb_diago      : ',nb_diago
-        write(out_unitp,*) 'max_diago     : ',max_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
+        write(out_unit,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
+        write(out_unit,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
+        write(out_unit,*) 'Lmax_filter   : ',para_propa%para_Davidson%Lmax_filter
+        write(out_unit,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
+        write(out_unit,*) 'Mmax_filter   : ',para_propa%para_Davidson%Mmax_filter
+        !write(out_unit,*) 'nb_diago      : ',nb_diago
+        write(out_unit,*) 'max_diago     : ',max_diago
 
       END IF
 !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 !-----------------------------------------------------------
 
-      write(out_unitp,*) ' Propagation: ',para_propa%name_WPpropa
+      write(out_unit,*) ' Propagation: ',para_propa%name_WPpropa
       CALL Set_ZPE_OF_Op(para_H,ZPE=para_propa%Hmin,forced=.TRUE.)
-      write(out_unitp,*) 'ZPE (cm-1)',para_H%ZPE * auTOcm_inv
+      write(out_unit,*) 'ZPE (cm-1)',para_H%ZPE * auTOcm_inv
 
       ! change Hmin and Hmax to be sure that the spectral range is between Hmin and Hmax.
       para_propa%Hmin = para_propa%Hmin - ONETENTH**2 * (para_propa%Hmax - para_propa%Hmin)
@@ -1396,7 +1396,7 @@ STOP
       para_H%E0     = para_propa%para_poly%E0
       para_H%Esc    = para_propa%para_poly%Esc
 
-      write(out_unitp,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
+      write(out_unit,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
                                             para_H%E0,para_H%Esc
 !-----------------------------------------------------------
 
@@ -1420,21 +1420,21 @@ STOP
       CALL renorm_psi(q1,BasisRep=.TRUE.)
       !- vector initialization:  q1 + others -----------
 
-     write(out_unitp,*) 'W_filter (ua)  : ',para_propa%para_Davidson%W_filter
-     write(out_unitp,*) 'W_filter (cm-1): ',para_propa%para_Davidson%W_filter*&
+     write(out_unit,*) 'W_filter (ua)  : ',para_propa%para_Davidson%W_filter
+     write(out_unit,*) 'W_filter (cm-1): ',para_propa%para_Davidson%W_filter*&
                                                                    auTOcm_inv
 
 
      Delta_Lambda = para_propa%para_Davidson%W_filter /                 &
                     real(para_propa%para_Davidson%L_filter-1,kind=Rkind)
-     write(out_unitp,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
-     write(out_unitp,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
+     write(out_unit,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
+     write(out_unit,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
 
      para_propa%para_Davidson%LambdaMin = max(para_H%ZPE,         &
          para_propa%para_Davidson%E0_filter - HALF*para_propa%para_Davidson%W_filter)
      para_propa%para_Davidson%LambdaMax =                               &
          para_propa%para_Davidson%LambdaMin + para_propa%para_Davidson%W_filter
-     write(out_unitp,*) ' LambdaMin,LambdaMax (cm-1): ',                &
+     write(out_unit,*) ' LambdaMin,LambdaMax (cm-1): ',                &
                         para_propa%para_Davidson%LambdaMin * auTOcm_inv,&
                         para_propa%para_Davidson%LambdaMax * auTOcm_inv
 !----------------------------------------------------------
@@ -1447,14 +1447,14 @@ STOP
 
        !- chebychev recursion -------------------------------------------
        CALL sub_chebychev_recursion(Tnq1,q1,m0,mf,para_H)
-       IF (debug) write(out_unitp,*) 'chebychev recursion: done',mf
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'chebychev recursion: done',mf
+       flush(out_unit)
 
        !- z vectors --------------------------------------------
        CALL sub_Z_vectors(z,Tnq1,m0,mf,para_H,para_propa)
        nb_diago = count(abs(z(:)%CAvOp)>ONETENTH**9)
-       IF (debug) write(out_unitp,*) 'ortho z vectors: done',nb_diago
-       flush(out_unitp)
+       IF (debug) write(out_unit,*) 'ortho z vectors: done',nb_diago
+       flush(out_unit)
        !- z vectors -------------------------------------------
 
         !- diagonalization -----------------------------------
@@ -1467,10 +1467,10 @@ STOP
           H(i,j) = real(Overlap,kind=Rkind)
         END DO
         END DO
-        !IF (debug) write(out_unitp,*) 'S matrix: done'
-        flush(out_unitp)
+        !IF (debug) write(out_unit,*) 'S matrix: done'
+        flush(out_unit)
         CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
 
 
 
@@ -1483,18 +1483,18 @@ STOP
             H(i,j) = real(Overlap,kind=Rkind)
           END DO
         END DO
-        !IF (debug) write(out_unitp,*) 'H matrix: done'
-        flush(out_unitp)
+        !IF (debug) write(out_unit,*) 'H matrix: done'
+        flush(out_unit)
 
         CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
-          If(MPI_id==0) write(out_unitp,*) 'WARNING: non_hermitic is BIG'
-          If(MPI_id==0) write(out_unitp,31) non_hermitic
+          If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
+          If(MPI_id==0) write(out_unit,31) non_hermitic
  31       format(' Hamiltonien: ',f16.12,' au')
         ELSE
-          If(MPI_id==0) write(out_unitp,51) non_hermitic*auTOcm_inv
+          If(MPI_id==0) write(out_unit,51) non_hermitic*auTOcm_inv
  51       format(' Hamiltonien: ',f16.12,' cm-1')
         END IF
         epsi = max(para_propa%para_Davidson%conv_resi,                    &
@@ -1507,15 +1507,15 @@ STOP
           CALL diagonalization(H,Ene(1:nb_diago),Vec,nb_diago,4,1,.FALSE.)
         END IF
 
-         write(out_unitp,21) Ene(1:nb_diago)*auTOcm_inv
-         write(out_unitp,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
+         write(out_unit,21) Ene(1:nb_diago)*auTOcm_inv
+         write(out_unit,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
  21      format(' Filter: ',50(1x,f18.4))
 
 
         !----------------------------------------------------------
         !- residual vector ---------------------------
-        IF (debug) write(out_unitp,*) 'residual'
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'residual'
+        flush(out_unit)
         DO j=1,nb_diago
           g = ZERO
           DO i=1,nb_diago
@@ -1527,11 +1527,11 @@ STOP
           convergeResi(j) = tab_norm2g(j) < epsi
 
         END DO
-        write(out_unitp,41) 'tab_norm2g(:):      ',tab_norm2g(1:nb_diago)
-        write(out_unitp,42) 'convergenceResi(:): ',convergeResi(1:nb_diago)
+        write(out_unit,41) 'tab_norm2g(:):      ',tab_norm2g(1:nb_diago)
+        write(out_unit,42) 'convergenceResi(:): ',convergeResi(1:nb_diago)
  41     format(a,100(1x,e9.2))
  42     format(a,100(1x,l9))
-        IF (debug) write(out_unitp,*) 'residual: done'
+        IF (debug) write(out_unit,*) 'residual: done'
 
         nb_Vec_IN_Window     = 0
         nb_ConvVec_IN_Window = 0
@@ -1545,11 +1545,11 @@ STOP
         END DO
         Conv = (nb_ConvVec_IN_Window == nb_Vec_IN_Window) .AND. nb_ConvVec_IN_Window > 0
 
-        write(out_unitp,*)  ' Converged levels:               ',count(convergeResi(1:nb_diago))
-        write(out_unitp,*)  ' Converged levels in the windox: ',nb_ConvVec_IN_Window
-        write(out_unitp,*)  ' Levels in the window:           ',nb_Vec_IN_Window
-        write(out_unitp,*)  ' Convergence ?:                  ',Conv
-        flush(out_unitp)
+        write(out_unit,*)  ' Converged levels:               ',count(convergeResi(1:nb_diago))
+        write(out_unit,*)  ' Converged levels in the windox: ',nb_ConvVec_IN_Window
+        write(out_unit,*)  ' Levels in the window:           ',nb_Vec_IN_Window
+        write(out_unit,*)  ' Convergence ?:                  ',Conv
+        flush(out_unit)
         !- residual vector and convergence ------------------------
         !----------------------------------------------------------
         IF (Conv .OR. mf >= para_propa%para_Davidson%Mmax_filter) EXIT
@@ -1592,8 +1592,8 @@ STOP
       END DO
       nb_diago = jsave
       IF (nb_diago < 1) THEN
-        write(out_unitp,*) 'WARNING in ',name_sub
-        write(out_unitp,*) ' There is no vector in the filter range!!'
+        write(out_unit,*) 'WARNING in ',name_sub
+        write(out_unit,*) ' There is no vector in the filter range!!'
         !STOP 'filter diago'
       END IF
 
@@ -1614,7 +1614,7 @@ STOP
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -1623,7 +1623,7 @@ STOP
 
       SUBROUTINE sub_FilterDiagonalization_v1(psi,Ene,nb_diago,max_diago, &
                                            para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,Set_Random_psi,        &
                              Set_symab_OF_psiBasisRep,renorm_psi,       &
                              Overlap_psi1_psi2,norm2_psi,dealloc_psi,  &
@@ -1672,20 +1672,20 @@ STOP
                     para_propa%para_Davidson%E0_filter + para_propa%Hmin
       nb_diago = para_propa%para_Davidson%L_filter
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
-        write(out_unitp,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
-        write(out_unitp,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
-        write(out_unitp,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
-        write(out_unitp,*) 'nb_diago      : ',nb_diago
-        write(out_unitp,*) 'max_diago     : ',max_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
+        write(out_unit,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
+        write(out_unit,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
+        write(out_unit,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
+        write(out_unit,*) 'nb_diago      : ',nb_diago
+        write(out_unit,*) 'max_diago     : ',max_diago
 
       END IF
 !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 !-----------------------------------------------------------
 
-      write(out_unitp,*) ' Propagation: ',para_propa%name_WPpropa
+      write(out_unit,*) ' Propagation: ',para_propa%name_WPpropa
 
 !     - scaling of H ---------------------------------------
       para_propa%para_poly%deltaE = para_propa%Hmax - para_propa%Hmin
@@ -1696,7 +1696,7 @@ STOP
       para_H%E0     = para_propa%para_poly%E0
       para_H%Esc    = para_propa%para_poly%Esc
 
-      write(out_unitp,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
+      write(out_unit,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
                                             para_H%E0,para_H%Esc
 !-----------------------------------------------------------
 
@@ -1736,30 +1736,30 @@ STOP
                                         para_propa%para_poly%deltaE /   &
           (1.2_Rkind*real(para_propa%para_Davidson%M_filter,kind=Rkind))
      para_propa%para_Davidson%W_filter = 200._Rkind / auTOcm_inv ! 200 cm-1
-     write(out_unitp,*) 'W_filter (ua)',para_propa%para_Davidson%W_filter
-     write(out_unitp,*) 'W_filter (cm-1)',para_propa%para_Davidson%W_filter*&
+     write(out_unit,*) 'W_filter (ua)',para_propa%para_Davidson%W_filter
+     write(out_unit,*) 'W_filter (cm-1)',para_propa%para_Davidson%W_filter*&
                                                             auTOcm_inv
 
 
      Delta_Lambda = para_propa%para_Davidson%W_filter /                 &
                     real(para_propa%para_Davidson%L_filter-1,kind=Rkind)
-     write(out_unitp,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
-     write(out_unitp,*) ' Delta_Lambda (cm-1): ',Delta_Lambda* auTOcm_inv
+     write(out_unit,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
+     write(out_unit,*) ' Delta_Lambda (cm-1): ',Delta_Lambda* auTOcm_inv
 
      LambdaMin = para_propa%para_Davidson%E0_filter -                   &
                                  HALF*para_propa%para_Davidson%W_filter
      IF (LambdaMin < para_propa%Hmin) LambdaMin = para_propa%Hmin
      LambdaMax = LambdaMin + para_propa%para_Davidson%W_filter
-     write(out_unitp,*) ' LambdaMin,LambdaMax (cm-1): ',                &
+     write(out_unit,*) ' LambdaMin,LambdaMax (cm-1): ',                &
                            LambdaMin * auTOcm_inv,LambdaMax * auTOcm_inv
 
      DO j=1,para_propa%para_Davidson%L_filter
        Lambda = LambdaMin + real(j-1,kind=Rkind)*Delta_Lambda
-       !write(out_unitp,*) 'j,Lambda (cm-1)',j,Lambda * auTOcm_inv
+       !write(out_unit,*) 'j,Lambda (cm-1)',j,Lambda * auTOcm_inv
        phi_j(j) = acos((Lambda-para_H%E0)/para_H%Esc)
      END DO
-     IF (debug) write(out_unitp,*) 'phi_j(:): done'
-     flush(out_unitp)
+     IF (debug) write(out_unit,*) 'phi_j(:): done'
+     flush(out_unit)
 
 !----------------------------------------------------------
 
@@ -1774,8 +1774,8 @@ STOP
         Tnq1(n) = TWO * w1
         Tnq1(n) = Tnq1(n) - Tnq1(n-2)
       END DO
-     IF (debug) write(out_unitp,*) 'chebychev recursion: done'
-     flush(out_unitp)
+     IF (debug) write(out_unit,*) 'chebychev recursion: done'
+     flush(out_unit)
 
       !- chebychev recursion -------------------------------------------
 
@@ -1786,8 +1786,8 @@ STOP
           z(j) = z(j) + TWO*cos(real(n,kind=rkind)*phi_j(j)) * Tnq1(n)
         END DO
       END DO
-     IF (debug) write(out_unitp,*) 'z vectors: done'
-     flush(out_unitp)
+     IF (debug) write(out_unit,*) 'z vectors: done'
+     flush(out_unit)
       !- z vectors -------------------------------------------
 
       !- z vectors (orthonormalized) -----------------------------------
@@ -1795,8 +1795,8 @@ STOP
       nb_diago = count(abs(z(:)%CAvOp)>ONETENTH**8)
 
 
-     IF (debug) write(out_unitp,*) 'ortho z vectors: done',nb_diago
-     flush(out_unitp)
+     IF (debug) write(out_unit,*) 'ortho z vectors: done',nb_diago
+     flush(out_unit)
       !- z vectors -------------------------------------------
 
       !- diagonalization -----------------------------------
@@ -1809,11 +1809,11 @@ STOP
         H(i,j) = real(Overlap,kind=Rkind)
       END DO
       END DO
-      !IF (debug) write(out_unitp,*) 'H matrix: done'
-      flush(out_unitp)
+      !IF (debug) write(out_unit,*) 'H matrix: done'
+      flush(out_unit)
       CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
 
-      !IF (debug) CALL Write_Mat(H,out_unitp,5)
+      !IF (debug) CALL Write_Mat(H,out_unit,5)
 
 
 
@@ -1827,18 +1827,18 @@ STOP
           H(i,j) = real(Overlap,kind=Rkind)
         END DO
       END DO
-      !IF (debug) write(out_unitp,*) 'H matrix: done'
-      flush(out_unitp)
+      !IF (debug) write(out_unit,*) 'H matrix: done'
+      flush(out_unit)
 
       CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-      !IF (debug) CALL Write_Mat(H,out_unitp,5)
+      !IF (debug) CALL Write_Mat(H,out_unit,5)
 
       IF (non_hermitic > FOUR*ONETENTH**4) THEN
-        If(MPI_id==0) write(out_unitp,*) 'WARNING: non_hermitic is BIG'
-        If(MPI_id==0) write(out_unitp,31) non_hermitic
+        If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
+        If(MPI_id==0) write(out_unit,31) non_hermitic
  31     format(' Hamiltonien: ',f16.12,' au')
       ELSE
-        If(MPI_id==0) write(out_unitp,51) non_hermitic*auTOcm_inv
+        If(MPI_id==0) write(out_unit,51) non_hermitic*auTOcm_inv
  51     format(' Hamiltonien: ',f16.12,' cm-1')
       END IF
       epsi = max(para_propa%para_Davidson%conv_resi,                    &
@@ -1846,25 +1846,25 @@ STOP
                                                non_hermitic)
 
       CALL Set_ZPE_OF_Op(para_H,ZPE=para_propa%Hmin,forced=.TRUE.)
-      write(out_unitp,*) 'ZPE',para_H%ZPE
+      write(out_unit,*) 'ZPE',para_H%ZPE
 
         IF (para_H%sym_Hamil) THEN
           CALL diagonalization(H,Ene(1:nb_diago),Vec,nb_diago,3,1,.FALSE.)
         ELSE
           CALL diagonalization(H,Ene(1:nb_diago),Vec,nb_diago,4,1,.FALSE.)
         END IF
-      !write(out_unitp,*) Ene(1:nb_diago)*auTOcm_inv
+      !write(out_unit,*) Ene(1:nb_diago)*auTOcm_inv
 
-       write(out_unitp,21) Ene(1:nb_diago)*auTOcm_inv
-       write(out_unitp,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
+       write(out_unit,21) Ene(1:nb_diago)*auTOcm_inv
+       write(out_unit,21) (Ene(1:nb_diago)-para_H%ZPE)*auTOcm_inv
 
  21   format(' Filter: ',50(1x,f18.4))
 
 
       !----------------------------------------------------------
       !- residual vector ---------------------------
-      IF (debug) write(out_unitp,*) 'residual'
-      IF (debug) flush(out_unitp)
+      IF (debug) write(out_unit,*) 'residual'
+      IF (debug) flush(out_unit)
       DO j=1,nb_diago
           g = ZERO
           DO i=1,nb_diago
@@ -1876,14 +1876,14 @@ STOP
           convergeResi(j) = tab_norm2g(j) < epsi
 
       END DO
-      write(out_unitp,41) 'tab_norm2g          ',tab_norm2g(1:nb_diago)
-      write(out_unitp,42)  'convergenceResi(:): ',convergeResi(1:nb_diago)
+      write(out_unit,41) 'tab_norm2g          ',tab_norm2g(1:nb_diago)
+      write(out_unit,42)  'convergenceResi(:): ',convergeResi(1:nb_diago)
  41   format(a,100(1x,e9.2))
  42   format(a,100(1x,l9))
-      IF (debug) write(out_unitp,*) 'residual: done'
-      write(out_unitp,*)  ' number of converged levels: ',count(convergeResi(1:nb_diago))
+      IF (debug) write(out_unit,*) 'residual: done'
+      write(out_unit,*)  ' number of converged levels: ',count(convergeResi(1:nb_diago))
 
-      IF (debug) flush(out_unitp)
+      IF (debug) flush(out_unit)
       !- residual vector and convergence ------------------------
       !----------------------------------------------------------
 
@@ -1902,15 +1902,15 @@ STOP
       END DO
       nb_diago = jsave
       IF (nb_diago < 1) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) ' There is no vector in the filter range!!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) ' There is no vector in the filter range!!'
         STOP 'filter diago'
       END IF
 
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -1918,7 +1918,7 @@ STOP
       END SUBROUTINE sub_FilterDiagonalization_v1
       SUBROUTINE sub_FilterDiagonalization_v0(psi,Ene,nb_diago,max_diago, &
                                            para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,Set_Random_psi,        &
                              Set_symab_OF_psiBasisRep,renorm_psi,       &
                              Overlap_psi1_psi2,norm2_psi,dealloc_psi
@@ -1966,20 +1966,20 @@ STOP
                     para_propa%para_Davidson%E0_filter + para_propa%Hmin
       nb_diago = para_propa%para_Davidson%L_filter
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
-        write(out_unitp,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
-        write(out_unitp,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
-        write(out_unitp,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
-        write(out_unitp,*) 'nb_diago      : ',nb_diago
-        write(out_unitp,*) 'max_diago     : ',max_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Hmin,Hmax     : ',para_propa%Hmin,para_propa%Hmax
+        write(out_unit,*) 'E0_filter (ua): ',para_propa%para_Davidson%E0_filter
+        write(out_unit,*) 'L_filter      : ',para_propa%para_Davidson%L_filter
+        write(out_unit,*) 'M_filter      : ',para_propa%para_Davidson%M_filter
+        write(out_unit,*) 'nb_diago      : ',nb_diago
+        write(out_unit,*) 'max_diago     : ',max_diago
 
       END IF
 !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 !-----------------------------------------------------------
 
-      write(out_unitp,*) ' Propagation: ',para_propa%name_WPpropa
+      write(out_unit,*) ' Propagation: ',para_propa%name_WPpropa
 
 !     - scaling of H ---------------------------------------
       para_propa%para_poly%deltaE = para_propa%Hmax - para_propa%Hmin
@@ -1990,7 +1990,7 @@ STOP
       para_H%E0     = para_propa%para_poly%E0
       para_H%Esc    = para_propa%para_poly%Esc
 
-      write(out_unitp,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
+      write(out_unit,*) ' deltaE,E0,Esc: ',para_propa%para_poly%deltaE,&
                                             para_H%E0,para_H%Esc
 !-----------------------------------------------------------
 
@@ -2030,26 +2030,26 @@ STOP
                                         para_propa%para_poly%deltaE /   &
           (1.2_Rkind*real(para_propa%para_Davidson%M_filter,kind=Rkind))
      para_propa%para_Davidson%W_filter = 200._Rkind / auTOcm_inv ! 200 cm-1
-     write(out_unitp,*) 'W_filter (ua)',para_propa%para_Davidson%W_filter
-     write(out_unitp,*) 'W_filter (cm-1)',para_propa%para_Davidson%W_filter*&
+     write(out_unit,*) 'W_filter (ua)',para_propa%para_Davidson%W_filter
+     write(out_unit,*) 'W_filter (cm-1)',para_propa%para_Davidson%W_filter*&
                                                                auTOcm_inv
 
 
      Delta_Lambda = para_propa%para_Davidson%W_filter /                 &
                     real(para_propa%para_Davidson%L_filter-1,kind=Rkind)
-     write(out_unitp,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
-     write(out_unitp,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
+     write(out_unit,*) ' Delta_Lambda (ua)  : ',Delta_Lambda
+     write(out_unit,*) ' Delta_Lambda (cm-1): ',Delta_Lambda*auTOcm_inv
 
      Lambda = para_propa%para_Davidson%E0_filter -                      &
                                  HALF*para_propa%para_Davidson%W_filter
      IF (Lambda < para_propa%Hmin) Lambda = para_propa%Hmin
      DO j=1,para_propa%para_Davidson%L_filter
-       write(out_unitp,*) 'j,Lambda (cm-1)',j,Lambda * auTOcm_inv
+       write(out_unit,*) 'j,Lambda (cm-1)',j,Lambda * auTOcm_inv
        phi_j(j) = acos((Lambda-para_H%E0)/para_H%Esc)
        Lambda = Lambda + Delta_Lambda
      END DO
-     IF (debug) write(out_unitp,*) 'phi_j(:): done'
-     flush(out_unitp)
+     IF (debug) write(out_unit,*) 'phi_j(:): done'
+     flush(out_unit)
 
 !----------------------------------------------------------
 
@@ -2066,8 +2066,8 @@ STOP
         Tnq1(n) = TWO * w1
         Tnq1(n) = Tnq1(n) - Tnq1(n-2)
       END DO
-     IF (debug) write(out_unitp,*) 'chebychev recursion: done'
-     flush(out_unitp)
+     IF (debug) write(out_unit,*) 'chebychev recursion: done'
+     flush(out_unit)
 
       !- chebychev recursion -------------------------------------------
 
@@ -2078,8 +2078,8 @@ STOP
           z(j) = z(j) + TWO*cos(real(n,kind=rkind)*phi_j(j)) * Tnq1(n)
         END DO
       END DO
-     IF (debug) write(out_unitp,*) 'z vectors: done'
-     flush(out_unitp)
+     IF (debug) write(out_unit,*) 'z vectors: done'
+     flush(out_unit)
       !- z vectors -------------------------------------------
 
 
@@ -2087,13 +2087,13 @@ STOP
       jorth = 0
       DO j=1,para_propa%para_Davidson%L_filter
         CALL renorm_psi(z(j))
-        write(out_unitp,*) 'j,norm',j,z(j)%norm2
+        write(out_unit,*) 'j,norm',j,z(j)%norm2
 
         DO i=1,jorth
           CALL norm2_psi(z(i))
-          !write(out_unitp,*) '    i,norm',i,z(i)%norm2
+          !write(out_unit,*) '    i,norm',i,z(i)%norm2
           CALL Overlap_psi1_psi2(Overlap,z(j),z(i))
-          !write(out_unitp,*) '    j,i,S(j,i)',j,i,real(Overlap,kind=Rkind)
+          !write(out_unit,*) '    j,i,S(j,i)',j,i,real(Overlap,kind=Rkind)
 
           z(j) = z(j) - z(i) * real(Overlap,kind=Rkind)
         END DO
@@ -2103,7 +2103,7 @@ STOP
           z(j) = z(j) - z(i) * RS
         END DO
         CALL norm2_psi(z(j))
-        !write(out_unitp,*) 'j,norm',j,z(j)%norm2
+        !write(out_unit,*) 'j,norm',j,z(j)%norm2
         IF (z(j)%norm2 > ONETENTH**6) THEN
           jorth = jorth + 1
           z(j) = z(j) * (ONE/sqrt(z(j)%norm2))
@@ -2111,13 +2111,13 @@ STOP
         ELSE
           z(j) = ZERO
         END IF
-        write(out_unitp,*) 'jorth',jorth
-        write(out_unitp,*)
+        write(out_unit,*) 'jorth',jorth
+        write(out_unit,*)
 
       END DO
       nb_diago = jorth
-     IF (debug) write(out_unitp,*) 'ortho z vectors: done',jorth
-     flush(out_unitp)
+     IF (debug) write(out_unit,*) 'ortho z vectors: done',jorth
+     flush(out_unit)
       !- z vectors -------------------------------------------
 
       !- diagonalization -----------------------------------
@@ -2130,11 +2130,11 @@ STOP
         H(i,j) = real(Overlap,kind=Rkind)
       END DO
       END DO
-      !IF (debug) write(out_unitp,*) 'H matrix: done'
-      flush(out_unitp)
+      !IF (debug) write(out_unit,*) 'H matrix: done'
+      flush(out_unit)
       CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
 
-      !IF (debug) CALL Write_Mat(H,out_unitp,5)
+      !IF (debug) CALL Write_Mat(H,out_unit,5)
 
 
 
@@ -2148,18 +2148,18 @@ STOP
           H(i,j) = real(Overlap,kind=Rkind)
         END DO
       END DO
-      !IF (debug) write(out_unitp,*) 'H matrix: done'
-      flush(out_unitp)
+      !IF (debug) write(out_unit,*) 'H matrix: done'
+      flush(out_unit)
 
       CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-      !IF (debug) CALL Write_Mat(H,out_unitp,5)
+      !IF (debug) CALL Write_Mat(H,out_unit,5)
 
       IF (non_hermitic > FOUR*ONETENTH**4) THEN
-        If(MPI_id==0) write(out_unitp,*) 'WARNING: non_hermitic is BIG'
-        If(MPI_id==0) write(out_unitp,31) non_hermitic
+        If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
+        If(MPI_id==0) write(out_unit,31) non_hermitic
  31     format(' Hamiltonien: ',f16.12,' au')
       ELSE
-        If(MPI_id==0) write(out_unitp,51) non_hermitic*auTOcm_inv
+        If(MPI_id==0) write(out_unit,51) non_hermitic*auTOcm_inv
  51     format(' Hamiltonien: ',f16.12,' cm-1')
       END IF
       epsi = max(para_propa%para_Davidson%conv_resi,                    &
@@ -2171,18 +2171,18 @@ STOP
         ELSE
           CALL diagonalization(H,Ene(1:nb_diago),Vec,nb_diago,4,1,.FALSE.)
         END IF
-      !write(out_unitp,*) Ene(1:nb_diago)*auTOcm_inv
+      !write(out_unit,*) Ene(1:nb_diago)*auTOcm_inv
 
-       write(out_unitp,21) Ene(1:nb_diago)*auTOcm_inv
-       write(out_unitp,21) (Ene(1:nb_diago)-para_propa%Hmin)*auTOcm_inv
+       write(out_unit,21) Ene(1:nb_diago)*auTOcm_inv
+       write(out_unit,21) (Ene(1:nb_diago)-para_propa%Hmin)*auTOcm_inv
 
  21   format(' Filter: ',50(1x,f18.4))
 
 
       !----------------------------------------------------------
       !- residual vector ---------------------------
-      IF (debug) write(out_unitp,*) 'residual'
-      IF (debug) flush(out_unitp)
+      IF (debug) write(out_unit,*) 'residual'
+      IF (debug) flush(out_unit)
       DO j=1,nb_diago
           g = ZERO
           psi(j) = ZERO
@@ -2196,14 +2196,14 @@ STOP
           convergeResi(j) = tab_norm2g(j) < epsi
 
       END DO
-      write(out_unitp,41) 'tab_norm2g          ',tab_norm2g(1:nb_diago)
-      write(out_unitp,42)  'convergenceResi(:): ',convergeResi(1:nb_diago)
+      write(out_unit,41) 'tab_norm2g          ',tab_norm2g(1:nb_diago)
+      write(out_unit,42)  'convergenceResi(:): ',convergeResi(1:nb_diago)
  41   format(a,100(1x,e9.2))
  42   format(a,100(1x,l9))
-      IF (debug) write(out_unitp,*) 'residual: done'
-      write(out_unitp,*)  ' number of converged levels: ',count(convergeResi(1:nb_diago))
+      IF (debug) write(out_unit,*) 'residual: done'
+      write(out_unit,*)  ' number of converged levels: ',count(convergeResi(1:nb_diago))
 
-      IF (debug) flush(out_unitp)
+      IF (debug) flush(out_unit)
       !- residual vector and convergence ------------------------
       !----------------------------------------------------------
 
@@ -2216,7 +2216,7 @@ STOP
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -2224,7 +2224,7 @@ STOP
       END SUBROUTINE sub_FilterDiagonalization_v0
 
      SUBROUTINE sub_chebychev_recursion(Tnq1,q1,m0,mf,para_Op)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,     ONLY : param_psi,dealloc_psi
       USE mod_Op
       IMPLICIT NONE
@@ -2249,20 +2249,20 @@ STOP
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'm0,mf              : ',m0,mf
-        write(out_unitp,*) 'ubound,lbound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'm0,mf              : ',m0,mf
+        write(out_unit,*) 'ubound,lbound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
       END IF
 !-----------------------------------------------------------
 
      IF (lbound(Tnq1,dim=1) /= 0 .OR. lbound(Tnq1,dim=1) > m0 .OR.      &
                                          ubound(Tnq1,dim=1) < mf) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' incompatible parameters:'
-        write(out_unitp,*) 'm0,mf              : ',m0,mf
-        write(out_unitp,*) 'lbound,ubound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
-        write(out_unitp,*) 'lbound(Tnq1) must be = 0 and <= m0'
-        write(out_unitp,*) 'ubound(Tnq1) must be >= mf'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' incompatible parameters:'
+        write(out_unit,*) 'm0,mf              : ',m0,mf
+        write(out_unit,*) 'lbound,ubound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
+        write(out_unit,*) 'lbound(Tnq1) must be = 0 and <= m0'
+        write(out_unit,*) 'ubound(Tnq1) must be >= mf'
         STOP 'chebychev recursion'
      END IF
 
@@ -2270,8 +2270,8 @@ STOP
      !m0_loc = 0 ! for debugging
 
      !- chebychev recursion -------------------------------------------
-     IF (print_level>-1) write(out_unitp,'(a)',ADVANCE='no') 'cheby rec (%): '
-     flush(out_unitp)
+     IF (print_level>-1) write(out_unit,'(a)',ADVANCE='no') 'cheby rec (%): '
+     flush(out_unit)
 
      IF (m0_loc == 0) THEN
         Tnq1(0)  = q1                                              ! => T0=q1
@@ -2288,22 +2288,22 @@ STOP
        Tnq1(n) = Tnq1(n) - Tnq1(n-2)
 
        IF (mod(n-m0,max(1,int((mf-m0)/10))) == 0 .AND. print_level>-1) THEN
-         write(out_unitp,'(a,i3)',ADVANCE='no') ' -',(n-m0)*100/(mf-m0)
-         flush(out_unitp)
+         write(out_unit,'(a,i3)',ADVANCE='no') ' -',(n-m0)*100/(mf-m0)
+         flush(out_unit)
        END IF
      END DO
-     IF (print_level>-1) write(out_unitp,'(a)',ADVANCE='yes') ' end'
-     flush(out_unitp)
+     IF (print_level>-1) write(out_unit,'(a)',ADVANCE='yes') ' end'
+     flush(out_unit)
      CALL dealloc_psi(w1)
 
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 
      END SUBROUTINE sub_chebychev_recursion
 
      SUBROUTINE sub_Z_vectors(z,Tnq1,m0,mf,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,sub_Lowdin,sub_Schmidt
       USE mod_Op
       USE mod_propa
@@ -2331,20 +2331,20 @@ STOP
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'm0,mf              : ',m0,mf
-        write(out_unitp,*) 'ubound,lbound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'm0,mf              : ',m0,mf
+        write(out_unit,*) 'ubound,lbound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
       END IF
 !-----------------------------------------------------------
 
      IF (lbound(Tnq1,dim=1) /= 0 .OR. lbound(Tnq1,dim=1) > m0 .OR.      &
                                          ubound(Tnq1,dim=1) < mf) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' incompatible parameters:'
-        write(out_unitp,*) 'm0,mf              : ',m0,mf
-        write(out_unitp,*) 'lbound,ubound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
-        write(out_unitp,*) 'lbound(Tnq1) must be = 0 and <= m0'
-        write(out_unitp,*) 'ubound(Tnq1) must be >= mf'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' incompatible parameters:'
+        write(out_unit,*) 'm0,mf              : ',m0,mf
+        write(out_unit,*) 'lbound,ubound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
+        write(out_unit,*) 'lbound(Tnq1) must be = 0 and <= m0'
+        write(out_unit,*) 'ubound(Tnq1) must be >= mf'
         STOP 'chebychev recursion'
      END IF
 
@@ -2374,13 +2374,13 @@ STOP
      CALL sub_Schmidt(z,para_propa%para_Davidson%L_filter) ! to have a better identity
 
      IF (debug) THEN
-       write(out_unitp,*) 'END ',name_sub
+       write(out_unit,*) 'END ',name_sub
      END IF
 
      END SUBROUTINE sub_Z_vectors
 
      SUBROUTINE sub_Z_vectors_withf(z,Tnq1,mf,para_H,para_propa,f)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,sub_Lowdin,sub_Schmidt
       USE mod_Op
       USE mod_propa
@@ -2408,19 +2408,19 @@ STOP
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'mf              : ',mf
-        write(out_unitp,*) 'ubound,lbound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'mf              : ',mf
+        write(out_unit,*) 'ubound,lbound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
       END IF
 !-----------------------------------------------------------
 
      IF (lbound(Tnq1,dim=1) /= 0 .OR. ubound(Tnq1,dim=1) < mf) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' incompatible parameters:'
-        write(out_unitp,*) 'mf              : ',mf
-        write(out_unitp,*) 'lbound,ubound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
-        write(out_unitp,*) 'lbound(Tnq1) must be = 0'
-        write(out_unitp,*) 'ubound(Tnq1) must be >= mf'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' incompatible parameters:'
+        write(out_unit,*) 'mf              : ',mf
+        write(out_unit,*) 'lbound,ubound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
+        write(out_unit,*) 'lbound(Tnq1) must be = 0'
+        write(out_unit,*) 'ubound(Tnq1) must be >= mf'
         STOP 'chebychev recursion'
      END IF
 
@@ -2438,13 +2438,13 @@ STOP
      CALL sub_Schmidt(z,para_propa%para_Davidson%L_filter) ! to have a better identity
 
      IF (debug) THEN
-       write(out_unitp,*) 'END ',name_sub
+       write(out_unit,*) 'END ',name_sub
      END IF
 
      END SUBROUTINE sub_Z_vectors_withf
 
      SUBROUTINE sub_newZ_vectors_withf(z,Tnq1,nb,para_H,para_propa,f)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,sub_Lowdin,sub_Schmidt
       USE mod_Op
       USE mod_propa
@@ -2471,22 +2471,22 @@ STOP
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb                 : ',nb
-        write(out_unitp,*) 'ubound,lbound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb                 : ',nb
+        write(out_unit,*) 'ubound,lbound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
         DO l=1,para_propa%para_Davidson%L_filter
-          write(out_unitp,*) 'f(:,l)',l,f(:,l)
+          write(out_unit,*) 'f(:,l)',l,f(:,l)
         END DO
       END IF
 !-----------------------------------------------------------
 
      IF (lbound(Tnq1,dim=1) /= 1 .OR. ubound(Tnq1,dim=1) < nb) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' incompatible parameters:'
-        write(out_unitp,*) 'nb                 : ',nb
-        write(out_unitp,*) 'lbound,ubound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
-        write(out_unitp,*) 'lbound(Tnq1) must be = 1'
-        write(out_unitp,*) 'ubound(Tnq1) must be >= nb'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' incompatible parameters:'
+        write(out_unit,*) 'nb                 : ',nb
+        write(out_unit,*) 'lbound,ubound Tnq1 : ',lbound(Tnq1,dim=1),ubound(Tnq1,dim=1)
+        write(out_unit,*) 'lbound(Tnq1) must be = 1'
+        write(out_unit,*) 'ubound(Tnq1) must be >= nb'
         STOP 'chebychev recursion'
      END IF
 
@@ -2504,13 +2504,13 @@ STOP
      CALL sub_Schmidt(z,para_propa%para_Davidson%L_filter) ! to have a better identity
 
      IF (debug) THEN
-       write(out_unitp,*) 'END ',name_sub
+       write(out_unit,*) 'END ',name_sub
      END IF
 
      END SUBROUTINE sub_newZ_vectors_withf
 
      FUNCTION f_filter_gauss(E,El,sigma)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind), intent(in) :: E,El,sigma
@@ -2523,8 +2523,8 @@ STOP
       !logical, parameter :: debug=.TRUE.
       !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'E,El,sigma              : ',E,El,sigma
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'E,El,sigma              : ',E,El,sigma
       END IF
       !-----------------------------------------------------------
 
@@ -2532,16 +2532,16 @@ STOP
 
       !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'DE/sigma                : ',(E-El)/sigma
-        write(out_unitp,*) 'f_filter                : ',f_filter_gauss
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'DE/sigma                : ',(E-El)/sigma
+        write(out_unit,*) 'f_filter                : ',f_filter_gauss
+        write(out_unit,*) 'END ',name_sub
       END IF
       !-----------------------------------------------------------
 
      END FUNCTION f_filter_gauss
 
      FUNCTION KDF(j,nb) ! Kenerl damping factor
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer, intent(in) :: j,nb
@@ -2556,8 +2556,8 @@ STOP
       !logical, parameter :: debug=.TRUE.
       !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'j              : ',j
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'j              : ',j
       END IF
       !-----------------------------------------------------------
 
@@ -2576,15 +2576,15 @@ STOP
 
       !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'KDF                : ',KDF
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'KDF                : ',KDF
+        write(out_unit,*) 'END ',name_sub
       END IF
       !-----------------------------------------------------------
 
      END FUNCTION KDF
 
   FUNCTION f_filter(E,filter)
-   USE mod_system
+   USE EVR_system_m
    IMPLICIT NONE
 
    real (kind=Rkind), intent(in)   :: E
@@ -2598,8 +2598,8 @@ STOP
    !logical, parameter :: debug=.TRUE.
    !-----------------------------------------------------------
    IF (debug) THEN
-     write(out_unitp,*) 'BEGINNING ',name_sub
-     write(out_unitp,*) 'filter              : ',filter
+     write(out_unit,*) 'BEGINNING ',name_sub
+     write(out_unit,*) 'filter              : ',filter
    END IF
    !-----------------------------------------------------------
 
@@ -2642,14 +2642,14 @@ STOP
 
    !-----------------------------------------------------------
    IF (debug) THEN
-     write(out_unitp,*) 'f_filter                : ',f_filter
-     write(out_unitp,*) 'END ',name_sub
+     write(out_unit,*) 'f_filter                : ',f_filter
+     write(out_unit,*) 'END ',name_sub
    END IF
    !-----------------------------------------------------------
 
   END FUNCTION f_filter
   SUBROUTINE Set_filter(filter,filter_type,A,B,beta,sigma,E0)
-   USE mod_system
+   USE EVR_system_m
    IMPLICIT NONE
 
    integer, intent(in) :: filter_type
@@ -2669,9 +2669,9 @@ STOP
    !logical, parameter :: debug=.TRUE.
    !-----------------------------------------------------------
    IF (debug) THEN
-     write(out_unitp,*) 'BEGINNING ',name_sub
-     write(out_unitp,*) 'filter_type         : ',filter_type
-     write(out_unitp,*) 'filter              : ',filter
+     write(out_unit,*) 'BEGINNING ',name_sub
+     write(out_unit,*) 'filter_type         : ',filter_type
+     write(out_unit,*) 'filter              : ',filter
    END IF
    !-----------------------------------------------------------
 
@@ -2684,8 +2684,8 @@ STOP
        filter%A = A
        filter%B = B
      ELSE
-       write(out_unitp,*) 'ERROR in ',name_sub
-       write(out_unitp,*) ' A or B are not present',present(A),present(B)
+       write(out_unit,*) 'ERROR in ',name_sub
+       write(out_unit,*) ' A or B are not present',present(A),present(B)
        STOP 'in set_filter'
      END IF
 
@@ -2695,8 +2695,8 @@ STOP
        filter%E0    = E0
        filter%sigma = sigma
      ELSE
-       write(out_unitp,*) 'ERROR in ',name_sub
-       write(out_unitp,*) ' E0 or sigma are not present',present(E0),present(sigma)
+       write(out_unit,*) 'ERROR in ',name_sub
+       write(out_unit,*) ' E0 or sigma are not present',present(E0),present(sigma)
        STOP 'in set_filter'
      END IF
 
@@ -2706,8 +2706,8 @@ STOP
        filter%A = A
        filter%B = B
      ELSE
-       write(out_unitp,*) 'ERROR in ',name_sub
-       write(out_unitp,*) ' A or B are not present',present(A),present(B)
+       write(out_unit,*) 'ERROR in ',name_sub
+       write(out_unit,*) ' A or B are not present',present(A),present(B)
        STOP 'in set_filter'
      END IF
      IF (present(beta)) filter%beta = beta
@@ -2719,22 +2719,22 @@ STOP
        filter%B  = B
        filter%E0 = (A+B)/TWO
      ELSE
-       write(out_unitp,*) 'ERROR in ',name_sub
-       write(out_unitp,*) ' A or B are not present',present(A),present(B)
+       write(out_unit,*) 'ERROR in ',name_sub
+       write(out_unit,*) ' A or B are not present',present(A),present(B)
        STOP 'in set_filter'
      END IF
 
    CASE DEFAULT ! rectangular
-     write(out_unitp,*) 'ERROR in ',name_sub
-     write(out_unitp,*) ' Unknown filter_type: ',filter_type
+     write(out_unit,*) 'ERROR in ',name_sub
+     write(out_unit,*) ' Unknown filter_type: ',filter_type
      STOP 'in set_filter'
 
    END SELECT
 
    !-----------------------------------------------------------
    IF (debug) THEN
-     write(out_unitp,*) 'filter                : ',filter
-     write(out_unitp,*) 'END ',name_sub
+     write(out_unit,*) 'filter                : ',filter
+     write(out_unit,*) 'END ',name_sub
    END IF
    !-----------------------------------------------------------
 

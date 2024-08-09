@@ -53,7 +53,7 @@
       CONTAINS
 
       SUBROUTINE sub_read_psi0(psi0,para_WP0,max_WP,symab,ortho)
-        USE mod_system
+        USE EVR_system_m
         USE mod_psi_set_alloc
         USE mod_ana_psi
         USE mod_psi_io
@@ -91,21 +91,21 @@
         !logical, parameter :: debug=.TRUE.
       !-----------------------------------------------------------
         IF (debug) THEN
-          write(out_unitp,*) 'BEGINNING ',name_sub
-          write(out_unitp,*) ' para_WP0%nb_WP0            ',para_WP0%nb_WP0
-          write(out_unitp,*) ' para_WP0%read_listWP0      ',para_WP0%read_listWP0
-          write(out_unitp,*) ' para_WP0%read_file         ',para_WP0%read_file
-          write(out_unitp,*) ' para_WP0%file_WP0          ',trim(adjustl(para_WP0%file_WP0%name))
-          write(out_unitp,*) ' para_WP0%WP0cplx           ',para_WP0%WP0cplx
-          write(out_unitp,*) ' para_WP0%file_WP0%formatted',para_WP0%file_WP0%formatted
-          write(out_unitp,*) ' max_WP                     ',max_WP
-          write(out_unitp,*)
+          write(out_unit,*) 'BEGINNING ',name_sub
+          write(out_unit,*) ' para_WP0%nb_WP0            ',para_WP0%nb_WP0
+          write(out_unit,*) ' para_WP0%read_listWP0      ',para_WP0%read_listWP0
+          write(out_unit,*) ' para_WP0%read_file         ',para_WP0%read_file
+          write(out_unit,*) ' para_WP0%file_WP0          ',trim(adjustl(para_WP0%file_WP0%name))
+          write(out_unit,*) ' para_WP0%WP0cplx           ',para_WP0%WP0cplx
+          write(out_unit,*) ' para_WP0%file_WP0%formatted',para_WP0%file_WP0%formatted
+          write(out_unit,*) ' max_WP                     ',max_WP
+          write(out_unit,*)
         END IF
       
       !------ initialization -------------------------------------
         IF (para_WP0%nb_WP0 < 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' para_WP0%nb_WP0 < 0!!',para_WP0%nb_WP0
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' para_WP0%nb_WP0 < 0!!',para_WP0%nb_WP0
           STOP
         END IF
       
@@ -136,54 +136,54 @@
                                         list_nDindBasis1_TO_nDindBasis2,  &
                                         para_WP0%file_WP0,Version_File)
       
-          write(out_unitp,*) ' file name for WP0: ',trim(para_WP0%file_WP0%name)
-          write(out_unitp,*) ' nb_readWP_file: ',nb_readWP_file
-          write(out_unitp,*) ' nb_tot_file   : ',size(list_nDindBasis1_TO_nDindBasis2)
-          write(out_unitp,*) ' Version_File  : ',Version_File
-          flush(out_unitp)
+          write(out_unit,*) ' file name for WP0: ',trim(para_WP0%file_WP0%name)
+          write(out_unit,*) ' nb_readWP_file: ',nb_readWP_file
+          write(out_unit,*) ' nb_tot_file   : ',size(list_nDindBasis1_TO_nDindBasis2)
+          write(out_unit,*) ' Version_File  : ',Version_File
+          flush(out_unit)
       
           IF (nb_readWP_file < para_WP0%nb_WP0 .OR. para_WP0%nb_WP0 == 0) THEN
-             write(out_unitp,*) ' WARNING in ',name_sub
-             write(out_unitp,*) ' The number of WP0 in the file (',               &
+             write(out_unit,*) ' WARNING in ',name_sub
+             write(out_unit,*) ' The number of WP0 in the file (',               &
                 trim(para_WP0%file_WP0%name),') is smaller than the requested number'
-             write(out_unitp,*) ' OR the request number is zero'
-             write(out_unitp,*) 'nb_WP0,nb_readWP_file',                          &
+             write(out_unit,*) ' OR the request number is zero'
+             write(out_unit,*) 'nb_WP0,nb_readWP_file',                          &
                           para_WP0%nb_WP0,nb_readWP_file
              para_WP0%nb_WP0 = nb_readWP_file
           END IF
       
           CALL alloc_NParray(list_readWP,[para_WP0%nb_WP0],"list_readWP",name_sub)
-          write(out_unitp,*) 'nb_WP0,nb_readWP_file',para_WP0%nb_WP0,nb_readWP_file
+          write(out_unit,*) 'nb_WP0,nb_readWP_file',para_WP0%nb_WP0,nb_readWP_file
           IF (para_WP0%read_listWP0) THEN
-            read(in_unitp,*) list_readWP(1:para_WP0%nb_WP0)
+            read(in_unit,*) list_readWP(1:para_WP0%nb_WP0)
           ELSE
             list_readWP(:) = [(i,i=1,para_WP0%nb_WP0)]
           END IF
       
-          IF (debug) write(out_unitp,*) 'list_readWP:',list_readWP(1:para_WP0%nb_WP0)
-          flush(out_unitp)
+          IF (debug) write(out_unit,*) 'list_readWP:',list_readWP(1:para_WP0%nb_WP0)
+          flush(out_unit)
       
       
           IF (.NOT. allocated(list_nDindBasis1_TO_nDindBasis2) ) THEN ! Version_File=0, option=1
             ilist = 1
             DO i=1,nb_readWP_file
-              IF (debug .OR. print_level > 1) write(out_unitp,*) i,ilist
-              flush(out_unitp)
+              IF (debug .OR. print_level > 1) write(out_unit,*) i,ilist
+              flush(out_unit)
               CALL lect_psiBasisRepnotall_nD(psi0(ilist),nioWP,cplx,      &
                                       para_WP0%file_WP0%formatted)
               IF (list_readWP(ilist) == i) ilist = ilist + 1
               IF (ilist > para_WP0%nb_WP0 .OR. ilist > max_WP) EXIT
             END DO
             para_WP0%nb_WP0 = ilist - 1
-            IF (debug) write(out_unitp,*) ' read with lect_psiBasisRepnotall_nD ' // &
+            IF (debug) write(out_unit,*) ' read with lect_psiBasisRepnotall_nD ' // &
                                        '(Version_File=0, option=1): done'
           ELSE ! Version_File=0, option=2 or Version_File=1 (with the namelist)
             nb_tot_file = size(list_nDindBasis1_TO_nDindBasis2)
       
             ilist = 1
             DO i=1,nb_readWP_file
-              IF (debug .OR. print_level > 1) write(out_unitp,*) 'i,ilist',i,ilist
-              flush(out_unitp)
+              IF (debug .OR. print_level > 1) write(out_unit,*) 'i,ilist',i,ilist
+              flush(out_unit)
       
               CALL Read_psi_nDBasis(psi0(ilist),nioWP,                     &
                                  para_WP0%file_WP0%formatted,Version_File, &
@@ -197,7 +197,7 @@
             CALL dealloc_NParray(list_nDindBasis1_TO_nDindBasis2,         &
                                 "list_nDindBasis1_TO_nDindBasis2",name_sub)
       
-            IF (debug) write(out_unitp,*) ' read with Read_psi_nDBasis ' //&
+            IF (debug) write(out_unit,*) ' read with Read_psi_nDBasis ' //&
                       '(Version_File=0, option=2 or Version_File=1): done'
           END IF
       
@@ -205,14 +205,14 @@
           CALL dealloc_NParray(list_readWP,"list_readWP",name_sub)
         ELSE
           DO i=1,para_WP0%nb_WP0
-            write(out_unitp,*) ' Read in',in_unitp,i
-            flush(out_unitp)
+            write(out_unit,*) ' Read in',in_unit,i
+            flush(out_unit)
             CALL alloc_psi(psi0(i),BasisRep=.TRUE.)
-            CALL lect_psiBasisRepnotall_nD(psi0(i),in_unitp,cplx,.TRUE.)
-            write(out_unitp,*) ' write in',out_unitp,i
-            flush(out_unitp)
-            IF(keep_MPI) CALL ecri_psiBasisRepnotall_nD(psi0(i),out_unitp,ONETENTH**4,.TRUE.,i)
-            IF (debug) write(out_unitp,*) ' read with lect_psiBasisRepnotall_nD ' // &
+            CALL lect_psiBasisRepnotall_nD(psi0(i),in_unit,cplx,.TRUE.)
+            write(out_unit,*) ' write in',out_unit,i
+            flush(out_unit)
+            IF(keep_MPI) CALL ecri_psiBasisRepnotall_nD(psi0(i),out_unit,ONETENTH**4,.TRUE.,i)
+            IF (debug) write(out_unit,*) ' read with lect_psiBasisRepnotall_nD ' // &
                                 '(Version_File=0, option=1 ???): done'
           END DO
         END IF
@@ -221,8 +221,8 @@
         DO i=1,para_WP0%nb_WP0
           CALL Set_symab_OF_psiBasisRep(psi0(i))
           CALL renorm_psi(psi0(i))
-          IF (debug .OR. print_level > 1) write(out_unitp,*) ' norm psi0(i),symab',i,psi0(i)%norm2,psi0(i)%symab
-          flush(out_unitp)
+          IF (debug .OR. print_level > 1) write(out_unit,*) ' norm psi0(i),symab',i,psi0(i)%norm2,psi0(i)%symab
+          flush(out_unit)
         END DO
       
       !-----Check the norm and Check and set the symmetry--------------------
@@ -245,21 +245,21 @@
           para_WP0%nb_WP0 = nb_WP0
       
         END IF
-        write(out_unitp,*) 'Number of read vector(s) after the symmetry analysis:',para_WP0%nb_WP0
+        write(out_unit,*) 'Number of read vector(s) after the symmetry analysis:',para_WP0%nb_WP0
         ! orthogonalisation
         IF (ortho_loc) CALL sub_Schmidt(psi0,para_WP0%nb_WP0)
       
-        write(out_unitp,*) 'Number of read vector(s):',para_WP0%nb_WP0
+        write(out_unit,*) 'Number of read vector(s):',para_WP0%nb_WP0
       
         IF (debug) THEN
-          write(out_unitp,*) ' ',para_WP0%nb_WP0,' read WP0s'
+          write(out_unit,*) ' ',para_WP0%nb_WP0,' read WP0s'
           DO i=1,para_WP0%nb_WP0
-            write(out_unitp,*) 'psiO(i)',i
-            write(out_unitp,*) 'symab, bits(symab)',WriteTOstring_symab(psi0(i)%symab)
+            write(out_unit,*) 'psiO(i)',i
+            write(out_unit,*) 'symab, bits(symab)',WriteTOstring_symab(psi0(i)%symab)
             CALL ecri_psi(psi=psi0(i))
           END DO
-          write(out_unitp,*)
-          write(out_unitp,*) 'END ',name_sub
+          write(out_unit,*)
+          write(out_unit,*) 'END ',name_sub
         END IF
         END SUBROUTINE sub_read_psi0
       !=======================================================================================

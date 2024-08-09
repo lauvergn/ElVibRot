@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_Basis_Grid_Param
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
         PRIVATE
@@ -79,28 +79,28 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
 
       IF (present(Rec_line)) THEN
-       write(out_unitp,*) trim(Rec_line),'LGridmax',Basis_Grid_Para%LGrid_max
-       write(out_unitp,*) trim(Rec_line),'nq',Basis_Grid_Para%nq
-       write(out_unitp,*) trim(Rec_line),'nq_ini',Basis_Grid_Para%nq_init
+       write(out_unit,*) trim(Rec_line),'LGridmax',Basis_Grid_Para%LGrid_max
+       write(out_unit,*) trim(Rec_line),'nq',Basis_Grid_Para%nq
+       write(out_unit,*) trim(Rec_line),'nq_ini',Basis_Grid_Para%nq_init
 
       ELSE
-       write(out_unitp,*) 'LGridmax',Basis_Grid_Para%LGrid_max
-       write(out_unitp,*) 'nq',Basis_Grid_Para%nq
-       write(out_unitp,*) 'nq_ini',Basis_Grid_Para%nq_init
+       write(out_unit,*) 'LGridmax',Basis_Grid_Para%LGrid_max
+       write(out_unit,*) 'nq',Basis_Grid_Para%nq
+       write(out_unit,*) 'nq_ini',Basis_Grid_Para%nq_init
       END IF
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -121,9 +121,9 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -135,10 +135,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_Basis_Grid_Param(Basis_Grid_Para1)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -160,9 +160,9 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -172,10 +172,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_Basis_Grid_Param(Basis_Grid_Para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -197,9 +197,9 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -209,10 +209,10 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_Basis_Grid_Param(Basis_Grid_Para)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 

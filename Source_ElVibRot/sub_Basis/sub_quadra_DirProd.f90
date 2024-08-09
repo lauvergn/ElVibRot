@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       SUBROUTINE sub_DirProd_basis(basis_DP)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       IMPLICIT NONE
@@ -79,18 +79,18 @@
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) '--------------------------'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) '--------------------------'
         CALL RecWrite_basis(basis_DP)
-        write(out_unitp,*) '--------------------------'
-        flush(out_unitp)
+        write(out_unit,*) '--------------------------'
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------------------
 
      IF (basis_DP%SparseGrid_type /= 0) THEN
-       write(out_unitp,*) ' ERROR in ',name_sub
-       write(out_unitp,*) ' You cannot use ',name_sub,' subroutine with SPARSE GRID'
-       write(out_unitp,*) ' Check the Fortran !!'
+       write(out_unit,*) ' ERROR in ',name_sub
+       write(out_unit,*) ' You cannot use ',name_sub,' subroutine with SPARSE GRID'
+       write(out_unit,*) ' Check the Fortran !!'
        STOP
      END IF
 !-----------------------------------------------------------------------
@@ -100,14 +100,14 @@
       !--- check if primitive_done=.TRUE. -----------------------
       DO i=1,basis_DP%nb_basis
         IF (.NOT. basis_DP%tab_Pbasis(i)%Pbasis%primitive_done) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' primitive_done is .FALSE. for the ibasis:',i
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' primitive_done is .FALSE. for the ibasis:',i
           STOP
         END IF
       END DO
       basis_DP%primitive_done = .TRUE.
 
-      !write(out_unitp,*) 'basis_DP%tab_Pbasis(:) packed?',(basis_DP%tab_Pbasis(i)%Pbasis%packed,i=1,nb_basis)
+      !write(out_unit,*) 'basis_DP%tab_Pbasis(:) packed?',(basis_DP%tab_Pbasis(i)%Pbasis%packed,i=1,nb_basis)
 
 
       basis_DP%opt_A(:)      = 0
@@ -120,17 +120,17 @@
 
       basis_DP%nb_init = basis_DP%nb
       IF (debug) CALL Write_nDindex(basis_DP%nDindB)
-      IF (debug) write(out_unitp,*) '      nb',basis_DP%nb
+      IF (debug) write(out_unit,*) '      nb',basis_DP%nb
       IF (debug)                                                        &
-       write(out_unitp,*) 'Tabder_Qdyn_TO_Qbasis',basis_DP%Tabder_Qdyn_TO_Qbasis
-      flush(out_unitp)
+       write(out_unit,*) 'Tabder_Qdyn_TO_Qbasis',basis_DP%Tabder_Qdyn_TO_Qbasis
+      flush(out_unit)
 
 
       ! set of tab_symab ---------------------------------------
       CALL Set_SymAbelian_OF_BasisDP(basis_DP)
       IF (basis_DP%print_info_OF_basisDP .AND. print_level > -1)        &
-                                         write(out_unitp,*) 'symab done'
-      flush(out_unitp)
+                                         write(out_unit,*) 'symab done'
+      flush(out_unit)
 
       ! set of nrho ---------------------------------------
       iq = 1
@@ -145,7 +145,7 @@
       DO i=1,basis_DP%nb_basis
         tab_nq(i) = get_nq_FROM_basis(basis_DP%tab_Pbasis(i)%Pbasis)
       END DO
-      IF (debug) write(out_unitp,*) 'tab_nq',tab_nq
+      IF (debug) write(out_unit,*) 'tab_nq',tab_nq
       CALL dealloc_nDindex(basis_DP%nDindG)
       CALL init_nDindexPrim(nDindex=basis_DP%nDindG,ndim=nb_basis,    &
                             nDsize=tab_nq)
@@ -158,33 +158,33 @@
       IF (debug) CALL Write_nDindex(basis_DP%nDindG)
 
       nq = get_nq_FROM_basis(basis_DP)
-      IF (debug) write(out_unitp,*) '      nq or nqaie',nq
-      IF (debug) write(out_unitp,*) ' DP basis: grid done'
+      IF (debug) write(out_unit,*) '      nq or nqaie',nq
+      IF (debug) write(out_unit,*) ' DP basis: grid done'
 
       !--- for the grid points -----------------------------------------
 
       !-- Packed the basis if necessary --------------------------------
-      !write(out_unitp,*) 'CALL pack_basis from ',name_sub
-      !write(out_unitp,*) 'packed?',basis_DP%packed
+      !write(out_unit,*) 'CALL pack_basis from ',name_sub
+      !write(out_unit,*) 'packed?',basis_DP%packed
       CALL pack_basis(basis_DP)
-      IF (debug) write(out_unitp,*) ' DP basis: pack done'
+      IF (debug) write(out_unit,*) ' DP basis: pack done'
 
       CALL sub_dnGB_TO_dnBB(basis_DP)
-      IF (debug) write(out_unitp,*) ' DP basis: dnBB done'
+      IF (debug) write(out_unit,*) ' DP basis: dnBB done'
 
 
       !-------------------------------------------------
       !- d1b => dnBGG%d1 and  d2b => dnBGG%d2 ------------
       CALL sub_dnGB_TO_dnGG(basis_DP)
-      IF (debug) write(out_unitp,*) ' DP basis: dnGG done'
+      IF (debug) write(out_unit,*) ' DP basis: dnGG done'
       !-------------------------------------------------
 
 
 !     - check the overlap matrix -----------------------------
-      !write(out_unitp,*) 'CALL check_ortho_basis from ',name_sub
-      !write(out_unitp,*) 'check_basis?',basis_DP%check_basis
+      !write(out_unit,*) 'CALL check_ortho_basis from ',name_sub
+      !write(out_unit,*) 'check_basis?',basis_DP%check_basis
       CALL check_ortho_basis(basis_DP)
-      IF (debug) write(out_unitp,*) ' DP basis: check done'
+      IF (debug) write(out_unit,*) ' DP basis: check done'
 
 
       !-------------------------------------------------
@@ -197,20 +197,20 @@
       !basis_DP%wrho(:) = wrho(:)
       !CALL dealloc_NParray(wrho,"wrho",name_sub)
 
-      !IF (debug) write(out_unitp,*) ' DP basis: wrho done'
+      !IF (debug) write(out_unit,*) ' DP basis: wrho done'
       !-------------------------------------------------
 
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_DP)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_DirProd_basis
 
       RECURSIVE SUBROUTINE calc_nDindB_ForDP(basis_DP)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_dnSVM
       USE mod_basis
@@ -246,8 +246,8 @@
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -267,12 +267,12 @@
           !CALL Write_nDindex(basis_DP%tab_Pbasis(ib)%Pbasis%nDindB)
 
           ndim_OF_ib = basis_DP%tab_Pbasis(ib)%Pbasis%nDindB%max_nDI
-          IF (debug) write(out_unitp,*) 'ib,ndim_OF_ib',ib,ndim_OF_ib
+          IF (debug) write(out_unit,*) 'ib,ndim_OF_ib',ib,ndim_OF_ib
           CALL alloc_RealVec(basis_DP%nDindB%tab_nDNorm(ib),SizeVec=ndim_OF_ib)
           basis_DP%nDindB%tab_nDNorm(ib)%vec(:) =                        &
                        basis_DP%tab_Pbasis(ib)%Pbasis%nDindB%Tab_Norm(:)
-          IF (debug) write(out_unitp,*) 'ib,tab_nDNorm(ib)%vec',ib,basis_DP%nDindB%tab_nDNorm(ib)%vec(:)
-          flush(out_unitp)
+          IF (debug) write(out_unit,*) 'ib,tab_nDNorm(ib)%vec',ib,basis_DP%nDindB%tab_nDNorm(ib)%vec(:)
+          flush(out_unit)
 
         END DO
 
@@ -296,8 +296,8 @@
       IF (debug) CALL Write_nDindex(basis_DP%nDindB,'nDindB: ')
 
       basis_DP%nb      = basis_DP%nDindB%max_nDI
-      IF (debug) write(out_unitp,*) 'basis_DP%nb',basis_DP%nb
-      flush(out_unitp)
+      IF (debug) write(out_unit,*) 'basis_DP%nb',basis_DP%nb
+      flush(out_unit)
 
 
       ! set-up Tab_OF_Tabnb2(:) for SparseBasis and type_OF_nDindex=0
@@ -337,21 +337,21 @@
               END IF
               basis_DP%Tab_OF_Tabnb2(ibasis)%vec(ivec) =                 &
                                 basis_DP%nDindB%Tab_nDval(ibasis,nDI_DP)
-             !write(out_unitp,*) ' ibasis,ivec,shape vec',ibasis,ivec,shape(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
+             !write(out_unit,*) ' ibasis,ivec,shape vec',ibasis,ivec,shape(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
             END DO
 
             CALL dealloc_NParray(nDval,    "nDval",    name_sub)
             CALL dealloc_NParray(nDval_ref,"nDval_ref",name_sub)
 
           END IF
-          !write(out_unitp,*) 'ibasis,size Tab_OF_Tabnb2(ibasis)%vec',ibasis,size(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
-          !write(out_unitp,*) 'ibasis,Tab_OF_Tabnb2(ibasis)%vec',ibasis,basis_DP%Tab_OF_Tabnb2(ibasis)%vec
+          !write(out_unit,*) 'ibasis,size Tab_OF_Tabnb2(ibasis)%vec',ibasis,size(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
+          !write(out_unit,*) 'ibasis,Tab_OF_Tabnb2(ibasis)%vec',ibasis,basis_DP%Tab_OF_Tabnb2(ibasis)%vec
           IF ((basis_DP%print_info_OF_basisDP .AND. print_level > -1) .OR. debug) &
-                             write(out_unitp,'(a,i4,":",2i6)')          &
+                             write(out_unit,'(a,i4,":",2i6)')          &
                              'ibasis,size(vec),sum(vec)',ibasis,        &
                              get_Size(basis_DP%Tab_OF_Tabnb2(ibasis)),  &
                              sum(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
-          flush(out_unitp)
+          flush(out_unit)
         END DO
 
       ELSE   ! for true direct-product (not SparseBasis)
@@ -365,11 +365,11 @@
           basis_DP%Tab_OF_Tabnb2(ibasis)%vec(:) = nb2
 
           IF ((basis_DP%print_info_OF_basisDP .AND. print_level > -1).OR. debug) &
-                             write(out_unitp,'(a,i4,":",2i6)')                   &
+                             write(out_unit,'(a,i4,":",2i6)')                   &
                              'ibasis,size(vec),sum(vec)',ibasis,        &
                              get_Size(basis_DP%Tab_OF_Tabnb2(ibasis)),  &
                              sum(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
-          flush(out_unitp)
+          flush(out_unit)
         END DO
       END IF
 
@@ -381,24 +381,24 @@
           nnb = get_Size(basis_DP%Tab_OF_Tabnb2(ibasis+1))
         END IF
         IF (sum(basis_DP%Tab_OF_Tabnb2(ibasis)%vec) /= nnb) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) 'Wrong Tab_OF_Tabnb2 !!'
-          write(out_unitp,*) 'ibasis,Tab_OF_Tabnb2',ibasis,                     &
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) 'Wrong Tab_OF_Tabnb2 !!'
+          write(out_unit,*) 'ibasis,Tab_OF_Tabnb2',ibasis,                     &
                                  basis_DP%Tab_OF_Tabnb2(ibasis)%vec
-          write(out_unitp,*) 'sum(Tab_OF_Tabnb2(ibasis)%vec)',                  &
+          write(out_unit,*) 'sum(Tab_OF_Tabnb2(ibasis)%vec)',                  &
                               sum(basis_DP%Tab_OF_Tabnb2(ibasis)%vec)
-          write(out_unitp,*) 'Tab_OF_Tabnb2(ibasis+1)%nb_var_vec or basis_DP%nb', &
+          write(out_unit,*) 'Tab_OF_Tabnb2(ibasis+1)%nb_var_vec or basis_DP%nb', &
                          nnb
-          write(out_unitp,*) 'weight(:)',basis_DP%nDindB%nDweight(:)
-          write(out_unitp,*) 'weight(:)',(basis_DP%tab_Pbasis(i)%Pbasis%nDindB%nDweight(1),i=1,nb_basis)
+          write(out_unit,*) 'weight(:)',basis_DP%nDindB%nDweight(:)
+          write(out_unit,*) 'weight(:)',(basis_DP%tab_Pbasis(i)%Pbasis%nDindB%nDweight(1),i=1,nb_basis)
           STOP
         END IF
       END DO
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 

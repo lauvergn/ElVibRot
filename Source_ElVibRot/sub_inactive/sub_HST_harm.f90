@@ -48,7 +48,7 @@
       SUBROUTINE sub_HSOp_inact(iq,freq_only,para_AllOp,                &
                                 max_Sii,max_Sij,test,OldPara)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_Coord_KEO, only : CoordType, Tnum, get_Qact0, qact_to_qdyn_from_activetransfo
       USE mod_basis
@@ -100,28 +100,28 @@
       mole       => para_AllOp%tab_Op(1)%mole
       para_Tnum  => para_AllOp%tab_Op(1)%para_Tnum
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_Op',para_AllOp%nb_Op,shape(para_AllOp%tab_Op)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_Op',para_AllOp%nb_Op,shape(para_AllOp%tab_Op)
 
         !-------------------------------------------------------
-        write(out_unitp,*) 'nb_bie',para_AllOp%tab_Op(1)%nb_bie
-        write(out_unitp,*) 'nrho',para_AllOp%tab_Op(1)%para_Tnum%nrho
-        write(out_unitp,*) 'JJ',para_AllOp%tab_Op(1)%para_Tnum%JJ
+        write(out_unit,*) 'nb_bie',para_AllOp%tab_Op(1)%nb_bie
+        write(out_unit,*) 'nrho',para_AllOp%tab_Op(1)%para_Tnum%nrho
+        write(out_unit,*) 'JJ',para_AllOp%tab_Op(1)%para_Tnum%JJ
 
         !-------------------------------------------------------
-        write(out_unitp,*) ' Max Overlap',max_Sii,max_Sij
+        write(out_unit,*) ' Max Overlap',max_Sii,max_Sij
 
         DO iOp=1,para_AllOp%nb_Op
-            write(out_unitp,*) ' iOp, n_Op, name_Op:',iOp,              &
+            write(out_unit,*) ' iOp, n_Op, name_Op:',iOp,              &
                                para_AllOp%tab_Op(iOp)%n_Op,             &
                                para_AllOp%tab_Op(iOp)%name_Op
             DO k_term=1,para_AllOp%tab_Op(iOp)%nb_term
-              write(out_unitp,*) ' name_Op, deriv_term:',               &
+              write(out_unit,*) ' name_Op, deriv_term:',               &
                              para_AllOp%tab_Op(iOp)%name_Op,            &
                  para_AllOp%tab_Op(iOp)%derive_termQact(:,k_term)
             END DO
             IF (para_AllOp%tab_Op(iOp)%cplx) THEN
-              write(out_unitp,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
+              write(out_unit,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
             END IF
         END DO
         !-----------------------------------------------------
@@ -274,10 +274,10 @@
         END IF
 
         IF (para_AllOp%tab_Op(1)%para_ReadOp%Type_HamilOp /= 1) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) '    Type_HamilOp',para_AllOp%tab_Op(1)%para_ReadOp%Type_HamilOp
-          write(out_unitp,*) '    Type_HamilOp MUST be equal to 1 for HADA or cHAC'
-          write(out_unitp,*) '    CHECK your data!!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) '    Type_HamilOp',para_AllOp%tab_Op(1)%para_ReadOp%Type_HamilOp
+          write(out_unit,*) '    Type_HamilOp MUST be equal to 1 for HADA or cHAC'
+          write(out_unit,*) '    CHECK your data!!'
           STOP
         END IF
 
@@ -332,28 +332,28 @@
       IF (print_level > 0) THEN
 
         IF (para_AllOp%tab_Op(1)%nb_qa <= max_nb_G_FOR_print) THEN
-          IF (freq_only) write(out_unitp,*) 'freq_only,iq',iq
+          IF (freq_only) write(out_unit,*) 'freq_only,iq',iq
 
           iOp = 1
           IF (JacSave) THEN
-            write(out_unitp,111) iq,Qact(1:mole%nb_act1),d0MatOp(1)%ReVal(1,1,:),d0MatOp(1)%Jac,d0MatOp(1)%rho
+            write(out_unit,111) iq,Qact(1:mole%nb_act1),d0MatOp(1)%ReVal(1,1,:),d0MatOp(1)%Jac,d0MatOp(1)%rho
           ELSE
-            write(out_unitp,111) iq,Qact(1:mole%nb_act1),                       &
+            write(out_unit,111) iq,Qact(1:mole%nb_act1),                       &
                 (d0MatOp(iOp)%ReVal(ie,ie,:),ie=1,para_AllOp%tab_Op(iOp)%nb_bie)
           END IF
  111      format('Grid: ',i6,50(1x,f18.10))
 
           DO iOp=3,size(d0MatOp)
-            write(out_unitp,121) iOp,iq,Qact(1:mole%nb_act1),                   &
+            write(out_unit,121) iOp,iq,Qact(1:mole%nb_act1),                   &
                   (d0MatOp(iOp)%ReVal(ie,ie,:),ie=1,para_AllOp%tab_Op(1)%nb_bie)
           END DO
  121      format('Grid_Op',i0,': ',i6,50(1x,f18.10))
 
         ELSE
           IF (mod(iq,max(1,int(para_AllOp%tab_Op(1)%nb_qa/10))) == 0 .AND. MPI_id==0)  &
-            write(out_unitp,'(a)',ADVANCE='no') '---'
+            write(out_unit,'(a)',ADVANCE='no') '---'
         END IF
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------
       !-----------------------------------------------------------
@@ -379,27 +379,27 @@
       !-----------------------------------------------------------
       IF (test .OR. debug) THEN
 
-        write(out_unitp,*) 'JJ',para_Tnum%JJ
-        write(out_unitp,*) 'Qact',Qact
+        write(out_unit,*) 'JJ',para_Tnum%JJ
+        write(out_unit,*) 'Qact',Qact
 
         IF (mole%nb_inact2n > 0) THEN
-          write(out_unitp,*) ' Max Overlap',max1_Sii,max1_Sij
+          write(out_unit,*) ' Max Overlap',max1_Sii,max1_Sij
         END IF
 
         DO iOp=1,para_AllOp%nb_Op
-          write(out_unitp,*) ' iOp, name_Op:',iOp,                      &
+          write(out_unit,*) ' iOp, name_Op:',iOp,                      &
                                para_AllOp%tab_Op(iOp)%name_Op
           DO k_term=1,d0MatOp(iOp)%nb_term
             IF (para_Tnum%JJ == 0 .AND.                                 &
                 count(d0MatOp(iOp)%derive_termQact(:,k_term) <0) > 0) CYCLE
-            write(out_unitp,*) ' name_Op, deriv_term:',                 &
+            write(out_unit,*) ' name_Op, deriv_term:',                 &
                              para_AllOp%tab_Op(iOp)%name_Op,            &
                              d0MatOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatOp(iOp)%ReVal(:,:,k_term),out_unitp,5)
+            CALL Write_Mat(d0MatOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatOp(iOp)%cplx) THEN
-            write(out_unitp,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
-            CALL Write_Mat(d0MatOp(iOp)%Imval(:,:),out_unitp,5)
+            write(out_unit,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
+            CALL Write_Mat(d0MatOp(iOp)%Imval(:,:),out_unit,5)
           END IF
         END DO
 
@@ -419,7 +419,7 @@
 
 
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 
       END SUBROUTINE sub_HSOp_inact
@@ -439,7 +439,7 @@
 !=============================================================
      SUBROUTINE sub_HST7_bhe(Qact,d0Qeq,d0ehess,d0MatHADAOp,nb_Op,    &
                              rho,para_AllOp,Basis2n,freq_only,test)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant, only : get_Conv_au_TO_unit
       USE mod_dnSVM
       USE mod_nDindex
@@ -557,49 +557,49 @@
 !-----------------------------------------------------------------
 !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_Op',para_AllOp%nb_Op,shape(para_AllOp%tab_Op)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_Op',para_AllOp%nb_Op,shape(para_AllOp%tab_Op)
 
         !-------------------------------------------------------
-        write(out_unitp,*) 'Qact',Qact
-        write(out_unitp,*) 'nb_bie',nb_bie
-        write(out_unitp,*) 'nrho',para_Tnum%nrho
-        write(out_unitp,*) 'JJ',para_Tnum%JJ
+        write(out_unit,*) 'Qact',Qact
+        write(out_unit,*) 'nb_bie',nb_bie
+        write(out_unit,*) 'nrho',para_Tnum%nrho
+        write(out_unit,*) 'JJ',para_Tnum%JJ
         !-------------------------------------------------------
         DO iOp=1,nb_Op
-          write(out_unitp,*) ' iOp, name_Op:',iOp,                      &
+          write(out_unit,*) ' iOp, name_Op:',iOp,                      &
                                para_AllOp%tab_Op(iOp)%name_Op
           DO k_term=1,d0MatHADAOp(iOp)%nb_term
             IF (para_AllOp%tab_Op(1)%para_Tnum%JJ == 0 .AND.            &
                 count(d0MatHADAOp(iOp)%derive_termQact(:,k_term) <0) > 0) CYCLE
-            write(out_unitp,*) ' name_Op, deriv_term:',                 &
+            write(out_unit,*) ' name_Op, deriv_term:',                 &
                              para_AllOp%tab_Op(iOp)%name_Op,            &
                              d0MatHADAOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unitp,5)
+            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatHADAOp(iOp)%cplx) THEN
-            write(out_unitp,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
-            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unitp,5)
+            write(out_unit,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
+            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
           END IF
         END DO
-        flush(out_unitp)
+        flush(out_unit)
         !-------------------------------------------------------
 
 !       -----------------------------------------------------
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_CoordType(mole)
-        write(out_unitp,*)
+        write(out_unit,*)
 !       -----------------------------------------------------
 
         CALL RecWrite_basis(Basis2n)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
 !-----------------------------------------------------------------
 !-----------------------------------------------------------------
 !     -- Matrix initialisation -----------------------------------
-      !write(out_unitp,*) 'nb_Op',nb_Op
+      !write(out_unit,*) 'nb_Op',nb_Op
       DO iOp=1,nb_Op
         d0MatHADAOp(iOp)%ReVal(:,:,:) = ZERO
         IF (d0MatHADAOp(iOp)%cplx) d0MatHADAOp(iOp)%ImVal(:,:) = ZERO
@@ -651,18 +651,18 @@
       d0ehess    = RPHpara_AT_Qact1%dnEHess%d0
 
       IF (print_level > 0) THEN
-        !IF (freq_only) write(out_unitp,*) ' freq_only'
+        !IF (freq_only) write(out_unit,*) ' freq_only'
 
-        write(out_unitp,11) Qact(1:nb_act1),                            &
+        write(out_unit,11) Qact(1:nb_act1),                            &
                                RPHpara_AT_Qact1%dnEHess%d0(:)*auTOcm_inv
  11     format(' frequencies : ',30f10.4)
 
-        write(out_unitp,12) Qact(1:nb_act1),RPHpara_AT_Qact1%dnQopt%d0
+        write(out_unit,12) Qact(1:nb_act1),RPHpara_AT_Qact1%dnQopt%d0
  12     format('Qeq',20(' ',f10.6))
 
-        write(out_unitp,13) Qact(1:nb_act1),pot0_corgrad
+        write(out_unit,13) Qact(1:nb_act1),pot0_corgrad
  13     format('pot0_corgrad',10(' ',f10.6))
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
 !-----------------------------------------------------------------
@@ -690,8 +690,8 @@
 
       nq = get_nq_FROM_basis(Basis2n)
       IF (print_level > 0 .AND. nq > nq_write_HADA) &
-                write(out_unitp,'(a)',ADVANCE='no') 'Grid_HADA (%): 0'
-      flush(out_unitp)
+                write(out_unit,'(a)',ADVANCE='no') 'Grid_HADA (%): 0'
+      flush(out_unit)
 
 
       DO i_point=1,nq
@@ -699,9 +699,9 @@
                                   mod(i_point,max(1,(nq/10))) == 0) THEN
                                   ! was mod(i_point,(nq/10)) == 0)
 
-          write(out_unitp,'(a,i3)',ADVANCE='no') ' -',                  &
+          write(out_unit,'(a,i3)',ADVANCE='no') ' -',                  &
               int(real(i_point,kind=Rkind)*HUNDRED/real(nq,kind=Rkind))
-          flush(out_unitp)
+          flush(out_unit)
         END IF
 
 
@@ -720,14 +720,14 @@
         DO ib=1,Basis2n%nb
           d0f_bhe(ib) = Rec_d0bnD(Basis2n,i_point,ib)
         END DO
-!       write(out_unitp,*) 'd0f_bhe',d0f_bhe
+!       write(out_unit,*) 'd0f_bhe',d0f_bhe
 !       -----------------------------------------------------
 
         CALL calc_nDindex(Basis2n%nDindG,i_point,ind_quadra(:),err_sub)
 
         IF (err_sub /= 0) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) '  from Basis2n%nDindG'
+           write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) '  from Basis2n%nDindG'
            STOP 'calc_nDindex'
          END IF
 
@@ -822,10 +822,10 @@
 
 !        -----------------------------------------------------
 
-        !write(out_unitp,*) 'Qact,Ta',Qact(1:nb_act1),f2Qaa,f1Qa,vep
-        !write(out_unitp,*) 'Qact,Tii',Qact(1:nb_act1),f2Qii,f1Qi
-        !write(out_unitp,*) 'Qact,Tai',Qact(1:nb_act1),f2Qai
-        !write(out_unitp,*) 'Qact,V',Qact(1:nb_act1),Vinact
+        !write(out_unit,*) 'Qact,Ta',Qact(1:nb_act1),f2Qaa,f1Qa,vep
+        !write(out_unit,*) 'Qact,Tii',Qact(1:nb_act1),f2Qii,f1Qi
+        !write(out_unit,*) 'Qact,Tai',Qact(1:nb_act1),f2Qai
+        !write(out_unit,*) 'Qact,V',Qact(1:nb_act1),Vinact
 
 
          CALL sub_mat6_HST(para_AllOp%tab_Op(1)%para_ReadOp%PrimOp_t,   &
@@ -850,8 +850,8 @@
 
       END DO
       IF (print_level > 0 .AND. nq > nq_write_HADA)                     &
-                           write(out_unitp,'(a)',ADVANCE='yes') ' - 100'
-      flush(out_unitp)
+                           write(out_unit,'(a)',ADVANCE='yes') ' - 100'
+      flush(out_unit)
 
 !     --- END Gauss-Hermite quadrature loop ---------------------
 !     -------------------------------------------------------
@@ -874,22 +874,22 @@
 !     -------------------------------------------------------
       IF (test .OR. debug) THEN
         DO iOp=1,nb_Op
-          write(out_unitp,*) ' iOp, name_Op:',iOp,                      &
+          write(out_unit,*) ' iOp, name_Op:',iOp,                      &
                                           para_AllOp%tab_Op(iOp)%name_Op
           DO k_term=1,d0MatHADAOp(iOp)%nb_term
             IF (para_AllOp%tab_Op(1)%para_Tnum%JJ == 0 .AND.            &
                 count(d0MatHADAOp(iOp)%derive_termQact(:,k_term) <0) > 0) CYCLE
-            write(out_unitp,*) ' name_Op, deriv_term:',                 &
+            write(out_unit,*) ' name_Op, deriv_term:',                 &
                              para_AllOp%tab_Op(iOp)%name_Op,            &
                              d0MatHADAOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unitp,5)
+            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatHADAOp(iOp)%cplx) THEN
-            write(out_unitp,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
-            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unitp,5)
+            write(out_unit,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
+            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
           END IF
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
 !     ------ free memory -----------------------------------------
@@ -932,7 +932,7 @@
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 

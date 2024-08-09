@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_Smolyak_RDP
-use mod_system
+use EVR_system_m
 IMPLICIT NONE
 
 
@@ -100,8 +100,8 @@ IMPLICIT NONE
   CALL dealloc_TypeRVec(Rvec)
 
   IF (nvec < 1) THEN
-    write(out_unitp,*) ' ERROR in alloc_TypeRVec'
-    write(out_unitp,*) ' nvec < 1',nvec
+    write(out_unit,*) ' ERROR in alloc_TypeRVec'
+    write(out_unit,*) ' nvec < 1',nvec
     STOP
   END IF
 
@@ -109,7 +109,7 @@ IMPLICIT NONE
 
 END SUBROUTINE alloc_TypeRVec
 SUBROUTINE dealloc_TypeRVec(Rvec)
-!USE mod_system
+!USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeRVec), intent(inout) :: Rvec
@@ -121,13 +121,13 @@ IMPLICIT NONE
 END SUBROUTINE dealloc_TypeRVec
 
 SUBROUTINE Write_TypeRVec(Rvec)
-!USE mod_system
+!USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeRVec), intent(in) :: Rvec
 
   IF (allocated(Rvec%R)) THEN
-    write(out_unitp,*) 'R:',Rvec%R
+    write(out_unit,*) 'R:',Rvec%R
   END IF
 
 END SUBROUTINE Write_TypeRVec
@@ -211,7 +211,7 @@ END IF
 
 D = size(tab_ind(:,1))
 MaxnD = size(tab_ind(1,:))
-!write(out_unitp,*) 'Alloc Smolyak Rep'
+!write(out_unit,*) 'Alloc Smolyak Rep'
 
 
 allocate(SRep%SmolyakRep(MaxnD))
@@ -222,7 +222,7 @@ DO iG=1,MaxnD
   ELSE
     tab_n = get_tab_nb(tab_ind(:,iG),tab_ba)
   END IF
-  !write(out_unitp,*) iG,'tab_n',tab_n
+  !write(out_unit,*) iG,'tab_n',tab_n
   allocate(SRep%SmolyakRep(iG)%R(product(tab_n)))
   !allocate(SRep%SmolyakRep(iG)%R(tab_n(1),tab_n(2)))
 
@@ -231,7 +231,7 @@ END DO
 IF (allocated(tab_n)) deallocate(tab_n)
 
 !nb_B = Size_SmolyakRep(SRep)
-!write(out_unitp,*) 'Size Smolyak Rep:',nb_B
+!write(out_unit,*) 'Size Smolyak Rep:',nb_B
 
 END SUBROUTINE alloc_SmolyakRep
 SUBROUTINE dealloc_SmolyakRep(SRep)
@@ -265,13 +265,13 @@ integer               :: iG,i1,i2,i3
 
 
 IF (allocated(TabRDP)) THEN
-  write(out_unitp,*) '======== TabRDP ============================',shape(TabRDP)
+  write(out_unit,*) '======== TabRDP ============================',shape(TabRDP)
   DO iG=lbound(TabRDP,dim=1),ubound(TabRDP,dim=1)
-    write(out_unitp,*) '    iG',iG
+    write(out_unit,*) '    iG',iG
     DO i3=1,TabRDP(iG)%n3
     DO i2=1,TabRDP(iG)%n2
     DO i1=1,TabRDP(iG)%n1
-      write(out_unitp,*) 'i1,i2,i3',i1,i2,i3,TabRDP(iG)%RDP(i1,i2,i3)
+      write(out_unit,*) 'i1,i2,i3',i1,i2,i3,TabRDP(iG)%RDP(i1,i2,i3)
     END DO
     END DO
     END DO
@@ -297,7 +297,7 @@ IF (allocated(TabRDP)) THEN
     DO i2=1,TabRDP(iG)%n2
     DO i1=1,TabRDP(iG)%n1
       igg = igg+1
-      write(out_unitp,*) igg,TabRDP(iG)%RDP(i1,i2,i3)
+      write(out_unit,*) igg,TabRDP(iG)%RDP(i1,i2,i3)
     END DO
     END DO
     END DO
@@ -317,16 +317,16 @@ TYPE(Type_SmolyakRep), intent(in)     :: SRep
 
 integer               :: iG
 
-  write(out_unitp,*) 'Grid',SRep%Grid
-  write(out_unitp,*) 'Delta',SRep%Delta
-  write(out_unitp,*) 'k',SRep%k
-  write(out_unitp,*) 'k_type_b',SRep%k_type_b
-  write(out_unitp,*) 'alloc?',allocated(SRep%SmolyakRep)
+  write(out_unit,*) 'Grid',SRep%Grid
+  write(out_unit,*) 'Delta',SRep%Delta
+  write(out_unit,*) 'k',SRep%k
+  write(out_unit,*) 'k_type_b',SRep%k_type_b
+  write(out_unit,*) 'alloc?',allocated(SRep%SmolyakRep)
 
 IF (allocated(SRep%SmolyakRep)) THEN
-  write(out_unitp,*) '======== Smolyak Rep ============================'
+  write(out_unit,*) '======== Smolyak Rep ============================'
   DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
-    write(out_unitp,*) iG,size(SRep%SmolyakRep(iG)%R),SRep%SmolyakRep(iG)%R
+    write(out_unit,*) iG,size(SRep%SmolyakRep(iG)%R),SRep%SmolyakRep(iG)%R
   END DO
 END IF
 
@@ -347,8 +347,8 @@ IF (allocated(SRep%SmolyakRep)) THEN
     R = reshape(SRep%SmolyakRep(iG)%R,[size(SRep%SmolyakRep(iG)%R)] )
     DO i=1,size(SRep%SmolyakRep(iG)%R)
       igg = igg+1
-      !write(out_unitp,*) igg,SRep%SmolyakRep(iG)%R(i)
-      write(out_unitp,*) igg,R(i)
+      !write(out_unit,*) igg,SRep%SmolyakRep(iG)%R(i)
+      write(out_unit,*) igg,R(i)
     END DO
   END DO
 END IF
@@ -374,13 +374,13 @@ IF (allocated(TabRDP)) THEN
 !    DO i3=1,TabRDP(iG)%n3
 !    DO i2=1,TabRDP(iG)%n2
 !    DO i1=1,TabRDP(iG)%n1
-!      IF (abs(TabRDP(iG)%RDP(i1,i2,i3))>1.d-5) write(out_unitp,*) 'i1,i2,i3',i1,i2,i3,TabRDP(iG)%RDP(i1,i2,i3)
+!      IF (abs(TabRDP(iG)%RDP(i1,i2,i3))>1.d-5) write(out_unit,*) 'i1,i2,i3',i1,i2,i3,TabRDP(iG)%RDP(i1,i2,i3)
 !    END DO
 !    END DO
 !    END DO
 
   END DO
-  write(out_unitp,*) 'SumSq TabRDP',SS
+  write(out_unit,*) 'SumSq TabRDP',SS
 
 END IF
 
@@ -475,9 +475,9 @@ integer               :: iG,nb_BG,nR,itabR
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (size(tabR2) /= nb_BG) THEN
-  write(out_unitp,*) ' ERROR in tabR2_TO_SmolyakRep1'
-  write(out_unitp,*) ' sizes are different!!'
-  write(out_unitp,*) ' sizes of tabR2 and SRep1',size(tabR2),nb_BG
+  write(out_unit,*) ' ERROR in tabR2_TO_SmolyakRep1'
+  write(out_unit,*) ' sizes are different!!'
+  write(out_unit,*) ' sizes of tabR2 and SRep1',size(tabR2),nb_BG
   STOP
 END IF
 
@@ -546,11 +546,11 @@ IF (SRep1%delta) THEN
       tab_n1(i) = l_TO_n(tab_n(i)-1,1)
     END DO
 
-    !write(out_unitp,*) 'iG',iG
-    !write(out_unitp,*) 'tab_i',tab_i
-    !write(out_unitp,*) 'tab_l',tab_n
-    !write(out_unitp,*) 'tab_n1',tab_n1
-    !write(out_unitp,*) 'tab_n2',tab_n2
+    !write(out_unit,*) 'iG',iG
+    !write(out_unit,*) 'tab_i',tab_i
+    !write(out_unit,*) 'tab_l',tab_n
+    !write(out_unit,*) 'tab_n1',tab_n1
+    !write(out_unit,*) 'tab_n2',tab_n2
 
     IF (minval(tab_n2 - tab_i) < 0) CYCLE
     IF (minval(tab_i - tab_n1) < 1) CYCLE
@@ -560,15 +560,15 @@ IF (SRep1%delta) THEN
       II = (II-1)*(tab_n2(i)-tab_n1(i)) + tab_i(i)-tab_n1(i)
     END DO
 
-    !write(out_unitp,*) 'II size R',II,size(SRep1%SmolyakRep(iG)%R)
+    !write(out_unit,*) 'II size R',II,size(SRep1%SmolyakRep(iG)%R)
 
     IF (II > size(SRep1%SmolyakRep(iG)%R) .OR. II < 1) THEN
-      write(out_unitp,*) 'iG',iG
-      write(out_unitp,*) 'II size R',II,size(SRep1%SmolyakRep(iG)%R)
-      write(out_unitp,*) 'tab_i',tab_i
-      write(out_unitp,*) 'tab_l',tab_n
-      write(out_unitp,*) 'tab_n1',tab_n1
-      write(out_unitp,*) 'tab_n2',tab_n2
+      write(out_unit,*) 'iG',iG
+      write(out_unit,*) 'II size R',II,size(SRep1%SmolyakRep(iG)%R)
+      write(out_unit,*) 'tab_i',tab_i
+      write(out_unit,*) 'tab_l',tab_n
+      write(out_unit,*) 'tab_n1',tab_n1
+      write(out_unit,*) 'tab_n2',tab_n2
 
       STOP 'ERROR in R2_TO_SmolyakRep1_with_tab_i'
     END IF
@@ -593,9 +593,9 @@ ELSE
     END DO
 
     IF (II > size(SRep1%SmolyakRep(iG)%R)) THEN
-      write(out_unitp,*) 'tab_n',tab_n
-      write(out_unitp,*) 'tab_i',tab_i
-      write(out_unitp,*) 'II',II
+      write(out_unit,*) 'tab_n',tab_n
+      write(out_unit,*) 'tab_i',tab_i
+      write(out_unit,*) 'II',II
       STOP 'ERROR in R2_TO_SmolyakRep1_with_tab_i'
     END IF
 
@@ -620,8 +620,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2) .AND. nb_BG /= size(WSRep)) THEN
-  write(out_unitp,*) 'ERROR in dot_product_SmolyakRep'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2),size(WSRep)
+  write(out_unit,*) 'ERROR in dot_product_SmolyakRep'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2),size(WSRep)
   STOP
 END IF
 
@@ -646,8 +646,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_TIME_SmolyakRe2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_TIME_SmolyakRe2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
   STOP
 END IF
 
@@ -673,8 +673,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_PLUS_SmolyakRe2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_PLUS_SmolyakRe2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
   STOP
 END IF
 
@@ -700,8 +700,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_MINUS_SmolyakRe2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_MINUS_SmolyakRe2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
   STOP
 END IF
 
@@ -769,10 +769,10 @@ DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
     deallocate(RTempB)
     allocate(RTempB(nnb,nb2,nnq))
 
-    !write(out_unitp,*) 'i',i
-    !write(out_unitp,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
-    !write(out_unitp,*) 'shape RTempB',shape(RTempB)
-    !write(out_unitp,*) 'shape RTempG',shape(RTempG)
+    !write(out_unit,*) 'i',i
+    !write(out_unit,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
+    !write(out_unit,*) 'shape RTempB',shape(RTempB)
+    !write(out_unit,*) 'shape RTempG',shape(RTempG)
 
     DO iq=1,nnq
     DO ib=1,nnb
@@ -857,10 +857,10 @@ DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
     deallocate(RTempB)
     allocate(RTempB(nnb,nb2,nnq))
 
-    !write(out_unitp,*) 'i',i
-    !write(out_unitp,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
-    !write(out_unitp,*) 'shape RTempB',shape(RTempB)
-    !write(out_unitp,*) 'shape RTempG',shape(RTempG)
+    !write(out_unit,*) 'i',i
+    !write(out_unit,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
+    !write(out_unit,*) 'shape RTempB',shape(RTempB)
+    !write(out_unit,*) 'shape RTempG',shape(RTempG)
 
     DO iq=1,nnq
     DO ib=1,nnb
@@ -1028,10 +1028,10 @@ DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
     deallocate(RTempG)
     allocate(RTempG(nnq,nq2,nnb))
 
-    !write(out_unitp,*) 'i',i
-    !write(out_unitp,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
-    !write(out_unitp,*) 'shape RTempB',shape(RTempB)
-    !write(out_unitp,*) 'shape RTempG',shape(RTempG)
+    !write(out_unit,*) 'i',i
+    !write(out_unit,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
+    !write(out_unit,*) 'shape RTempB',shape(RTempB)
+    !write(out_unit,*) 'shape RTempG',shape(RTempG)
 
 
     DO ib=1,nnb
@@ -1118,17 +1118,17 @@ DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
     deallocate(RTempG)
     allocate(RTempG(nnq,nq2,nnb))
 
-    !write(out_unitp,*) 'i',i
-    !write(out_unitp,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
-    !write(out_unitp,*) 'shape RTempB',shape(RTempB)
-    !write(out_unitp,*) 'shape RTempG',shape(RTempG)
+    !write(out_unit,*) 'i',i
+    !write(out_unit,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
+    !write(out_unit,*) 'shape RTempB',shape(RTempB)
+    !write(out_unit,*) 'shape RTempG',shape(RTempG)
 
 
     DO ib=1,nnb
     DO iq=1,nnq
-       !write(out_unitp,*) 'i,iG,ibb,iqq',i,iG,ib,iq,'b',RTempB(iq,:,ib)
+       !write(out_unit,*) 'i,iG,ibb,iqq',i,iG,ib,iq,'b',RTempB(iq,:,ib)
        RTempG(iq,:,ib) = matmul(tab_ba(tab_ind(i,iG),i)%d0b,RTempB(iq,:,ib))
-       !write(out_unitp,*) 'i,iG,ibb,iqq',i,iG,ib,iq,'g',RTempG(iq,:,ib)
+       !write(out_unit,*) 'i,iG,ibb,iqq',i,iG,ib,iq,'g',RTempG(iq,:,ib)
        !$OMP ATOMIC
        nb_mult_BTOG = nb_mult_BTOG + nb2*nq2
     END DO
@@ -1209,19 +1209,19 @@ DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
     deallocate(RTempG)
     allocate(RTempG(nnq,nq2,nnb))
 
-    !write(out_unitp,*) 'i',i
-    !write(out_unitp,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
-    !write(out_unitp,*) 'shape RTempB',shape(RTempB)
-    !write(out_unitp,*) 'shape RTempG',shape(RTempG)
+    !write(out_unit,*) 'i',i
+    !write(out_unit,*) 'nnq,nq2,nb2,nnb',nnq,nq2,nb2,nnb
+    !write(out_unit,*) 'shape RTempB',shape(RTempB)
+    !write(out_unit,*) 'shape RTempG',shape(RTempG)
 
 
     DO ib=1,nnb
     DO iq=1,nnq
-       !write(out_unitp,*) 'i,iG,ibb,iqq',i,iG,ib,iq,'b',RTempB(iq,:,ib)
+       !write(out_unit,*) 'i,iG,ibb,iqq',i,iG,ib,iq,'b',RTempB(iq,:,ib)
        !RTempG(iq,:,ib) = matmul(tab_ba(tab_ind(i,iG),i)%d0b,RTempB(iq,:,ib))
        RTempG(iq,:,ib) = matmul(RTempB(iq,:,ib),tab_ba(tab_ind(i,iG),i)%td0b)
 
-       !write(out_unitp,*) 'i,iG,ibb,iqq',i,iG,ib,iq,'g',RTempG(iq,:,ib)
+       !write(out_unit,*) 'i,iG,ibb,iqq',i,iG,ib,iq,'g',RTempG(iq,:,ib)
        !$OMP ATOMIC
        nb_mult_BTOG = nb_mult_BTOG + nb2*nq2
     END DO
@@ -1421,18 +1421,18 @@ DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
 
   tab_nq = get_tab_nq(tab_ind(:,iG),tab_ba)
 
-  !write(out_unitp,*) 'iG,tabnq',iG,':',tab_nq
+  !write(out_unit,*) 'iG,tabnq',iG,':',tab_nq
   DO iq=1,product(tab_nq)
     CALL InD_TO_tabi(iq,D,tab_nq,tab_i)
     DO i=1,D
       tab_x(i) = tab_ba(tab_ind(i,iG),i)%x(tab_i(i))
     END DO
-    !write(out_unitp,*) 'iq,tab_i',iq,':',tab_i,'tab_nq',tab_nq,'x:',tab_x
+    !write(out_unit,*) 'iq,tab_i',iq,':',tab_i,'tab_nq',tab_nq,'x:',tab_x
 
     SRep%SmolyakRep(iG)%R(iq) = HALF * dot_product(tab_x,tab_x)
     !SRep%SmolyakRep(iG)%R(tab_i(1),tab_i(2)) = HALF * dot_product(tab_x,tab_x)
 
-    !write(out_unitp,*) 'iG,iq,tab_i',iG,iq,':',tab_i,'x:',tab_x,'V:',SRep%SmolyakRep(iG)%R(iq)
+    !write(out_unit,*) 'iG,iq,tab_i',iG,iq,':',tab_i,'x:',tab_x,'V:',SRep%SmolyakRep(iG)%R(iq)
 
 
   END DO
@@ -1459,8 +1459,8 @@ IF (TabRDP1(1)%n1 /= TabRDP2(1)%n1 .OR.                                 &
     TabRDP1(1)%n2 /= TabRDP2(1)%n2 .OR.                                 &
     TabRDP1(1)%n3 /= TabRDP2(1)%n3 .OR.                                 &
     size(TabRDP1) /= size(TabRDP2) ) THEN
-  write(out_unitp,*) ' ERROR in Norm_OFF_Diff_TabRDP'
-  write(out_unitp,*) ' incompatible TabRDP1 and TabRDP2'
+  write(out_unit,*) ' ERROR in Norm_OFF_Diff_TabRDP'
+  write(out_unit,*) ' incompatible TabRDP1 and TabRDP2'
   STOP
 END IF
 
@@ -1468,7 +1468,7 @@ Norm = ZERO
 DO iG=1,ubound(TabRDP1,dim=1)
   Norm = Norm + sum( (TabRDP1(iG)%RDP(:,:,:) - TabRDP2(iG)%RDP(:,:,:))**2 )
 END DO
-write(out_unitp,*) 'Norm_OFF_Diff_TabRDP',Norm
+write(out_unit,*) 'Norm_OFF_Diff_TabRDP',Norm
 
 
 END SUBROUTINE Norm_OFF_Diff_TabRDP

@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
   MODULE mod_type_ana_psi
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
 
   PRIVATE
@@ -246,10 +246,10 @@
     IF (ana_weight) THEN
 
       IF (size(Qana_Weight) /= size(Weight_Rho) ) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) ' The size of Qana_Weight is different from the size of Weight_Rho'
-        write(out_unitp,*) ' It is not possible!'
-        write(out_unitp,*) ' Check the fortran!!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) ' The size of Qana_Weight is different from the size of Weight_Rho'
+        write(out_unit,*) ' It is not possible!'
+        write(out_unit,*) ' Check the fortran!!'
         STOP
       END IF
 
@@ -444,10 +444,10 @@
 
       IF (ana_weight) THEN
         IF (size(Qana_Weight) /= size(Weight_Rho) ) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' The size of Qana_Weight is different from the size of Weight_Rho'
-          write(out_unitp,*) ' It is not possible!'
-          write(out_unitp,*) ' Check the fortran!!'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' The size of Qana_Weight is different from the size of Weight_Rho'
+          write(out_unit,*) ' It is not possible!'
+          write(out_unit,*) ' Check the fortran!!'
           STOP
         END IF
 
@@ -678,91 +678,91 @@
 
     character (len=*), parameter :: name_sub='Write_ana_psi'
 
-    write(out_unitp,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'BEGINNING ',name_sub
 
-    write(out_unitp,*) 'ana_level',ana_psi%ana_level
-    write(out_unitp,*) 'num_psi',ana_psi%num_psi
-    write(out_unitp,*) 'Tformat: ',ana_psi%Tformat
-    write(out_unitp,*) 'Eformat: ',ana_psi%Eformat
-    write(out_unitp,*) 'GridDone',ana_psi%GridDone
-     write(out_unitp,*)
-    write(out_unitp,*) 'Boltzmann population:'
-    write(out_unitp,*) 'Boltzmann_pop',ana_psi%Boltzmann_pop
-    write(out_unitp,*) 'Temp',ana_psi%Temp
-    write(out_unitp,*) 'Part_func',ana_psi%Part_func
-    write(out_unitp,*) 'ZPE',ana_psi%ZPE
-    write(out_unitp,*) 'Ene',ana_psi%Ene
+    write(out_unit,*) 'ana_level',ana_psi%ana_level
+    write(out_unit,*) 'num_psi',ana_psi%num_psi
+    write(out_unit,*) 'Tformat: ',ana_psi%Tformat
+    write(out_unit,*) 'Eformat: ',ana_psi%Eformat
+    write(out_unit,*) 'GridDone',ana_psi%GridDone
+     write(out_unit,*)
+    write(out_unit,*) 'Boltzmann population:'
+    write(out_unit,*) 'Boltzmann_pop',ana_psi%Boltzmann_pop
+    write(out_unit,*) 'Temp',ana_psi%Temp
+    write(out_unit,*) 'Part_func',ana_psi%Part_func
+    write(out_unit,*) 'ZPE',ana_psi%ZPE
+    write(out_unit,*) 'Ene',ana_psi%Ene
 
-    write(out_unitp,*)
-    write(out_unitp,*) 'population analysis + reduced density:'
-    write(out_unitp,*) 'file_PsiRho:'
+    write(out_unit,*)
+    write(out_unit,*) 'population analysis + reduced density:'
+    write(out_unit,*) 'file_PsiRho:'
     CALL file_Write(ana_psi%file_PsiRho)
     IF (allocated(ana_psi%max_RedDensity))                            &
-            write(out_unitp,*) 'max_RedDensity',ana_psi%max_RedDensity
+            write(out_unit,*) 'max_RedDensity',ana_psi%max_RedDensity
 
-    write(out_unitp,*) 'Psi_norm2',ana_psi%Psi_norm2
-    write(out_unitp,*) 'adia',ana_psi%adia
-    write(out_unitp,*) 'Rho1D',ana_psi%Rho1D
-    write(out_unitp,*) 'Rho2D',ana_psi%Rho2D
+    write(out_unit,*) 'Psi_norm2',ana_psi%Psi_norm2
+    write(out_unit,*) 'adia',ana_psi%adia
+    write(out_unit,*) 'Rho1D',ana_psi%Rho1D
+    write(out_unit,*) 'Rho2D',ana_psi%Rho2D
     IF (allocated(ana_psi%Weight_Rho))                                &
-                    write(out_unitp,*) 'Weight_Rho',ana_psi%Weight_Rho
+                    write(out_unit,*) 'Weight_Rho',ana_psi%Weight_Rho
     IF (allocated(ana_psi%Qana_weight))                               &
-                 write(out_unitp,*) 'Qana_weight',ana_psi%Qana_weight
-    write(out_unitp,*) 'Rho_type',ana_psi%Rho_type
+                 write(out_unit,*) 'Qana_weight',ana_psi%Qana_weight
+    write(out_unit,*) 'Rho_type',ana_psi%Rho_type
 
-    write(out_unitp,*)
-    write(out_unitp,*) 'Average over coordinates:'
-    write(out_unitp,*) 'AvQ',ana_psi%AvQ
+    write(out_unit,*)
+    write(out_unit,*) 'Average over coordinates:'
+    write(out_unit,*) 'AvQ',ana_psi%AvQ
     IF (allocated(ana_psi%Qtransfo_type))                             &
-              write(out_unitp,*) 'Qtransfo_type',ana_psi%Qtransfo_type
+              write(out_unit,*) 'Qtransfo_type',ana_psi%Qtransfo_type
 
-    write(out_unitp,*)
-    write(out_unitp,*) 'Average over scalar operators:'
-    write(out_unitp,*) 'AvScalOp',ana_psi%AvScalOp
-    write(out_unitp,*) 'Average over H term by term:'
-    write(out_unitp,*) 'AvHiterm',ana_psi%AvHiterm
-    write(out_unitp,*) 'Average over Pi operators:'
-    write(out_unitp,*) 'AvPi',ana_psi%AvPi
-    write(out_unitp,*) 'Average over operators (except H and S):'
-    write(out_unitp,*) 'AvOp',ana_psi%AvOp
+    write(out_unit,*)
+    write(out_unit,*) 'Average over scalar operators:'
+    write(out_unit,*) 'AvScalOp',ana_psi%AvScalOp
+    write(out_unit,*) 'Average over H term by term:'
+    write(out_unit,*) 'AvHiterm',ana_psi%AvHiterm
+    write(out_unit,*) 'Average over Pi operators:'
+    write(out_unit,*) 'AvPi',ana_psi%AvPi
+    write(out_unit,*) 'Average over operators (except H and S):'
+    write(out_unit,*) 'AvOp',ana_psi%AvOp
 
-    write(out_unitp,*)
-    write(out_unitp,*) 'Coherence:?'
-    write(out_unitp,*) 'Coherence (Coherence_type)',ana_psi%Coherence
-    write(out_unitp,*) 'Coherence_epsi',ana_psi%Coherence_epsi
+    write(out_unit,*)
+    write(out_unit,*) 'Coherence:?'
+    write(out_unit,*) 'Coherence (Coherence_type)',ana_psi%Coherence
+    write(out_unit,*) 'Coherence_epsi',ana_psi%Coherence_epsi
 
-    write(out_unitp,*)
-    write(out_unitp,*) 'Exact Factorisation analysis:?'
-    write(out_unitp,*) 'ExactFact',ana_psi%ExactFact
+    write(out_unit,*)
+    write(out_unit,*) 'Exact Factorisation analysis:?'
+    write(out_unit,*) 'ExactFact',ana_psi%ExactFact
 
 
-    write(out_unitp,*)
-    write(out_unitp,*) '1D and 2D cut of psi at Qana:'
-    write(out_unitp,*) 'file_PsiCut:'
+    write(out_unit,*)
+    write(out_unit,*) '1D and 2D cut of psi at Qana:'
+    write(out_unit,*) 'file_PsiCut:'
     CALL file_Write(ana_psi%file_PsiCut)
-    write(out_unitp,*) 'psi1D_Q0',ana_psi%psi1D_Q0
-    write(out_unitp,*) 'psi2D_Q0',ana_psi%psi2D_Q0
-    IF (allocated(ana_psi%Qana)) write(out_unitp,*) 'Qana',ana_psi%Qana
+    write(out_unit,*) 'psi1D_Q0',ana_psi%psi1D_Q0
+    write(out_unit,*) 'psi2D_Q0',ana_psi%psi2D_Q0
+    IF (allocated(ana_psi%Qana)) write(out_unit,*) 'Qana',ana_psi%Qana
 
 
-    write(out_unitp,*)
-    write(out_unitp,*) 'Write_psi:',ana_psi%Write_psi
-    write(out_unitp,*) 'file_Psi:'
+    write(out_unit,*)
+    write(out_unit,*) 'Write_psi:',ana_psi%Write_psi
+    write(out_unit,*) 'file_Psi:'
     CALL file_Write(ana_psi%file_Psi)
-    write(out_unitp,*) 'Write_psi2_Grid',ana_psi%Write_psi2_Grid
-    write(out_unitp,*) 'Write_psi2_Basis',ana_psi%Write_psi2_Basis
-    write(out_unitp,*) 'Write_psi_Grid',ana_psi%Write_psi_Grid
-    write(out_unitp,*) 'Write_psi_Basis',ana_psi%Write_psi_Basis
+    write(out_unit,*) 'Write_psi2_Grid',ana_psi%Write_psi2_Grid
+    write(out_unit,*) 'Write_psi2_Basis',ana_psi%Write_psi2_Basis
+    write(out_unit,*) 'Write_psi_Grid',ana_psi%Write_psi_Grid
+    write(out_unit,*) 'Write_psi_Basis',ana_psi%Write_psi_Basis
 
-    write(out_unitp,*)
-    write(out_unitp,*) 'Propagation parameters:'
-    write(out_unitp,*) 'propa',ana_psi%propa
-    write(out_unitp,*) 'With_field',ana_psi%With_field
-    write(out_unitp,*) 'T (time)',ana_psi%T
-    write(out_unitp,*) 'field(:)',ana_psi%field(:)
-    write(out_unitp,*)
-    flush(out_unitp)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*)
+    write(out_unit,*) 'Propagation parameters:'
+    write(out_unit,*) 'propa',ana_psi%propa
+    write(out_unit,*) 'With_field',ana_psi%With_field
+    write(out_unit,*) 'T (time)',ana_psi%T
+    write(out_unit,*) 'field(:)',ana_psi%field(:)
+    write(out_unit,*)
+    flush(out_unit)
+    write(out_unit,*) 'END ',name_sub
 
     END SUBROUTINE Write_ana_psi
 

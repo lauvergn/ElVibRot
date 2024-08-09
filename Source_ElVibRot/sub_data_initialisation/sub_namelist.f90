@@ -59,7 +59,7 @@
 !================================================================
 !
       SUBROUTINE read_inactive(para_AllBasis,mole,QMLib_in)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_Constant,  only: REAL_WU, convRWU_TO_R_WITH_WorkingUnit
       use mod_Coord_KEO, only: CoordType, alloc_array, dealloc_array,   &
@@ -115,10 +115,10 @@
       logical, parameter :: debug=.FALSE.
       character (len=*), parameter :: name_sub='read_inactive'
 !      -----------------------------------------------------------------
-      write(out_unitp,*) 'INACTIVES PARAMETERS'
+      write(out_unit,*) 'INACTIVES PARAMETERS'
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'QMLib_in',QMLib_in
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'QMLib_in',QMLib_in
       END IF
 
       ! get nb_inact21 from mole%nb_inact2n or mole%RPHTransfo%nb_inact21
@@ -129,13 +129,13 @@
       END IF
 
       IF (mole%nb_inact2n <= 0) THEN
-        read(in_unitp,inactives) ! for nagfor we must read the inactive namelist
+        read(in_unit,inactives) ! for nagfor we must read the inactive namelist
         RETURN
       END IF
       IF (nb_inact21 > max_inact2n) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'max_inact2n is too small',max_inact2n
-        write(out_unitp,*) 'It should be larger than "nb_inact21"',nb_inact21
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'max_inact2n is too small',max_inact2n
+        write(out_unit,*) 'It should be larger than "nb_inact21"',nb_inact21
         STOP
       END IF
 
@@ -167,12 +167,12 @@
 
       QMLib             = QMLib_in
 
-      read(in_unitp,inactives)
+      read(in_unit,inactives)
 
       IF (step < epsilon(ONE)*TEN**3) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'step is too small',step
-        write(out_unitp,*) 'It should be larger than',epsilon(ONE)*TEN**3
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'step is too small',step
+        write(out_unit,*) 'It should be larger than',epsilon(ONE)*TEN**3
         STOP
       END IF
 
@@ -197,8 +197,8 @@
           max_excit = sum(tab_nb(1:nb_inact21))-nb_inact21
         END IF
 
-        write(out_unitp,*) 'max_excit',max_excit
-        write(out_unitp,*) 'tab_nb(:)',tab_nb(1:nb_inact21)
+        write(out_unit,*) 'max_excit',max_excit
+        write(out_unit,*) 'tab_nb(:)',tab_nb(1:nb_inact21)
 
         nDinit(:) = 0
         CALL alloc_array(para_AllBasis%Basis2n%nDindB,                   &
@@ -213,9 +213,9 @@
                                 nDsize=tab_nb(1:nb_inact21),nDinit=nDinit(1:nb_inact21), &
                                 Lmax=max_excit,type_OF_nDindex=0,With_nDindex=.FALSE.)
         ELSE
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) '   the isort value ',isort,' cannot be used.'
-          write(out_unitp,*) '   check your data!!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) '   the isort value ',isort,' cannot be used.'
+          write(out_unit,*) '   check your data!!'
           STOP
         END IF
         para_AllBasis%Basis2n%nDindB%Max_nDI = n_h
@@ -242,18 +242,18 @@
         CALL alloc_tab_Pbasis_OF_basis(para_AllBasis%Basis2n)
 
         IF (SparseGrid .AND. isort /= 2) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' With SparseGrid, you MUST use isort=2'
-          write(out_unitp,*) '   SparseGrid,isort: ',SparseGrid,isort
-          write(out_unitp,*) 'Check your data!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' With SparseGrid, you MUST use isort=2'
+          write(out_unit,*) '   SparseGrid,isort: ',SparseGrid,isort
+          write(out_unit,*) 'Check your data!'
           STOP
         END IF
 
         IF (para_AllBasis%Basis2n%SparseGrid_type == 3 .AND.            &
             para_AllBasis%Basis2n%L_SparseGrid < 1) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' SparseGrid_type /= 3 and L_SparseGrid < 1'
-          write(out_unitp,*) ' You should increase L_SparseGrid!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' SparseGrid_type /= 3 and L_SparseGrid < 1'
+          write(out_unit,*) ' You should increase L_SparseGrid!'
           STOP
         END IF
       END IF
@@ -297,7 +297,7 @@
       IF (debug) THEN
         CALL Write_nDindex(para_AllBasis%Basis2n%nDindB,'para_AllBasis%Basis2n%nDindB')
         CALL Write_nDindex(para_AllBasis%Basis2n%nDindG,'para_AllBasis%Basis2n%nDindG')
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 
       END SUBROUTINE read_inactive
@@ -313,7 +313,7 @@
 !
       SUBROUTINE read_active(para_Tnum,mole,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_Constant, only : REAL_WU,convRWU_TO_R_WITH_WorkingUnit
       USE mod_PrimOp
@@ -387,10 +387,10 @@
 
 
 !------- test on max_HADA and n_h ---------------------------------
-      write(out_unitp,*) ' ACTIVES PARAMETERS'
+      write(out_unit,*) ' ACTIVES PARAMETERS'
 
-      IF (print_level > 0) write(out_unitp,*) 'BEGINNING read_active'
-      IF (print_level > 0) write(out_unitp,*) 'nb_act1',mole%nb_act1
+      IF (print_level > 0) write(out_unit,*) 'BEGINNING read_active'
+      IF (print_level > 0) write(out_unit,*) 'nb_act1',mole%nb_act1
 
 
 !------- read the active namelist ----------------------------
@@ -442,26 +442,26 @@
       Op_Transfo          = .FALSE.
       E0_Transfo          = REAL_WU(ZERO,   'cm-1','E') !ZERO with cm-1 as default unit
 
-      read(in_unitp,actives)
+      read(in_unit,actives)
       IF (direct == 0 .OR. read_Op) make_MatOp = .TRUE.
-      IF (print_level > 1) write(out_unitp,actives)
+      IF (print_level > 1) write(out_unit,actives)
 
 
       IF (name_HADA /= 'SH_HADA' .OR. .NOT. formatted_HADA) THEN
-        write(out_unitp,*) 'ERROR in read_active'
-        write(out_unitp,*) '  You should not use the parameters (name_HADA, formatted_HADA) '
-        write(out_unitp,*) '    in read_active namelist, '
-        write(out_unitp,*) '  name_Grid and formatted_Grid'
+        write(out_unit,*) 'ERROR in read_active'
+        write(out_unit,*) '  You should not use the parameters (name_HADA, formatted_HADA) '
+        write(out_unit,*) '    in read_active namelist, '
+        write(out_unit,*) '  name_Grid and formatted_Grid'
         STOP
         name_Grid      = name_HADA
         formatted_Grid = formatted_HADA
       END IF
 
       IF (lect .OR. restart) THEN
-        write(out_unitp,*) 'ERROR in read_active'
-        write(out_unitp,*) '  You should not use the parameters (lect or restart) '
-        write(out_unitp,*) '    in read_active namelist, '
-        write(out_unitp,*) '  instead, you must use: Read_Grid and Restart_Grid'
+        write(out_unit,*) 'ERROR in read_active'
+        write(out_unit,*) '  You should not use the parameters (lect or restart) '
+        write(out_unit,*) '    in read_active namelist, '
+        write(out_unit,*) '  instead, you must use: Read_Grid and Restart_Grid'
         STOP
       END IF
 
@@ -476,7 +476,7 @@
       para_ReadOp%Op_WithContracRVec = Op_WithContracRVec
 
 
-      IF (print_level > 0) write(out_unitp,*) ' END read_active'
+      IF (print_level > 0) write(out_unit,*) ' END read_active'
 
       !- Copy parameters in para_ReadOp --------
       SELECT CASE (direct)
@@ -616,17 +616,17 @@
       para_ReadOp%T_only          = T_only
 
       para_ReadOp%Op_Transfo      = Op_Transfo
-      IF(MPI_id==0) write(out_unitp,*) 'para_ReadOp%Op_Transfo',para_ReadOp%Op_Transfo
+      IF(MPI_id==0) write(out_unit,*) 'para_ReadOp%Op_Transfo',para_ReadOp%Op_Transfo
       IF (Op_Transfo) THEN
-        !write(out_unitp,*) 'E0_Transfo',E0_Transfo
+        !write(out_unit,*) 'E0_Transfo',E0_Transfo
 
         para_ReadOp%E0_Transfo      = convRWU_TO_R_WITH_WorkingUnit(E0_Transfo)
         para_ReadOp%degree_Transfo  = 2
         CALL alloc_NParray(para_ReadOp%Poly_Transfo,[2],            &
                           'para_ReadOp%Poly_Transfo','read_active',[0])
         para_ReadOp%Poly_Transfo = [ZERO,ZERO,ONE] ! x^2
-        write(out_unitp,*) 'para_ReadOp%E0_Transfo',para_ReadOp%E0_Transfo
-        !write(out_unitp,*) 'l u bounds',ubound(para_ReadOp%Poly_Transfo),lbound(para_ReadOp%Poly_Transfo)
+        write(out_unit,*) 'para_ReadOp%E0_Transfo',para_ReadOp%E0_Transfo
+        !write(out_unit,*) 'l u bounds',ubound(para_ReadOp%Poly_Transfo),lbound(para_ReadOp%Poly_Transfo)
 
       END IF
 
@@ -654,7 +654,7 @@
       ELSE
         para_ReadOp%nb_bRot         = 1
       END IF
-      IF(MPI_id==0) write(out_unitp,*) 'The number of rotational basis is:',para_ReadOp%nb_bRot
+      IF(MPI_id==0) write(out_unit,*) 'The number of rotational basis is:',para_ReadOp%nb_bRot
 
       IF(openmpi .AND. direct/=4)                                                      &
          STOP 'use direct=4 for namelist "actives" when running with MPI'

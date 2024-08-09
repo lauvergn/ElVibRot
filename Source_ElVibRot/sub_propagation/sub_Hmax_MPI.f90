@@ -52,7 +52,7 @@ Public get_Hmin_MPI
 
 CONTAINS
   SUBROUTINE get_Hmin_MPI(para_H)
-    USE mod_system
+    USE EVR_system_m
     USE mod_SetOp
     USE mod_MPI_aux
     IMPLICIT NONE

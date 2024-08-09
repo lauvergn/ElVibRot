@@ -55,7 +55,7 @@ CONTAINS
 !================================================================
       SUBROUTINE sub_analyse(Tab_Psi,nb_psi_in,para_H,para_ana,         &
                              para_intensity,para_AllOp,const_phys)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_Coord_KEO
 
@@ -133,14 +133,14 @@ CONTAINS
       BasisnD    => para_H%para_AllBasis%BasisnD
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_ba,nb_qa',para_H%nb_ba,para_H%nb_qa
-        write(out_unitp,*) 'nb_bi',para_H%nb_bi
-        write(out_unitp,*) 'nb_bie',para_H%nb_bie
-        write(out_unitp,*) 'nb_act1',mole%nb_act1
-        write(out_unitp,*) 'max_ana,max_ene',para_ana%max_ana,para_ana%max_ene
-        write(out_unitp,*) 'nb_psi_in',nb_psi_in
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_ba,nb_qa',para_H%nb_ba,para_H%nb_qa
+        write(out_unit,*) 'nb_bi',para_H%nb_bi
+        write(out_unit,*) 'nb_bie',para_H%nb_bie
+        write(out_unit,*) 'nb_act1',mole%nb_act1
+        write(out_unit,*) 'max_ana,max_ene',para_ana%max_ana,para_ana%max_ene
+        write(out_unit,*) 'nb_psi_in',nb_psi_in
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
       CALL alloc_NParray(ene,shape(Tab_psi),'ene',name_sub)
@@ -152,13 +152,13 @@ CONTAINS
 
       RWU_ZPE = REAL_WU(para_H%ZPE,'au','E')
       RWU_E   = REAL_WU(sum(ene) / real(nb_psi_in,kind=Rkind),'au','E')
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*)
-      write(out_unitp,*) 'ZPE        : ',RWU_Write(RWU_ZPE,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
-      write(out_unitp,*) 'Average_ene: ',RWU_Write(RWU_E,  WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*)
+      write(out_unit,*) 'ZPE        : ',RWU_Write(RWU_ZPE,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
+      write(out_unit,*) 'Average_ene: ',RWU_Write(RWU_E,  WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
       RWU_E   = REAL_WU(sum(ene),'au','E') ! trace
-      write(out_unitp,*) 'trace_ene  : ',RWU_Write(RWU_E,  WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
-      flush(out_unitp)
+      write(out_unit,*) 'trace_ene  : ',RWU_Write(RWU_E,  WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
+      flush(out_unit)
       IF (para_ana%max_ana > nb_psi_in) para_ana%max_ana = nb_psi_in
 
       IF (para_ana%intensity .AND. para_intensity%l_IntVR) THEN
@@ -166,7 +166,7 @@ CONTAINS
                           "para_intensity%ABC",name_sub)
       END IF
 
-       write(out_unitp,*)
+       write(out_unit,*)
        Q =  part_func(ene,nb_psi_in,para_ana%Temp)
 
       file_WPspectral%name = make_EVRTFileName(para_ana%name_file_spectralWP)
@@ -174,8 +174,8 @@ CONTAINS
 
       ! For the header of the file
       nb_psi        = count((ene(:)-para_H%ZPE) <= para_ana%max_ene)
-      !write(out_unitp,*) 'nb_psi',nb_psi
-      !write(out_unitp,*) 'ZPE,max_ene',para_H%ZPE,para_ana%max_ene
+      !write(out_unit,*) 'nb_psi',nb_psi
+      !write(out_unit,*) 'ZPE,max_ene',para_H%ZPE,para_ana%max_ene
 
 
       IF(MPI_id==0) CALL Write_header_saveFile_psi(tab_Psi,nb_psi,file_WPspectral)
@@ -184,9 +184,9 @@ CONTAINS
       allocate(ana_psi(nb_psi_in))
       allocate(tab_PsiAna(nb_psi_in))
 
-      write(out_unitp,*) 'population at T, Q',para_ana%Temp,Q
-      write(out_unitp,*) 'Energy level (',const_phys%ene_unit,') pop and means :'
-      flush(out_unitp)
+      write(out_unit,*) 'population at T, Q',para_ana%Temp,Q
+      write(out_unit,*) 'Energy level (',const_phys%ene_unit,') pop and means :'
+      flush(out_unit)
       DO i=1,nb_psi_in
         ana_psi(i) = para_ana%ana_psi
 
@@ -211,7 +211,7 @@ CONTAINS
           lformat = '("lev0: ",i0,i0,l3,3(1x,' // trim(adjustl(EneIO_format)) // '))'
         END IF
 
-        write(out_unitp,lformat) i,0,tab_Psi(i)%convAvOp,E,DE
+        write(out_unit,lformat) i,0,tab_Psi(i)%convAvOp,E,DE
 
         IF(MPI_id==0) CALL Write_Psi_nDBasis(tab_Psi(i),nioWP,i,ZERO,file_WPspectral%formatted,FilePsiVersion)
 
@@ -233,13 +233,13 @@ CONTAINS
       para_ana%ana_psi%Part_Func  = Q
       para_ana%ana_psi%Temp       = para_ana%Temp
       iana                        = 0
-      write(out_unitp,'(a)')              'Psi(:) analysis: (%): [--0-10-20-30-40-50-60-70-80-90-100]'
-      write(out_unitp,'(a)',ADVANCE='no') 'Psi(:) analysis: (%): ['
-      flush(out_unitp)
+      write(out_unit,'(a)')              'Psi(:) analysis: (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+      write(out_unit,'(a)',ADVANCE='no') 'Psi(:) analysis: (%): ['
+      flush(out_unit)
 !$OMP   PARALLEL &
 !$OMP   DEFAULT(NONE) &
 !$OMP   SHARED(nb_psi_in,ene,para_H,para_AllOp,para_ana,tab_Psi,ana_psi,AllPsi_max_RedDensity,const_phys) &
-!$OMP   SHARED(out_unitp,para_intensity,tab_PsiAna,iana,MPI_id) &
+!$OMP   SHARED(out_unit,para_intensity,tab_PsiAna,iana,MPI_id) &
 !$OMP   PRIVATE(i,info) &
 !$OMP   NUM_THREADS(maxth)
 
@@ -279,34 +279,34 @@ CONTAINS
 
         deallocate(info)
 
-        IF (mod(iana,nb_psi_in) == 0 .AND. MPI_id == 0) write(out_unitp,'(a)',ADVANCE='no') '---'
+        IF (mod(iana,nb_psi_in) == 0 .AND. MPI_id == 0) write(out_unit,'(a)',ADVANCE='no') '---'
       END DO
 !$OMP   END DO
 !$OMP   END PARALLEL
-      write(out_unitp,'(a)',ADVANCE='yes') '----]'
+      write(out_unit,'(a)',ADVANCE='yes') '----]'
 
-      write(out_unitp,*) '=============================================================='
-      write(out_unitp,*) '=============================================================='
-      write(out_unitp,*) '=============================================================='
-      write(out_unitp,*) 'population at T, Q',para_ana%Temp,Q
-      write(out_unitp,*) 'Energy level (',const_phys%ene_unit,') pop and averages :'
-      flush(out_unitp)
+      write(out_unit,*) '=============================================================='
+      write(out_unit,*) '=============================================================='
+      write(out_unit,*) '=============================================================='
+      write(out_unit,*) 'population at T, Q',para_ana%Temp,Q
+      write(out_unit,*) 'Energy level (',const_phys%ene_unit,') pop and averages :'
+      flush(out_unit)
       DO i=1,nb_psi_in
-        write(out_unitp,'(a)') tab_PsiAna(i)%str
-        flush(out_unitp)
+        write(out_unit,'(a)') tab_PsiAna(i)%str
+        flush(out_unit)
       END DO
-      write(out_unitp,*) '=============================================================='
-      write(out_unitp,*) '=============================================================='
-      write(out_unitp,*) '=============================================================='
-      flush(out_unitp)
+      write(out_unit,*) '=============================================================='
+      write(out_unit,*) '=============================================================='
+      write(out_unit,*) '=============================================================='
+      flush(out_unit)
 
       IF (allocated(AllPsi_max_RedDensity)) THEN
-        CALL Write_Vec(AllPsi_max_RedDensity,out_unitp,6,Rformat='e10.3',info='For all psi max_RedDensity ')
-        !write(out_unitp,*) 'For all psi max_RedDensity ',AllPsi_max_RedDensity(:)
+        CALL Write_Vec(AllPsi_max_RedDensity,out_unit,6,Rformat='e10.3',info='For all psi max_RedDensity ')
+        !write(out_unit,*) 'For all psi max_RedDensity ',AllPsi_max_RedDensity(:)
         CALL dealloc_NParray(AllPsi_max_RedDensity,"AllPsi_max_RedDensity",name_sub)
       END IF
 
-      flush(out_unitp)
+      flush(out_unit)
 
 !----------------------------------------------------------
 
@@ -315,8 +315,8 @@ CONTAINS
 !     writing the eigenvectors
       para_ana%print_psi = min(para_ana%print_psi,nb_psi_in)
       IF (debug) para_ana%print_psi = nb_psi_in
-      write(out_unitp,*) 'para_ana%print_psi',para_ana%print_psi
-      flush(out_unitp)
+      write(out_unit,*) 'para_ana%print_psi',para_ana%print_psi
+      flush(out_unit)
 
       IF (cube) CALL write_cube(Tab_Psi)
 
@@ -339,11 +339,11 @@ CONTAINS
         !                                   .AND. mole%nb_act1 < 3) THEN
         !  CALL write_psi2_new(tab_Psi)
         END IF
-        flush(out_unitp)
+        flush(out_unit)
         nb_col = 5
-        write(out_unitp,*) 'eigenvectors in column'
-        write(out_unitp,*) nb_col,para_ana%print_psi,tab_Psi(1)%nb_tot
-        CALL Write_Mat(Mat_psi(:,1:para_ana%print_psi),out_unitp,nb_col)
+        write(out_unit,*) 'eigenvectors in column'
+        write(out_unit,*) nb_col,para_ana%print_psi,tab_Psi(1)%nb_tot
+        CALL Write_Mat(Mat_psi(:,1:para_ana%print_psi),out_unit,nb_col)
         CALL dealloc_NParray(Mat_psi,"Mat_psi",name_sub)
 
       END IF
@@ -361,7 +361,7 @@ CONTAINS
 !----------------------------------------------------------
       IF (debug) THEN
       END IF
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
 !----------------------------------------------------------
 
 
@@ -377,7 +377,7 @@ CONTAINS
                            para_Tnum,mole,                              &
                            BasisnD,para_Op)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_basis
       USE mod_Op
@@ -421,17 +421,17 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING write_psi'
-        write(out_unitp,*) 'nb_psi,psi2',nb_psi,psi2
-        write(out_unitp,*) 'nb_ba',nb_ba
-        write(out_unitp,*) 'nb_qa',nb_qa
-        write(out_unitp,*) 'n_h',n_h
+        write(out_unit,*) 'BEGINNING write_psi'
+        write(out_unit,*) 'nb_psi,psi2',nb_psi,psi2
+        write(out_unit,*) 'nb_ba',nb_ba
+        write(out_unit,*) 'nb_qa',nb_qa
+        write(out_unit,*) 'n_h',n_h
       END IF
 !-----------------------------------------------------------
 
 !-----------------------------------------------------------
-      write(out_unitp,*)
-      write(out_unitp,*) 'eigenvectors on a grid',nb_psi
+      write(out_unit,*)
+      write(out_unit,*) 'eigenvectors on a grid',nb_psi
 
 !     - initisalisation ----------------------------------
       CALL alloc_NParray(d0b,     [nb_ba],       'd0b','write_psi')
@@ -494,11 +494,11 @@ CONTAINS
          IF (psi2) ih_print = 1
 
           IF (mole%nb_act1 == 2 .AND. abs(Q1-Qact1(1)) > ONETENTH**6) THEN
-             write(out_unitp,*)
+             write(out_unit,*)
              Q1 = Qact1(1)
           END IF
 
-         write(out_unitp,31) Qact1(:),WrhonD,psi_q(1:min(max_print,nb_psi),1:ih_print)
+         write(out_unit,31) Qact1(:),WrhonD,psi_q(1:min(max_print,nb_psi),1:ih_print)
  31      format(3f20.10,200f20.10)
 
        END DO
@@ -509,7 +509,7 @@ CONTAINS
       CALL dealloc_NParray(psi_q,   'psi_q',   'write_psi')
 !----------------------------------------------------------
         IF (debug) THEN
-          write(out_unitp,*) 'END write_psi'
+          write(out_unit,*) 'END write_psi'
         END IF
 !----------------------------------------------------------
 
@@ -518,7 +518,7 @@ CONTAINS
 
       SUBROUTINE write_psi2_new(Tab_Psi)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE mod_psi,      ONLY : param_psi,sub_PsiBasisRep_TO_GridRep
       IMPLICIT NONE
@@ -549,12 +549,12 @@ CONTAINS
       nb_bi  = Tab_Psi(1)%nb_bi
       nb_qa  = Tab_Psi(1)%nb_qa
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_psi',nb_psi
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_psi',nb_psi
       END IF
 !-----------------------------------------------------------
-      write(out_unitp,*)
-      write(out_unitp,*) 'eigenvectors on a grid',nb_psi
+      write(out_unit,*)
+      write(out_unit,*) 'eigenvectors on a grid',nb_psi
 
 
       CALL alloc_NParray(psi_q,[nb_qa,nb_psi],'psi_q',name_sub)
@@ -589,7 +589,7 @@ CONTAINS
          !- calculation of WrhonD ------------------------------
          WrhonD = Rec_WrhonD(Tab_Psi(1)%BasisnD,i_q)
 
-         write(out_unitp,31) Qact1(:),WrhonD,psi_q(i_q,1:nb_psi)
+         write(out_unit,31) Qact1(:),WrhonD,psi_q(i_q,1:nb_psi)
  31      format(3f20.10,200f20.10)
 
        END DO
@@ -600,7 +600,7 @@ CONTAINS
 
 !----------------------------------------------------------
         IF (debug) THEN
-          write(out_unitp,*) 'END ',name_sub
+          write(out_unit,*) 'END ',name_sub
         END IF
 !----------------------------------------------------------
 
@@ -609,7 +609,7 @@ CONTAINS
 
       SUBROUTINE write_cube(Tab_Psi)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,      ONLY : param_psi,sub_PsiBasisRep_TO_GridRep
       IMPLICIT NONE
 
@@ -637,12 +637,12 @@ CONTAINS
       nb_bi  = Tab_Psi(1)%nb_bi
       nb_qa  = Tab_Psi(1)%nb_qa
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_psi',nb_psi
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_psi',nb_psi
       END IF
 !-----------------------------------------------------------
-      write(out_unitp,*)
-      write(out_unitp,*) 'eigenvectors on a cube (test)',nb_psi
+      write(out_unit,*)
+      write(out_unit,*) 'eigenvectors on a cube (test)',nb_psi
 
 !-----------------------------------------------------------
 
@@ -672,7 +672,7 @@ CONTAINS
 
 !----------------------------------------------------------
         IF (debug) THEN
-          write(out_unitp,*) 'END ',name_sub
+          write(out_unit,*) 'END ',name_sub
         END IF
 !----------------------------------------------------------
 
@@ -681,7 +681,7 @@ CONTAINS
 
       ! write basis b^n(Q)
       SUBROUTINE write_basis_biqi(psi)
-        USE mod_system
+        USE EVR_system_m
         USE mod_nDindex
         USE mod_psi,                         ONLY: param_psi
         IMPLICIT NONE
@@ -710,15 +710,15 @@ CONTAINS
 
         DO nD=1,3 ! psi%BasisnD%nDindB%ndim in total
           nQ=size(Psi%BasisnD%tab_basisPrimSG(LG,nD)%dnRGB%d0,1)
-          write(out_unitp,*) "b(Q): ",nD,ndim_AT_ib(nD),nQ,LG ! dimension: b*Q
+          write(out_unit,*) "b(Q): ",nD,ndim_AT_ib(nD),nQ,LG ! dimension: b*Q
           ! tab_basisPrimSG(0 ~ L_SparseGrid,nD)
           DO iQ=1,nQ
-            write(out_unitp,51) psi%BasisnD%tab_basisPrimSG(LG,nD)&
+            write(out_unit,51) psi%BasisnD%tab_basisPrimSG(LG,nD)&
                                    %dnRGB%d0(iQ,1:ndim_AT_ib(nD))
           ENDDO
 
           DO iQ=1,nQ
-            write(out_unitp,51) Psi%BasisnD%tab_basisPrimSG(LG,nD)%x(:,iQ)
+            write(out_unit,51) Psi%BasisnD%tab_basisPrimSG(LG,nD)%x(:,iQ)
           ENDDO
         ENDDO
 

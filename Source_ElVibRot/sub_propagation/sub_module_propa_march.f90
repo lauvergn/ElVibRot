@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
  MODULE mod_march
- USE mod_system
+ USE EVR_system_m
  use mod_Constant,      ONLY : get_conv_au_to_unit
  USE mod_psi,           ONLY : param_psi,alloc_NParray,dealloc_NParray,dealloc_psi
  USE mod_propa,         ONLY : param_propa,param_poly,Calc_AutoCorr,    &
@@ -66,7 +66,7 @@
 !=======================================================================================
       SUBROUTINE march_gene(T,WP,WP0,nb_WP,print_Op,                    &
                             para_H,para_propa,tab_Op,para_field)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op
       IMPLICIT NONE
@@ -97,25 +97,25 @@
       character (len=*), parameter :: name_sub='march_gene'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        IF(.NOT. openmpi) write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,    &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        IF(.NOT. openmpi) write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,    &
                                                          para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
-        write(out_unitp,*) 'type_WPpropa',para_propa%type_WPpropa
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
+        write(out_unit,*) 'type_WPpropa',para_propa%type_WPpropa
+        write(out_unit,*)
 
         DO i=1,nb_WP
           CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP(i)%norm2
+          write(out_unit,*) 'norm WP',i,WP(i)%norm2
 
-          write(out_unitp,*) 'WP BasisRep',i
+          write(out_unit,*) 'WP BasisRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',i
+          write(out_unit,*) 'WP GridRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
         END DO
@@ -124,18 +124,18 @@
 
       IF (para_propa%One_Iteration) THEN
         IF(MPI_id==0) THEN
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING ',name_sub
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING ',name_sub
           CALL time_perso('march_gene')
-          write(out_unitp,*)
+          write(out_unit,*)
         ENDIF
       END IF
 
       IF (para_propa%With_field .AND. .NOT. present(para_field)         &
           .AND. .NOT. present(tab_Op)) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'With_field=T and para_field and tab_Op are not present'
-        write(out_unitp,*) 'check the source!!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'With_field=T and para_field and tab_Op are not present'
+        write(out_unit,*) 'check the source!!'
         STOP
       END IF
 
@@ -217,9 +217,9 @@
                              para_field,para_propa)
 
       CASE DEFAULT
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'The type_WPpropa is unknown',para_propa%type_WPpropa
-        write(out_unitp,*) 'check your data !!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'The type_WPpropa is unknown',para_propa%type_WPpropa
+        write(out_unit,*) 'check your data !!'
         STOP
       END SELECT
 
@@ -230,26 +230,26 @@
                                                          para_propa%ana_psi)
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
+          write(out_unit,*)
           CALL time_perso('march_gene')
-          write(out_unitp,*)
-          write(out_unitp,*) ' VIB: END march_gene'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) 'Propagation stops after one time step.'
-          write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!'
-          write(out_unitp,*) '================================================'
+          write(out_unit,*)
+          write(out_unit,*) ' VIB: END march_gene'
+          write(out_unit,*) '================================================='
+          write(out_unit,*) 'Propagation stops after one time step.'
+          write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
+          write(out_unit,*) '================================================'
         ENDIF
         STOP 'Propagation stops after one time step.'
       END IF
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Psi at T+DT'
+        write(out_unit,*) 'Psi at T+DT'
         DO i=1,nb_WP
           CALL ecri_psi(psi=WP(i),                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
         END DO
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
       END SUBROUTINE march_gene
@@ -269,7 +269,7 @@
       !!@param: TODO
       SUBROUTINE march_RK2_field(T,WP,nb_WP,print_Op,                   &
                                  para_H,para_Dip,para_field,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op
       IMPLICIT NONE
@@ -305,23 +305,23 @@
       character (len=*), parameter :: name_sub='march_RK2_field'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
         DO i=1,nb_WP
           CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP(i)%norm2
+          write(out_unit,*) 'norm WP',i,WP(i)%norm2
 
-          write(out_unitp,*) 'WP BasisRep',i
+          write(out_unit,*) 'WP BasisRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                              &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',i
+          write(out_unit,*) 'WP GridRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                              &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
         END DO
@@ -357,8 +357,8 @@
       CALL norm2_psi(WP(i),GridRep=.FALSE.,BasisRep=.TRUE.)
       IF ( WP(i)%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -376,7 +376,7 @@
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -396,7 +396,7 @@
       !!@param: TODO
       SUBROUTINE march_RK4_field(T,WP,nb_WP,print_Op,                   &
                                  para_H,para_Dip,para_field,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op
       IMPLICIT NONE
@@ -440,23 +440,23 @@
       character (len=*), parameter :: name_sub='march_RK4_field'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
         DO i=1,nb_WP
           CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP(i)%norm2
+          write(out_unit,*) 'norm WP',i,WP(i)%norm2
 
-          write(out_unitp,*) 'WP BasisRep',i
+          write(out_unit,*) 'WP BasisRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',i
+          write(out_unit,*) 'WP GridRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
         END DO
@@ -523,8 +523,8 @@
       CALL norm2_psi(WP(i),GridRep=.FALSE.,BasisRep=.TRUE.)
       IF ( WP(i)%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -541,13 +541,13 @@
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
       END SUBROUTINE march_RK4_field
       SUBROUTINE march_Euler(T,no,WP,WP0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op
       IMPLICIT NONE
@@ -589,22 +589,22 @@
       character (len=*), parameter :: name_sub='march_Euler'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
           CALL norm2_psi(WP,.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP%norm2
+          write(out_unit,*) 'norm WP',i,WP%norm2
 
-          write(out_unitp,*) 'WP BasisRep'
+          write(out_unit,*) 'WP BasisRep'
           CALL ecri_psi(T=ZERO,psi=WP,                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep'
+          write(out_unit,*) 'WP GridRep'
           CALL ecri_psi(T=ZERO,psi=WP,                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
@@ -626,8 +626,8 @@
       CALL norm2_psi(WP,GridRep=.FALSE.,BasisRep=.TRUE.)
       IF ( WP%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -642,13 +642,13 @@
       CALL dealloc_psi(w6)
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
 END SUBROUTINE march_Euler
       SUBROUTINE march_RK2(T,no,WP,WP0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op
       USE mod_MPI_aux
@@ -691,22 +691,22 @@ END SUBROUTINE march_Euler
       character (len=*), parameter :: name_sub='march_RK2'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
           CALL norm2_psi(WP,.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP%norm2
+          write(out_unit,*) 'norm WP',i,WP%norm2
 
-          write(out_unitp,*) 'WP BasisRep'
+          write(out_unit,*) 'WP BasisRep'
           CALL ecri_psi(T=ZERO,psi=WP,                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep'
+          write(out_unit,*) 'WP GridRep'
           CALL ecri_psi(T=ZERO,psi=WP,                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
@@ -743,8 +743,8 @@ END SUBROUTINE march_Euler
 
       IF ( WP%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -763,13 +763,13 @@ END SUBROUTINE march_Euler
       ENDIF
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
 END SUBROUTINE march_RK2
 SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op
       USE mod_MPI_aux
@@ -813,22 +813,22 @@ SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
       character (len=*), parameter :: name_sub='march_RK4'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
           CALL norm2_psi(WP,.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP%norm2
+          write(out_unit,*) 'norm WP',i,WP%norm2
 
-          write(out_unitp,*) 'WP BasisRep',T
+          write(out_unit,*) 'WP BasisRep',T
           CALL ecri_psi(T=T,psi=WP,                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',T
+          write(out_unit,*) 'WP GridRep',T
           CALL ecri_psi(T=T,psi=WP,                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
@@ -847,7 +847,7 @@ SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
       CALL fcn(WP,w1,para_H)
 
       IF (debug) THEN
-        write(out_unitp,*) 'k1 BasisRep'
+        write(out_unit,*) 'k1 BasisRep'
         CALL ecri_psi(T=T,psi=w1)
       END IF
 
@@ -857,7 +857,7 @@ SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
       !w2 = -iH*w
       CALL fcn(w,w2,para_H)
       IF (debug) THEN
-        write(out_unitp,*) 'k2 BasisRep'
+        write(out_unit,*) 'k2 BasisRep'
         CALL ecri_psi(T=T,psi=w2)
       END IF
 
@@ -868,7 +868,7 @@ SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
       !w3 = -iH*w2
       CALL fcn(w,w3,para_H)
       IF (debug) THEN
-        write(out_unitp,*) 'k3 BasisRep'
+        write(out_unit,*) 'k3 BasisRep'
         CALL ecri_psi(T=T,psi=w3)
       END IF
 
@@ -881,7 +881,7 @@ SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
       !w4 = -iH(T)*w
       CALL fcn(w,w4,para_H)
       IF (debug) THEN
-        write(out_unitp,*) 'k4 BasisRep'
+        write(out_unit,*) 'k4 BasisRep'
         CALL ecri_psi(T=T,psi=w4)
       END IF
 
@@ -901,8 +901,8 @@ SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
 
       IF ( WP%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -923,20 +923,20 @@ SUBROUTINE march_RK4(T,no,WP,WP0,para_H,para_propa)
       ENDIF
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'WP BasisRep',T_DT
+        write(out_unit,*) 'WP BasisRep',T_DT
         CALL ecri_psi(T=T_DT,psi=WP,                               &
                       ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) 'WP GridRep',T_DT
+        write(out_unit,*) 'WP GridRep',T_DT
         CALL ecri_psi(T=T_DT,psi=WP,                               &
                       ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
 END SUBROUTINE march_RK4
 SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op
       USE mod_MPI_aux
@@ -980,22 +980,22 @@ SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
       character (len=*), parameter :: name_sub='march_RK4_old'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
           CALL norm2_psi(WP,.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP%norm2
+          write(out_unit,*) 'norm WP',i,WP%norm2
 
-          write(out_unitp,*) 'WP BasisRep',T
+          write(out_unit,*) 'WP BasisRep',T
           CALL ecri_psi(T=T,psi=WP,                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',T
+          write(out_unit,*) 'WP GridRep',T
           CALL ecri_psi(T=T,psi=WP,                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
@@ -1014,7 +1014,7 @@ SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
       CALL fcn(WP,w1,para_H)
 
       IF (debug) THEN
-        write(out_unitp,*) 'k1 BasisRep'
+        write(out_unit,*) 'k1 BasisRep'
         CALL ecri_psi(T=T,psi=WP)
       END IF
 
@@ -1024,7 +1024,7 @@ SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
       !w3 = -iH*w2
       CALL fcn(w2,w3,para_H)
       IF (debug) THEN
-        write(out_unitp,*) 'k2 BasisRep'
+        write(out_unit,*) 'k2 BasisRep'
         CALL ecri_psi(T=T,psi=WP)
       END IF
 
@@ -1035,7 +1035,7 @@ SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
       !w4 = -iH*w2
       CALL fcn(w2,w4,para_H)
       IF (debug) THEN
-        write(out_unitp,*) 'k3 BasisRep'
+        write(out_unit,*) 'k3 BasisRep'
         CALL ecri_psi(T=T,psi=WP)
       END IF
 
@@ -1050,7 +1050,7 @@ SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
       !w3 = -iH(T)*w2
       CALL fcn(w2,w3,para_H)
       IF (debug) THEN
-        write(out_unitp,*) 'k4 BasisRep'
+        write(out_unit,*) 'k4 BasisRep'
         CALL ecri_psi(T=T,psi=WP)
       END IF
 
@@ -1072,8 +1072,8 @@ SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
 
       IF ( WP%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -1095,20 +1095,20 @@ SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
       ENDIF
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'WP BasisRep',T_DT
+        write(out_unit,*) 'WP BasisRep',T_DT
         CALL ecri_psi(T=T_DT,psi=WP,                               &
                       ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) 'WP GridRep',T_DT
+        write(out_unit,*) 'WP GridRep',T_DT
         CALL ecri_psi(T=T_DT,psi=WP,                               &
                       ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
 END SUBROUTINE march_RK4_old
       SUBROUTINE march_BS(T,no,WP,WP0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,dealloc_psi
       USE mod_Op,    ONLY : param_Op
       USE mod_MPI_aux
@@ -1156,22 +1156,22 @@ END SUBROUTINE march_RK4_old
       character (len=*), parameter :: name_sub='march_BS'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
           CALL norm2_psi(WP,.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP%norm2
+          write(out_unit,*) 'norm WP',i,WP%norm2
 
-          write(out_unitp,*) 'WP BasisRep'
+          write(out_unit,*) 'WP BasisRep'
           CALL ecri_psi(T=ZERO,psi=WP,                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep'
+          write(out_unit,*) 'WP GridRep'
           CALL ecri_psi(T=ZERO,psi=WP,                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
@@ -1180,9 +1180,9 @@ END SUBROUTINE march_RK4_old
 
   order = para_propa%para_poly%npoly
   IF (order < 1) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' order < 1  ...'
-    write(out_unitp,*) ' npoly has a wrong value',para_propa%para_poly%npoly
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' order < 1  ...'
+    write(out_unit,*) ' npoly has a wrong value',para_propa%para_poly%npoly
   END IF
 
   DT        = para_propa%WPdeltaT
@@ -1229,14 +1229,14 @@ END SUBROUTINE march_RK4_old
       IF(keep_MPI) CALL dealloc_psi(yt1(i),delete_all=.TRUE.)
     END DO
     deallocate(yt1)
-    !write(out_unitp,*) 'march_bs',j,err1
+    !write(out_unit,*) 'march_bs',j,err1
 
     !IF (err1 < 1.d-6 .OR. err1 > err0) EXIT
     IF (err1 < 1.d-10) EXIT
 
     err0 = err1
   END DO
-  write(out_unitp,*) 'end march_bs',min(j,order),err1
+  write(out_unit,*) 'end march_bs',min(j,order),err1
 
   IF(keep_MPI) WP = yt0(min(j,order))
   DO i=lbound(yt0,dim=1),ubound(yt0,dim=1)
@@ -1254,8 +1254,8 @@ END SUBROUTINE march_RK4_old
       IF(openmpi) CALL MPI_Bcast_(WP%norm2,size1_MPI,root_MPI)
       IF ( WP%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -1269,13 +1269,13 @@ END SUBROUTINE march_RK4_old
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
       END SUBROUTINE march_BS
       SUBROUTINE march_ModMidPoint(T,no,WP,WP0,para_H,para_propa,order)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,dealloc_psi
       USE mod_Op,    ONLY : param_Op
       USE mod_MPI_aux
@@ -1322,22 +1322,22 @@ END SUBROUTINE march_RK4_old
       character (len=*), parameter :: name_sub='march_ModMidPoint'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
           CALL norm2_psi(WP,.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP%norm2
+          write(out_unit,*) 'norm WP',i,WP%norm2
 
-          write(out_unitp,*) 'WP BasisRep'
+          write(out_unit,*) 'WP BasisRep'
           CALL ecri_psi(T=ZERO,psi=WP,                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep'
+          write(out_unit,*) 'WP GridRep'
           CALL ecri_psi(T=ZERO,psi=WP,                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
@@ -1349,15 +1349,15 @@ END SUBROUTINE march_RK4_old
         order_loc = para_propa%para_poly%npoly
       END IF
       IF (order_loc < 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' order_loc < 1  ...'
-        write(out_unitp,*) ' npoly or order have wrong values'
-        write(out_unitp,*) ' npoly: ',para_propa%para_poly%npoly
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' order_loc < 1  ...'
+        write(out_unit,*) ' npoly or order have wrong values'
+        write(out_unit,*) ' npoly: ',para_propa%para_poly%npoly
         IF (present(order))  &
-          write(out_unitp,*) ' order: ',order
+          write(out_unit,*) ' order: ',order
         STOP
       END IF
-!write(out_unitp,*) 'order_loc',order_loc
+!write(out_unit,*) 'order_loc',order_loc
       DTT        = para_propa%WPdeltaT / real(order_loc,kind=Rkind)
 
       IF(keep_MPI) zkm = WP
@@ -1404,8 +1404,8 @@ END SUBROUTINE march_RK4_old
 
       IF ( WP%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm2 > max_norm2',WP%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -1419,7 +1419,7 @@ END SUBROUTINE march_RK4_old
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -1438,7 +1438,7 @@ END SUBROUTINE march_RK4_old
       !!@param: TODO
       SUBROUTINE fcn_field(T,WP,dWP,para_H,para_Dip,                    &
                            para_field,w1)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op,sub_OpPsi,sub_scaledOpPsi
       USE mod_field, ONLY : param_field,sub_dnE
@@ -1480,15 +1480,15 @@ END SUBROUTINE march_RK4_old
       character (len=*), parameter :: name_sub='fcn_field'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
         CALL norm2_psi(WP,.FALSE.,.TRUE.,.FALSE.)
-        write(out_unitp,*) 'norm WP BasisRep',WP%norm2
+        write(out_unit,*) 'norm WP BasisRep',WP%norm2
 
-        write(out_unitp,*) 'WP'
+        write(out_unit,*) 'WP'
         CALL ecri_psi(T=T,psi=WP)
        END IF
 !-----------------------------------------------------------
@@ -1510,16 +1510,16 @@ END SUBROUTINE march_RK4_old
        dWP = dWP * (-EYE)
 
       IF (debug) THEN
-        write(out_unitp,*) 'dWP'
+        write(out_unit,*) 'dWP'
         CALL ecri_psi(T=T,psi=dWP)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
 
       END SUBROUTINE fcn_field
       SUBROUTINE fcn(WP,dWP,para_H)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis, ONLY : get_nb_TDParam_FROM_basis
 
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
@@ -1546,21 +1546,21 @@ END SUBROUTINE march_RK4_old
       character (len=*), parameter :: name_sub='fcn'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
-        write(out_unitp,*) 'nb_bi',WP%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_ba,nb_qa',WP%nb_ba,WP%nb_qa
+        write(out_unit,*) 'nb_bi',WP%nb_bi
+        write(out_unit,*)
 
         CALL norm2_psi(WP,.FALSE.,.TRUE.,.FALSE.)
-        write(out_unitp,*) 'norm WP BasisRep',WP%norm2
+        write(out_unit,*) 'norm WP BasisRep',WP%norm2
 
-        write(out_unitp,*) 'WP'
+        write(out_unit,*) 'WP'
         CALL ecri_psi(T=ZERO,psi=WP)
        END IF
 !-----------------------------------------------------------
 
        !nb_TDParam = get_nb_TDParam_FROM_basis(WP%BasisnD)
-       IF(keep_MPI) write(out_unitp,*) 'In fcn: nb_TDParam',WP%nb_TDParam
+       IF(keep_MPI) write(out_unit,*) 'In fcn: nb_TDParam',WP%nb_TDParam
 
 !-----------------------------------------------------------
 !      dWP = -i.H.WP
@@ -1570,16 +1570,16 @@ END SUBROUTINE march_RK4_old
        IF(keep_MPI) dWP = dWP * (-EYE)
 
        IF (debug) THEN
-        write(out_unitp,*) 'dWP'
+        write(out_unit,*) 'dWP'
         CALL ecri_psi(T=ZERO,psi=dWP)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
 
       END SUBROUTINE fcn
       SUBROUTINE Make_SMatrix_WITH_TDParam(S,WP,para_H)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis, ONLY : get_nb_TDParam_FROM_basis
 
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
@@ -1600,11 +1600,11 @@ END SUBROUTINE march_RK4_old
       character (len=*), parameter :: name_sub='Make_SMatrix_WITH_TDParam'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_tot',WP%nb_tot
-        write(out_unitp,*) 'nb_TDParam',WP%nb_TDParam
-        write(out_unitp,*)
-        !write(out_unitp,*) 'WP'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_tot',WP%nb_tot
+        write(out_unit,*) 'nb_TDParam',WP%nb_TDParam
+        write(out_unit,*)
+        !write(out_unit,*) 'WP'
         !CALL ecri_psi(T=ZERO,psi=WP)
        END IF
 !-----------------------------------------------------------
@@ -1619,9 +1619,9 @@ END SUBROUTINE march_RK4_old
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'S with TDParam'
-        CALL Write_Mat(S,out_unitp,6)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'S with TDParam'
+        CALL Write_Mat(S,out_unit,6)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -1641,7 +1641,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       SUBROUTINE march_noD_field(T,WP,nb_WP,print_Op,                   &
                                  para_H,para_Dip,                       &
                                  para_field,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op,sub_OpPsi,sub_scaledOpPsi
       USE mod_field, ONLY : param_field,sub_dnE
@@ -1692,23 +1692,23 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_nOd_field'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+        write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+        write(out_unit,*)
 
         DO i=1,nb_WP
           CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP(i)%norm2
+          write(out_unit,*) 'norm WP',i,WP(i)%norm2
 
-          write(out_unitp,*) 'WP BasisRep',i
+          write(out_unit,*) 'WP BasisRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',i
+          write(out_unit,*) 'WP GridRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
         END DO
@@ -1740,10 +1740,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         fac_k = fac_k * cmplx(para_propa%WPdeltaT/real(k,kind=Rkind),kind=Rkind)
         limit = maxval(abs(dnE(:)))*fac_k
         IF (limit > para_propa%para_poly%poly_tol) max_der=k
-!       write(out_unitp,*) 'k,max_der,limit',k,max_der,limit
+!       write(out_unit,*) 'k,max_der,limit',k,max_der,limit
       END DO
 !     max_der=para_propa%para_poly%npoly-1
-!     write(out_unitp,*) 'max_der',max_der
+!     write(out_unit,*) 'max_der',max_der
 
       CALL alloc_NParray(work_WP,[para_propa%para_poly%npoly-1],        &
                         'work_WP',name_sub,[0])
@@ -1787,14 +1787,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           WP(j) = WP(j) + work_WP(i+1)
 
           CALL norm2_psi(work_WP(i+1))
-          !write(out_unitp,*) 'norm2 psi i+1',i+1,work_WP(i+1)%norm2
+          !write(out_unit,*) 'norm2 psi i+1',i+1,work_WP(i+1)%norm2
           IF (work_WP(i+1)%norm2 < para_propa%para_poly%poly_tol) EXIT
           IF (work_WP(i+1)%norm2 > TEN**15) THEN
-             write(out_unitp,*) ' ERROR in ',name_sub
-             write(out_unitp,*) ' The norm2 of dnpsi(i+1) is huge !',           &
+             write(out_unit,*) ' ERROR in ',name_sub
+             write(out_unit,*) ' The norm2 of dnpsi(i+1) is huge !',           &
                                           work_WP(i+1)%norm2
-             write(out_unitp,*) ' iteration i:',i
-             write(out_unitp,*) ' Reduce the time step, WPDeltaT:',             &
+             write(out_unit,*) ' iteration i:',i
+             write(out_unit,*) ' Reduce the time step, WPDeltaT:',             &
                              para_propa%WPdeltaT
              para_propa%march_error = .TRUE.
              STOP
@@ -1803,7 +1803,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 
 
-        IF (print_Op) write(out_unitp,*) 'T,max_der,ipoly,norm2',T,max_der,i,&
+        IF (print_Op) write(out_unit,*) 'T,max_der,ipoly,norm2',T,max_der,i,&
                           work_WP(min(i+1,para_propa%para_poly%npoly))%norm2
 
         work_WP(0) = work_WP(min(i+1,para_propa%para_poly%npoly))
@@ -1816,10 +1816,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL norm2_psi(WP(j),GridRep=.FALSE.,BasisRep=.TRUE.)
         IF (WP(j)%norm2 > para_propa%max_norm2) THEN
           T  = T + para_propa%WPdeltaT
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' STOP propagation: norm^2 > max_norm^2',WP(j)%norm2
-          write(out_unitp,*) ' norm^2:     ',WP(j)%norm2
-          write(out_unitp,*) ' max_norm^2: ',para_propa%max_norm2
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' STOP propagation: norm^2 > max_norm^2',WP(j)%norm2
+          write(out_unit,*) ' norm^2:     ',WP(j)%norm2
+          write(out_unit,*) ' max_norm^2: ',para_propa%max_norm2
           para_propa%march_error   = .TRUE.
           para_propa%test_max_norm = .TRUE.
           STOP
@@ -1834,7 +1834,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -1850,7 +1850,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE march_noD(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op,sub_PsiOpPsi,sub_OpPsi,sub_scaledOpPsi
       USE mod_MPI_aux
@@ -1880,10 +1880,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_nOd'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'nOD',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'nOD',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
@@ -1891,7 +1891,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       CALL sub_PsiOpPsi(E,psi,w2,para_H)
       IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(E,size1_MPI,root_MPI)
 !     para_H%E0 = real(E,kind=Rkind)
-!     write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
+!     write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
 
       psi0Hkpsi0(:) = cmplx(ZERO,ZERO,kind=Rkind)
 
@@ -1902,22 +1902,22 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
  21 format(a,100(x,e12.5))
 
-      !write(out_unitp,21) 'Rw1',Real(w1%CvecB,kind=Rkind)
-      !write(out_unitp,21) 'Iw1',AImag(w1%CvecB)
+      !write(out_unit,21) 'Rw1',Real(w1%CvecB,kind=Rkind)
+      !write(out_unit,21) 'Iw1',AImag(w1%CvecB)
 
       DO j=1,para_propa%para_poly%npoly
 
-        !write(out_unitp,21) 'Rw1',Real(w1%CvecB,kind=Rkind)
-        !write(out_unitp,21) 'Iw1',AImag(w1%CvecB)
+        !write(out_unit,21) 'Rw1',Real(w1%CvecB,kind=Rkind)
+        !write(out_unit,21) 'Iw1',AImag(w1%CvecB)
 
         IF (j > 1) CALL sub_OpPsi(w1,w2,para_H) ! already done in PsiHPsi
-        !write(out_unitp,21) 'Rw2',Real(w2%CvecB,kind=Rkind)
-        !write(out_unitp,21) 'Iw2',AImag(w2%CvecB)
+        !write(out_unit,21) 'Rw2',Real(w2%CvecB,kind=Rkind)
+        !write(out_unit,21) 'Iw2',AImag(w2%CvecB)
 
         CALL sub_scaledOpPsi(w1,w2,para_H%E0,ONE)
 
-        !write(out_unitp,21) 'Rw2',Real(w2%CvecB,kind=Rkind)
-        !write(out_unitp,21) 'Iw2',AImag(w2%CvecB)
+        !write(out_unit,21) 'Rw2',Real(w2%CvecB,kind=Rkind)
+        !write(out_unit,21) 'Iw2',AImag(w2%CvecB)
 
         IF(keep_MPI) w1 = w2
 
@@ -1929,49 +1929,49 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           cmplx(ZERO,-para_propa%WPdeltaT/real(j,kind=Rkind),kind=Rkind)
         IF(keep_MPI) w2 = w1 * rtj
 
-        !write(out_unitp,21) 'Rw2*rtj',Real(w2%CvecB,kind=Rkind)
-        !write(out_unitp,21) 'Iw2*rtj',AImag(w2%CvecB)
+        !write(out_unit,21) 'Rw2*rtj',Real(w2%CvecB,kind=Rkind)
+        !write(out_unit,21) 'Iw2*rtj',AImag(w2%CvecB)
 
         IF(keep_MPI) psi = psi + w2
 
-        !write(out_unitp,21) 'Rpsi',Real(psi%CvecB,kind=Rkind)
-        !write(out_unitp,21) 'Ipsi',AImag(psi%CvecB)
+        !write(out_unit,21) 'Rpsi',Real(psi%CvecB,kind=Rkind)
+        !write(out_unit,21) 'Ipsi',AImag(psi%CvecB)
 
         IF(keep_MPI) CALL norm2_psi(w2)
         IF(openmpi .AND. MPI_scheme/=1)  CALL MPI_Bcast_(w2%norm2,size1_MPI,root_MPI)
 
-        IF (debug) write(out_unitp,*) 'j,norm2 w2',j,w2%norm2
+        IF (debug) write(out_unit,*) 'j,norm2 w2',j,w2%norm2
 
         IF (w2%norm2 > TEN**15) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Norm of the vector is TOO large (> 10^15)',j,    &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Norm of the vector is TOO large (> 10^15)',j,    &
                                                 w2%norm2
-          write(out_unitp,*) ' => Reduce the time step !!'
+          write(out_unit,*) ' => Reduce the time step !!'
           STOP
         END IF
         j_exit = j
         IF (w2%norm2 < para_propa%para_poly%poly_tol) EXIT
 
       END DO
-      write(out_unitp,*) 'j_exit,norms',j_exit,abs(w2%norm2)
+      write(out_unit,*) 'j_exit,norms',j_exit,abs(w2%norm2)
 
-!     write(out_unitp,*) 'j,norm2',j,abs(w1%norm2*rtj)
+!     write(out_unit,*) 'j,norm2',j,abs(w1%norm2*rtj)
       IF (abs(w2%norm2) > para_propa%para_poly%poly_tol) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' Norm of the last vector is TOO large',w2%norm2
-        write(out_unitp,*) ' poly_tol: ',para_propa%para_poly%poly_tol
-        write(out_unitp,*) ' => npoly or max_poly are TOO small',               &
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' Norm of the last vector is TOO large',w2%norm2
+        write(out_unit,*) ' poly_tol: ',para_propa%para_poly%poly_tol
+        write(out_unit,*) ' => npoly or max_poly are TOO small',               &
                       para_propa%para_poly%npoly
         STOP
       END IF
 
- !write(out_unitp,*) ' Psi before phase shift '
+ !write(out_unit,*) ' Psi before phase shift '
  !CALL ecri_psi(psi=psi)
 !     - Phase Shift -----------------------------------
       phase = para_H%E0*para_propa%WPdeltaT
       IF(keep_MPI) psi   = psi * exp(-cmplx(ZERO,phase,kind=Rkind))
 
- !write(out_unitp,*) ' Psi after phase shift '
+ !write(out_unit,*) ' Psi after phase shift '
  !CALL ecri_psi(psi=psi)
 
 !    - check norm ------------------
@@ -1980,8 +1980,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       IF ( psi%norm2 > para_propa%max_norm2) THEN
         T  = T + para_propa%WPdeltaT
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -2023,8 +2023,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -2039,7 +2039,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
   SUBROUTINE march_SIP(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,renorm_psi,Overlap_psi1_psi2
       USE mod_Op,    ONLY : param_Op, sub_PsiOpPsi, sub_OpPsi,sub_scaledOpPsi
       IMPLICIT NONE
@@ -2077,10 +2077,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_SIP'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'order',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'order',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
@@ -2099,7 +2099,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       H(:,:) = CZERO
       ! loop for H|psi>, H^2|psi>, H^3|psi>...
       DO j=2,para_propa%para_poly%npoly+1
-        IF (debug) write(out_unitp,*) 'in ',name_sub,' it:',j-1
+        IF (debug) write(out_unit,*) 'in ',name_sub,' it:',j-1
         CALL sub_OpPsi(Psi  =tab_KrylovSpace(j-1),                              &
                        OpPsi=tab_KrylovSpace(j),para_Op=para_H)
 
@@ -2129,11 +2129,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         ! n=j-1
         CALL UPsi_spec(UPsiOnKrylov,H(1:j-1,1:j-1),Vec,Eig,             &
                               para_propa%WPdeltaT,j-1,With_diago=.TRUE.)
-        IF (debug) write(out_unitp,*) j-1,'abs(UPsiOnKrylov(j-1)',abs(UPsiOnKrylov(j-1))
+        IF (debug) write(out_unit,*) j-1,'abs(UPsiOnKrylov(j-1)',abs(UPsiOnKrylov(j-1))
         IF (abs(UPsiOnKrylov(j-1)) < para_propa%para_poly%poly_tol .OR. &
             j == para_propa%para_poly%npoly+1) THEN
           n = j-1
-          write(out_unitp,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(j-1))
+          write(out_unit,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(j-1))
           EXIT
         END IF
 
@@ -2163,19 +2163,19 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 
       IF (abs(UPsiOnKrylov(n)) > para_propa%para_poly%poly_tol) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
-        write(out_unitp,*) '    abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
-        write(out_unitp,*) '    poly_tol: ',para_propa%para_poly%poly_tol
-        write(out_unitp,*) ' => npoly is TOO small',para_propa%para_poly%npoly
-        write(out_unitp,*) ' or'
-        write(out_unitp,*) ' => Reduce the time step !!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
+        write(out_unit,*) '    abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
+        write(out_unit,*) '    poly_tol: ',para_propa%para_poly%poly_tol
+        write(out_unit,*) ' => npoly is TOO small',para_propa%para_poly%npoly
+        write(out_unit,*) ' or'
+        write(out_unit,*) ' => Reduce the time step !!'
         STOP
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'Eig',Eig(1:n)
-        write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
+        write(out_unit,*) 'Eig',Eig(1:n)
+        write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
       END IF
 
       Psi = ZERO
@@ -2186,8 +2186,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !- check norm ------------------
       CALL norm2_psi(psi)
       IF ( psi%norm2 > para_propa%max_norm2) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -2238,14 +2238,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
   END SUBROUTINE march_SIP
   SUBROUTINE march_SIP2(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,renorm_psi,Overlap_psi1_psi2
       USE mod_Op,    ONLY : param_Op, sub_PsiOpPsi, sub_OpPsi,sub_scaledOpPsi
       IMPLICIT NONE
@@ -2284,11 +2284,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_SIP2'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'order',para_propa%para_poly%npoly
-        write(out_unitp,*) 'tol',para_propa%para_poly%poly_tol
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'order',para_propa%para_poly%npoly
+        write(out_unit,*) 'tol',para_propa%para_poly%poly_tol
       END IF
 !-----------------------------------------------------------
 
@@ -2302,7 +2302,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       S(1,1) = CONE
       ! loop for H|psi>, H^2|psi>, H^3|psi>...
       DO j=2,para_propa%para_poly%npoly+1
-        IF (debug) write(out_unitp,*) 'in ',name_sub,' it:',j-1
+        IF (debug) write(out_unit,*) 'in ',name_sub,' it:',j-1
         CALL sub_OpPsi(Psi  =tab_KrylovSpace(j-1),                      &
                        OpPsi=tab_KrylovSpace(j),para_Op=para_H)
 !        IF (j == 2) THEN
@@ -2326,11 +2326,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         END DO
         H(1:j-1,1:j-1) = S(1:j-1,2:j)
 
-        write(out_unitp,*)
-        write(out_unitp,*) 'Real(S)'
-        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unitp,6,Rformat='(f18.14)')
-        write(out_unitp,*) 'im(S)'
-        CALL Write_Mat(aimag(S(1:j,1:j)),out_unitp,6,Rformat='(f18.14)')
+        write(out_unit,*)
+        write(out_unit,*) 'Real(S)'
+        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
+        write(out_unit,*) 'im(S)'
+        CALL Write_Mat(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
 
 
         ! psi(t+dt)=sum_{i}^{n} <Vec|psi_0>exp(-i*Ei*dt) |Vec>
@@ -2338,30 +2338,30 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL UGPsi_spec(UPsiOnKrylov,UPspectral_n,H(1:j-1,1:j-1),       &
                         S(1:j-1,1:j-1),Vec,Eig,para_propa%WPdeltaT,     &
                         j-1,With_diago=.TRUE.)
-        !IF (debug) write(out_unitp,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
+        !IF (debug) write(out_unit,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
         IF (abs(UPspectral_n) < para_propa%para_poly%poly_tol .OR. &
             j == para_propa%para_poly%npoly+1) THEN
           n = j-1
-          write(out_unitp,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
+          write(out_unit,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
           EXIT
         END IF
 
       END DO
 
       IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
-        write(out_unitp,*) '    abs(UPspectral_n)',abs(UPspectral_n)
-        write(out_unitp,*) '    poly_tol: ',para_propa%para_poly%poly_tol
-        write(out_unitp,*) ' => npoly is TOO small',para_propa%para_poly%npoly
-        write(out_unitp,*) ' or'
-        write(out_unitp,*) ' => Reduce the time step !!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
+        write(out_unit,*) '    abs(UPspectral_n)',abs(UPspectral_n)
+        write(out_unit,*) '    poly_tol: ',para_propa%para_poly%poly_tol
+        write(out_unit,*) ' => npoly is TOO small',para_propa%para_poly%npoly
+        write(out_unit,*) ' or'
+        write(out_unit,*) ' => Reduce the time step !!'
         STOP
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'Eig',Eig(1:n)
-        write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
+        write(out_unit,*) 'Eig',Eig(1:n)
+        write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
       END IF
 
       Psi = ZERO
@@ -2372,8 +2372,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !- check norm ------------------
       CALL norm2_psi(psi)
       IF ( psi%norm2 > para_propa%max_norm2) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -2399,14 +2399,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
   END SUBROUTINE march_SIP2
   SUBROUTINE march_SIP2_SRep(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi
       USE mod_Op
       USE mod_OpPsi_SG4
@@ -2452,10 +2452,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_SIP2_SRep'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'order',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'order',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
      BasisnD => psi%BasisnD
@@ -2484,7 +2484,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       ! loop for H|psi>, H^2|psi>, H^3|psi>...
       DO j=2,para_propa%para_poly%npoly+1
-        IF (debug) write(out_unitp,*) 'in ',name_sub,' it:',j-1
+        IF (debug) write(out_unit,*) 'in ',name_sub,' it:',j-1
 
         ! loop on the Smolyak terms
         tab_l(:) = BasisnD%para_SGType2%nDval_init(:,1)
@@ -2529,11 +2529,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         END DO
         ! End of the Smolyak term loop
 
-        write(out_unitp,*)
-        write(out_unitp,*) 'Real(S)'
-        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unitp,6,Rformat='(f18.14)')
-        write(out_unitp,*) 'im(S)'
-        CALL Write_Mat(aimag(S(1:j,1:j)),out_unitp,6,Rformat='(f18.14)')
+        write(out_unit,*)
+        write(out_unit,*) 'Real(S)'
+        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
+        write(out_unit,*) 'im(S)'
+        CALL Write_Mat(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
 
         ! The matrix H is a part of S
         H(1:j-1,1:j-1) = S(1:j-1,2:j)
@@ -2544,30 +2544,30 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL UGPsi_spec(UPsiOnKrylov,UPspectral_n,H(1:j-1,1:j-1),       &
                         S(1:j-1,1:j-1),Vec,Eig,para_propa%WPdeltaT,     &
                         j-1,With_diago=.TRUE.)
-        !IF (debug) write(out_unitp,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
+        !IF (debug) write(out_unit,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
         IF (abs(UPspectral_n) < para_propa%para_poly%poly_tol .OR. &
             j == para_propa%para_poly%npoly+1) THEN
           n = j-1
-          write(out_unitp,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
+          write(out_unit,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
           EXIT
         END IF
 
       END DO
 
       IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
-        write(out_unitp,*) '    abs(UPspectral_n)',abs(UPspectral_n)
-        write(out_unitp,*) '    poly_tol: ',para_propa%para_poly%poly_tol
-        write(out_unitp,*) ' => npoly is TOO small',para_propa%para_poly%npoly
-        write(out_unitp,*) ' or'
-        write(out_unitp,*) ' => Reduce the time step !!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
+        write(out_unit,*) '    abs(UPspectral_n)',abs(UPspectral_n)
+        write(out_unit,*) '    poly_tol: ',para_propa%para_poly%poly_tol
+        write(out_unit,*) ' => npoly is TOO small',para_propa%para_poly%npoly
+        write(out_unit,*) ' or'
+        write(out_unit,*) ' => Reduce the time step !!'
         STOP
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'Eig',Eig(1:n)
-        write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
+        write(out_unit,*) 'Eig',Eig(1:n)
+        write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
       END IF
 
       !Psi = ZERO
@@ -2598,8 +2598,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !- check norm ------------------
       CALL norm2_psi(psi)
       IF ( psi%norm2 > para_propa%max_norm2) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -2629,14 +2629,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
   END SUBROUTINE march_SIP2_SRep
   SUBROUTINE march_SIP2_SRep2(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi
       USE mod_Op
       USE mod_OpPsi_SG4
@@ -2683,10 +2683,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_SIP2_SRep2'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'order',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'order',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
      BasisnD => psi%BasisnD
@@ -2714,7 +2714,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       ! loop for H|psi>, H^2|psi>, H^3|psi>...
       DO j=2,para_propa%para_poly%npoly+1
-        IF (debug) write(out_unitp,*) 'in ',name_sub,' it:',j-1
+        IF (debug) write(out_unit,*) 'in ',name_sub,' it:',j-1
 
         ! loop on the Smolyak terms
         tab_l(:) = BasisnD%para_SGType2%nDval_init(:,1)
@@ -2788,11 +2788,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         END DO
         ! End of the Smolyak term loop
 
-        write(out_unitp,*)
-        write(out_unitp,*) 'Real(S)'
-        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unitp,6,Rformat='(f18.14)')
-        write(out_unitp,*) 'im(S)'
-        CALL Write_Mat(aimag(S(1:j,1:j)),out_unitp,6,Rformat='(f18.14)')
+        write(out_unit,*)
+        write(out_unit,*) 'Real(S)'
+        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
+        write(out_unit,*) 'im(S)'
+        CALL Write_Mat(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
 
         ! The matrix H is a part of S
         !H(1:j-1,1:j-1) = S(1:j-1,2:j)
@@ -2807,30 +2807,30 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL UGPsi_spec(UPsiOnKrylov,UPspectral_n,H(1:j-1,1:j-1),     &
                         S(1:j-1,1:j-1),Vec,Eig,para_propa%WPdeltaT,     &
                         j-1,With_diago=.TRUE.)
-        !IF (debug) write(out_unitp,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
+        !IF (debug) write(out_unit,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
         IF (abs(UPspectral_n) < para_propa%para_poly%poly_tol .OR. &
             j == para_propa%para_poly%npoly+1) THEN
           n = j-1
-          write(out_unitp,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
+          write(out_unit,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
           EXIT
         END IF
 
       END DO
 
       IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
-        write(out_unitp,*) '    abs(UPspectral_n)',abs(UPspectral_n)
-        write(out_unitp,*) '    poly_tol: ',para_propa%para_poly%poly_tol
-        write(out_unitp,*) ' => npoly is TOO small',para_propa%para_poly%npoly
-        write(out_unitp,*) ' or'
-        write(out_unitp,*) ' => Reduce the time step !!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
+        write(out_unit,*) '    abs(UPspectral_n)',abs(UPspectral_n)
+        write(out_unit,*) '    poly_tol: ',para_propa%para_poly%poly_tol
+        write(out_unit,*) ' => npoly is TOO small',para_propa%para_poly%npoly
+        write(out_unit,*) ' or'
+        write(out_unit,*) ' => Reduce the time step !!'
         !STOP
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'Eig',Eig(1:n)
-        write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
+        write(out_unit,*) 'Eig',Eig(1:n)
+        write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
       END IF
 
       !Psi = ZERO
@@ -2861,8 +2861,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !- check norm ------------------
       CALL norm2_psi(psi)
       IF ( psi%norm2 > para_propa%max_norm2) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
         STOP
@@ -2896,14 +2896,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
   END SUBROUTINE march_SIP2_SRep2
   SUBROUTINE march_SIL(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Op,    ONLY : param_Op, sub_PsiOpPsi, sub_OpPsi,sub_scaledOpPsi
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,renorm_psi,    &
                             renorm_psi_With_norm2,Overlap_psi1_psi2
@@ -2945,10 +2945,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_SIL'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'order',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'order',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
@@ -2967,7 +2967,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       E0 = para_H%E0
       IF(keep_MPI) H(:,:) = CZERO
       DO k=1,para_propa%para_poly%npoly
-        IF (debug) write(out_unitp,*) 'in ',name_sub,' it:',k
+        IF (debug) write(out_unit,*) 'in ',name_sub,' it:',k
 
         IF (para_propa%nb_micro > 1) THEN
           IF(keep_MPI) psi0_psiKrylovSpace(k) = Calc_AutoCorr(psi0,tab_KrylovSpace(k),&
@@ -3005,11 +3005,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           !  (i) k reaches npoly (ii) the scheme converges
           CALL UPsi_spec(UPsiOnKrylov,H(1:k,1:k),Vec,Eig,                 &
                                   para_propa%WPdeltaT,k,With_diago=.TRUE.)
-          !write(out_unitp,*) k,'abs(UPsiOnKrylov(k)',abs(UPsiOnKrylov(k))
+          !write(out_unit,*) k,'abs(UPsiOnKrylov(k)',abs(UPsiOnKrylov(k))
           IF (abs(UPsiOnKrylov(k)) < para_propa%para_poly%poly_tol .OR. &
             k == para_propa%para_poly%npoly) THEN
             n = k
-            write(out_unitp,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
+            write(out_unit,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
             !EXIT
             MPI_exit=.TRUE.
           END IF
@@ -3034,7 +3034,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       END DO
 
-      IF (debug) write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
+      IF (debug) write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
 
       IF(keep_MPI) THEN
         Psi = ZERO
@@ -3047,8 +3047,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       IF(keep_MPI) CALL norm2_psi(psi)
       IF(openmpi)  CALL MPI_Bcast_(psi%norm2,size1_MPI,root_MPI)
       IF ( psi%norm2 > para_propa%max_norm2) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm > max_norm',                &
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm > max_norm',                &
                          psi%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
@@ -3098,14 +3098,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
   END SUBROUTINE march_SIL
   SUBROUTINE UPsi_spec(UPsiOnKrylov,H,Vec,Eig,deltaT,n,With_diago)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 
@@ -3130,13 +3130,13 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='UPsi_spec'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',deltaT
-        write(out_unitp,*) 'n',n
-        write(out_unitp,*) 'With_diago',With_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',deltaT
+        write(out_unit,*) 'n',n
+        write(out_unit,*) 'With_diago',With_diago
         IF (With_diago .AND. n <= nmax) THEN
-          write(out_unitp,*) 'H'
-          CALL Write_Mat(H,out_unitp,6)
+          write(out_unit,*) 'H'
+          CALL Write_Mat(H,out_unit,6)
         END IF
       END IF
 !-----------------------------------------------------------
@@ -3167,17 +3167,17 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'abs(UPsiOnKrylov(:))',abs(UPsiOnKrylov)
-        write(out_unitp,*) 'minval(abs(UPsiOnKrylov(:)))',minval(abs(UPsiOnKrylov))
-        write(out_unitp,*) 'norm2 UPsiOnKrylov',dot_product(UPsiOnKrylov,UPsiOnKrylov)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'abs(UPsiOnKrylov(:))',abs(UPsiOnKrylov)
+        write(out_unit,*) 'minval(abs(UPsiOnKrylov(:)))',minval(abs(UPsiOnKrylov))
+        write(out_unit,*) 'norm2 UPsiOnKrylov',dot_product(UPsiOnKrylov,UPsiOnKrylov)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
 
   END SUBROUTINE UPsi_spec
   SUBROUTINE UGPsi_spec(UPsiOnKrylov,UPspectral_n,H,S,Vec,Eig,deltaT,n,With_diago)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 
@@ -3211,22 +3211,22 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='UGPsi_spec'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',deltaT
-        write(out_unitp,*) 'n',n
-        write(out_unitp,*) 'With_diago',With_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',deltaT
+        write(out_unit,*) 'n',n
+        write(out_unit,*) 'With_diago',With_diago
         IF (With_diago .AND. n <= nmax) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) 'H'
-          write(out_unitp,*) 'Real(H)'
-          CALL Write_Mat(real(H,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(H)'
-          CALL Write_Mat(aimag(H),out_unitp,6)
-          write(out_unitp,*)
-          write(out_unitp,*) 'Real(S)'
-          CALL Write_Mat(real(S,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(S)'
-          CALL Write_Mat(aimag(S),out_unitp,6)
+          write(out_unit,*)
+          write(out_unit,*) 'H'
+          write(out_unit,*) 'Real(H)'
+          CALL Write_Mat(real(H,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(H)'
+          CALL Write_Mat(aimag(H),out_unit,6)
+          write(out_unit,*)
+          write(out_unit,*) 'Real(S)'
+          CALL Write_Mat(real(S,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(S)'
+          CALL Write_Mat(aimag(S),out_unit,6)
         END IF
       END IF
 !-----------------------------------------------------------
@@ -3239,8 +3239,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL alloc_NParray(Eig,[n],  'Eig',name_sub)
 
         CALL diagonalization(S,Eig,Vec,3,1,.TRUE.)
-        IF (debug) write(out_unitp,*) 'Eig of S',Eig
-        IF (debug) write(out_unitp,*) 'min(abs(Eig)) of S',minval(abs(Eig))
+        IF (debug) write(out_unit,*) 'Eig of S',Eig
+        IF (debug) write(out_unit,*) 'min(abs(Eig)) of S',minval(abs(Eig))
 
         !first transfo S -> I (ortho Smidt)
         So = S
@@ -3248,8 +3248,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         DO i=1,n
           Sii = S(i,i)
           IF (abs(Sii) <tol_ortho) THEN
-            write(out_unitp,*) 'ERROR in ',name_sub
-            write(out_unitp,*) 'S(i,i) is too small',abs(Sii)
+            write(out_unit,*) 'ERROR in ',name_sub
+            write(out_unit,*) 'S(i,i) is too small',abs(Sii)
             STOP 'ERROR in UGPsi_spec: S(i,i) is too small'
           END IF
           C1(i,i) = ONE / sqrt(abs(Sii))
@@ -3258,8 +3258,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         DO i=1,n
           Sii = dot_product(C1(:,i),matmul(S,C1(:,i)))
           IF (abs(Sii) < tol_ortho) THEN
-            write(out_unitp,*) 'ERROR in ',name_sub
-            write(out_unitp,*) ' S(i,i) is too small',abs(Sii)
+            write(out_unit,*) 'ERROR in ',name_sub
+            write(out_unit,*) ' S(i,i) is too small',abs(Sii)
             STOP 'ERROR in UGPsi_spec: S(i,i) is too small'
           END IF
           C1(:,i) = C1(:,i) / sqrt(abs(Sii))
@@ -3272,24 +3272,24 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         Ho = matmul(transpose(conjg(C1)),matmul(H,C1))
         So = matmul(transpose(conjg(C1)),matmul(S,C1))
 
-        IF (debug)  write(out_unitp,*) ' Max non-Hermitian Ho :',maxval(abs(Ho-conjg(transpose(Ho))))
+        IF (debug)  write(out_unit,*) ' Max non-Hermitian Ho :',maxval(abs(Ho-conjg(transpose(Ho))))
 
         IF (debug .AND. n <= nmax) THEN
 
-          write(out_unitp,*)
-          write(out_unitp,*) 'Ho'
-          write(out_unitp,*) 'Real(Ho)'
-          CALL Write_Mat(real(Ho,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(Ho)'
-          CALL Write_Mat(aimag(Ho),out_unitp,6)
+          write(out_unit,*)
+          write(out_unit,*) 'Ho'
+          write(out_unit,*) 'Real(Ho)'
+          CALL Write_Mat(real(Ho,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(Ho)'
+          CALL Write_Mat(aimag(Ho),out_unit,6)
 
-          write(out_unitp,*)
-          write(out_unitp,*) 'So: Identity matrix'
-          write(out_unitp,*) 'Real(So)'
-          CALL Write_Mat(real(So,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(So)'
-          CALL Write_Mat(aimag(So),out_unitp,6)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) 'So: Identity matrix'
+          write(out_unit,*) 'Real(So)'
+          CALL Write_Mat(real(So,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(So)'
+          CALL Write_Mat(aimag(So),out_unit,6)
+          write(out_unit,*)
         END IF
 
 
@@ -3298,17 +3298,17 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           So(i,i)   = abs(So(i,i)) - CONE
         END DO
         max_diff = maxval(abs(So))
-        IF (debug)  write(out_unitp,*) ' Max_diff on (So-Idmatrix) :',max_diff
+        IF (debug)  write(out_unit,*) ' Max_diff on (So-Idmatrix) :',max_diff
 
         IF (max_diff > ONETENTH**6) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' So is not the identity matrix. max_diff:',max_diff
-          write(out_unitp,*)
-          write(out_unitp,*) 'Real(So)'
-          CALL Write_Mat(real(So,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(So)'
-          CALL Write_Mat(aimag(So),out_unitp,6)
-          write(out_unitp,*)
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' So is not the identity matrix. max_diff:',max_diff
+          write(out_unit,*)
+          write(out_unit,*) 'Real(So)'
+          CALL Write_Mat(real(So,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(So)'
+          CALL Write_Mat(aimag(So),out_unit,6)
+          write(out_unit,*)
           STOP 'ERROR in UGPsi_spec: So is not the identity matrix.'
         END IF
 
@@ -3324,14 +3324,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         CALL diagonalization(Ho,Eig,Vec,3,1,.TRUE.)
         IF (debug) THEN
-          write(out_unitp,*) 'Eig',Eig
+          write(out_unit,*) 'Eig',Eig
 
-          write(out_unitp,*)
-          write(out_unitp,*) 'Real(Vec)'
-          CALL Write_Mat(real(Vec,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(Vec)'
-          CALL Write_Mat(aimag(Vec),out_unitp,6)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) 'Real(Vec)'
+          CALL Write_Mat(real(Vec,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(Vec)'
+          CALL Write_Mat(aimag(Vec),out_unit,6)
+          write(out_unit,*)
         END IF
 
       END IF
@@ -3340,7 +3340,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       UPsiOnKrylov = CZERO
 
       DO i=1,n
-        IF (debug) write(out_unitp,*) 'norm2 Vec(:,i)',i,dot_product(Vec(:,i),Vec(:,i))
+        IF (debug) write(out_unit,*) 'norm2 Vec(:,i)',i,dot_product(Vec(:,i),Vec(:,i))
 
         coef_i = Vec(1,i) ! just (1,i) because psi on the Krylov subspace is [1,0,0,...0]
                           ! that why we use Schmidt orthogonalisation
@@ -3349,7 +3349,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         UPsiOnKrylov(:) = UPsiOnKrylov(:) + conjg(Vec(:,i))*coef_i ! update U.psi on the Krylov space
       END DO
-      IF (debug) write(out_unitp,*) 'norm2 UPsiOnKrylov',dot_product(UPsiOnKrylov,UPsiOnKrylov)
+      IF (debug) write(out_unit,*) 'norm2 UPsiOnKrylov',dot_product(UPsiOnKrylov,UPsiOnKrylov)
 
       UPspectral_n = UPsiOnKrylov(n)
 
@@ -3357,16 +3357,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'abs(UPspectral_n)',abs(UPspectral_n)
-        write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'abs(UPspectral_n)',abs(UPspectral_n)
+        write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
 
   END SUBROUTINE UGPsi_spec
   SUBROUTINE UGPsi_taylor(UPsiOnKrylov,UPspectral_n,H,S,Vec,Eig,deltaT,n,With_diago)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 
@@ -3405,22 +3405,22 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='UGPsi_taylor'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',deltaT
-        write(out_unitp,*) 'n',n
-        write(out_unitp,*) 'With_diago',With_diago
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',deltaT
+        write(out_unit,*) 'n',n
+        write(out_unit,*) 'With_diago',With_diago
         IF (With_diago .AND. n <= nmax) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) 'H'
-          write(out_unitp,*) 'Real(H)'
-          CALL Write_Mat(real(H,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(H)'
-          CALL Write_Mat(aimag(H),out_unitp,6)
-          write(out_unitp,*)
-          write(out_unitp,*) 'Real(S)'
-          CALL Write_Mat(real(S,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(S)'
-          CALL Write_Mat(aimag(S),out_unitp,6)
+          write(out_unit,*)
+          write(out_unit,*) 'H'
+          write(out_unit,*) 'Real(H)'
+          CALL Write_Mat(real(H,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(H)'
+          CALL Write_Mat(aimag(H),out_unit,6)
+          write(out_unit,*)
+          write(out_unit,*) 'Real(S)'
+          CALL Write_Mat(real(S,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(S)'
+          CALL Write_Mat(aimag(S),out_unit,6)
         END IF
       END IF
 !-----------------------------------------------------------
@@ -3433,8 +3433,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL alloc_NParray(Eig,[n],  'Eig',name_sub)
 
         CALL diagonalization(S,Eig,Vec,3,1,.TRUE.)
-        IF (debug) write(out_unitp,*) 'Eig of S',Eig
-        IF (debug) write(out_unitp,*) 'min(abs(Eig)) of S',minval(abs(Eig))
+        IF (debug) write(out_unit,*) 'Eig of S',Eig
+        IF (debug) write(out_unit,*) 'min(abs(Eig)) of S',minval(abs(Eig))
 
         !first transfo S -> I (ortho Smidt)
         So = S
@@ -3442,8 +3442,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         DO i=1,n
           Sii = S(i,i)
           IF (abs(Sii) <tol_ortho) THEN
-            write(out_unitp,*) 'ERROR in ',name_sub
-            write(out_unitp,*) 'S(i,i) is too small',abs(Sii)
+            write(out_unit,*) 'ERROR in ',name_sub
+            write(out_unit,*) 'S(i,i) is too small',abs(Sii)
             STOP 'ERROR in UGPsi_spec: S(i,i) is too small'
           END IF
           C1(i,i) = ONE / sqrt(abs(Sii))
@@ -3452,8 +3452,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         DO i=1,n
           Sii = dot_product(C1(:,i),matmul(S,C1(:,i)))
           IF (abs(Sii) < tol_ortho) THEN
-            write(out_unitp,*) 'ERROR in ',name_sub
-            write(out_unitp,*) ' S(i,i) is too small',abs(Sii)
+            write(out_unit,*) 'ERROR in ',name_sub
+            write(out_unit,*) ' S(i,i) is too small',abs(Sii)
             STOP 'ERROR in UGPsi_spec: S(i,i) is too small'
           END IF
           C1(:,i) = C1(:,i) / sqrt(abs(Sii))
@@ -3468,20 +3468,20 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         IF (debug .AND. n <= nmax) THEN
 
-          write(out_unitp,*)
-          write(out_unitp,*) 'Ho'
-          write(out_unitp,*) 'Real(Ho)'
-          CALL Write_Mat(real(Ho,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(Ho)'
-          CALL Write_Mat(aimag(Ho),out_unitp,6)
+          write(out_unit,*)
+          write(out_unit,*) 'Ho'
+          write(out_unit,*) 'Real(Ho)'
+          CALL Write_Mat(real(Ho,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(Ho)'
+          CALL Write_Mat(aimag(Ho),out_unit,6)
 
-          write(out_unitp,*)
-          write(out_unitp,*) 'So: Identity matrix'
-          write(out_unitp,*) 'Real(So)'
-          CALL Write_Mat(real(So,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(So)'
-          CALL Write_Mat(aimag(So),out_unitp,6)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) 'So: Identity matrix'
+          write(out_unit,*) 'Real(So)'
+          CALL Write_Mat(real(So,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(So)'
+          CALL Write_Mat(aimag(So),out_unit,6)
+          write(out_unit,*)
         END IF
 
 
@@ -3490,17 +3490,17 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           So(i,i)   = abs(So(i,i)) - CONE
         END DO
         max_diff = maxval(abs(So))
-        IF (debug)  write(out_unitp,*) ' Max_diff on (So-Idmatrix) :',max_diff
+        IF (debug)  write(out_unit,*) ' Max_diff on (So-Idmatrix) :',max_diff
 
         IF (max_diff > ONETENTH**6) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' So is not the identity matrix. max_diff:',max_diff
-          write(out_unitp,*)
-          write(out_unitp,*) 'Real(So)'
-          CALL Write_Mat(real(So,kind=Rkind),out_unitp,6)
-          write(out_unitp,*) 'im(So)'
-          CALL Write_Mat(aimag(So),out_unitp,6)
-          write(out_unitp,*)
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' So is not the identity matrix. max_diff:',max_diff
+          write(out_unit,*)
+          write(out_unit,*) 'Real(So)'
+          CALL Write_Mat(real(So,kind=Rkind),out_unit,6)
+          write(out_unit,*) 'im(So)'
+          CALL Write_Mat(aimag(So),out_unit,6)
+          write(out_unit,*)
           STOP 'ERROR in UGPsi_spec: So is not the identity matrix.'
         END IF
 
@@ -3522,34 +3522,34 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       UPsiOnKrylov    = CZERO
       UPsiOnKrylov(1) = CONE
       Vtemp           = UPsiOnKrylov ! here we have the 0 order term.
-      !write(out_unitp,*) '0 abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
-      !write(out_unitp,*) '0 Vtemp',abs(Vtemp)
+      !write(out_unit,*) '0 abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
+      !write(out_unit,*) '0 Vtemp',abs(Vtemp)
       max_norm_UPsiOnKrylov = ONE
 
       DO i=1,max_it_taylor
         Vtemp = matmul(Ho,Vtemp) / cmplx(i,kind=Rkind)
-        !write(out_unitp,*) i,' Vtemp',abs(Vtemp)
+        !write(out_unit,*) i,' Vtemp',abs(Vtemp)
         UPsiOnKrylov = UPsiOnKrylov + Vtemp
-        !write(out_unitp,*) i,'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
+        !write(out_unit,*) i,'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
 
         IF (sqrt(abs(dot_product(UPsiOnKrylov,UPsiOnKrylov))) > max_norm_UPsiOnKrylov) &
            max_norm_UPsiOnKrylov = sqrt(abs(dot_product(UPsiOnKrylov,UPsiOnKrylov)))
         IF (max_norm_UPsiOnKrylov > TEN**10) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' UPsiOnKrylov is too large at the Taylor iteration:',i
-          write(out_unitp,*) ' max_norm_UPsiOnKrylov',max_norm_UPsiOnKrylov
-          write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
-          write(out_unitp,*)
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' UPsiOnKrylov is too large at the Taylor iteration:',i
+          write(out_unit,*) ' max_norm_UPsiOnKrylov',max_norm_UPsiOnKrylov
+          write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
+          write(out_unit,*)
           STOP ' ERROR in Taylor: UPsiOnKrylov too large'
         END IF
 
         IF (sqrt(abs(dot_product(Vtemp,Vtemp))) < tol_taylor) EXIT
 
       END DO
-      IF (debug) write(out_unitp,*) 'Taylor order',i,sqrt(abs(dot_product(Vtemp,Vtemp)))
-      IF (debug) write(out_unitp,*) 'max_norm_UPsiOnKrylov',max_norm_UPsiOnKrylov
+      IF (debug) write(out_unit,*) 'Taylor order',i,sqrt(abs(dot_product(Vtemp,Vtemp)))
+      IF (debug) write(out_unit,*) 'max_norm_UPsiOnKrylov',max_norm_UPsiOnKrylov
 
-      IF (debug) write(out_unitp,*) 'norm2 UPsiOnKrylov',dot_product(UPsiOnKrylov,UPsiOnKrylov)
+      IF (debug) write(out_unit,*) 'norm2 UPsiOnKrylov',dot_product(UPsiOnKrylov,UPsiOnKrylov)
 
       UPspectral_n = UPsiOnKrylov(n)*exp(EYE*deltaT*E0)
 
@@ -3557,16 +3557,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'abs(UPspectral_n)',abs(UPspectral_n)
-        write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'abs(UPspectral_n)',abs(UPspectral_n)
+        write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
 
   END SUBROUTINE UGPsi_taylor
   SUBROUTINE UPsi_spec_v1(UPsiOnKrylov,H,deltaT,n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 
@@ -3589,8 +3589,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='UPsi_spec_v1'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',deltaT
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',deltaT
       END IF
 !-----------------------------------------------------------
 
@@ -3608,16 +3608,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
-        write(out_unitp,*) 'norm2 UPsiOnKrylov',dot_product(UPsiOnKrylov,UPsiOnKrylov)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov)
+        write(out_unit,*) 'norm2 UPsiOnKrylov',dot_product(UPsiOnKrylov,UPsiOnKrylov)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
 
   END SUBROUTINE UPsi_spec_v1
   SUBROUTINE march_SIP_v1(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,renorm_psi,Overlap_psi1_psi2
       USE mod_Op,    ONLY : param_Op, sub_PsiOpPsi, sub_OpPsi,sub_scaledOpPsi
       IMPLICIT NONE
@@ -3656,10 +3656,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_SIP_v1'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'order',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'order',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
@@ -3689,11 +3689,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         END DO
 
         CALL UPsi_spec_v1(UPsiOnKrylov(1:j-1),H(1:j-1,1:j-1),para_propa%WPdeltaT,j-1)
-        !write(out_unitp,*) j-1,'abs(UPsiOnKrylov(j-1)',abs(UPsiOnKrylov(j-1))
+        !write(out_unit,*) j-1,'abs(UPsiOnKrylov(j-1)',abs(UPsiOnKrylov(j-1))
         IF (abs(UPsiOnKrylov(j-1)) < para_propa%para_poly%poly_tol .OR. &
             j == para_propa%para_poly%npoly+1) THEN
           n = j-1
-          write(out_unitp,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
+          write(out_unit,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
           EXIT
         END IF
 
@@ -3731,7 +3731,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       END DO
 
-      IF (debug) write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
+      IF (debug) write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n))
 
       Psi = ZERO
       DO i=1,n
@@ -3741,8 +3741,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !- check norm ------------------
       CALL norm2_psi(psi)
       IF ( psi%norm2 > para_propa%max_norm2) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' STOP propagation: norm > max_norm',                &
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' STOP propagation: norm > max_norm',                &
                          psi%norm2
         para_propa%march_error   = .TRUE.
         para_propa%test_max_norm = .TRUE.
@@ -3757,9 +3757,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !      microphase  = phase/real(para_propa%nb_micro,kind=Rkind)
 !
 !
-!      !write(out_unitp,*) 'para_propa%nb_micro',para_propa%nb_micro
-!      !write(out_unitp,*) 'microdeltaT',microdeltaT
-!      !write(out_unitp,*) 'microphase',microphase
+!      !write(out_unit,*) 'para_propa%nb_micro',para_propa%nb_micro
+!      !write(out_unit,*) 'microdeltaT',microdeltaT
+!      !write(out_unit,*) 'microphase',microphase
 !
 !      phase  = ZERO
 !      microT = ZERO
@@ -3799,8 +3799,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -3809,7 +3809,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
   END SUBROUTINE march_SIP_v1
   SUBROUTINE march_SIP_v0(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,renorm_psi,Overlap_psi1_psi2
       USE mod_Op,    ONLY : param_Op, sub_PsiOpPsi, sub_OpPsi,sub_scaledOpPsi
       IMPLICIT NONE
@@ -3852,10 +3852,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_SIP_v0'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'order',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'order',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
@@ -3909,16 +3909,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       END DO
 
       IF (debug) THEN
-        write(out_unitp,*) 'H'
-        CALL Write_Mat(H,out_unitp,6)
+        write(out_unit,*) 'H'
+        CALL Write_Mat(H,out_unit,6)
       END IF
 
       CALL diagonalization(H,Eig,Vec,3,1,.TRUE.)
 
       IF (debug) THEN
-        write(out_unitp,*) 'Vec'
-        CALL Write_Mat(Vec,out_unitp,6)
-        write(out_unitp,*) 'Eig',Eig
+        write(out_unit,*) 'Vec'
+        CALL Write_Mat(Vec,out_unit,6)
+        write(out_unit,*) 'Eig',Eig
       END IF
 
       IF (test) THEN
@@ -3929,13 +3929,13 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           S(i,j) = Overlap
         END DO
         END DO
-        write(out_unitp,*) 'S'
-        CALL Write_Mat(S,out_unitp,6)
+        write(out_unit,*) 'S'
+        CALL Write_Mat(S,out_unit,6)
 
-        write(out_unitp,*) 'H'
-        CALL Write_Mat(H,out_unitp,6)
+        write(out_unit,*) 'H'
+        CALL Write_Mat(H,out_unit,6)
 
-        write(out_unitp,*) 'Eig1',dot_product(Vec(:,1),matmul(H,Vec(:,1)))
+        write(out_unit,*) 'Eig1',dot_product(Vec(:,1),matmul(H,Vec(:,1)))
 
         H = CZERO
         DO i=1,para_propa%para_poly%npoly
@@ -3944,8 +3944,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         H = matmul(conjg(Vec),matmul(H,transpose(Vec)))
         !H = matmul(transpose(conjg(Vec)),matmul(H,Vec)) ! wrong expression
 
-        write(out_unitp,*) 'H'
-        CALL Write_Mat(H,out_unitp,6)
+        write(out_unit,*) 'H'
+        CALL Write_Mat(H,out_unit,6)
         STOP
       END IF
 
@@ -3955,10 +3955,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !DO i=1,para_propa%para_poly%npoly
       !  PsiOnVec(i) = Vec(1,i)
       !END DO
-      IF (debug) write(out_unitp,*) 'PsiOnVec',PsiOnVec
+      IF (debug) write(out_unit,*) 'PsiOnVec',PsiOnVec
 
       HPsiOnVec   = exp(-EYE*Eig*para_propa%WPdeltaT)*PsiOnVec
-      IF (debug) write(out_unitp,*) 'HPsiOnVec',HPsiOnVec
+      IF (debug) write(out_unit,*) 'HPsiOnVec',HPsiOnVec
 
 
       HPsiOnKrylov  = matmul(conjg(Vec),HPsiOnVec)
@@ -3966,8 +3966,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !DO i=1,para_propa%para_poly%npoly
       !  HPsiOnKrylov(:) = HPsiOnKrylov(:) + conjg(Vec(:,i))*HPsiOnVec(i)
       !END DO
-      IF (debug) write(out_unitp,*) 'HPsiOnKrylov',HPsiOnKrylov
-      IF (debug) write(out_unitp,*) 'abs(HPsiOnKrylov)',abs(HPsiOnKrylov)
+      IF (debug) write(out_unit,*) 'HPsiOnKrylov',HPsiOnKrylov
+      IF (debug) write(out_unit,*) 'abs(HPsiOnKrylov)',abs(HPsiOnKrylov)
 
       Psi = ZERO
       DO i=1,para_propa%para_poly%npoly
@@ -3994,8 +3994,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -4013,7 +4013,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
   SUBROUTINE march_Spectral(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,renorm_psi,Overlap_psi1_psi2
       USE mod_Op,    ONLY : param_Op, sub_PsiOpPsi, sub_OpPsi,sub_scaledOpPsi
       IMPLICIT NONE
@@ -4049,19 +4049,19 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_Spectral'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'order',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'order',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
       IF (.NOT. para_H%spectral_done .AND. para_H%spectral_Op /= para_H%n_Op) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' H is not in a spectral representation or'
-        write(out_unitp,*) ' The spectral representation not done on H.'
-        write(out_unitp,*) ' spectral_done',para_H%spectral_done
-        write(out_unitp,*) ' spectral_Op',para_H%spectral_Op
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' H is not in a spectral representation or'
+        write(out_unit,*) ' The spectral representation not done on H.'
+        write(out_unit,*) ' spectral_done',para_H%spectral_done
+        write(out_unit,*) ' spectral_Op',para_H%spectral_Op
         STOP
       END IF
 
@@ -4129,8 +4129,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 !STOP
@@ -4145,7 +4145,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE march_cheby(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op, sub_OpPsi,sub_scaledOpPsi
       USE mod_propa
@@ -4182,16 +4182,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING march_cheby'
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'deltaE',para_propa%para_poly%deltaE
-        write(out_unitp,*) 'E0',para_H%E0
-        write(out_unitp,*) 'Esc',para_H%Esc
-        write(out_unitp,*) 'ncheby',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING march_cheby'
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'deltaE',para_propa%para_poly%deltaE
+        write(out_unit,*) 'E0',para_H%E0
+        write(out_unit,*) 'Esc',para_H%Esc
+        write(out_unit,*) 'ncheby',para_propa%para_poly%npoly
 
-        write(out_unitp,*) 'psi%BasisRep psi%GridRep',psi%BasisRep,psi%GridRep
+        write(out_unit,*) 'psi%BasisRep psi%GridRep',psi%BasisRep,psi%GridRep
 
-        !write(out_unitp,*) 'psi'
+        !write(out_unit,*) 'psi'
         !CALL ecri_psi(T=T,psi=psi,ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
       END IF
 !-----------------------------------------------------------
@@ -4222,7 +4222,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
             para_H%E0     = para_propa%para_poly%E0
             para_H%Esc    = para_propa%para_poly%Esc
 
-            !write(out_unitp,*) 'Hmin,Hmax check:', para_propa%Hmin,para_propa%Hmax
+            !write(out_unit,*) 'Hmin,Hmax check:', para_propa%Hmin,para_propa%Hmax
           ENDIF
         ENDIF
 
@@ -4238,12 +4238,12 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         para_H%Esc                  = para_propa%para_poly%Esc
 
         IF (debug) THEN
-          write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-          write(out_unitp,*) 'deltaE',para_propa%para_poly%deltaE
-          write(out_unitp,*) 'alpha ',para_propa%para_poly%alpha
-          write(out_unitp,*) 'E0    ',para_H%E0
-          write(out_unitp,*) 'Esc   ',para_H%Esc
-          write(out_unitp,*) 'ncheby',para_propa%para_poly%npoly
+          write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+          write(out_unit,*) 'deltaE',para_propa%para_poly%deltaE
+          write(out_unit,*) 'alpha ',para_propa%para_poly%alpha
+          write(out_unit,*) 'E0    ',para_H%E0
+          write(out_unit,*) 'Esc   ',para_H%Esc
+          write(out_unit,*) 'ncheby',para_propa%para_poly%npoly
         END IF
 
         psi0Hkpsi0(:) = CZERO
@@ -4255,9 +4255,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL cof(r,para_propa%para_poly%npoly,para_propa%para_poly%coef_poly)
 
         IF (debug) THEN
-          write(out_unitp,*) 'r,deltaE,WPdeltaT',r,para_propa%para_poly%deltaE,para_propa%WPdeltaT
-          write(out_unitp,*) 'npoly',para_propa%para_poly%npoly
-          !write(out_unitp,*) 'coef_poly',para_propa%para_poly%coef_poly(1:para_propa%para_poly%npoly)
+          write(out_unit,*) 'r,deltaE,WPdeltaT',r,para_propa%para_poly%deltaE,para_propa%WPdeltaT
+          write(out_unit,*) 'npoly',para_propa%para_poly%npoly
+          !write(out_unit,*) 'coef_poly',para_propa%para_poly%coef_poly(1:para_propa%para_poly%npoly)
         END IF
 
         psi0Hkpsi0(0) = Calc_AutoCorr(psi0,psi,para_propa,T,Write_AC=.FALSE.)
@@ -4274,7 +4274,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         psi0Hkpsi0(1) =  psi0Hkpsi0(0)
 
 !     - The second term of the expansion -----------------
-        write(out_unitp,'(a)',advance='no') 'cheby rec:'
+        write(out_unit,'(a)',advance='no') 'cheby rec:'
 
         !IF(.NOT. para_propa%once_Hmin .OR. .NOT. openmpi) CALL sub_OpPsi(w1,w2,para_H)
 !        IF((Type_FileGrid4 .AND. .NOT. para_propa%once_Hmin) .OR. (.NOT. Type_FileGrid4)) THEN
@@ -4300,7 +4300,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
           CALL sub_OpPsi(w2,w3,para_H)
           CALL sub_scaledOpPsi(w2,w3,para_H%E0,para_H%Esc)
-          IF (mod(jt,100) == 0) write(out_unitp,'(a)',advance='no') '.'
+          IF (mod(jt,100) == 0) write(out_unit,'(a)',advance='no') '.'
 
           IF(keep_MPI) THEN
 !           Recurrence relations of the Chebychev expansion:
@@ -4317,10 +4317,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           IF(openmpi) CALL MPI_Bcast_(norm_exit,size1_MPI,root_MPI)
 
           jt_exit = jt
-          IF (debug) write(out_unitp,*) 'jt,norms',jt,norm_exit
+          IF (debug) write(out_unit,*) 'jt,norms',jt,norm_exit
 
           IF (norm_exit > TEN**15) THEN
-            write(out_unitp,*) ' WARNING: Norm^2 of the vector is TOO large (> 10^15)',jt,norm_exit
+            write(out_unit,*) ' WARNING: Norm^2 of the vector is TOO large (> 10^15)',jt,norm_exit
             IF(keep_MPI) para_propa%march_error = .TRUE.
             EXIT
           END IF
@@ -4349,24 +4349,24 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         END DO ! for jt=3,para_propa%para_poly%npoly
 
-        write(out_unitp,*) 'jt_exit,norms',jt_exit,abs(w2%norm2),norm_exit
+        write(out_unit,*) 'jt_exit,norms',jt_exit,abs(w2%norm2),norm_exit
         para_propa%para_poly%npoly_Opt = jt_exit
 
         IF (.NOT. para_propa%march_error .AND. norm_exit > para_propa%para_poly%poly_tol) THEN
-          write(out_unitp,*) ' ERROR in march_cheby'
-          write(out_unitp,*) ' WARNING: Norm^2 of the last vector TOO large',jt_exit,norm_exit
+          write(out_unit,*) ' ERROR in march_cheby'
+          write(out_unit,*) ' WARNING: Norm^2 of the last vector TOO large',jt_exit,norm_exit
           para_propa%march_error = .TRUE.
         END IF
 
         IF (para_propa%march_error) THEN
-          write(out_unitp,*) ' Old Hmin,Hmax',para_propa%para_poly%Hmin,para_propa%para_poly%Hmax
+          write(out_unit,*) ' Old Hmin,Hmax',para_propa%para_poly%Hmin,para_propa%para_poly%Hmax
 
           para_propa%para_poly%Hmax = para_propa%para_poly%Hmax +         &
                                     para_propa%para_poly%deltaE * ONETENTH
           !para_propa%para_poly%Hmin = para_propa%para_poly%Hmin -         &
           !                          para_propa%para_poly%deltaE * ONETENTH
 
-          write(out_unitp,*) ' New Hmin,Hmax',para_propa%para_poly%Hmin,para_propa%para_poly%Hmax
+          write(out_unit,*) ' New Hmin,Hmax',para_propa%para_poly%Hmin,para_propa%para_poly%Hmax
 
           IF(keep_MPI) psi = psi_save
         ELSE
@@ -4376,9 +4376,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       END DO ! for max_cheby
 
       IF (para_propa%march_error) THEN
-        write(out_unitp,*) ' ERROR in march_cheby'
-        write(out_unitp,*) ' It cannot converge ...'
-        write(out_unitp,*) ' => Reduce the time step !!'
+        write(out_unit,*) ' ERROR in march_cheby'
+        write(out_unit,*) ' It cannot converge ...'
+        write(out_unit,*) ' => Reduce the time step !!'
         STOP
       END IF
 
@@ -4399,9 +4399,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       phase = ZERO
       microT = ZERO
 
-      !write(out_unitp,*) 'para_propa%nb_micro',para_propa%nb_micro
-      !write(out_unitp,*) 'microdeltaT',microdeltaT
-      !write(out_unitp,*) 'microphase',microphase
+      !write(out_unit,*) 'para_propa%nb_micro',para_propa%nb_micro
+      !write(out_unit,*) 'microdeltaT',microdeltaT
+      !write(out_unit,*) 'microphase',microphase
 
       DO it=1,para_propa%nb_micro
 
@@ -4412,16 +4412,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL cof(r,jt_exit,para_propa%para_poly%coef_poly)
 
         cdot = cmplx(ZERO,ZERO,kind=Rkind)
-        !write(out_unitp,*) 'jt,cdot',0,cdot
+        !write(out_unit,*) 'jt,cdot',0,cdot
         DO jt=1,jt_exit
 
           cdot = cdot + psi0Hkpsi0(jt) *                                &
             cmplx(para_propa%para_poly%coef_poly(jt),ZERO,kind=Rkind)
-          !write(out_unitp,*) 'jt,psi0Hkpsi0(jt),coef_poly(jt),cdot',jt,psi0Hkpsi0(jt),para_propa%para_poly%coef_poly(jt),cdot
+          !write(out_unit,*) 'jt,psi0Hkpsi0(jt),coef_poly(jt),cdot',jt,psi0Hkpsi0(jt),para_propa%para_poly%coef_poly(jt),cdot
 
         END DO
         cdot = cdot * cmplx( cos(phase),-sin(phase),kind=Rkind)
-        !write(out_unitp,*) 'T,cdot,no,type_corr',T+microT,cdot,no,para_propa%type_corr
+        !write(out_unit,*) 'T,cdot,no,type_corr',T+microT,cdot,no,para_propa%type_corr
         IF(MPI_id==0) CALL Write_AutoCorr(no,T+microT,cdot)
       END DO
       IF(MPI_id==0) flush(no)
@@ -4429,9 +4429,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        !write(out_unitp,*) 'psi'
+        !write(out_unit,*) 'psi'
         !CALL ecri_psi(T=T+para_propa%WPdeltaT,psi=psi,ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) 'END march_cheby'
+        write(out_unit,*) 'END march_cheby'
       END IF
 !-----------------------------------------------------------
 
@@ -4439,7 +4439,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !=======================================================================================
 
       SUBROUTINE march_cheby_old(T,no,psi,psi0,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op, sub_OpPsi,sub_scaledOpPsi
       USE mod_MPI_aux
@@ -4473,16 +4473,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING march_cheby_old'
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'deltaE',para_propa%para_poly%deltaE
-        write(out_unitp,*) 'E0',para_H%E0
-        write(out_unitp,*) 'Esc',para_H%Esc
-        write(out_unitp,*) 'ncheby',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING march_cheby_old'
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'deltaE',para_propa%para_poly%deltaE
+        write(out_unit,*) 'E0',para_H%E0
+        write(out_unit,*) 'Esc',para_H%Esc
+        write(out_unit,*) 'ncheby',para_propa%para_poly%npoly
 
-        write(out_unitp,*) 'psi%BasisRep psi%GridRep',psi%BasisRep,psi%GridRep
+        write(out_unit,*) 'psi%BasisRep psi%GridRep',psi%BasisRep,psi%GridRep
 
-        !write(out_unitp,*) 'psi'
+        !write(out_unit,*) 'psi'
         !CALL ecri_psi(T=T,psi=psi,ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
 
       END IF
@@ -4509,7 +4509,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           para_H%E0     = para_propa%para_poly%E0
           para_H%Esc    = para_propa%para_poly%Esc
 
-          !write(out_unitp,*) 'Hmin,Hmax check:', para_propa%Hmin,para_propa%Hmax
+          !write(out_unit,*) 'Hmin,Hmax check:', para_propa%Hmin,para_propa%Hmax
         ENDIF
       ENDIF ! direct4
 
@@ -4518,8 +4518,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       r = HALF * para_propa%para_poly%deltaE * para_propa%WPdeltaT
       CALL cof(r,para_propa%para_poly%npoly,                            &
                  para_propa%para_poly%coef_poly)
-      !write(out_unitp,*) 'r,deltaE,WPdeltaT',r,para_propa%para_poly%deltaE,para_propa%WPdeltaT
-      !write(out_unitp,*) 'npoly,coef_poly',para_propa%para_poly%npoly,  &
+      !write(out_unit,*) 'r,deltaE,WPdeltaT',r,para_propa%para_poly%deltaE,para_propa%WPdeltaT
+      !write(out_unit,*) 'npoly,coef_poly',para_propa%para_poly%npoly,  &
       !  para_propa%para_poly%coef_poly(1:para_propa%para_poly%npoly)
 
       IF(keep_MPI) psi0Hkpsi0(0) = Calc_AutoCorr(psi0,psi,para_propa,T,Write_AC=.FALSE.)
@@ -4541,7 +4541,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       ENDIF
 
 !     - The second term of the expansion -----------------
-      write(out_unitp,'(a)',advance='no') 'cheby rec:'
+      write(out_unit,'(a)',advance='no') 'cheby rec:'
 
       !IF(.NOT. para_propa%once_Hmin .OR. .NOT. openmpi) CALL sub_OpPsi(w1,w2,para_H)
 !      IF((Type_FileGrid4 .AND. .NOT. para_propa%once_Hmin) .OR. (.NOT. Type_FileGrid4)) THEN
@@ -4567,7 +4567,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         CALL sub_OpPsi(w2,w3,para_H)
         CALL sub_scaledOpPsi(w2,w3,para_H%E0,para_H%Esc)
-        IF (mod(jt,100) == 0) write(out_unitp,'(a)',advance='no') '.'
+        IF (mod(jt,100) == 0) write(out_unit,'(a)',advance='no') '.'
 
         IF(keep_MPI) THEN
 !        Recurrence relations of the Chebychev expansion:
@@ -4582,13 +4582,13 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
          norm_exit = abs(w2%norm2*para_propa%para_poly%coef_poly(jt))
          jt_exit = jt
-         IF (debug) write(out_unitp,*) 'jt,norms',jt,norm_exit
+         IF (debug) write(out_unit,*) 'jt,norms',jt,norm_exit
 
           IF (norm_exit > TEN**15) THEN
-            write(out_unitp,*) ' ERROR in march_cheby'
-            write(out_unitp,*) ' Norm of the vector is TOO large (> 10^15)',    &
+            write(out_unit,*) ' ERROR in march_cheby'
+            write(out_unit,*) ' Norm of the vector is TOO large (> 10^15)',    &
                                                 jt,norm_exit
-           write(out_unitp,*) ' => Reduce the time step !!'
+           write(out_unit,*) ' => Reduce the time step !!'
            STOP
          END IF
          psi0Hkpsi0(jt) = Calc_AutoCorr(psi0,w2,para_propa,T,Write_AC=.FALSE.)
@@ -4599,14 +4599,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         IF (norm_exit < para_propa%para_poly%poly_tol) EXIT
 
       END DO
-      write(out_unitp,*) 'jt_exit,norms',jt_exit,abs(w2%norm2),norm_exit
-      IF (debug) write(out_unitp,*) 'psi0Hkpsi0',psi0Hkpsi0(0:jt_exit)
+      write(out_unit,*) 'jt_exit,norms',jt_exit,abs(w2%norm2),norm_exit
+      IF (debug) write(out_unit,*) 'psi0Hkpsi0',psi0Hkpsi0(0:jt_exit)
 
       IF (norm_exit > para_propa%para_poly%poly_tol) THEN
-        write(out_unitp,*) ' ERROR in march_cheby'
-        write(out_unitp,*) ' Norm of the last vector TOO large',norm_exit
-        write(out_unitp,*) ' poly_tol: ',para_propa%para_poly%poly_tol
-        write(out_unitp,*) ' => npoly TOO small',para_propa%para_poly%npoly
+        write(out_unit,*) ' ERROR in march_cheby'
+        write(out_unit,*) ' Norm of the last vector TOO large',norm_exit
+        write(out_unit,*) ' poly_tol: ',para_propa%para_poly%poly_tol
+        write(out_unit,*) ' => npoly TOO small',para_propa%para_poly%npoly
         STOP
       END IF
 
@@ -4622,9 +4622,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       phase = ZERO
       microT = ZERO
 
-      !write(out_unitp,*) 'para_propa%nb_micro',para_propa%nb_micro
-      !write(out_unitp,*) 'microdeltaT',microdeltaT
-      !write(out_unitp,*) 'microphase',microphase
+      !write(out_unit,*) 'para_propa%nb_micro',para_propa%nb_micro
+      !write(out_unit,*) 'microdeltaT',microdeltaT
+      !write(out_unit,*) 'microphase',microphase
 
       DO it=1,para_propa%nb_micro
 
@@ -4635,16 +4635,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL cof(r,jt_exit,para_propa%para_poly%coef_poly)
 
         cdot = cmplx(ZERO,ZERO,kind=Rkind)
-        !write(out_unitp,*) 'jt,cdot',0,cdot
+        !write(out_unit,*) 'jt,cdot',0,cdot
         DO jt=1,jt_exit
 
           cdot = cdot + psi0Hkpsi0(jt) *                                &
             cmplx(para_propa%para_poly%coef_poly(jt),ZERO,kind=Rkind)
-          !write(out_unitp,*) 'jt,psi0Hkpsi0(jt),coef_poly(jt),cdot',jt,psi0Hkpsi0(jt),para_propa%para_poly%coef_poly(jt),cdot
+          !write(out_unit,*) 'jt,psi0Hkpsi0(jt),coef_poly(jt),cdot',jt,psi0Hkpsi0(jt),para_propa%para_poly%coef_poly(jt),cdot
 
         END DO
         cdot = cdot * cmplx( cos(phase),-sin(phase),kind=Rkind)
-        !write(out_unitp,*) 'T,cdot,no,type_corr',T+microT,cdot,no,para_propa%type_corr
+        !write(out_unit,*) 'T,cdot,no,type_corr',T+microT,cdot,no,para_propa%type_corr
         IF(MPI_id==0) CALL Write_AutoCorr(no,T+microT,cdot)
       END DO
       IF(MPI_id==0) flush(no)
@@ -4657,9 +4657,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        !write(out_unitp,*) 'psi'
+        !write(out_unit,*) 'psi'
         !CALL ecri_psi(T=T+para_propa%WPdeltaT,psi=psi,ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) 'END march_cheby_old'
+        write(out_unit,*) 'END march_cheby_old'
       END IF
 !-----------------------------------------------------------
 
@@ -4675,7 +4675,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE march_nOD_im(T,no,psi,psi0,w1,w2,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_Op,    ONLY : param_Op, sub_OpPsi,sub_scaledOpPsi
       IMPLICIT NONE
@@ -4701,11 +4701,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING march_nOD_im'
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'nOD',para_propa%para_poly%npoly
-        write(out_unitp,*) 'type_WPpropa',para_propa%type_WPpropa
-        write(out_unitp,*) 'para_H%E0',para_H%E0
+        write(out_unit,*) 'BEGINNING march_nOD_im'
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'nOD',para_propa%para_poly%npoly
+        write(out_unit,*) 'type_WPpropa',para_propa%type_WPpropa
+        write(out_unit,*) 'para_H%E0',para_H%E0
       END IF
 !-----------------------------------------------------------
 
@@ -4714,11 +4714,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       signDT = -ONE
       IF (para_propa%type_WPpropa < 0) signDT = ONE
 
-        write(out_unitp,'(a)',advance='no') 'nOD_im rec:'
+        write(out_unit,'(a)',advance='no') 'nOD_im rec:'
 
       w1 = psi
       DO j=1,para_propa%para_poly%max_poly
-        IF (mod(j,10) == 0) write(out_unitp,'(a)',advance='no') '.'
+        IF (mod(j,10) == 0) write(out_unit,'(a)',advance='no') '.'
 
         rtj =  signDT*para_propa%WPdeltaT/real(j,kind=Rkind)
 
@@ -4730,18 +4730,18 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         CALL norm2_psi(w1)
         CALL norm2_psi(psi)
-        !write(out_unitp,*) 'j,wi%n/psi%n',j,w1%norm2/psi%norm2
+        !write(out_unit,*) 'j,wi%n/psi%n',j,w1%norm2/psi%norm2
         IF (w1%norm2/psi%norm2 < para_propa%para_poly%poly_tol) EXIT
 
       END DO
-      write(out_unitp,*) 'jt_exit,rap norm',j,w1%norm2/psi%norm2
+      write(out_unit,*) 'jt_exit,rap norm',j,w1%norm2/psi%norm2
 
       IF (para_propa%write_iter .OR. debug)                             &
-                  write(out_unitp,*) 'j,wi%n/psi%n',j,w1%norm2/psi%norm2
+                  write(out_unit,*) 'j,wi%n/psi%n',j,w1%norm2/psi%norm2
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END march_nOD_im'
+        write(out_unit,*) 'END march_nOD_im'
       END IF
 !-----------------------------------------------------------
 
@@ -4756,7 +4756,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE march_FOD_Opti_im(psi,Ene0,T,it,para_H,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,dealloc_psi,Overlap_psi1_psi2,norm2_psi
       USE mod_Op,    ONLY : param_Op, sub_OpPsi,sub_scaledOpPsi
       IMPLICIT NONE
@@ -4793,18 +4793,18 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING march_FOD_Opti_im'
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING march_FOD_Opti_im'
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
+        write(out_unit,*)
        END IF
 !-----------------------------------------------------------
 
       IF (para_H%cplx) THEN
-        write(out_unitp,*) ' ERROR in march_FOD_Opti_im'
-        write(out_unitp,*) ' This subroutine cannot be use with complex Hmiltonian'
-        write(out_unitp,*) ' You can use "march_nOD_im" instead !'
+        write(out_unit,*) ' ERROR in march_FOD_Opti_im'
+        write(out_unit,*) ' This subroutine cannot be use with complex Hmiltonian'
+        write(out_unit,*) ' You can use "march_nOD_im" instead !'
         STOP
       END IF
 
@@ -4841,7 +4841,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       avH2 = CavH2
       avH3 = CavH3
 
-      IF (debug) write(out_unitp,*) 'avH..',avH1,avH2,avH3
+      IF (debug) write(out_unit,*) 'avH..',avH1,avH2,avH3
 
 
       A =  avH1*avH1 - avH2
@@ -4855,11 +4855,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       S = ONE-TWO*DT1*avH1+DT1*DT1*avH2
       E1= avH1-TWO*DT1*avH2+DT1*DT1*avH3
       E1= E1/S
-      !write(out_unitp,*) 'DT1',DT1,S,E1*get_Conv_au_TO_unit('E','cm-1')
+      !write(out_unit,*) 'DT1',DT1,S,E1*get_Conv_au_TO_unit('E','cm-1')
       S = ONE-TWO*DT2*avH1+DT2*DT2*avH2
       E2= avH1-TWO*DT2*avH2+DT2*DT2*avH3
       E2= E2/S
-      !write(out_unitp,*) 'DT2',DT2,S,E2*get_Conv_au_TO_unit('E','cm-1')
+      !write(out_unit,*) 'DT2',DT2,S,E2*get_Conv_au_TO_unit('E','cm-1')
 
       IF (E1<E2) THEN
         DeltaT = DT1
@@ -4869,8 +4869,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       S = ONE - TWO*DeltaT*avH1 + DeltaT**2*avH2
       DO WHILE (abs(S) < ONETENTH**6)
-        write(out_unitp,*) 'WARNING: S<',ONETENTH**6
-        write(out_unitp,*) 'WP it, DeltaT,S',it,DeltaT,S
+        write(out_unit,*) 'WARNING: S<',ONETENTH**6
+        write(out_unit,*) 'WP it, DeltaT,S',it,DeltaT,S
         DeltaT = DeltaT * HALF
         S = ONE - TWO*DeltaT*avH1 + DeltaT**2*avH2
       END DO
@@ -4896,17 +4896,17 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       !- propagation ------------------------------------------
       IF (para_propa%write_iter .OR. debug) THEN
-        write(out_unitp,*) 'WP it sqrt(norm2 g)',it,                &
+        write(out_unit,*) 'WP it sqrt(norm2 g)',it,                &
             sqrt(g%norm2)*get_Conv_au_TO_unit('E','cm-1')
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'WP it, E',it,                               &
+        write(out_unit,*) 'WP it, E',it,                               &
                                   Ene0*get_Conv_au_TO_unit('E','cm-1'), &
                                 DeltaE*get_Conv_au_TO_unit('E','cm-1')
-        write(out_unitp,*) 'WP it sqrt(norm2 g)',it,                &
+        write(out_unit,*) 'WP it sqrt(norm2 g)',it,                &
             sqrt(g%norm2)*get_Conv_au_TO_unit('E','cm-1')
-        write(out_unitp,*) 'WP it, DeltaT,S',it,DeltaT,S
+        write(out_unit,*) 'WP it, DeltaT,S',it,DeltaT,S
       END IF
 
       T = T + DeltaT
@@ -4918,7 +4918,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END march_FOD_Opti_im'
+         write(out_unit,*) 'END march_FOD_Opti_im'
        END IF
 !----------------------------------------------------------
 
@@ -4934,7 +4934,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       SUBROUTINE march_new0_noD_field(T,WP,nb_WP,print_Op,              &
                                       para_H,para_Dip,                  &
                                       para_field,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_field, ONLY : param_field,sub_dnE
       USE mod_Op,    ONLY : param_Op, sub_OpPsi,sub_scaledOpPsi
@@ -4992,23 +4992,23 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_nOd_field'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+        write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+        write(out_unit,*)
 
         DO i=1,nb_WP
           CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP(i)%norm2
+          write(out_unit,*) 'norm WP',i,WP(i)%norm2
 
-          write(out_unitp,*) 'WP BasisRep',i
+          write(out_unit,*) 'WP BasisRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',i
+          write(out_unit,*) 'WP GridRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
         END DO
@@ -5030,7 +5030,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         tab_dnE(k,:) = -dnE(:)
       END DO
       max_der = nb_der
-      write(out_unitp,*) 'max_der,npoly',max_der,para_propa%para_poly%npoly
+      write(out_unit,*) 'max_der,npoly',max_der,para_propa%para_poly%npoly
 
       CALL alloc_NParray(work_WP,[para_propa%para_poly%npoly-1],        &
                         'work_WP',name_sub,[0])
@@ -5079,7 +5079,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
               coef = para_propa%WPdeltaT**m /                           &
                   (real(m,kind=Rkind) * factorial(k) * factorial(m-1-k) )
               coef_ip(:) = coef_ip(:) + coef*tab_dnE(m-1-k,:)
-!             write(out_unitp,*) 'k,m',k,m,abs(coef)
+!             write(out_unit,*) 'k,m',k,m,abs(coef)
               IF (abs(coef) <                                           &
                       para_propa%para_poly%poly_tol*ONETENTH**0) EXIT
             END DO
@@ -5093,14 +5093,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
           WP(j) = WP(j) + w1 * (-EYE)
           CALL norm2_psi(w1)
-          write(out_unitp,*) 'norm2 dkpsi k',k,w1%norm2
+          write(out_unit,*) 'norm2 dkpsi k',k,w1%norm2
           IF (w1%norm2 < para_propa%para_poly%poly_tol) EXIT
 
           IF (w1%norm2 > TEN**15) THEN
-             write(out_unitp,*) ' ERROR in ',name_sub
-             write(out_unitp,*) ' The norm2 of dnpsi(k) is huge !',w1%norm2
-             write(out_unitp,*) ' iteration k:',k
-             write(out_unitp,*) ' Reduce the time step, WPDeltaT:',             &
+             write(out_unit,*) ' ERROR in ',name_sub
+             write(out_unit,*) ' The norm2 of dnpsi(k) is huge !',w1%norm2
+             write(out_unit,*) ' iteration k:',k
+             write(out_unit,*) ' Reduce the time step, WPDeltaT:',             &
                              para_propa%WPdeltaT
              para_propa%march_error = .TRUE.
              STOP
@@ -5116,8 +5116,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL norm2_psi(WP(j),GridRep=.FALSE.,BasisRep=.TRUE.)
         IF ( WP(j)%norm2 > para_propa%max_norm2) THEN
            T  = T + para_propa%WPdeltaT
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) ' STOP propagation: norm > max_norm',             &
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) ' STOP propagation: norm > max_norm',             &
                          WP(j)%norm2
            para_propa%march_error   = .TRUE.
            para_propa%test_max_norm = .TRUE.
@@ -5133,7 +5133,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -5147,7 +5147,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !================================================================
       SUBROUTINE march_new_noD_field(T,WP,nb_WP,print_Op,               &
                                      para_H,para_Dip,para_field,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_field, ONLY : param_field,sub_dnE
       USE mod_Op,    ONLY : param_Op, sub_OpPsi,sub_scaledOpPsi
@@ -5207,23 +5207,23 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_new_nOd_field'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+        write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+        write(out_unit,*)
 
         DO i=1,nb_WP
           CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP(i)%norm2
+          write(out_unit,*) 'norm WP',i,WP(i)%norm2
 
-          write(out_unitp,*) 'WP BasisRep',i
+          write(out_unit,*) 'WP BasisRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',i
+          write(out_unit,*) 'WP GridRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
         END DO
@@ -5255,10 +5255,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         fac_k = fac_k * para_propa%WPdeltaT/real(k,kind=Rkind)
         limit = maxval(abs(dnE(:)))*fac_k
         IF (limit > para_propa%para_poly%poly_tol) max_der=k
-!       write(out_unitp,*) 'k,max_der,limit',k,max_der,limit
+!       write(out_unit,*) 'k,max_der,limit',k,max_der,limit
       END DO
       max_der=para_propa%para_poly%npoly-1
-      write(out_unitp,*) 'max_der',max_der
+      write(out_unit,*) 'max_der',max_der
 
       DO j=1,nb_WP
         work_WP(0) = WP(j)
@@ -5326,14 +5326,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
           CALL norm2_psi(w1)
           IF (w1%norm2 > max_norm) max_norm = w1%norm2
-          write(out_unitp,*) 'norms of w1(i),max_norm',i,w1%norm2,max_norm
+          write(out_unit,*) 'norms of w1(i),max_norm',i,w1%norm2,max_norm
 
           IF (w1%norm2 < para_propa%para_poly%poly_tol) EXIT
           IF (w1%norm2 > TEN**15) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' The norm2 of dnpsi(i+1) is huge !',w1%norm2
-            write(out_unitp,*) ' iteration i:',i
-            write(out_unitp,*) ' Reduce the time step, WPDeltaT:',              &
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' The norm2 of dnpsi(i+1) is huge !',w1%norm2
+            write(out_unit,*) ' iteration i:',i
+            write(out_unit,*) ' Reduce the time step, WPDeltaT:',              &
                              para_propa%WPdeltaT
             para_propa%march_error = .TRUE.
             STOP
@@ -5342,7 +5342,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 
 
-        IF (print_Op) write(out_unitp,*) 'T,max_der,ipoly,norm2',               &
+        IF (print_Op) write(out_unit,*) 'T,max_der,ipoly,norm2',               &
                                   T,max_der,i,w1%norm2
 
         work_WP(0) = work_WP(min(i+1,para_propa%para_poly%npoly))
@@ -5355,8 +5355,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL norm2_psi(WP(j),GridRep=.FALSE.,BasisRep=.TRUE.)
         IF ( WP(j)%norm2 > para_propa%max_norm2) THEN
           T  = T + para_propa%WPdeltaT
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' STOP propagation: norm > max_norm',              &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' STOP propagation: norm > max_norm',              &
                          WP(j)%norm2
           para_propa%march_error   = .TRUE.
           para_propa%test_max_norm = .TRUE.
@@ -5372,7 +5372,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -5387,7 +5387,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       SUBROUTINE march_split_field(T,WP,nb_WP,print_Op,                 &
                                  para_H,para_Dip,                       &
                                  para_field,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi,norm2_psi,               &
                             sub_PsiBasisRep_TO_GridRep,                 &
                             sub_PsiGridRep_TO_BasisRep
@@ -5440,23 +5440,23 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       character (len=*), parameter :: name_sub='march_split_field'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+        write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+        write(out_unit,*)
 
         DO i=1,nb_WP
           CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-          write(out_unitp,*) 'norm WP',i,WP(i)%norm2
+          write(out_unit,*) 'norm WP',i,WP(i)%norm2
 
-          write(out_unitp,*) 'WP BasisRep',i
+          write(out_unit,*) 'WP BasisRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-          write(out_unitp,*) 'WP GridRep',i
+          write(out_unit,*) 'WP GridRep',i
           CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                         ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
         END DO
@@ -5509,8 +5509,8 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         CALL norm2_psi(WP(j),GridRep=.FALSE.,BasisRep=.TRUE.)
         IF ( WP(j)%norm2 > para_propa%max_norm2) THEN
           T  = T + para_propa%WPdeltaT
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' STOP propagation: norm > max_norm',              &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' STOP propagation: norm > max_norm',              &
                          WP(j)%norm2
           para_propa%march_error   = .TRUE.
           para_propa%test_max_norm = .TRUE.
@@ -5527,7 +5527,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
 
@@ -5540,7 +5540,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !
 !==============================================================
       SUBROUTINE initialisation1_poly(para_poly,deltaT,type_propa)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- variables for the WP propagation ----------------------------
@@ -5560,21 +5560,21 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !-----------------------------------------------------------
        IF (para_poly%init_done) RETURN
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'deltaT',deltaT
-         write(out_unitp,*) 'Hmax',para_poly%Hmax
-         write(out_unitp,*) 'DHmax',para_poly%DHmax
-         write(out_unitp,*) 'Hmin',para_poly%Hmin
-         flush(out_unitp)
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'deltaT',deltaT
+         write(out_unit,*) 'Hmax',para_poly%Hmax
+         write(out_unit,*) 'DHmax',para_poly%DHmax
+         write(out_unit,*) 'Hmin',para_poly%Hmin
+         flush(out_unit)
        END IF
 !-----------------------------------------------------------
 
       IF (para_poly%Hmin > para_poly%Hmax) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) 'Hmax',para_poly%Hmax
-         write(out_unitp,*) 'DHmax',para_poly%DHmax
-         write(out_unitp,*) 'Hmin',para_poly%Hmin
-         write(out_unitp,*) ' Hmin > Hmax '
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) 'Hmax',para_poly%Hmax
+         write(out_unit,*) 'DHmax',para_poly%DHmax
+         write(out_unit,*) 'Hmin',para_poly%Hmin
+         write(out_unit,*) ' Hmin > Hmax '
          !STOP " ERROR in " // name_sub // " : Hmin > Hmax"
          STOP
       END IF
@@ -5594,11 +5594,11 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 
       IF (debug) THEN
-        write(out_unitp,*) 'Hmin,Hmax',para_poly%Hmin,para_poly%Hmax
-        write(out_unitp,*) 'deltaE',para_poly%deltaE
-        write(out_unitp,*) 'E0,Esc',para_poly%E0,para_poly%Esc
-        write(out_unitp,*) 'alpha (r)',para_poly%alpha
-        flush(out_unitp)
+        write(out_unit,*) 'Hmin,Hmax',para_poly%Hmin,para_poly%Hmax
+        write(out_unit,*) 'deltaE',para_poly%deltaE
+        write(out_unit,*) 'E0,Esc',para_poly%E0,para_poly%Esc
+        write(out_unit,*) 'alpha (r)',para_poly%alpha
+        flush(out_unit)
       END IF
 !     ------------------------------------------------------
 
@@ -5621,12 +5621,12 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'npoly',para_poly%npoly
-         write(out_unitp,*) 'deltaT',deltaT
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'npoly',para_poly%npoly
+         write(out_unit,*) 'deltaT',deltaT
+         write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
-       flush(out_unitp)
+       flush(out_unit)
 
        END SUBROUTINE initialisation1_poly
 
@@ -5643,7 +5643,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE cofcheb(r,ncheb,cf,nchmx,tol)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer       :: ncheb,nchmx
@@ -5657,22 +5657,22 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING cofcheb'
-         write(out_unitp,*) 'r,tol',r,tol
-         write(out_unitp,*) 'nchmx',nchmx
-         flush(out_unitp)
+         write(out_unit,*) 'BEGINNING cofcheb'
+         write(out_unit,*) 'r,tol',r,tol
+         write(out_unit,*) 'nchmx',nchmx
+         flush(out_unit)
        END IF
 !-----------------------------------------------------------
 
 !----------------------------------------------
       ncheb = max(ONE,r)
-      IF (debug) write(out_unitp,*) 'r, ncheb : ',r,ncheb
-      flush(out_unitp)
+      IF (debug) write(out_unit,*) 'r, ncheb : ',r,ncheb
+      flush(out_unit)
 
       IF (ncheb > nchmx) THEN
-         write(out_unitp,*) ' ERROR in cofcheb'
-         write(out_unitp,*) '*** nchmx too small '
-         write(out_unitp,*) 'nchmx < ncheb',nchmx,ncheb
+         write(out_unit,*) ' ERROR in cofcheb'
+         write(out_unit,*) '*** nchmx too small '
+         write(out_unit,*) 'nchmx < ncheb',nchmx,ncheb
          STOP
       END IF
 
@@ -5680,9 +5680,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
 !     -----------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Chebychev coefficients',ncheb
-        write(out_unitp,2009) (i,cf(i),i=1,ncheb)
-        flush(out_unitp)
+        write(out_unit,*) 'Chebychev coefficients',ncheb
+        write(out_unit,2009) (i,cf(i),i=1,ncheb)
+        flush(out_unit)
       END IF
 !     -----------------------------------------
 !----------------------------------------------
@@ -5694,9 +5694,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       if(ctst > tol)then
         ncheb=ncheb+10
         IF (ncheb > nchmx) THEN
-          write(out_unitp,*) ' ERROR in cofcheb'
-          write(out_unitp,*) '*** nchmx too small '
-          write(out_unitp,*) 'nchmx < ncheb',nchmx,ncheb
+          write(out_unit,*) ' ERROR in cofcheb'
+          write(out_unit,*) '*** nchmx too small '
+          write(out_unit,*) 'nchmx < ncheb',nchmx,ncheb
           STOP
         END IF
         call cof(r,ncheb,cf)
@@ -5714,19 +5714,19 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
    45 continue
 !----------------------------------------------
 
-      write(out_unitp,2007) ncheb
+      write(out_unit,2007) ncheb
  2007 format(1x,'Ncheb after optimization = ',i6)
 
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Chebychev coefficients',ncheb
-        write(out_unitp,2009) (i,cf(i),i=1,ncheb)
+        write(out_unit,*) 'Chebychev coefficients',ncheb
+        write(out_unit,2009) (i,cf(i),i=1,ncheb)
  2009   format(3(i6,e16.5))
-        write(out_unitp,*) 'END cofcheb'
+        write(out_unit,*) 'END cofcheb'
       END IF
 !-----------------------------------------------------------
-      flush(out_unitp)
+      flush(out_unit)
 
       END SUBROUTINE cofcheb
 !==============================================================
@@ -5739,7 +5739,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE cof(r,ncheb,cf)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer ncheb
@@ -5751,12 +5751,12 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       r1 = r
       CALL mmbsjn(r1,ncheb,cf,ier)
 
-      !write(out_unitp,*) 'Chebychev coefficients'
-      !write(out_unitp,*) '  with r=',r1
+      !write(out_unit,*) 'Chebychev coefficients'
+      !write(out_unit,*) '  with r=',r1
 
       DO i=2,ncheb
         cf(i) = cf(i) + cf(i)
-        !write(out_unitp,*) 'i,cf',i,cf(i)
+        !write(out_unit,*) 'i,cf',i,cf(i)
       END DO
 !stop
       END SUBROUTINE cof
@@ -5771,7 +5771,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       !!@param: TODO
       !!@param: TODO
       SUBROUTINE cof_nOD(alpha,DeltaT,nOD,coef,Max_nOD,epsi)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer           :: nOD,Max_nOD
@@ -5788,9 +5788,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 !     logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING cof_nOD'
-         write(out_unitp,*) 'alpha,DeltaT,epsi',alpha,DeltaT,epsi
-         write(out_unitp,*) 'nOD,Max_nOD',nOD,Max_nOD
+         write(out_unit,*) 'BEGINNING cof_nOD'
+         write(out_unit,*) 'alpha,DeltaT,epsi',alpha,DeltaT,epsi
+         write(out_unit,*) 'nOD,Max_nOD',nOD,Max_nOD
        END IF
 !-----------------------------------------------------------
 
@@ -5805,24 +5805,24 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           i = i+1
           xi = xi * alpha / real(i,kind=Rkind)
           reste = reste +xi
-          !write(out_unitp,*) 'i,xi,reste',i,xi,log(reste)-alpha
+          !write(out_unit,*) 'i,xi,reste',i,xi,log(reste)-alpha
         END DO
         nOD  = i
-        write(out_unitp,*) 'Optimal nOD1',nOD,log(reste)-alpha
+        write(out_unit,*) 'Optimal nOD1',nOD,log(reste)-alpha
         DO WHILE (xi > epsi .AND. i <= Max_nOD)
           i = i+1
           xi = xi * alpha / real(i,kind=Rkind)
-          !write(out_unitp,*) 'i,xi',i,xi
+          !write(out_unit,*) 'i,xi',i,xi
         END DO
         nOD  = i
-        IF (debug) write(out_unitp,*) 'Optimal nOD2',nOD,xi
+        IF (debug) write(out_unit,*) 'Optimal nOD2',nOD,xi
       ELSE
-        IF (debug) write(out_unitp,*) 'Fixed   nOD ',nOD
+        IF (debug) write(out_unit,*) 'Fixed   nOD ',nOD
       END IF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END cof_nOD'
+        write(out_unit,*) 'END cof_nOD'
       END IF
 !-----------------------------------------------------------
 

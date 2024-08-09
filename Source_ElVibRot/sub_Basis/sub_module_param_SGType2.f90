@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_param_SGType2
-USE mod_system
+USE EVR_system_m
 use mod_nDindex, only: type_nDindex, dealloc_nDindex,Write_nDindex,     &
                        alloc_nparray, init_ndval_of_nDindex,            &
                        add_one_to_nDindex, calc_ndi, calc_nDindex,      &
@@ -130,16 +130,16 @@ TYPE (OldParam), intent(in) :: OldPara
 
 character (len=*), parameter :: name_sub='Write_OldParam'
 
-  write(out_unitp,*) 'BEGINNING ',name_sub
-  write(out_unitp,*) 'iq,ib          ',OldPara%iq,OldPara%ib
-  write(out_unitp,*) 'i_SG           ',OldPara%i_SG
-  write(out_unitp,*) 'iq_SG,ib_SG    ',OldPara%iq_SG,OldPara%ib_SG
+  write(out_unit,*) 'BEGINNING ',name_sub
+  write(out_unit,*) 'iq,ib          ',OldPara%iq,OldPara%ib
+  write(out_unit,*) 'i_SG           ',OldPara%i_SG
+  write(out_unit,*) 'iq_SG,ib_SG    ',OldPara%iq_SG,OldPara%ib_SG
 
   IF (allocated(OldPara%tab_l_AT_SG)) &
-  write(out_unitp,*) 'tab_l_AT_SG(:) ',OldPara%tab_l_AT_SG(:)
+  write(out_unit,*) 'tab_l_AT_SG(:) ',OldPara%tab_l_AT_SG(:)
 
-  write(out_unitp,*) 'END ',name_sub
-  flush(out_unitp)
+  write(out_unit,*) 'END ',name_sub
+  flush(out_unit)
 
 END SUBROUTINE Write_OldParam
 SUBROUTINE dealloc_OldParam(OldPara)
@@ -165,41 +165,41 @@ SUBROUTINE Write_SGType2(SGType2)
 
 character (len=*), parameter :: name_sub='Write_SGType2'
 
-  write(out_unitp,*) 'BEGINNING ',name_sub
+  write(out_unit,*) 'BEGINNING ',name_sub
 
-  write(out_unitp,*) 'L1_SparseGrid ',SGType2%L1_SparseGrid
-  write(out_unitp,*) 'L2_SparseGrid ',SGType2%L2_SparseGrid
-  write(out_unitp,*) 'L1_SparseBasis ',SGType2%L1_SparseBasis
-  write(out_unitp,*) 'L2_SparseBasis ',SGType2%L2_SparseBasis
-  write(out_unitp,*) 'Num_OF_Lmax ',SGType2%Num_OF_Lmax
-  write(out_unitp,*)
+  write(out_unit,*) 'L1_SparseGrid ',SGType2%L1_SparseGrid
+  write(out_unit,*) 'L2_SparseGrid ',SGType2%L2_SparseGrid
+  write(out_unit,*) 'L1_SparseBasis ',SGType2%L1_SparseBasis
+  write(out_unit,*) 'L2_SparseBasis ',SGType2%L2_SparseBasis
+  write(out_unit,*) 'Num_OF_Lmax ',SGType2%Num_OF_Lmax
+  write(out_unit,*)
 
-  write(out_unitp,*) 'nb0 ',SGType2%nb0
-  write(out_unitp,*) 'nb_SG ',SGType2%nb_SG
-  write(out_unitp,*)
+  write(out_unit,*) 'nb0 ',SGType2%nb0
+  write(out_unit,*) 'nb_SG ',SGType2%nb_SG
+  write(out_unit,*)
 
   CALL Write_nDindex(SGType2%nDind_SmolyakRep,'nDind_SmolyakRep')
-  write(out_unitp,*) 'alloc nDind_DPG',allocated(SGType2%nDind_DPG)
-  write(out_unitp,*) 'alloc nDind_DPB',allocated(SGType2%nDind_DPB)
-  write(out_unitp,*)
+  write(out_unit,*) 'alloc nDind_DPG',allocated(SGType2%nDind_DPG)
+  write(out_unit,*) 'alloc nDind_DPB',allocated(SGType2%nDind_DPB)
+  write(out_unit,*)
 
-  write(out_unitp,*) '  FOR SG4:'
-  write(out_unitp,*) 'alloc tab_iB_OF_SRep_TO_iB',allocated(SGType2%tab_iB_OF_SRep_TO_iB)
-  write(out_unitp,*) 'alloc tab_Sum_nq_OF_SRep',allocated(SGType2%tab_Sum_nq_OF_SRep)
-  write(out_unitp,*) 'alloc tab_nq_OF_SRep',allocated(SGType2%tab_nq_OF_SRep)
-  write(out_unitp,*) 'alloc tab_Sum_nb_OF_SRep',allocated(SGType2%tab_Sum_nb_OF_SRep)
-  write(out_unitp,*) 'alloc tab_nb_OF_SRep',allocated(SGType2%tab_nb_OF_SRep)
-  write(out_unitp,*)
+  write(out_unit,*) '  FOR SG4:'
+  write(out_unit,*) 'alloc tab_iB_OF_SRep_TO_iB',allocated(SGType2%tab_iB_OF_SRep_TO_iB)
+  write(out_unit,*) 'alloc tab_Sum_nq_OF_SRep',allocated(SGType2%tab_Sum_nq_OF_SRep)
+  write(out_unit,*) 'alloc tab_nq_OF_SRep',allocated(SGType2%tab_nq_OF_SRep)
+  write(out_unit,*) 'alloc tab_Sum_nb_OF_SRep',allocated(SGType2%tab_Sum_nb_OF_SRep)
+  write(out_unit,*) 'alloc tab_nb_OF_SRep',allocated(SGType2%tab_nb_OF_SRep)
+  write(out_unit,*)
 
-  write(out_unitp,*) 'nb_threads ',SGType2%nb_threads
-  write(out_unitp,*) 'nb_tasks ',SGType2%nb_tasks
-  write(out_unitp,*) 'alloc nDval_init',allocated(SGType2%nDval_init)
-  write(out_unitp,*) 'alloc iG_th',allocated(SGType2%iG_th)
-  write(out_unitp,*) 'alloc fG_th',allocated(SGType2%fG_th)
-  write(out_unitp,*)
+  write(out_unit,*) 'nb_threads ',SGType2%nb_threads
+  write(out_unit,*) 'nb_tasks ',SGType2%nb_tasks
+  write(out_unit,*) 'alloc nDval_init',allocated(SGType2%nDval_init)
+  write(out_unit,*) 'alloc iG_th',allocated(SGType2%iG_th)
+  write(out_unit,*) 'alloc fG_th',allocated(SGType2%fG_th)
+  write(out_unit,*)
 
-  write(out_unitp,*) 'END ',name_sub
-  flush(out_unitp)
+  write(out_unit,*) 'END ',name_sub
+  flush(out_unit)
 
 END SUBROUTINE Write_SGType2
 
@@ -362,7 +362,7 @@ END IF
 END SUBROUTINE SGType2_2TOSGType2_1
 
       SUBROUTINE Set_nDval_init_FOR_SG4(SGType2,version)
-      USE mod_system
+      USE EVR_system_m
       !$ USE omp_lib, only : omp_get_max_threads
       IMPLICIT NONE
 
@@ -383,9 +383,9 @@ END SUBROUTINE SGType2_2TOSGType2_1
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'ndim (nb_basis)',SGType2%nDind_SmolyakRep%ndim
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'ndim (nb_basis)',SGType2%nDind_SmolyakRep%ndim
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -407,7 +407,7 @@ END SUBROUTINE SGType2_2TOSGType2_1
       CASE (1)
 
         DO
-          write(out_unitp,*) ' nb_threads',nb_threads
+          write(out_unit,*) ' nb_threads',nb_threads
           ! nDval_init setup
           CALL Set_nDval_init_FOR_SG4_v1(SGType2,nb_threads,err_sub)
 
@@ -430,7 +430,7 @@ END SUBROUTINE SGType2_2TOSGType2_1
       END SELECT
 
       IF (err_sub /= 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' ERROR in ',name_sub
         STOP
       END IF
 
@@ -439,18 +439,18 @@ END SUBROUTINE SGType2_2TOSGType2_1
         fformat = '(i0,a,i0,x,i0,a,' // TO_string(ndim) // '(1x,i0))'
 
         DO ith=1,SGType2%nb_tasks
-          write(out_unitp,fformat) ith-1,' iG_th,fG_th ',               &
+          write(out_unit,fformat) ith-1,' iG_th,fG_th ',               &
                                  SGType2%iG_th(ith),SGType2%fG_th(ith), &
                     ' nDval_init: ',SGType2%nDval_init(:,ith)
         END DO
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE Set_nDval_init_FOR_SG4
       SUBROUTINE Set_nDval_init_FOR_SG4_v0(SGType2,nb_threads,err_sub)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- for the basis set ----------------------------------------------
@@ -471,9 +471,9 @@ END SUBROUTINE SGType2_2TOSGType2_1
       logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'ndim (nb_basis)',SGType2%nDind_SmolyakRep%ndim
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'ndim (nb_basis)',SGType2%nDind_SmolyakRep%ndim
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -531,17 +531,17 @@ END SUBROUTINE SGType2_2TOSGType2_1
         fformat = '(i0,a,i0,x,i0,a,' // TO_string(ndim) // '(1x,i0))'
 
         DO ith=1,SGType2%nb_tasks
-          write(out_unitp,fformat) ith-1,' iG_th,fG_th ',               &
+          write(out_unit,fformat) ith-1,' iG_th,fG_th ',               &
                                  SGType2%iG_th(ith),SGType2%fG_th(ith), &
                     ' nDval_init: ',SGType2%nDval_init(:,ith)
         END DO
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE Set_nDval_init_FOR_SG4_v0
       SUBROUTINE Set_nDval_init_FOR_SG4_v1(SGType2,nb_threads,err_sub)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- for the basis set ----------------------------------------------
@@ -562,12 +562,12 @@ END SUBROUTINE SGType2_2TOSGType2_1
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'ndim (nb_basis)',SGType2%nDind_SmolyakRep%ndim
-        write(out_unitp,*) 'nb_threads',nb_threads
-        write(out_unitp,*) 'SGType2%nb_SG',SGType2%nb_SG
-        write(out_unitp,*) 'SGType2%nDind_SmolyakRep%Max_nDI',SGType2%nDind_SmolyakRep%Max_nDI
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'ndim (nb_basis)',SGType2%nDind_SmolyakRep%ndim
+        write(out_unit,*) 'nb_threads',nb_threads
+        write(out_unit,*) 'SGType2%nb_SG',SGType2%nb_SG
+        write(out_unit,*) 'SGType2%nDind_SmolyakRep%Max_nDI',SGType2%nDind_SmolyakRep%Max_nDI
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -591,7 +591,7 @@ END SUBROUTINE SGType2_2TOSGType2_1
 
 
         nqq_Th      = sum(SGType2%tab_nq_OF_SRep(:)) / SGType2%nb_tasks
-        IF (debug) write(out_unitp,*) 'nqq_Th',nqq_Th
+        IF (debug) write(out_unit,*) 'nqq_Th',nqq_Th
         nqq         = 0
 
         ith = 1
@@ -630,11 +630,11 @@ END SUBROUTINE SGType2_2TOSGType2_1
         fformat = '(i0,a,i0,x,i0,a,' // TO_string(ndim) // '(1x,i0))'
 
         DO ith=1,SGType2%nb_tasks
-          write(out_unitp,fformat) ith-1,' iG_th,fG_th ',               &
+          write(out_unit,fformat) ith-1,' iG_th,fG_th ',               &
                                  SGType2%iG_th(ith),SGType2%fG_th(ith), &
                     ' nDval_init: ',SGType2%nDval_init(:,ith)
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
       !err /= 0 means nb_threads is too large => table are deallocated
@@ -646,16 +646,16 @@ END SUBROUTINE SGType2_2TOSGType2_1
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'err_sub ',err_sub
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'err_sub ',err_sub
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE Set_nDval_init_FOR_SG4_v1
 
       SUBROUTINE Set_nDval_init_FOR_SG4_v2(SGType2,nb_threads,err_sub)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- for the basis set ----------------------------------------------
@@ -676,11 +676,11 @@ END SUBROUTINE SGType2_2TOSGType2_1
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'ndim (nb_basis): ',SGType2%nDind_SmolyakRep%ndim
-        write(out_unitp,*) 'nb_threads:      ',nb_threads
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'ndim (nb_basis): ',SGType2%nDind_SmolyakRep%ndim
+        write(out_unit,*) 'nb_threads:      ',nb_threads
 
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -699,8 +699,8 @@ END SUBROUTINE SGType2_2TOSGType2_1
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'SGType2%nb_tasks',SGType2%nb_tasks
-        flush(out_unitp)
+        write(out_unit,*) 'SGType2%nb_tasks',SGType2%nb_tasks
+        flush(out_unit)
       END IF
 
 
@@ -746,18 +746,18 @@ END SUBROUTINE SGType2_2TOSGType2_1
         fformat = '(i0,a,i0,x,i0,a,' // TO_string(ndim) // '(1x,i0))'
 
         DO ith=1,SGType2%nb_tasks
-          write(out_unitp,fformat) ith-1,' iG_th,fG_th ',               &
+          write(out_unit,fformat) ith-1,' iG_th,fG_th ',               &
                                  SGType2%iG_th(ith),SGType2%fG_th(ith), &
                               ' nDval_init: ',SGType2%nDval_init(:,ith)
         END DO
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE Set_nDval_init_FOR_SG4_v2
 
       RECURSIVE SUBROUTINE calc_Weight_OF_SRep(WeightSG,nDind_SmolyakRep)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       TYPE (Type_nDindex),             intent(in)    :: nDind_SmolyakRep
@@ -782,7 +782,7 @@ END SUBROUTINE SGType2_2TOSGType2_1
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -807,7 +807,7 @@ END SUBROUTINE SGType2_2TOSGType2_1
           END IF
         END IF
 
-        IF (debug) write(out_unitp,*) 'i_SG,nDval,coef',i_SG,tab_l(:),WeightSG(i_SG)
+        IF (debug) write(out_unit,*) 'i_SG,nDval,coef',i_SG,tab_l(:),WeightSG(i_SG)
       END DO
     ELSE ! here the Smolyak rep in Delta_S is transformed in S to get the correct WeightSG
       WeightSG(:) = ONE
@@ -836,7 +836,7 @@ END SUBROUTINE SGType2_2TOSGType2_1
       !STOP 'not yet'
     END IF
 
-    IF (debug) write(out_unitp,*) 'count zero weight: ',count(abs(WeightSG) <= ONETENTH**6)
+    IF (debug) write(out_unit,*) 'count zero weight: ',count(abs(WeightSG) <= ONETENTH**6)
 !-----------------------------------------------------------
     IF (debug .OR. print_level > 1) THEN
       max_print = nDind_SmolyakRep%Max_nDI
@@ -845,15 +845,15 @@ END SUBROUTINE SGType2_2TOSGType2_1
       CALL init_nDval_OF_nDindex(nDind_SmolyakRep,tab_l)
       DO i_SG=1,max_print
         CALL ADD_ONE_TO_nDindex(nDind_SmolyakRep,tab_l,iG=i_SG)
-        write(out_unitp,*) 'i_SG,nDval,coef',i_SG,tab_l(:),WeightSG(i_SG)
+        write(out_unit,*) 'i_SG,nDval,coef',i_SG,tab_l(:),WeightSG(i_SG)
       END DO
       IF (max_print < nDind_SmolyakRep%Max_nDI) THEN
-         write(out_unitp,*) 'i_SG,nDval,coef ....'
+         write(out_unit,*) 'i_SG,nDval,coef ....'
       END IF
     END IF
 
     IF (debug) THEN
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
     END IF
 !-----------------------------------------------------------
   END SUBROUTINE calc_Weight_OF_SRep
@@ -880,18 +880,18 @@ character (len=*), parameter :: name_sub = 'get_iqSG_iSG_FROM_iq'
 !-----------------------------------------------------------
 err_sub = 0
 IF (debug) THEN
-  write(out_unitp,*) 'BEGINNING ',name_sub
-  flush(out_unitp)
+  write(out_unit,*) 'BEGINNING ',name_sub
+  flush(out_unit)
 END IF
 
 IF (present(OldPara)) THEN
-  !write(out_unitp,*) 'OldPara ',name_sub,OldPara
+  !write(out_unit,*) 'OldPara ',name_sub,OldPara
   iSG = OldPara%i_SG
 END IF
 
 
-!write(out_unitp,*) 'alloc tab_Sum_nq_OF_SRep',allocated(SGType2%tab_Sum_nq_OF_SRep)
-!flush(out_unitp)
+!write(out_unit,*) 'alloc tab_Sum_nq_OF_SRep',allocated(SGType2%tab_Sum_nq_OF_SRep)
+!flush(out_unit)
 IF (iSG > 1 .AND. iSG <= size(SGType2%tab_Sum_nq_OF_SRep)) THEN
   iqSG = iq - SGType2%tab_Sum_nq_OF_SRep(iSG-1)
 
@@ -921,8 +921,8 @@ IF (iqSG < 1) STOP 'iqSG < 1'
 
 
 IF (debug) THEN
-  write(out_unitp,*) 'iq,iSG,iqSG',iq,iSG,iqSG
-  write(out_unitp,*) 'END ',name_sub
+  write(out_unit,*) 'iq,iSG,iqSG',iq,iSG,iqSG
+  write(out_unit,*) 'END ',name_sub
 END IF
 
 END SUBROUTINE get_iqSG_iSG_FROM_iq
@@ -956,19 +956,19 @@ character (len=*), parameter :: name_sub = 'get_Tabiq_Tabil_FROM_iq'
 
 err_sub = 0
 IF (debug) THEN
-  write(out_unitp,*) 'BEGINNING ',name_sub
-  !$ write(out_unitp,*) 'thread_num:',omp_get_thread_num()
-  write(out_unitp,*) ' iq',iq
-  write(out_unitp,*) ' i_SG,iq_SG',i_SG,iq_SG
-  write(out_unitp,*) ' Tabiq',Tabiq
-  write(out_unitp,*) ' Tabil',Tabil
+  write(out_unit,*) 'BEGINNING ',name_sub
+  !$ write(out_unit,*) 'thread_num:',omp_get_thread_num()
+  write(out_unit,*) ' iq',iq
+  write(out_unit,*) ' i_SG,iq_SG',i_SG,iq_SG
+  write(out_unit,*) ' Tabiq',Tabiq
+  write(out_unit,*) ' Tabil',Tabil
   IF (present(OldPara)) CALL Write_OldParam(OldPara)
-  flush(out_unitp)
+  flush(out_unit)
 END IF
 
 !first calculation of i_SG and iq_SG from iq and OldPara (if available)
 IF (present(OldPara)) THEN
-  !write(out_unitp,*) 'OldPara ',name_sub,OldPara
+  !write(out_unit,*) 'OldPara ',name_sub,OldPara
   i_SG = OldPara%i_SG
 ELSE
   i_SG = 0
@@ -996,25 +996,25 @@ END DO
 i_SG       = i_SG_loc
 
 IF (i_SG > SGType2%nDind_SmolyakRep%Max_nDI) THEN
-  write(out_unitp,*) 'ERROR in ',name_sub
-  write(out_unitp,*) ' iq_SG',iq_SG
-  write(out_unitp,*) ' i_SG',i_SG
-  write(out_unitp,*) ' nDind_SmolyakRep%Max_nDI',SGType2%nDind_SmolyakRep%Max_nDI
+  write(out_unit,*) 'ERROR in ',name_sub
+  write(out_unit,*) ' iq_SG',iq_SG
+  write(out_unit,*) ' i_SG',i_SG
+  write(out_unit,*) ' nDind_SmolyakRep%Max_nDI',SGType2%nDind_SmolyakRep%Max_nDI
   IF (present(OldPara)) CALL Write_OldParam(OldPara)
-  flush(out_unitp)
+  flush(out_unit)
   STOP 'i_SG too large'
 END IF
 IF (iq_SG < 1) THEN
-  write(out_unitp,*) 'ERROR in ',name_sub
-  write(out_unitp,*) ' iq_SG',iq_SG
-  write(out_unitp,*) ' iq_SG < 1'
+  write(out_unit,*) 'ERROR in ',name_sub
+  write(out_unit,*) ' iq_SG',iq_SG
+  write(out_unit,*) ' iq_SG < 1'
   IF (present(OldPara)) CALL Write_OldParam(OldPara)
-  flush(out_unitp)
+  flush(out_unit)
   STOP 'iq_SG < 1'
 END IF
 
-  IF (debug) write(out_unitp,*) ' i_SG,iq_SG,iq',i_SG,iq_SG,iq
-  flush(out_unitp)
+  IF (debug) write(out_unit,*) ' i_SG,iq_SG,iq',i_SG,iq_SG,iq
+  flush(out_unit)
 
 
 !2d calculation of Tabil from i_SG and OldPara (if available)
@@ -1038,18 +1038,18 @@ ELSE
 END IF
 
 IF (err_sub /= 0) THEN
-  write(out_unitp,*) ' SGType2%nDind_SmolyakRep'
-  write(out_unitp,*) ' ERROR in ',name_sub
-  write(out_unitp,*) ' i_SG,iq_SG,iq',i_SG,iq_SG,iq
-  write(out_unitp,*) ' Tabil',Tabil
-  write(out_unitp,*) '  from SGType2%nDind_SmolyakRep',i_SG
+  write(out_unit,*) ' SGType2%nDind_SmolyakRep'
+  write(out_unit,*) ' ERROR in ',name_sub
+  write(out_unit,*) ' i_SG,iq_SG,iq',i_SG,iq_SG,iq
+  write(out_unit,*) ' Tabil',Tabil
+  write(out_unit,*) '  from SGType2%nDind_SmolyakRep',i_SG
   IF (present(OldPara)) CALL Write_OldParam(OldPara)
   err_sub = 1
   RETURN
   !STOP 'calc_nDindex'
 END IF
-  IF (debug) write(out_unitp,*) ' Tabil',i_SG,' : ',Tabil
-  flush(out_unitp)
+  IF (debug) write(out_unit,*) ' Tabil',i_SG,' : ',Tabil
+  flush(out_unit)
 
 
 ! Save the parameters in OldPara if OldPara is present
@@ -1065,26 +1065,26 @@ END IF
   !CALL calc_nDval_m1(Tabiq,SGType2%tab_nq_OF_SRep(i_SG),nDsize,size(Tabil))
   !CALL calc_nDindex(SGType2%nDind_DPG(i_SG),iq_SG,Tabiq,err_sub)
   IF (err_sub /= 0) THEN
-    write(out_unitp,*) ' SGType2%nDind_DPG(i_SG)'
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' i_SG,iq_SG,iq',i_SG,iq_SG,iq
-    write(out_unitp,*) ' Tabiq',Tabiq
-    write(out_unitp,*) ' Tabil',Tabil
-    write(out_unitp,*) '  from SGType2%nDind_DPG(i_SG)',i_SG
+    write(out_unit,*) ' SGType2%nDind_DPG(i_SG)'
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' i_SG,iq_SG,iq',i_SG,iq_SG,iq
+    write(out_unit,*) ' Tabiq',Tabiq
+    write(out_unit,*) ' Tabil',Tabil
+    write(out_unit,*) '  from SGType2%nDind_DPG(i_SG)',i_SG
     err_sub = 2
     RETURN
     !STOP 'calc_nDindex'
    END IF
 
-  !IF (debug) write(out_unitp,*) ' Tabiq',Tabiq
-  !flush(out_unitp)
+  !IF (debug) write(out_unit,*) ' Tabiq',Tabiq
+  !flush(out_unit)
 
 IF (debug) THEN
-  write(out_unitp,*) 'iq,i_SG,iq_SG',iq,i_SG,iq_SG
-  write(out_unitp,*) 'iq,i_SG,Tabil',iq,i_SG,':',Tabil
-  write(out_unitp,*) 'iq,i_SG,Tabiq',iq,i_SG,':',Tabiq
-  write(out_unitp,*) 'END ',name_sub
-  flush(out_unitp)
+  write(out_unit,*) 'iq,i_SG,iq_SG',iq,i_SG,iq_SG
+  write(out_unit,*) 'iq,i_SG,Tabil',iq,i_SG,':',Tabil
+  write(out_unit,*) 'iq,i_SG,Tabiq',iq,i_SG,':',Tabiq
+  write(out_unit,*) 'END ',name_sub
+  flush(out_unit)
 END IF
 
 END SUBROUTINE get_Tabiq_Tabil_FROM_iq
@@ -1110,7 +1110,7 @@ integer :: err_sub
 character (len=*), parameter :: name_sub = 'get_Tabiq_Tabil_FROM_iq_old'
 !-----------------------------------------------------------
 IF (debug) THEN
-  write(out_unitp,*) 'BEGINNING ',name_sub
+  write(out_unit,*) 'BEGINNING ',name_sub
 END IF
 
 iq_SG           = iq
@@ -1123,23 +1123,23 @@ END DO
 
   CALL calc_nDindex(SGType2%nDind_SmolyakRep,i_SG,Tabil,err_sub)
   IF (err_sub /= 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) '  from SGType2%nDind_SmolyakRep',i_SG
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) '  from SGType2%nDind_SmolyakRep',i_SG
     STOP 'calc_nDindex'
   END IF
 
   CALL calc_nDindex(SGType2%nDind_DPG(i_SG),iq_SG,Tabiq,err_sub)
   IF (err_sub /= 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) '  from SGType2%nDind_DPG(i_SG)',i_SG
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) '  from SGType2%nDind_DPG(i_SG)',i_SG
     STOP 'calc_nDindex'
   END IF
 
 IF (debug) THEN
-  write(out_unitp,*) 'iq,i_SG,iq_SG',iq,i_SG,iq_SG
-  write(out_unitp,*) 'iq,i_SG,Tabil',iq,i_SG,':',Tabil
-  write(out_unitp,*) 'iq,i_SG,Tabiq',iq,i_SG,':',Tabiq
-  write(out_unitp,*) 'END ',name_sub
+  write(out_unit,*) 'iq,i_SG,iq_SG',iq,i_SG,iq_SG
+  write(out_unit,*) 'iq,i_SG,Tabil',iq,i_SG,':',Tabil
+  write(out_unit,*) 'iq,i_SG,Tabiq',iq,i_SG,':',Tabiq
+  write(out_unit,*) 'END ',name_sub
 END IF
 
 END SUBROUTINE get_Tabiq_Tabil_FROM_iq_old

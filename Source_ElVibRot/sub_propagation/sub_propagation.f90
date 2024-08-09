@@ -75,7 +75,7 @@ CONTAINS
 !
 !=======================================================================================
   SUBROUTINE sub_propagation(WP0,para_AllOp,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Op
       USE mod_propa
       USE mod_psi,    ONLY : param_psi,ecri_psi,alloc_array,                    &
@@ -119,15 +119,15 @@ CONTAINS
 !-----------------------------------------------------------
       para_H => para_AllOp%tab_Op(1)
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'n',WP0(1)%nb_tot
-        write(out_unitp,*)
-        write(out_unitp,*) 'WP0(:)%symab',WP0(:)%symab
-        write(out_unitp,*) 'WP0 BasisRep'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'n',WP0(1)%nb_tot
+        write(out_unit,*)
+        write(out_unit,*) 'WP0(:)%symab',WP0(:)%symab
+        write(out_unit,*) 'WP0 BasisRep'
         CALL ecri_psi(psi=WP0(1))
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL write_param_Op(para_H)
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL Write_ana_psi(para_propa%ana_psi)
       END IF
 !-----------------------------------------------------------
@@ -145,15 +145,15 @@ CONTAINS
         para_propa%para_poly%Hmax = para_propa%Hmax
       ENDIF
 
-      write(out_unitp,*) 'Tmax,DeltaT (ua)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (ua)=> ',                         &
              para_propa%WPTmax,para_propa%WPdeltaT
-      write(out_unitp,*) 'Tmax,DeltaT (fs)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (fs)=> ',                         &
                para_propa%WPTmax*get_Conv_au_TO_unit('t','fs'),         &
              para_propa%WPdeltaT*get_Conv_au_TO_unit('t','fs')
-      write(out_unitp,*) 'Tmax,DeltaT (ps)=> ',                         &
+      write(out_unit,*) 'Tmax,DeltaT (ps)=> ',                         &
                para_propa%WPTmax*get_Conv_au_TO_unit('t','ps'),         &
              para_propa%WPdeltaT*get_Conv_au_TO_unit('t','ps')
-      write(out_unitp,*) '... DeltaE,Emax (cm-1)',                      &
+      write(out_unit,*) '... DeltaE,Emax (cm-1)',                      &
           TWO*pi/para_propa%WPTmax   * get_Conv_au_TO_unit('E','cm-1'), &
           TWO*pi/para_propa%WPdeltaT * get_Conv_au_TO_unit('E','cm-1')
 
@@ -219,21 +219,21 @@ CONTAINS
         DO i=iOp,iOp+2
           iDip = para_AllOp%tab_Op(i)%n_Op
           IF (para_propa%para_field%pola_xyz(iDip)) THEN
-            write(out_unitp,*) 'Propagation with ',                     &
+            write(out_unit,*) 'Propagation with ',                     &
                    trim(para_AllOp%tab_Op(i)%name_Op),                  &
                    para_AllOp%tab_Op(i)%n_Op
           END IF
         END DO
 
         IF (para_propa%para_field%stepw == 0) THEN
-          write(out_unitp,*) 'propagation without scan in w'
+          write(out_unit,*) 'propagation without scan in w'
           WP(1) = WP0(1)
           CALL sub_propagation24(WP,1,print_Op,                         &
                                  para_propa%para_field,.FALSE.,         &
                                  para_AllOp%tab_Op,para_propa)
         ELSE
 
-          write(out_unitp,*) 'propagation with scan in w'
+          write(out_unit,*) 'propagation with scan in w'
           wmin  = para_propa%para_field%wmin
           wmax  = para_propa%para_field%wmax
           stepw = para_propa%para_field%stepw
@@ -246,7 +246,7 @@ CONTAINS
 
             para_propa%para_field%w(:,:) = w
 
-            write(out_unitp,*) 'propagation with w =',w
+            write(out_unit,*) 'propagation with w =',w
             WP = WP0
             CALL sub_propagation24(WP,1,print_Op,                       &
                                    para_propa%para_field,.FALSE.,       &
@@ -262,11 +262,11 @@ CONTAINS
                                 para_AllOp%tab_Op,para_propa)
 
       CASE DEFAULT
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) ' Unknown type of propagation(',para_propa%type_WPpropa,')'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) ' Unknown type of propagation(',para_propa%type_WPpropa,')'
         STOP ' ERROR: Unknown type of propagation'
       END SELECT
-      write(out_unitp,*) 'Number of Hamiltonian operations (H I psi >)',para_H%nb_OpPsi
+      write(out_unit,*) 'Number of Hamiltonian operations (H I psi >)',para_H%nb_OpPsi
 
 
 
@@ -276,7 +276,7 @@ CONTAINS
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
   end subroutine sub_propagation
@@ -286,7 +286,7 @@ CONTAINS
 !     3 : propagation in imaginary time => ground state
 !=======================================================================================
       SUBROUTINE sub_propagation3(E0,psi0,psi,tab_Op,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,     ONLY : param_psi,ecri_psi,dealloc_psi,           &
                               renorm_psi,Write_Psi_nDBasis,             &
                               param_ana_psi,Write_ana_psi
@@ -328,18 +328,18 @@ CONTAINS
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_propagation3'
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING sub_propagation3'
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',psi(1)%nb_ba,psi(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',psi(1)%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',psi(1)%nb_ba,psi(1)%nb_qa
+        write(out_unit,*) 'nb_bi',psi(1)%nb_bi
+        write(out_unit,*)
 
-        write(out_unitp,*) 'psiBasisRep'
+        write(out_unit,*) 'psiBasisRep'
         CALL ecri_psi(psi=psi0(1),ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) 'psiGridRep'
+        write(out_unit,*) 'psiGridRep'
         CALL ecri_psi(psi=psi0(1),ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
 
        END IF
@@ -357,7 +357,7 @@ CONTAINS
 !-----------------------------------------------------------
 
 !-----------------------------------------------------------
-      write(out_unitp,*) ' vib : propagation: ',para_propa%name_WPpropa
+      write(out_unit,*) ' vib : propagation: ',para_propa%name_WPpropa
 
 !     - parameters for poly (cheby and nOD) ... ------------
       CALL initialisation1_poly(para_propa%para_poly,                   &
@@ -382,7 +382,7 @@ CONTAINS
       DeltaE = abs(para_H%Hmax - para_H%Hmin)
       FOD = .NOT. (para_propa%type_WPpropa == -3) .AND. .NOT. para_H%cplx
       IF (para_propa%write_iter .OR. debug) THEN
-        write(out_unitp,21) T,E0*get_Conv_au_TO_unit('E','cm-1')
+        write(out_unit,21) T,E0*get_Conv_au_TO_unit('E','cm-1')
       END IF
  21   format('ImTimeProp ',f12.2,' (',2(1x,f18.4),')')
 
@@ -393,7 +393,7 @@ CONTAINS
 
 !       --------------------------------------------------------
         IF (FOD) THEN
-          IF (para_propa%write_iter .OR. debug) write(out_unitp,*) 'march FOD'
+          IF (para_propa%write_iter .OR. debug) write(out_unit,*) 'march FOD'
           para_H%E0     = ZERO
           E1 = E0
           CALL march_FOD_Opti_im(psi(1),RE0,T,it,para_H,para_propa)
@@ -406,7 +406,7 @@ CONTAINS
           DeltaE = abs(E1-E0)
           FOD = (DeltaE > ONETENTH**6)  ! about 3 cm-1
         ELSE
-          IF (para_propa%write_iter .OR. debug) write(out_unitp,*) 'march nOD'
+          IF (para_propa%write_iter .OR. debug) write(out_unit,*) 'march nOD'
           para_H%E0     = para_propa%para_poly%E0
           IF (para_propa%type_WPpropa == 3) para_H%E0     = ZERO
           CALL march_nOD_im(T,no,psi(1),psi0(1),w1,w2,para_H,para_propa)
@@ -424,11 +424,11 @@ CONTAINS
         END IF
 
         IF (para_propa%write_iter .OR. debug) THEN
-           write(out_unitp,21) T,E0*get_Conv_au_TO_unit('E','cm-1')
+           write(out_unit,21) T,E0*get_Conv_au_TO_unit('E','cm-1')
         END IF
         it = it + 1
 
-        flush(out_unitp)
+        flush(out_unit)
 
       END DO
 !----------------------------------------------------------
@@ -437,7 +437,7 @@ CONTAINS
 !----------------------------------------------------------
 !     - write the final WP---------------------------------
       IF (T > para_propa%WPTmax)                                        &
-          write(out_unitp,*) ' WARNING : the WP is not fully relaxed'
+          write(out_unit,*) ' WARNING : the WP is not fully relaxed'
 
       para_propa%ana_psi%Write_psi2_Grid = .FALSE.
       para_propa%ana_psi%Write_psi_Grid  = .TRUE.
@@ -450,25 +450,25 @@ CONTAINS
         CALL Write_Psi_nDBasis(psi(1),nioWP,iPsi=1,epsi=ZERO,lformated=para_propa%file_WP%formatted,version=0)
         CALL file_close(para_propa%file_WP)
 
-        write(out_unitp,*) 'WP (BasisRep) at T=',T
+        write(out_unit,*) 'WP (BasisRep) at T=',T
         CALL Write_Psi_nDBasis(psi(1),6,iPsi=1,epsi=ONETENTH,lformated=.TRUE.,version=0)
       ENDIF
 
       IF (debug .OR. psi(1)%nb_tot < 1000) THEN
-        write(out_unitp,*) 'WP (BasisRep) at T=',T
+        write(out_unit,*) 'WP (BasisRep) at T=',T
         CALL ecri_psi(T=T,psi=psi(1),ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
       END IF
 
 !----------------------------------------------------------
-      write(out_unitp,*)
-      write(out_unitp,*) 'Number of Hamiltonian operation',para_H%nb_OpPsi
-      write(out_unitp,*)
-      write(out_unitp,*) 'relaxed E/pot0 (ua)',E0
-      write(out_unitp,*) 'relaxed E (ua)',E0+para_H%pot0
-      write(out_unitp,*) 'relaxed En/pot0 (cm-1)',                      &
+      write(out_unit,*)
+      write(out_unit,*) 'Number of Hamiltonian operation',para_H%nb_OpPsi
+      write(out_unit,*)
+      write(out_unit,*) 'relaxed E/pot0 (ua)',E0
+      write(out_unit,*) 'relaxed E (ua)',E0+para_H%pot0
+      write(out_unit,*) 'relaxed En/pot0 (cm-1)',                      &
                                       E0*get_Conv_au_TO_unit('E','cm-1')
-      write(out_unitp,*)
-      write(out_unitp,*) 'DHmax (ua)',E0 -                              &
+      write(out_unit,*)
+      write(out_unit,*) 'DHmax (ua)',E0 -                              &
                   para_propa%para_poly%Hmax + para_propa%para_poly%DHmax
 !----------------------------------------------------------
 
@@ -478,7 +478,7 @@ CONTAINS
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END sub_propagation3'
+         write(out_unit,*) 'END sub_propagation3'
        END IF
 !----------------------------------------------------------
 
@@ -486,7 +486,7 @@ CONTAINS
       END SUBROUTINE sub_propagation3
 
       SUBROUTINE sub_propagation34(psi,Ene0,nb_diago,tab_Op,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,  ONLY : param_psi,alloc_psi,dealloc_psi,ecri_psi,     &
                            Write_Psi_nDBasis,Set_psi_With_index,trie_psi,&
                            norm2_psi,renorm_psi,renorm_psi_WITH_norm2,   &
@@ -536,19 +536,19 @@ CONTAINS
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_propagation34'
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING sub_propagation34'
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
+        write(out_unit,*)
        END IF
 !-----------------------------------------------------------
        para_H => tab_Op(1)
 
 !-----------------------------------------------------------
-      write(out_unitp,*) ' propagation34: ',para_propa%name_WPpropa
-      write(out_unitp,*) ' nb_diago',nb_diago
-      write(out_unitp,*)
+      write(out_unit,*) ' propagation34: ',para_propa%name_WPpropa
+      write(out_unit,*) ' nb_diago',nb_diago
+      write(out_unit,*)
 
 !     - scaling of H ---------------------------------------
       para_H%E0     = ZERO
@@ -571,9 +571,9 @@ CONTAINS
 
       IF (lect) THEN
         read(99,*) nb_diagoR
-        write(out_unitp,*) ' nb_diagoR',nb_diagoR
+        write(out_unit,*) ' nb_diagoR',nb_diagoR
         nb_diago = min(nb_diagoR,nb_diago)
-        write(out_unitp,*) ' new nb_diago',nb_diago
+        write(out_unit,*) ' new nb_diago',nb_diago
         DO i=1,nb_diago
           CALL init_psi(psi(i),para_H,cplx)
           psi(i)%GridRep=.TRUE.
@@ -644,8 +644,8 @@ CONTAINS
         DeltaE = para_H%Hmax-para_H%Hmin
         norm2g = para_H%Hmax-para_H%Hmin
 
-        write(out_unitp,*) '-------------------------------------------'
-        write(out_unitp,*) 'WP i, E',i,                                 &
+        write(out_unit,*) '-------------------------------------------'
+        write(out_unit,*) 'WP i, E',i,                                 &
                         Ene0(i)*get_Conv_au_TO_unit('E','cm-1'),DeltaE
 
 !       DO WHILE (T .LE. para_propa%WPTmax .AND. abs(DeltaE) .GT. epsi)
@@ -679,7 +679,7 @@ CONTAINS
           avH3 = CavH3
 
 
-          IF (debug) write(out_unitp,*) 'avH..',avH1,avH2,avH3
+          IF (debug) write(out_unit,*) 'avH..',avH1,avH2,avH3
 
 !         |g> = H |psi> - E|psi> with E = <psi|H|psi> (E=avH1)
 !         Rq : <g|psi> = 0
@@ -693,13 +693,13 @@ CONTAINS
           B = B/C
           C = sqrt(C)
 
-          write(out_unitp,*) 'A,B,C',A,B,C
+          write(out_unit,*) 'A,B,C',A,B,C
 
           th = HALF*atan( -TWO*C/(B-A) )
           E1 = A*cos(th)**2 + B*sin(th)**2 + TWO*C*cos(th)*sin(th)
 
 
-          write(out_unitp,*) 'it,th E',it,th,E1*get_Conv_au_TO_unit('E','cm-1')
+          write(out_unit,*) 'it,th E',it,th,E1*get_Conv_au_TO_unit('E','cm-1')
 
 
           Ene0(i) = E1
@@ -714,7 +714,7 @@ CONTAINS
           CALL norm2_psi(g)
           norm2g = sqrt(g%norm2)
           CALL renorm_psi_WITH_norm2(g)
-          write(out_unitp,*) 'it norm2g C',it,norm2g,C
+          write(out_unit,*) 'it norm2g C',it,norm2g,C
 
 
           H2psi  = psi(i) * cos(th)
@@ -722,38 +722,38 @@ CONTAINS
 
 
           CALL norm2_psi(psi(i))
-          write(out_unitp,*) 'it norm2 npsi',it,psi(i)%norm2
+          write(out_unit,*) 'it norm2 npsi',it,psi(i)%norm2
           CALL renorm_psi_WITH_norm2(psi(i))
           CALL sub_PsiOpPsi(CEne0,psi(i),Hpsi,para_H)
           Ene0(i) = CEne0
-          write(out_unitp,*) 'it E with npsi',it,                       &
+          write(out_unit,*) 'it E with npsi',it,                       &
                                 Ene0(i)*get_Conv_au_TO_unit('E','cm-1')
 
 
 !         - propagation ------------------------------------------
 
           IF (debug) THEN
-            write(out_unitp,*) 'WP it, E',it,                           &
+            write(out_unit,*) 'WP it, E',it,                           &
                        Ene0(i)*get_Conv_au_TO_unit('E','cm-1'),         &
                         DeltaE*get_Conv_au_TO_unit('E','cm-1')
-            write(out_unitp,*) 'WP it sqrt(norm2 g)',it,                &
+            write(out_unit,*) 'WP it sqrt(norm2 g)',it,                &
                          sqrt(g%norm2)*get_Conv_au_TO_unit('E','cm-1')
-            write(out_unitp,*) 'WP it, DeltaT,S',it,DeltaT,S
+            write(out_unit,*) 'WP it, DeltaT,S',it,DeltaT,S
           END IF
 
           T = T + para_propa%WPdeltaT
           it = it + 1
 
         END DO
-        IF (T> para_propa%WPTmax) write(out_unitp,*) ' WARNING: not converged!'
-        write(out_unitp,*) 'WP i, E',i,                                 &
+        IF (T> para_propa%WPTmax) write(out_unit,*) ' WARNING: not converged!'
+        write(out_unit,*) 'WP i, E',i,                                 &
                          Ene0(i)*get_Conv_au_TO_unit('E','cm-1'),DeltaE
-        write(out_unitp,*) 'it,T,Deltapsi',it,T,Deltapsi
+        write(out_unit,*) 'it,T,Deltapsi',it,T,Deltapsi
         it_all = it_all + it
       END DO
-      write(out_unitp,*) '-------------------------------------------'
-      write(out_unitp,*) 'iterations for eigenvalues: ',it_all
-      write(out_unitp,*) '-------------------------------------------'
+      write(out_unit,*) '-------------------------------------------'
+      write(out_unit,*) 'iterations for eigenvalues: ',it_all
+      write(out_unit,*) '-------------------------------------------'
 !----------------------------------------------------------
 
 
@@ -761,7 +761,7 @@ CONTAINS
 !----------------------------------------------------------
 !     - write the final WP---------------------------------
 !     DO i=1,nb_diago
-!       write(out_unitp,*) 'WP (i) (BasisRep) ',i
+!       write(out_unit,*) 'WP (i) (BasisRep) ',i
 !       CALL ecri_psi(T,psi(i))
 !     END DO
 !----------------------------------------------------------
@@ -773,16 +773,16 @@ CONTAINS
       CALL dealloc_psi(g)
 
 !----------------------------------------------------------
-      write(out_unitp,21) T,DeltaE*get_Conv_au_TO_unit('E','cm-1'),     &
+      write(out_unit,21) T,DeltaE*get_Conv_au_TO_unit('E','cm-1'),     &
                      real(Ene0(:))*get_Conv_au_TO_unit('E','cm-1')
  21   format('ImTimeProp ',f12.2,f18.6,1x,20(1x,f18.4))
-      write(out_unitp,*)
+      write(out_unit,*)
 !----------------------------------------------------------
 
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END sub_propagation34'
+         write(out_unit,*) 'END sub_propagation34'
        END IF
 !----------------------------------------------------------
 
@@ -798,7 +798,7 @@ CONTAINS
 !
 !================================================================
       SUBROUTINE sub_propagation11(psi0,psi,nb_WP,tab_Op,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Op
       USE mod_psi,    ONLY : param_psi,ecri_psi
       USE mod_propa
@@ -841,19 +841,19 @@ CONTAINS
       para_H => tab_Op(1)
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_propagation11'
-        write(out_unitp,*) 'Tmax,DeltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        IF(.NOT. openmpi) write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,    &
+        write(out_unit,*) 'BEGINNING sub_propagation11'
+        write(out_unit,*) 'Tmax,DeltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        IF(.NOT. openmpi) write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,    &
                                                          para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',psi(1)%nb_ba,psi(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',psi(1)%nb_bi
-        write(out_unitp,*)
-        write(out_unitp,*) 'psi(:)%symab',psi(:)%symab
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',psi(1)%nb_ba,psi(1)%nb_qa
+        write(out_unit,*) 'nb_bi',psi(1)%nb_bi
+        write(out_unit,*)
+        write(out_unit,*) 'psi(:)%symab',psi(:)%symab
 
-        write(out_unitp,*) 'psiBasisRep'
+        write(out_unit,*) 'psiBasisRep'
         CALL ecri_psi(T=ZERO,psi=psi(1),ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) 'psiGridRep'
+        write(out_unit,*) 'psiGridRep'
         CALL ecri_psi(T=ZERO,psi=psi(1),ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
       END IF
 !-----------------------------------------------------------
@@ -862,8 +862,8 @@ CONTAINS
       BasisRep = psi0(1)%BasisRep
       GridRep  = psi0(1)%GridRep
 
-      write(out_unitp,*) ' vib : propagation: ',para_propa%name_WPpropa
-      flush(out_unitp)
+      write(out_unit,*) ' vib : propagation: ',para_propa%name_WPpropa
+      flush(out_unit)
 
       IF(.NOT. (para_H%para_ReadOp%para_FileGrid%Type_FileGrid==4)) THEN
         CALL initialisation1_poly(para_propa%para_poly,                   &
@@ -874,7 +874,7 @@ CONTAINS
         para_H%E0     = para_propa%para_poly%E0
         para_H%Esc    = para_propa%para_poly%Esc
       ENDIF
-      write(out_unitp,*) 'npoly',para_propa%para_poly%npoly
+      write(out_unit,*) 'npoly',para_propa%para_poly%npoly
 !------- propagation loop ---------------------------------
 
       T = ZERO
@@ -917,20 +917,20 @@ CONTAINS
 
          RealTime = Delta_RealTime(PropaTime)
          IF (RealTime < TEN) THEN
-           write(out_unitp,'(a,a,a,i0)') 'At T: ',                              &
+           write(out_unit,'(a,a,a,i0)') 'At T: ',                              &
                           RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.), &
                           ', Delta Real time (ms): ',int(10**3*RealTime)
          ELSE
-           write(out_unitp,'(a,a,a,i0)') 'At T: ',                              &
+           write(out_unit,'(a,a,a,i0)') 'At T: ',                              &
                           RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.), &
                           ', Delta Real time (s): ',int(RealTime)
          END IF
-         flush(out_unitp)
+         flush(out_unit)
 
       END DO
 
 !----------------------------------------------------------
-      IF (debug) write(out_unitp,*) 'WP (BasisRep) at T=',T
+      IF (debug) write(out_unit,*) 'WP (BasisRep) at T=',T
       IF (debug) CALL ecri_psi(T=T,psi=psi(1),ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
 
       para_propa%ana_psi%Write_psi2_Grid = para_propa%WPpsi2
@@ -943,7 +943,7 @@ CONTAINS
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END sub_propagation11'
+        write(out_unit,*) 'END sub_propagation11'
       END IF
 !----------------------------------------------------------
 
@@ -961,7 +961,7 @@ CONTAINS
       SUBROUTINE sub_propagation24(WP,nb_WP,print_Op,                   &
                                    para_field_new,make_field,           &
                                    tab_Op,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,ecri_psi,renorm_psi
       USE mod_Op
       USE mod_propa
@@ -1005,18 +1005,18 @@ CONTAINS
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_propagation24'
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING sub_propagation24'
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+        write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+        write(out_unit,*)
 
-        write(out_unitp,*) 'WP(1)%BasisRep'
+        write(out_unit,*) 'WP(1)%BasisRep'
         CALL ecri_psi(T=ZERO,psi=WP(1),ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-        write(out_unitp,*) 'WP(1)%GridRep'
+        write(out_unit,*) 'WP(1)%GridRep'
         CALL ecri_psi(T=ZERO,psi=WP(1),ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
        END IF
 !-----------------------------------------------------------
@@ -1025,10 +1025,10 @@ CONTAINS
 
 !-----------------------------------------------------------
       IF (print_Op) THEN
-        write(out_unitp,*) ' Propagation ',para_propa%name_WPpropa
-        IF (para_propa%para_field%pola_xyz(1)) write(out_unitp,*) 'with Dipx'
-        IF (para_propa%para_field%pola_xyz(2)) write(out_unitp,*) 'with Dipy'
-        IF (para_propa%para_field%pola_xyz(3)) write(out_unitp,*) 'with Dipz'
+        write(out_unit,*) ' Propagation ',para_propa%name_WPpropa
+        IF (para_propa%para_field%pola_xyz(1)) write(out_unit,*) 'with Dipx'
+        IF (para_propa%para_field%pola_xyz(2)) write(out_unit,*) 'with Dipy'
+        IF (para_propa%para_field%pola_xyz(3)) write(out_unit,*) 'with Dipz'
       END IF
 
 !     - parameters for poly (cheby and nOD) ... ------------
@@ -1047,7 +1047,7 @@ CONTAINS
       para_H%E0     = para_propa%para_poly%E0
       para_H%Esc    = para_propa%para_poly%Esc
 
-      write(out_unitp,*) 'para_H%E0,para_H%Esc',para_H%E0,para_H%Esc
+      write(out_unit,*) 'para_H%E0,para_H%Esc',para_H%E0,para_H%Esc
 
 !-----------------------------------------------------------
       T = ZERO
@@ -1058,17 +1058,17 @@ CONTAINS
 
       ww = para_propa%para_field%w(:,1)
       IF (print_Op) THEN
-        write(out_unitp,*) 'For the first pulse'
-        write(out_unitp,*) '  nb_pulse',para_propa%para_field%nb_pulse
-        write(out_unitp,*) 'ww (ua),FieldE0 (ua)',ww,                   &
+        write(out_unit,*) 'For the first pulse'
+        write(out_unit,*) '  nb_pulse',para_propa%para_field%nb_pulse
+        write(out_unit,*) 'ww (ua),FieldE0 (ua)',ww,                   &
                                            para_propa%para_field%E0(:,1)
-        write(out_unitp,*) 'ww (cm-1),FieldE0 (V cm-1)',                &
+        write(out_unit,*) 'ww (cm-1),FieldE0 (V cm-1)',                &
                                   ww*get_Conv_au_TO_unit('E','cm-1'),   &
             para_propa%para_field%E0(:,1)*get_Conv_au_TO_unit('Electric Field','V.cm-1')
-        write(out_unitp,11) para_propa%para_field%E0(:,1)**2 *          &
+        write(out_unit,11) para_propa%para_field%E0(:,1)**2 *          &
                            get_Conv_au_TO_unit('EF intensity','W.cm-2')
  11     format('G (W cm-2):  ',d16.8)
-        write(out_unitp,*)
+        write(out_unit,*)
 
       END IF
 !-----------------------------------------------------------
@@ -1095,13 +1095,13 @@ CONTAINS
         it = it + 1
 
        END DO ! loop on the Time iteration
-       flush(out_unitp)
+       flush(out_unit)
 
 !----------------------------------------------------------
 !     - write the final WP---------------------------------
       T  = para_propa%WPTmax
-      write(out_unitp,*) '=================================='
-      write(out_unitp,*) 'Final normalized WP'
+      write(out_unit,*) '=================================='
+      write(out_unit,*) 'Final normalized WP'
       DO i=1,nb_WP
         CALL renorm_psi(WP(i),GridRep=.FALSE.,BasisRep=.TRUE.)
       END DO
@@ -1113,7 +1113,7 @@ CONTAINS
 
       DO i=1,nb_WP
         avE(i) = avE(i)/real(it_max,kind=Rkind)
-        write(out_unitp,31) i,ww,real(avE(i),kind=Rkind)
+        write(out_unit,31) i,ww,real(avE(i),kind=Rkind)
  31     format('average absorbed energy at w ',i3,4(1x,f20.10))
       END DO ! j loop (nb_WP)
 
@@ -1122,7 +1122,7 @@ CONTAINS
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END sub_propagation24'
+         write(out_unit,*) 'END sub_propagation24'
        END IF
 !----------------------------------------------------------
 
@@ -1136,7 +1136,7 @@ CONTAINS
       SUBROUTINE sub_propagation100(WP,nb_WP,print_Op,                  &
                                    para_field_new,make_field,           &
                                    tab_Op,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,dealloc_psi,ecri_psi,  &
                              sub_PsiBasisRep_TO_GridRep,sub_save_psi,   &
                              sub_PsiGridRep_TO_BasisRep,overlap_psi1_psi2
@@ -1179,16 +1179,16 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_propagation100'
-        write(out_unitp,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
-        write(out_unitp,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
+        write(out_unit,*) 'BEGINNING sub_propagation100'
+        write(out_unit,*) 'Tmax,deltaT',para_propa%WPTmax,para_propa%WPdeltaT
+        write(out_unit,*) 'Hmin,Hmax',para_propa%para_poly%Hmin,               &
                                 para_propa%para_poly%Hmax
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-        write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+        write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+        write(out_unit,*)
 
-        write(out_unitp,*) 'WP(1)'
+        write(out_unit,*) 'WP(1)'
         CALL ecri_psi(T=ZERO,psi=WP(1))
        END IF
 !-----------------------------------------------------------
@@ -1198,7 +1198,7 @@ CONTAINS
       CALL init_psi(w1,tab_Op(1),cplx)
       CALL alloc_psi(w1)
       w1%CvecB(1) = CONE
-      write(out_unitp,*) 'WP'
+      write(out_unit,*) 'WP'
       CALL ecri_psi(T=ZERO,psi=w1)
 
 
@@ -1207,12 +1207,12 @@ CONTAINS
 
       CALL sub_OpPsi(w1,w2,tab_Op(1))
 
-      write(out_unitp,*) 'H.WP'
+      write(out_unit,*) 'H.WP'
       CALL ecri_psi(T=ZERO,psi=w2)
 
       CALL Overlap_psi1_psi2(ET,w1,w2)
 
-      write(out_unitp,*) 'E',ET
+      write(out_unit,*) 'E',ET
 
       STOP 'propa100'
 
@@ -1226,25 +1226,25 @@ CONTAINS
         IF (para_propa%num_Op == tab_Op(iOp)%n_Op) EXIT
       END DO
       IF (iOp > size(tab_Op)) THEN
-        write(out_unitp,*) ' ERROR in sub_propagation100'
-        write(out_unitp,*) ' The Operator "',para_propa%num_Op,'" is not in the list!'
-        write(out_unitp,*) ' Change the "num_Op" value in "propagation namelist"'
-        write(out_unitp,*) ' Possible values are:'
+        write(out_unit,*) ' ERROR in sub_propagation100'
+        write(out_unit,*) ' The Operator "',para_propa%num_Op,'" is not in the list!'
+        write(out_unit,*) ' Change the "num_Op" value in "propagation namelist"'
+        write(out_unit,*) ' Possible values are:'
         DO iOp=1,size(tab_Op)
-          write(out_unitp,*) 'iOp,num_Op,Name_Op',iOp,tab_Op(iOp)%n_Op,tab_Op(iOp)%name_Op
+          write(out_unit,*) 'iOp,num_Op,Name_Op',iOp,tab_Op(iOp)%n_Op,tab_Op(iOp)%name_Op
         END DO
         STOP
       END IF
-      write(out_unitp,*) 'num_Op',iOp,para_propa%num_Op
+      write(out_unit,*) 'num_Op',iOp,para_propa%num_Op
 
       DO i=1,nb_WP
-         write(out_unitp,*) 'WP,i',i
-         !CALL ecri_psiBasisRepnotall_nD(WP(i),out_unitp,ONETENTH**10,.TRUE.,i)
+         write(out_unit,*) 'WP,i',i
+         !CALL ecri_psiBasisRepnotall_nD(WP(i),out_unit,ONETENTH**10,.TRUE.,i)
          !CALL ecri_psi(Psi=WP(i))
          CALL sub_OpPsi(WP(i),OpWP(i),tab_Op(iOp))
          CALL Overlap_psi1_psi2(ET,WP(i),OpWP(i))
 
-         write(out_unitp,*) 'OpWP,i',i,ET*get_Conv_au_TO_unit('E','cm-1')
+         write(out_unit,*) 'OpWP,i',i,ET*get_Conv_au_TO_unit('E','cm-1')
 
          !CALL ecri_psi(Psi=OpWP(i))
          WP(i) = OpWP(i)
@@ -1252,7 +1252,7 @@ CONTAINS
       END DO
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) 'file_WP0: ',para_propa%para_WP0%file_WP0%name
+        write(out_unit,*) 'file_WP0: ',para_propa%para_WP0%file_WP0%name
         CALL sub_save_psi(WP,nb_WP,para_propa%para_WP0%file_WP0)
       ENDIF
 
@@ -1265,7 +1265,7 @@ CONTAINS
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END sub_propagation100'
+         write(out_unit,*) 'END sub_propagation100'
        END IF
 !----------------------------------------------------------
 

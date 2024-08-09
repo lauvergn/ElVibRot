@@ -51,7 +51,7 @@
 !
 !=============================================================
       SUBROUTINE sub_quadra_box(base,nosym)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       IMPLICIT NONE
 
@@ -78,8 +78,8 @@
 !-----------------------------------------------------------
        nq = get_nq_FROM_basis(base)
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'nb,nq',base%nb,nq
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'nb,nq',base%nb,nq
        END IF
 !-----------------------------------------------------------
 
@@ -94,15 +94,15 @@
       base%packed_done       = .TRUE.
 
       IF (base%check_nq_OF_basis) THEN
-        write(out_unitp,*) '    Basis: ',name_sub
-        write(out_unitp,*) '      nb_box',base%nb
+        write(out_unit,*) '    Basis: ',name_sub
+        write(out_unit,*) '      nb_box',base%nb
       END IF
 
       IF (.NOT. base%xPOGridRep_done) THEN
         IF (base%check_nq_OF_basis) THEN
-          write(out_unitp,*) '      old nb_quadra',nq
+          write(out_unit,*) '      old nb_quadra',nq
           IF ( nq < base%nb ) nq = base%nb
-          write(out_unitp,*) '      new nb_quadra',nq
+          write(out_unit,*) '      new nb_quadra',nq
         END IF
         CALL Set_nq_OF_basis(base,nq)
         CALL alloc_xw_OF_basis(base)
@@ -124,13 +124,13 @@
 
       DO ib=1,base%nb
         base%tab_ndim_index(1,ib) = ib
-        IF (debug) write(out_unitp,*) 'basis, particle in a box[0,Pi]:',ib
+        IF (debug) write(out_unit,*) 'basis, particle in a box[0,Pi]:',ib
         DO k=1,nq
           CALL d0d1d2d3box(base%x(1,k),d0,d1,d2,d3,ib)
           base%dnRGB%d0(k,ib)     = d0
           base%dnRGB%d1(k,ib,1)   = d1
           base%dnRGB%d2(k,ib,1,1) = d2
-         !write(out_unitp,*) ib,k,d0,d1,d2
+         !write(out_unit,*) ib,k,d0,d1,d2
         END DO
     END DO
 
@@ -143,7 +143,7 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base,write_all=.TRUE.)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 

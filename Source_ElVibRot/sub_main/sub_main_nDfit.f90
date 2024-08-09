@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_nDGridFit
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex,     only : Type_nDindex
   use mod_dnSVM,       only : Type_dnVec
   USE QDUtil_IntVec_m, ONLY : IntVec_t 
@@ -119,7 +119,7 @@ END SUBROUTINE dealloc_nDGrid
 
 
 SUBROUTINE sub_nDGrid_nDfit()
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_Constant
       USE mod_Coord_KEO
@@ -184,13 +184,13 @@ SUBROUTINE sub_nDGrid_nDfit()
       CALL sub_constantes(const_phys,.TRUE.)
 
       auTOenergy = get_Conv_au_TO_unit('E',' ',WorkingUnit=.FALSE.)
-      flush(out_unitp)
-      write(out_unitp,*) "============================================================"
-      write(out_unitp,*) "============================================================"
-      write(out_unitp,*) "=== COORDINATES (TNUM) ====================================="
-      write(out_unitp,*) "============================================================"
-      write(out_unitp,*) "============================================================"
-      flush(out_unitp)
+      flush(out_unit)
+      write(out_unit,*) "============================================================"
+      write(out_unit,*) "============================================================"
+      write(out_unit,*) "=== COORDINATES (TNUM) ====================================="
+      write(out_unit,*) "============================================================"
+      write(out_unit,*) "============================================================"
+      flush(out_unit)
 !=======================================================================
 !=======================================================================
       CALL versionEVRT(.TRUE.)
@@ -216,12 +216,12 @@ SUBROUTINE sub_nDGrid_nDfit()
       CALL Finalize_TnumTana_Coord_PrimOp(para_Tnum,mole,PrimOp)
       !-----------------------------------------------------------------
 
-      write(out_unitp,*) "============================================================"
-      write(out_unitp,*) "============================================================"
-      write(out_unitp,*) "=== END COORDINATES (TNUM) ================================="
-      write(out_unitp,*) "============================================================"
-      write(out_unitp,*) "============================================================"
-      flush(out_unitp)
+      write(out_unit,*) "============================================================"
+      write(out_unit,*) "============================================================"
+      write(out_unit,*) "=== END COORDINATES (TNUM) ================================="
+      write(out_unit,*) "============================================================"
+      write(out_unit,*) "============================================================"
+      flush(out_unit)
 
 
       CALL alloc_NParray(Qact0,[mole%nb_var],'Qact0',name_sub)
@@ -241,23 +241,23 @@ SUBROUTINE sub_nDGrid_nDfit()
         Grid1_TO_Grid2 = .FALSE.
         Transfo_fit    = .FALSE.
         Analysis       = .FALSE.
-        read(in_unitp,Grid_Fit,IOSTAT=err_read)
+        read(in_unit,Grid_Fit,IOSTAT=err_read)
         IF (err_read < 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' End-of-file or End-of-record'
-          write(out_unitp,*) ' The namelist "Grid_Fit" is probably absent'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' End-of-file or End-of-record'
+          write(out_unit,*) ' The namelist "Grid_Fit" is probably absent'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,*) ' ERROR in ',name_sub
           STOP
         ELSE IF (err_read > 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Some parameter name of the namelist "Grid_Fit" are probaly wrong'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,Grid_Fit)
-          write(out_unitp,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Some parameter name of the namelist "Grid_Fit" are probaly wrong'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,Grid_Fit)
+          write(out_unit,*) ' ERROR in ',name_sub
           STOP
         END IF
-        IF (debug) write(out_unitp,Grid_Fit)
+        IF (debug) write(out_unit,Grid_Fit)
 
         para_nDFit%Analysis   = Analysis
         para_nDFit%name_Fit   = name_Fit
@@ -285,21 +285,21 @@ SUBROUTINE sub_nDGrid_nDfit()
           CASE (1)
             CALL sub_nDGrid_v1(para_nDGrid(1),Qact0,mole,PrimOp)
           CASE (2)
-            write(out_unitp,*) '--------------------------------------------------'
-            write(out_unitp,*) '-------No coupling -------------------------------'
+            write(out_unit,*) '--------------------------------------------------'
+            write(out_unit,*) '-------No coupling -------------------------------'
             CALL sub_nDGrid_coupling0_v2(para_nDGrid(1),Qact0,para_Tnum,mole,PrimOp)
-            write(out_unitp,*) '--------------------------------------------------'
+            write(out_unit,*) '--------------------------------------------------'
             DO iG=2,nb_Grid
-              write(out_unitp,*) '-------Grid:',iG,' -----------------------------'
+              write(out_unit,*) '-------Grid:',iG,' -----------------------------'
               CALL sub_nDGrid_coupling1_v2(para_nDGrid(iG),Qact0,para_Tnum,mole,PrimOp)
-              write(out_unitp,*) '--------------------------------------------------'
+              write(out_unit,*) '--------------------------------------------------'
             END DO
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' Wrong "Grid_type value"',Grid_type
-            write(out_unitp,*) ' check your data!'
-            write(out_unitp,Grid_Fit)
-            write(out_unitp,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' Wrong "Grid_type value"',Grid_type
+            write(out_unit,*) ' check your data!'
+            write(out_unit,Grid_Fit)
+            write(out_unit,*) ' ERROR in ',name_sub
             STOP
           END SELECT
         ELSE
@@ -314,11 +314,11 @@ SUBROUTINE sub_nDGrid_nDfit()
             CALL sub_TransfoGrid_v2(para_nDGrid)
             CALL sub_nDFit_v2(para_nDFit,para_nDGrid(FirstGrid:LastGrid),Qact0,mole,PrimOp)
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' Wrong "Fit_type value"',Fit_type
-            write(out_unitp,*) ' check your data!'
-            write(out_unitp,Grid_Fit)
-            write(out_unitp,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' Wrong "Fit_type value"',Fit_type
+            write(out_unit,*) ' check your data!'
+            write(out_unit,Grid_Fit)
+            write(out_unit,*) ' ERROR in ',name_sub
             STOP
           END SELECT
         END IF
@@ -343,7 +343,7 @@ SUBROUTINE sub_nDGrid_nDfit()
           Q(1) = para_nDGrid(1)%Q0(1) + ZERO
 
           CALL sub_nDFunc_FROM_nDFit(val_nDfit,Q,PrimOp%para_nDFit_V)
-          write(out_unitp,*) 'val_nDfit',val_nDfit
+          write(out_unit,*) 'val_nDfit',val_nDfit
 
           CALL dealloc_array(Q,'Q',name_sub)
         END IF
@@ -357,11 +357,11 @@ SUBROUTINE sub_nDGrid_nDfit()
       END IF
 
 
-      write(out_unitp,*) 'mem_tot',para_mem%mem_tot
+      write(out_unit,*) 'mem_tot',para_mem%mem_tot
 
       END SUBROUTINE sub_nDGrid_nDfit
       SUBROUTINE sub_nDGrid(para_nDGrid,Qact,mole,PrimOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_nDindex
       USE mod_Constant,  only : get_Conv_au_TO_unit
@@ -450,30 +450,30 @@ SUBROUTINE sub_nDGrid_nDfit()
         nDsize_read = .FALSE.
         nb_Gonly    = .FALSE.
         add_Grid    = .FALSE.
-        read(in_unitp,nDGrid,IOSTAT=err_read)
+        read(in_unit,nDGrid,IOSTAT=err_read)
         IF (err_read < 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' End-of-file or End-of-record'
-          write(out_unitp,*) ' The namelist "nDGrid" is probably absent'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' End-of-file or End-of-record'
+          write(out_unit,*) ' The namelist "nDGrid" is probably absent'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,*) ' ERROR in ',name_sub
           STOP
         ELSE IF (err_read > 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Some parameter name of the namelist "nDGrid" are probaly wrong'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,nDGrid)
-          write(out_unitp,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Some parameter name of the namelist "nDGrid" are probaly wrong'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,nDGrid)
+          write(out_unit,*) ' ERROR in ',name_sub
           STOP
         END IF
-        IF (debug) write(out_unitp,nDGrid)
-        read(in_unitp,*) nDweight(:)
-        read(in_unitp,*) para_nDGrid%stepQ(:)
-        IF (nDsize_read) read(in_unitp,*) nDsize(:)
+        IF (debug) write(out_unit,nDGrid)
+        read(in_unit,*) nDweight(:)
+        read(in_unit,*) para_nDGrid%stepQ(:)
+        IF (nDsize_read) read(in_unit,*) nDsize(:)
 
-        IF (debug) write(out_unitp,*) 'nDweight',nDweight(:)
-        IF (debug) write(out_unitp,*) 'stepQ',para_nDGrid%stepQ(:)
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'nDweight',nDweight(:)
+        IF (debug) write(out_unit,*) 'stepQ',para_nDGrid%stepQ(:)
+        flush(out_unit)
 
 
         para_nDGrid%MinNorm      = MinNorm
@@ -482,8 +482,8 @@ SUBROUTINE sub_nDGrid_nDfit()
         para_nDGrid%MinCoupling  = MinCoupling
         para_nDGrid%nb_DeltaQ    = nb_DeltaQ
         IF (.NOT. nDsize_read) nDsize(:) = nb_DeltaQ
-        IF (debug) write(out_unitp,*) 'nDsize',nDsize(:)
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'nDsize',nDsize(:)
+        flush(out_unit)
 
         CALL init_nDindexPrim(para_nDGrid%nDindG,mole%nb_act,nDsize=nDsize,    &
                               nDweight=nDweight,type_OF_nDindex=0,      &
@@ -522,13 +522,13 @@ SUBROUTINE sub_nDGrid_nDfit()
             iGPtot = iGPtot + Tab_PointGridSign(nb_couplings)%Max_nDI
           END IF
         END DO
-        write(out_unitp,*) "nb_G",iGPtot
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "nb_G",iGPtot
+        write(out_unit,*) "======================================"
 
         !IF (nb_Gonly) CYCLE
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "======================================"
         iGPtot = 0
         CALL get_Qact0(Qact,mole%ActiveTransfo)
         DO iGP=1,para_nDGrid%nDindG%Max_nDI
@@ -546,9 +546,9 @@ SUBROUTINE sub_nDGrid_nDfit()
             nDinit(:) = para_nDGrid%nDindG%Tab_nDval(:,iGP)
 
             IF (debug) THEN
-              write(out_unitp,"(a,3i7,a,10i3)") 'iGPtot,iGp,isign,Qact',&
+              write(out_unit,"(a,3i7,a,10i3)") 'iGPtot,iGp,isign,Qact',&
                                        iGPtot,iGp,isign,' : ',nDinit(:)
-              write(out_unitp,*) 'Grid',iGPtot,Qact(1:mole%nb_act),     &
+              write(out_unit,*) 'Grid',iGPtot,Qact(1:mole%nb_act),     &
                              dnMatOp(1)%tab_dnMatOp(:,:,1)%d0*conv_ene, &
                 (dnMatOp(iOp)%tab_dnMatOp(:,:,1)%d0,iOp=3,size(dnMatOp))
             END IF
@@ -579,9 +579,9 @@ SUBROUTINE sub_nDGrid_nDfit()
               IF (.NOT. nb_Gonly) CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=0)
 
               IF (debug) THEN
-                write(out_unitp,"(a,3i7,a,10i3)") 'iGPtot,iGp,isign,Qact',&
+                write(out_unit,"(a,3i7,a,10i3)") 'iGPtot,iGp,isign,Qact',&
                                        iGPtot,iGp,isign,' : ',nDinit(:)
-                write(out_unitp,*) 'Grid',iGPtot,Qact(1:mole%nb_act),   &
+                write(out_unit,*) 'Grid',iGPtot,Qact(1:mole%nb_act),   &
                              dnMatOp(1)%tab_dnMatOp(:,:,1)%d0*conv_ene, &
                 (dnMatOp(iOp)%tab_dnMatOp(:,:,1)%d0,iOp=3,size(dnMatOp))
               END IF
@@ -596,8 +596,8 @@ SUBROUTINE sub_nDGrid_nDfit()
           END IF
         END DO
         para_nDGrid%nb_G = iGPtot
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "======================================"
 
       END DO
 
@@ -618,7 +618,7 @@ SUBROUTINE sub_nDGrid_nDfit()
 END SUBROUTINE sub_nDGrid
 
 SUBROUTINE sub_nDGrid_coupling0_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
-  USE mod_system
+  USE EVR_system_m
   USE mod_dnSVM
   USE mod_nDindex
   USE mod_Constant,  only : get_Conv_au_TO_unit
@@ -690,32 +690,32 @@ SUBROUTINE sub_nDGrid_coupling0_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
   nb_DeltaQ   = 20
   nb_Gonly    = .FALSE.
   Read_Grid   = .FALSE.
-  read(in_unitp,nDGrid,IOSTAT=err_read)
+  read(in_unit,nDGrid,IOSTAT=err_read)
   IF (err_read < 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' End-of-file or End-of-record'
-    write(out_unitp,*) ' The namelist "nDGrid" is probably absent'
-    write(out_unitp,*) ' check your data!'
-    write(out_unitp,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' End-of-file or End-of-record'
+    write(out_unit,*) ' The namelist "nDGrid" is probably absent'
+    write(out_unit,*) ' check your data!'
+    write(out_unit,*) ' ERROR in ',name_sub
     STOP
   ELSE IF (err_read > 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' Some parameter name of the namelist "nDGrid" are probaly wrong'
-    write(out_unitp,*) ' check your data!'
-    write(out_unitp,nDGrid)
-    write(out_unitp,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' Some parameter name of the namelist "nDGrid" are probaly wrong'
+    write(out_unit,*) ' check your data!'
+    write(out_unit,nDGrid)
+    write(out_unit,*) ' ERROR in ',name_sub
     STOP
   END IF
-  IF (debug) write(out_unitp,nDGrid)
-  flush(out_unitp)
+  IF (debug) write(out_unit,nDGrid)
+  flush(out_unit)
 
   para_nDGrid%MinNorm      = MinNorm
   para_nDGrid%MaxNorm      = MaxNorm
   para_nDGrid%MaxCoupling  = MaxCoupling
   para_nDGrid%MinCoupling  = MinCoupling
 
-  write(out_unitp,*) "======================================"
-  write(out_unitp,*) "======================================"
+  write(out_unit,*) "======================================"
+  write(out_unit,*) "======================================"
   CALL alloc_NParray(nDinit,[mole%nb_act],'nDinit',name_sub)
   nDinit(:) = 0
 
@@ -744,8 +744,8 @@ SUBROUTINE sub_nDGrid_coupling0_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
     HessRef = dnMatOp(1)%tab_dnMatOp(1,1,1)%d2
 
     IF (debug) THEN
-      write(out_unitp,"(a,i7,a,10i3)") 'iGP,iGp,isign,Qact',iGP,' : ',nDinit(:)
-      write(out_unitp,*) 'Grid',iGP,Qact0(1:mole%nb_act),                         &
+      write(out_unit,"(a,i7,a,10i3)") 'iGP,iGp,isign,Qact',iGP,' : ',nDinit(:)
+      write(out_unit,*) 'Grid',iGP,Qact0(1:mole%nb_act),                         &
                    dnMatOp(1)%tab_dnMatOp(:,:,1)%d0*conv_ene,                   &
         (dnMatOp(iOp)%tab_dnMatOp(:,:,1)%d0,iOp=3,size(dnMatOp))
     END IF
@@ -764,12 +764,12 @@ SUBROUTINE sub_nDGrid_coupling0_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
       kini      = HessRef(i,i)
       DO
         DeltaQ = sqrt(MaxNorm/kini)
-        write(out_unitp,*) 'DeltaQ (one PES)',DeltaQ
+        write(out_unit,*) 'DeltaQ (one PES)',DeltaQ
         Qact    = Qact0
         Qact(i) = Qact0(i) + DeltaQ
         CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=0)
         DeltaVal = dnMatOp(1)%tab_dnMatOp(1,1,1)%d0-ValRef
-        write(out_unitp,*) 'i,DeltaQ,DeltaVal',i,DeltaQ,DeltaVal
+        write(out_unit,*) 'i,DeltaQ,DeltaVal',i,DeltaQ,DeltaVal
         IF (DeltaVal > MaxNorm*1.1_Rkind .OR. DeltaVal < MaxNorm*0.9_Rkind) THEN
           kini = DeltaVal/DeltaQ**2
         ELSE
@@ -780,12 +780,12 @@ SUBROUTINE sub_nDGrid_coupling0_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
       kini      = HessRef(i,i)
       DO
         DeltaQ = -sqrt(MaxNorm/kini)
-        write(out_unitp,*) 'DeltaQ (one PES)',DeltaQ
+        write(out_unit,*) 'DeltaQ (one PES)',DeltaQ
         Qact    = Qact0
         Qact(i) = Qact0(i) + DeltaQ
         CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=0)
         DeltaVal = dnMatOp(1)%tab_dnMatOp(1,1,1)%d0-ValRef
-        write(out_unitp,*) 'i,DeltaQ,DeltaVal',i,DeltaQ,DeltaVal
+        write(out_unit,*) 'i,DeltaQ,DeltaVal',i,DeltaQ,DeltaVal
         IF (DeltaVal > MaxNorm*1.1_Rkind .OR. DeltaVal < MaxNorm*0.9_Rkind) THEN
           kini = DeltaVal/DeltaQ**2
         ELSE
@@ -799,14 +799,14 @@ SUBROUTINE sub_nDGrid_coupling0_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
     StepQp(:) = StepQp(:) / nb_DeltaQ
 
     DO i=1,mole%nb_act
-      write(out_unitp,'(a,i0,100(x,i0))')    'l(:)_',     i,0,([j,j],j=1,nb_DeltaQ)
-      write(out_unitp,'(a,i0,100(x,f6.2))') 'DeltaQ(:)_',i,ZERO,([StepQp(i)*j,StepQm(i)*j],j=1,nb_DeltaQ)
+      write(out_unit,'(a,i0,100(x,i0))')    'l(:)_',     i,0,([j,j],j=1,nb_DeltaQ)
+      write(out_unit,'(a,i0,100(x,f6.2))') 'DeltaQ(:)_',i,ZERO,([StepQp(i)*j,StepQm(i)*j],j=1,nb_DeltaQ)
     END DO
   ELSE
     read(nioGrid1,*) Name_dum,iGdum,nDinit(:),ValRef
     para_nDGrid%Val(1) = ValRef
-    write(out_unitp,"(a,i7,a,10i3)") 'iGP,nDval',iGP,' : ',nDinit(:)
-    write(out_unitp,*) 'Grid',iGP,Qact0(1:mole%nb_act),ValRef
+    write(out_unit,"(a,i7,a,10i3)") 'iGP,nDval',iGP,' : ',nDinit(:)
+    write(out_unit,*) 'Grid',iGP,Qact0(1:mole%nb_act),ValRef
   END IF
 
   CALL file_close(para_nDGrid%Grid_FOR_Fit_file1)
@@ -817,7 +817,7 @@ SUBROUTINE sub_nDGrid_coupling0_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
 END SUBROUTINE sub_nDGrid_coupling0_v2
 
 SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
-  USE mod_system
+  USE EVR_system_m
   use mod_dnSVM,       only : Type_dnVec, alloc_dnVec
   USE QDUtil_IntVec_m, ONLY : IntVec_t, alloc_IntVec
   USE mod_nDindex
@@ -887,34 +887,34 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
   nb_DeltaQ   = 20
   nb_Gonly    = .FALSE.
   Read_Grid   = .FALSE.
-  read(in_unitp,nml=nDGrid,IOSTAT=err_read)
+  read(in_unit,nml=nDGrid,IOSTAT=err_read)
   IF (err_read < 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' End-of-file or End-of-record'
-    write(out_unitp,*) ' The namelist "nDGrid" is probably absent'
-    write(out_unitp,*) ' check your data!'
-    write(out_unitp,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' End-of-file or End-of-record'
+    write(out_unit,*) ' The namelist "nDGrid" is probably absent'
+    write(out_unit,*) ' check your data!'
+    write(out_unit,*) ' ERROR in ',name_sub
     STOP
   ELSE IF (err_read > 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' Some parameter name of the namelist "nDGrid" are probaly wrong'
-    write(out_unitp,*) ' check your data!'
-    write(out_unitp,nDGrid)
-    write(out_unitp,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' Some parameter name of the namelist "nDGrid" are probaly wrong'
+    write(out_unit,*) ' check your data!'
+    write(out_unit,nDGrid)
+    write(out_unit,*) ' ERROR in ',name_sub
     STOP
   END IF
-  IF (debug) write(out_unitp,nml=nDGrid)
+  IF (debug) write(out_unit,nml=nDGrid)
   IF (MaxCoupling == 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) ' This subroutine must be used with MaxCoupling > 0'
-    write(out_unitp,*) '    MaxCoupling',MaxCoupling
-    write(out_unitp,*) ' check your data!'
-    write(out_unitp,nml=nDGrid)
-    write(out_unitp,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) ' This subroutine must be used with MaxCoupling > 0'
+    write(out_unit,*) '    MaxCoupling',MaxCoupling
+    write(out_unit,*) ' check your data!'
+    write(out_unit,nml=nDGrid)
+    write(out_unit,*) ' ERROR in ',name_sub
     STOP
   END IF
 
-  flush(out_unitp)
+  flush(out_unit)
 
   para_nDGrid%MinNorm      = MinNorm
   para_nDGrid%MaxNorm      = MaxNorm
@@ -928,10 +928,10 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
   DO i=1,mole%nb_act
     ! for tab_i_TO_l
     IF (allocated(tab_i_TO_l)) deallocate(tab_i_TO_l)
-    CALL read_name_advNo(in_unitp,name_dum,err_read)
+    CALL read_name_advNo(in_unit,name_dum,err_read)
     !write(6,*) 'name_dum',name_dum ; flush(6)
     DO
-      CALL read_name_advNo(in_unitp,name_dum,err_read)
+      CALL read_name_advNo(in_unit,name_dum,err_read)
       read(name_dum,*) ii
       !write(6,*) 'name_dum: ',name_dum,ii ; flush(6)
       IF (allocated(tab_i_TO_l)) THEN
@@ -946,10 +946,10 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
 
     ! for Tab_stepQ
     IF (allocated(Tab_stepQ))  deallocate(Tab_stepQ)
-    CALL read_name_advNo(in_unitp,name_dum,err_read)
+    CALL read_name_advNo(in_unit,name_dum,err_read)
     !write(6,*) 'name_dum',name_dum ; flush(6)
     DO
-      CALL read_name_advNo(in_unitp,name_dum,err_read)
+      CALL read_name_advNo(in_unit,name_dum,err_read)
       read(name_dum,*) stepQ
       !write(6,*) 'name_dum: ',name_dum,stepQ ; flush(6)
       IF (allocated(Tab_stepQ)) THEN
@@ -962,17 +962,17 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
     CALL alloc_dnVec(para_nDGrid%Tab_stepQ(i),nb_var_vec=size(Tab_stepQ))
     para_nDGrid%Tab_stepQ(i)%d0 = Tab_stepQ
 
-    write(out_unitp,*) i,'tab_i_TO_l',para_nDGrid%tab_i_TO_l(i)%vec
-    write(out_unitp,*) i,'Tab_stepQ',para_nDGrid%Tab_stepQ(i)%d0
+    write(out_unit,*) i,'tab_i_TO_l',para_nDGrid%tab_i_TO_l(i)%vec
+    write(out_unit,*) i,'Tab_stepQ',para_nDGrid%Tab_stepQ(i)%d0
 
-    !read(in_unitp,*) name_dum,para_nDGrid%tab_i_TO_l(i)%vec(:)
-    !read(in_unitp,*) name_dum,para_nDGrid%Tab_stepQ(i)%d0(:)
+    !read(in_unit,*) name_dum,para_nDGrid%tab_i_TO_l(i)%vec(:)
+    !read(in_unit,*) name_dum,para_nDGrid%Tab_stepQ(i)%d0(:)
   END DO
 
 
 
-  write(out_unitp,*) "======================================"
-  write(out_unitp,*) "======================================"
+  write(out_unit,*) "======================================"
+  write(out_unit,*) "======================================"
   CALL alloc_NParray(nDinit,[mole%nb_act],'nDinit',name_sub)
   nDinit(:) = 0
   CALL alloc_NParray(nDsize,[mole%nb_act],'nDsize',name_sub)
@@ -1026,8 +1026,8 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
       END IF
 
       IF (debug) THEN
-        write(out_unitp,"(a,i7,a,10i3)") 'iGP,nDval',iGP,' : ',nDval(:)
-        write(out_unitp,*) 'Grid',iGP,Qact(1:mole%nb_act),                        &
+        write(out_unit,"(a,i7,a,10i3)") 'iGP,nDval',iGP,' : ',nDval(:)
+        write(out_unit,*) 'Grid',iGP,Qact(1:mole%nb_act),                        &
                        dnMatOp(1)%tab_dnMatOp(:,:,1)%d0*conv_ene,                 &
           (dnMatOp(iOp)%tab_dnMatOp(:,:,1)%d0,iOp=3,size(dnMatOp))
       END IF
@@ -1038,12 +1038,12 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
                                 dnMatOp(1)%tab_dnMatOp(:,:,1)%d0,                 &
           (dnMatOp(iOp)%tab_dnMatOp(:,:,1)%d0,iOp=3,size(dnMatOp))
 
-      IF (debug) write(out_unitp,*) 'iGP,nDval',iGP,nDval,DeltaQ,ValRef
+      IF (debug) write(out_unit,*) 'iGP,nDval',iGP,nDval,DeltaQ,ValRef
     ELSE
       read(nioGrid1,*) Name_dum,iGdum,nDval_dum(:),ValRef
       para_nDGrid%Val(iGP) = ValRef
-      write(out_unitp,"(a,i7,a,10i3)") 'iGP,nDval',iGP,' : ',nDval(:)
-      write(out_unitp,*) 'Grid',iGP,Qact(1:mole%nb_act),ValRef
+      write(out_unit,"(a,i7,a,10i3)") 'iGP,nDval',iGP,' : ',nDval(:)
+      write(out_unit,*) 'Grid',iGP,Qact(1:mole%nb_act),ValRef
     END IF
   END DO
 
@@ -1056,7 +1056,7 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
 END SUBROUTINE sub_nDGrid_coupling1_v2
 
 SUBROUTINE sub_TransfoGrid_v2(para_nDGrid)
-  USE mod_system
+  USE EVR_system_m
   USE mod_dnSVM
   USE mod_nDindex
   USE mod_Constant
@@ -1082,18 +1082,18 @@ SUBROUTINE sub_TransfoGrid_v2(para_nDGrid)
 
   CALL alloc_NParray(nDvalG,[para_nDGrid(1)%nDindG%ndim],'nDvalG',name_sub)
 
-  write(out_unitp,*) "======================================"
-  write(out_unitp,*) "=== TRANSFORM the Grids =============="
-  write(out_unitp,*) "======================================"
+  write(out_unit,*) "======================================"
+  write(out_unit,*) "=== TRANSFORM the Grids =============="
+  write(out_unit,*) "======================================"
   DO iG=2,size(para_nDGrid)
   DO iGP=1,para_nDGrid(iG)%nb_G
       CALL calc_nDindex(para_nDGrid(iG)%nDindG,iGP,nDvalG)
       valGP = ValGridPoint(para_nDGrid(1:iG-1),nDvalG)
-      write(out_unitp,*) 'val',iG,iGP,':',nDvalG,para_nDGrid(iG)%Val(iGP)
+      write(out_unit,*) 'val',iG,iGP,':',nDvalG,para_nDGrid(iG)%Val(iGP)
       para_nDGrid(iG)%Val(iGP) = para_nDGrid(iG)%Val(iGP) - valGP
-      write(out_unitp,*) 'new val',iG,iGP,':',nDvalG,para_nDGrid(iG)%Val(iGP)
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*) 'new val',iG,iGP,':',nDvalG,para_nDGrid(iG)%Val(iGP)
+      write(out_unit,*)
+      write(out_unit,*)
   END DO
   END DO
 
@@ -1102,7 +1102,7 @@ SUBROUTINE sub_TransfoGrid_v2(para_nDGrid)
 END SUBROUTINE sub_TransfoGrid_v2
 
 FUNCTION ValGridPoint(para_nDGrid,nDvalG)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
   IMPLICIT NONE
 
@@ -1179,7 +1179,7 @@ FUNCTION ValGridPoint(para_nDGrid,nDvalG)
 END FUNCTION ValGridPoint
 
       SUBROUTINE sub_nDGrid_v1(para_nDGrid,Qact,mole,PrimOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_nDindex
       USE mod_Constant,  only : get_Conv_au_TO_unit
@@ -1268,30 +1268,30 @@ END FUNCTION ValGridPoint
         nDsize_read = .FALSE.
         nb_Gonly    = .FALSE.
         add_Grid    = .FALSE.
-        read(in_unitp,nDGrid,IOSTAT=err_read)
+        read(in_unit,nDGrid,IOSTAT=err_read)
         IF (err_read < 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' End-of-file or End-of-record'
-          write(out_unitp,*) ' The namelist "nDGrid" is probably absent'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' End-of-file or End-of-record'
+          write(out_unit,*) ' The namelist "nDGrid" is probably absent'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,*) ' ERROR in ',name_sub
           STOP
         ELSE IF (err_read > 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Some parameter name of the namelist "nDGrid" are probaly wrong'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,nDGrid)
-          write(out_unitp,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Some parameter name of the namelist "nDGrid" are probaly wrong'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,nDGrid)
+          write(out_unit,*) ' ERROR in ',name_sub
           STOP
         END IF
-        IF (debug) write(out_unitp,nDGrid)
-        read(in_unitp,*) nDweight(:)
-        read(in_unitp,*) para_nDGrid%stepQ(:)
-        IF (nDsize_read) read(in_unitp,*) nDsize(:)
+        IF (debug) write(out_unit,nDGrid)
+        read(in_unit,*) nDweight(:)
+        read(in_unit,*) para_nDGrid%stepQ(:)
+        IF (nDsize_read) read(in_unit,*) nDsize(:)
 
-        IF (debug) write(out_unitp,*) 'nDweight',nDweight(:)
-        IF (debug) write(out_unitp,*) 'stepQ',para_nDGrid%stepQ(:)
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'nDweight',nDweight(:)
+        IF (debug) write(out_unit,*) 'stepQ',para_nDGrid%stepQ(:)
+        flush(out_unit)
 
 
         para_nDGrid%MinNorm      = MinNorm
@@ -1300,8 +1300,8 @@ END FUNCTION ValGridPoint
         para_nDGrid%MinCoupling  = MinCoupling
         para_nDGrid%nb_DeltaQ    = nb_DeltaQ
         IF (.NOT. nDsize_read) nDsize(:) = nb_DeltaQ
-        IF (debug) write(out_unitp,*) 'nDsize',nDsize(:)
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'nDsize',nDsize(:)
+        flush(out_unit)
 
         CALL init_nDindexPrim(para_nDGrid%nDindG,mole%nb_act,nDsize,    &
                               nDweight=nDweight,type_OF_nDindex=0,      &
@@ -1340,13 +1340,13 @@ END FUNCTION ValGridPoint
             iGPtot = iGPtot + Tab_PointGridSign(nb_couplings)%Max_nDI
           END IF
         END DO
-        write(out_unitp,*) "nb_G",iGPtot
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "nb_G",iGPtot
+        write(out_unit,*) "======================================"
 
         !IF (nb_Gonly) CYCLE
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "======================================"
         iGPtot = 0
         CALL get_Qact0(Qact,mole%ActiveTransfo)
         DO iGP=1,para_nDGrid%nDindG%Max_nDI
@@ -1364,9 +1364,9 @@ END FUNCTION ValGridPoint
             nDinit(:) = para_nDGrid%nDindG%Tab_nDval(:,iGP)
 
             IF (debug) THEN
-              write(out_unitp,"(a,3i7,a,10i3)") 'iGPtot,iGp,isign,Qact',&
+              write(out_unit,"(a,3i7,a,10i3)") 'iGPtot,iGp,isign,Qact',&
                                        iGPtot,iGp,isign,' : ',nDinit(:)
-              write(out_unitp,*) 'Grid',iGPtot,Qact(1:mole%nb_act),     &
+              write(out_unit,*) 'Grid',iGPtot,Qact(1:mole%nb_act),     &
                              dnMatOp(1)%tab_dnMatOp(:,:,1)%d0*conv_ene, &
                 (dnMatOp(iOp)%tab_dnMatOp(:,:,1)%d0,iOp=3,size(dnMatOp))
             END IF
@@ -1397,9 +1397,9 @@ END FUNCTION ValGridPoint
               IF (.NOT. nb_Gonly) CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=0)
 
               IF (debug) THEN
-                write(out_unitp,"(a,3i7,a,10i3)") 'iGPtot,iGp,isign,Qact',&
+                write(out_unit,"(a,3i7,a,10i3)") 'iGPtot,iGp,isign,Qact',&
                                        iGPtot,iGp,isign,' : ',nDinit(:)
-                write(out_unitp,*) 'Grid',iGPtot,Qact(1:mole%nb_act),   &
+                write(out_unit,*) 'Grid',iGPtot,Qact(1:mole%nb_act),   &
                              dnMatOp(1)%tab_dnMatOp(:,:,1)%d0*conv_ene, &
                 (dnMatOp(iOp)%tab_dnMatOp(:,:,1)%d0,iOp=3,size(dnMatOp))
               END IF
@@ -1414,8 +1414,8 @@ END FUNCTION ValGridPoint
           END IF
         END DO
         para_nDGrid%nb_G = iGPtot
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "======================================"
 
       END DO
 
@@ -1436,7 +1436,7 @@ END FUNCTION ValGridPoint
 
     END SUBROUTINE sub_nDGrid_v1
       SUBROUTINE sub_nDGrid_WiTHOUT_calc(para_nDGrid,Qact,mole,PrimOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant,  only : get_Conv_au_TO_unit
       USE mod_Coord_KEO, only : CoordType, Tnum, get_Qact0
       USE mod_PrimOp
@@ -1491,21 +1491,21 @@ END FUNCTION ValGridPoint
         para_nDGrid%Grid_FOR_Fit_file2%name = adjustl(trim(para_nDGrid%name_Grid)) // '2'
 
         CALL file_open(para_nDGrid%Grid_FOR_FIT_file2,nioGrid2)
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "======================================"
         iGPtot = 0
         DO
           !read(nioGrid2,*,IOSTAT=err_read) name_dum,idum,Q(:),val(:)
           read(nioGrid2,*,IOSTAT=err_read) name_dum,idum,Q(:)
 
           IF (err_read < 0) EXIT
-          !write(out_unitp,*) name_dum,idum,Q(:),val(1)/auTOenergy,val(2:4)
+          !write(out_unit,*) name_dum,idum,Q(:),val(1)/auTOenergy,val(2:4)
           iGPtot = iGPtot + 1
         END DO
         para_nDGrid%nb_G = iGPtot
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "======================================"
         CALL file_close(para_nDGrid%Grid_FOR_Fit_file2)
 
         CALL dealloc_array(Q,'Q',name_sub)
@@ -1514,7 +1514,7 @@ END FUNCTION ValGridPoint
 
       END SUBROUTINE sub_nDGrid_WiTHOUT_calc
       SUBROUTINE sub_nDFit_v2(para_nDFit,para_nDGrid,Qact,mole,PrimOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_nDindex
       USE mod_Constant
@@ -1567,10 +1567,10 @@ END FUNCTION ValGridPoint
 !-----------------------------------------------------------
 
 
-  write(out_unitp,*) "======================================"
-  write(out_unitp,*) "=== FIT the Grids ===================="
-  write(out_unitp,*) "======================================"
-  write(out_unitp,*) "lbound,ubound",lbound(para_nDGrid),ubound(para_nDGrid)
+  write(out_unit,*) "======================================"
+  write(out_unit,*) "=== FIT the Grids ===================="
+  write(out_unit,*) "======================================"
+  write(out_unit,*) "lbound,ubound",lbound(para_nDGrid),ubound(para_nDGrid)
 
   conv_ene = get_Conv_au_TO_unit('E',' ',WorkingUnit=.FALSE.)
 
@@ -1626,7 +1626,7 @@ END FUNCTION ValGridPoint
     DO iB=1,nb_B
       F(iB) = nDFunct_WITH_Q(Q,iB,para_nDFit)
     END DO
-    !CALL Write_Vec(F, out_unitp, 5, name_info='F')
+    !CALL Write_Vec(F, out_unit, 5, name_info='F')
 
     DO iB=1,nb_B
        DO jB=1,nb_B
@@ -1638,13 +1638,13 @@ END FUNCTION ValGridPoint
   END DO
   END DO
 
-  !CALL Write_Mat(A, out_unitp, 5, name_info='A')
-  !CALL Write_Vec(B, out_unitp, 5, name_info='B')
+  !CALL Write_Mat(A, out_unit, 5, name_info='A')
+  !CALL Write_Vec(B, out_unit, 5, name_info='B')
 
   IF (para_nDFit%svd) THEN
     !une facon.... SVD
-    !write(out_unitp,*) 'a',a
-    !write(out_unitp,*) 'b',b
+    !write(out_unit,*) 'a',a
+    !write(out_unit,*) 'b',b
     !CALL SVDCMP(A,nb_B,nb_B,w,vv,nb_B)
     !Find maximum singular value
     !wmax = maxval(w)
@@ -1661,8 +1661,8 @@ END FUNCTION ValGridPoint
   ELSE
     STOP 'not SVD, not yet'
   END IF
-  write(out_unitp,*) "======================================"
-  write(out_unitp,*) "======================================"
+  write(out_unit,*) "======================================"
+  write(out_unit,*) "======================================"
 
   para_nDFit%ndim = mole%nb_act
   CALL ReadWrite_nDFitW(para_nDFit,.FALSE.,B=B,conv_ene=conv_ene)
@@ -1694,7 +1694,7 @@ END FUNCTION ValGridPoint
       END SUBROUTINE sub_nDFit_v2
 
       SUBROUTINE sub_nDFit_v1(para_nDFit,para_nDGrid,Qact,mole,PrimOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       USE mod_nDindex
       USE mod_Constant
@@ -1791,9 +1791,9 @@ END FUNCTION ValGridPoint
         nullify(vv)
         CALL alloc_array(vv,[nb_B,nb_B],'vv',name_sub)
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "=== FIT =============================="
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "=== FIT =============================="
+        write(out_unit,*) "======================================"
         CALL file_open(para_nDGrid%Grid_FOR_FIT_file2,nioGrid2)
 
         DO iGP=1,para_nDGrid%nb_G
@@ -1822,8 +1822,8 @@ END FUNCTION ValGridPoint
 
         IF (para_nDFit%svd) THEN
           !une facon.... SVD
-          !write(out_unitp,*) 'a',a
-          !write(out_unitp,*) 'b',b
+          !write(out_unit,*) 'a',a
+          !write(out_unit,*) 'b',b
           !CALL SVDCMP(A,nb_B,nb_B,w,vv,nb_B)
           !Find maximum singular value
           !wmax = maxval(w)
@@ -1841,8 +1841,8 @@ END FUNCTION ValGridPoint
           STOP 'not SVD, not yet'
         END IF
         CALL file_close(para_nDGrid%Grid_FOR_Fit_file2)
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "======================================"
 
 
         para_nDFit%ndim = mole%nb_act
@@ -1873,7 +1873,7 @@ END FUNCTION ValGridPoint
       END SUBROUTINE sub_nDFit_v1
 
       SUBROUTINE sub_ChecknDFit2(para_nDFit,para_nDGrid)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_PrimOp
       IMPLICIT NONE
@@ -1910,9 +1910,9 @@ END FUNCTION ValGridPoint
         CALL alloc_array(Q,[para_nDFit%nDindB%ndim],'Q',name_sub)
 
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "=== CHECKING FIT ====================="
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "=== CHECKING FIT ====================="
+        write(out_unit,*) "======================================"
 
         CALL file_open(para_nDGrid%Grid_FOR_FIT_file2,nioGrid2)
 
@@ -1924,17 +1924,17 @@ END FUNCTION ValGridPoint
           read(nioGrid2,*) name_dum,idum,Q(:),val(:)
 
           CALL sub_nDFunc_FROM_nDFit(val_fit,Q,para_nDFit)
-          IF (iGP == 1) write(out_unitp,*) 'Q (1st point),val_fit,val',Q,val_fit,val
+          IF (iGP == 1) write(out_unit,*) 'Q (1st point),val_fit,val',Q,val_fit,val
 
 
           IF (abs(val(para_nDFit%ind_val)-val_fit) > FIVE*ONETENTH**4) THEN
             IF (para_nDFit%ind_val == 1) THEN
-              write(out_unitp,*) 'iG,val,val_fit,diff (cm-1)',iGP,        &
+              write(out_unit,*) 'iG,val,val_fit,diff (cm-1)',iGP,        &
                                       val(para_nDFit%ind_val),val_fit,    &
                                     abs(val(para_nDFit%ind_val)-val_fit)* &
                                       get_Conv_au_TO_unit('E','cm-1')
             ELSE
-              write(out_unitp,*) 'iG,val,val_fit,diff',iGP,               &
+              write(out_unit,*) 'iG,val,val_fit,diff',iGP,               &
                                       val(para_nDFit%ind_val),val_fit,    &
                                       abs(val(para_nDFit%ind_val)-val_fit)
             END IF
@@ -1951,20 +1951,20 @@ END FUNCTION ValGridPoint
         RMS_err = sqrt(RMS_err/para_nDGrid%nb_G)
 
         IF (para_nDFit%ind_val == 1) THEN
-          write(out_unitp,*) 'Max_error (cm-1): ',max_err*              &
+          write(out_unit,*) 'Max_error (cm-1): ',max_err*              &
                                          get_Conv_au_TO_unit('E','cm-1')
 
-          write(out_unitp,*) 'RMS_error (cm-1): ',RMS_err*              &
+          write(out_unit,*) 'RMS_error (cm-1): ',RMS_err*              &
                                          get_Conv_au_TO_unit('E','cm-1')
 
         ELSE
-          write(out_unitp,*) 'Max_error: ',max_err
-          write(out_unitp,*) 'RMS_error: ',RMS_err
+          write(out_unit,*) 'Max_error: ',max_err
+          write(out_unit,*) 'RMS_error: ',RMS_err
         END IF
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "=== END CHECKING FIT ================="
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "=== END CHECKING FIT ================="
+        write(out_unit,*) "======================================"
 
 
         CALL dealloc_array(val,'val',name_sub)
@@ -1974,7 +1974,7 @@ END FUNCTION ValGridPoint
       END SUBROUTINE sub_ChecknDFit2
 
       SUBROUTINE sub_ChecknDFit2_tabGrid(para_nDFit,para_nDGrid)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_PrimOp
       USE mod_nDindex
@@ -2004,10 +2004,10 @@ END FUNCTION ValGridPoint
         CALL alloc_NParray(nDvalG,[para_nDFit%nDindB%ndim],'nDvalG',name_sub)
 
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "=== CHECKING FIT ====================="
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "lbound,ubound",lbound(para_nDGrid),ubound(para_nDGrid)
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "=== CHECKING FIT ====================="
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "lbound,ubound",lbound(para_nDGrid),ubound(para_nDGrid)
         max_err = ZERO
         RMS_err = ZERO
 
@@ -2030,10 +2030,10 @@ END FUNCTION ValGridPoint
 
           IF (abs(ValGP-val_fit) > FIVE*ONETENTH**4) THEN
             IF (para_nDFit%ind_val == 1) THEN
-              write(out_unitp,*) 'iG,val,val_fit,diff (cm-1)',iGP,ValGP,val_fit,&
+              write(out_unit,*) 'iG,val,val_fit,diff (cm-1)',iGP,ValGP,val_fit,&
                               abs(ValGP-val_fit)*get_Conv_au_TO_unit('E','cm-1')
             ELSE
-              write(out_unitp,*) 'iG,val,val_fit,diff',iGP, ValGP,val_fit,abs(ValGP-val_fit)
+              write(out_unit,*) 'iG,val,val_fit,diff',iGP, ValGP,val_fit,abs(ValGP-val_fit)
             END IF
           END IF
 
@@ -2048,20 +2048,20 @@ END FUNCTION ValGridPoint
         RMS_err = sqrt(RMS_err/sum(para_nDGrid(:)%nb_G))
 
         IF (para_nDFit%ind_val == 1) THEN
-          write(out_unitp,*) 'Max_error (cm-1): ',max_err*              &
+          write(out_unit,*) 'Max_error (cm-1): ',max_err*              &
                                          get_Conv_au_TO_unit('E','cm-1')
 
-          write(out_unitp,*) 'RMS_error (cm-1): ',RMS_err*              &
+          write(out_unit,*) 'RMS_error (cm-1): ',RMS_err*              &
                                          get_Conv_au_TO_unit('E','cm-1')
 
         ELSE
-          write(out_unitp,*) 'Max_error: ',max_err
-          write(out_unitp,*) 'RMS_error: ',RMS_err
+          write(out_unit,*) 'Max_error: ',max_err
+          write(out_unit,*) 'RMS_error: ',RMS_err
         END IF
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "=== END CHECKING FIT ================="
-        write(out_unitp,*) "======================================"
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "=== END CHECKING FIT ================="
+        write(out_unit,*) "======================================"
 
 
         CALL dealloc_NParray(Q,'Q',name_sub)
@@ -2070,7 +2070,7 @@ END FUNCTION ValGridPoint
 
       END SUBROUTINE sub_ChecknDFit2_tabGrid
       SUBROUTINE sub_nGrid1_TO_nGrid2(Q0)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind) :: Q0(:)
@@ -2107,27 +2107,27 @@ END FUNCTION ValGridPoint
 !=====================================================================
         nb_act2 = size(Q0)
 
-        write(out_unitp,*) 'Q0',Q0(:)
+        write(out_unit,*) 'Q0',Q0(:)
 
         nb_act1    = 0
         name_Grid1 = ''
         name_Grid2 = ''
-        read(in_unitp,nGrid1_TO_nGrid2,IOSTAT=err_read)
+        read(in_unit,nGrid1_TO_nGrid2,IOSTAT=err_read)
         IF (err_read < 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' End-of-file or End-of-record'
-          write(out_unitp,*) ' The namelist "nGrid1_TO_nGrid2" is probably absent'
-          write(out_unitp,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' End-of-file or End-of-record'
+          write(out_unit,*) ' The namelist "nGrid1_TO_nGrid2" is probably absent'
+          write(out_unit,*) ' ERROR in ',name_sub
           STOP
         ELSE IF (err_read > 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Some parameter name of the namelist "nGrid1_TO_nGrid2" are probaly wrong'
-          write(out_unitp,*) ' It should never append !!'
-          write(out_unitp,*) ' Check the fortran'
-          write(out_unitp,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Some parameter name of the namelist "nGrid1_TO_nGrid2" are probaly wrong'
+          write(out_unit,*) ' It should never append !!'
+          write(out_unit,*) ' Check the fortran'
+          write(out_unit,*) ' ERROR in ',name_sub
           STOP
         END IF
-        IF (debug) write(out_unitp,nGrid1_TO_nGrid2)
+        IF (debug) write(out_unit,nGrid1_TO_nGrid2)
 
         nullify(val)
         CALL alloc_array(val,[4],'val',name_sub)
@@ -2144,15 +2144,15 @@ END FUNCTION ValGridPoint
         CALL alloc_array(nDvalG2,[nb_act2],'nDvalG2',name_sub)
 
 
-        read(in_unitp,*) list1(:) ! for list of active variables of grid 1
-        IF (debug) write(out_unitp,*) list1(:)
-        flush(out_unitp)
+        read(in_unit,*) list1(:) ! for list of active variables of grid 1
+        IF (debug) write(out_unit,*) list1(:)
+        flush(out_unit)
 
 
-        write(out_unitp,*) "======================================"
-        write(out_unitp,*) "=== READING THE GRIDS ================"
-        write(out_unitp,*) "======================================"
-        flush(out_unitp)
+        write(out_unit,*) "======================================"
+        write(out_unit,*) "=== READING THE GRIDS ================"
+        write(out_unit,*) "======================================"
+        flush(out_unit)
 
         ! for the file with the grid points
         name_file = adjustl(trim(name_Grid1)) // '2'

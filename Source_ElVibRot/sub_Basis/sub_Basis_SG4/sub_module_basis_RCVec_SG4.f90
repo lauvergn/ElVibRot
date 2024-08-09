@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_basis_RCVec_SGType4
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 PRIVATE
@@ -71,7 +71,7 @@ PUBLIC  TypeCVec, alloc_TypeCVec, dealloc_TypeCVec, Write_TypeCVec, &
 CONTAINS
 
 SUBROUTINE alloc_TypeRVec(Rvec,nvec)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeRVec),    intent(inout) :: Rvec
@@ -81,8 +81,8 @@ IMPLICIT NONE
   CALL dealloc_TypeRVec(Rvec)
 
   IF (nvec < 1) THEN
-    write(out_unitp,*) ' ERROR in alloc_TypeRVec'
-    write(out_unitp,*) ' nvec < 1',nvec
+    write(out_unit,*) ' ERROR in alloc_TypeRVec'
+    write(out_unit,*) ' nvec < 1',nvec
     STOP
   END IF
 
@@ -91,7 +91,7 @@ IMPLICIT NONE
 
 END SUBROUTINE alloc_TypeRVec
 SUBROUTINE dealloc_TypeRVec(Rvec)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeRVec), intent(inout) :: Rvec
@@ -103,19 +103,19 @@ IMPLICIT NONE
 END SUBROUTINE dealloc_TypeRVec
 
 SUBROUTINE Write_TypeRVec(Rvec)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeRVec), intent(in) :: Rvec
 
   IF (allocated(Rvec%V)) THEN
-    CALL Write_VecMat(Rvec%V,out_unitp,5,info='R:')
+    CALL Write_VecMat(Rvec%V,out_unit,5,info='R:')
   END IF
 
 END SUBROUTINE Write_TypeRVec
 
 SUBROUTINE TypeRVec2_TO_TypeRVec1(Rvec1,Rvec2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   CLASS (TypeRVec), intent(inout) :: Rvec1
@@ -130,7 +130,7 @@ IMPLICIT NONE
 
 END SUBROUTINE TypeRVec2_TO_TypeRVec1
 SUBROUTINE tabR2_TO_TypeRVec1(Rvec1,tabR2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   CLASS (TypeRVec),               intent(inout) :: Rvec1
@@ -146,7 +146,7 @@ IMPLICIT NONE
 END SUBROUTINE tabR2_TO_TypeRVec1
 
 SUBROUTINE sub_ReadRVec(RVec,FileName_RVec,err_sub)
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
 
   TYPE (TypeRVec),                 intent(inout)           :: RVec
@@ -163,15 +163,15 @@ SUBROUTINE sub_ReadRVec(RVec,FileName_RVec,err_sub)
 
   CALL file_open2(FileName_RVec,nio,lformatted=.FALSE.,old=.TRUE.,err_file=err_file)
   IF (err_file /= 0) THEN
-    write(out_unitp,*) ' ERROR in ',Name_sub
-    write(out_unitp,*) '   Problem with the file associated to RVec'
-    write(out_unitp,*) '   err_file: ',err_file
+    write(out_unit,*) ' ERROR in ',Name_sub
+    write(out_unit,*) '   Problem with the file associated to RVec'
+    write(out_unit,*) '   err_file: ',err_file
     error = 2
   ELSE
     read(nio,iostat=err_file) nvec
     IF (err_file /= 0 .OR. nvec < 1) THEN
-      write(out_unitp,*) ' ERROR in ',Name_sub
-      write(out_unitp,*) '   Error while reading nvec',nvec
+      write(out_unit,*) ' ERROR in ',Name_sub
+      write(out_unit,*) '   Error while reading nvec',nvec
       error = 3
       nvec = 0
     END IF
@@ -181,8 +181,8 @@ SUBROUTINE sub_ReadRVec(RVec,FileName_RVec,err_sub)
     CALL alloc_TypeRVec(Rvec,nvec)
     read(nio,iostat=err_file) Rvec%V
     IF (err_file /= 0) THEN
-      write(out_unitp,*) ' ERROR in ',Name_sub
-      write(out_unitp,*) '   Error while reading Rvec'
+      write(out_unit,*) ' ERROR in ',Name_sub
+      write(out_unit,*) '   Error while reading Rvec'
       error = 4
     END IF
   END IF
@@ -197,7 +197,7 @@ SUBROUTINE sub_ReadRVec(RVec,FileName_RVec,err_sub)
 
 END SUBROUTINE sub_ReadRVec
 SUBROUTINE sub_WriteRVec(RVec,FileName_RVec,err_sub)
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
 
   TYPE (TypeRVec),                 intent(in)              :: RVec
@@ -217,22 +217,22 @@ SUBROUTINE sub_WriteRVec(RVec,FileName_RVec,err_sub)
   ELSE
     CALL file_open2(FileName_RVec,nio,lformatted=.FALSE.,old=.FALSE.,err_file=err_file)
     IF (err_file /= 0) THEN
-      write(out_unitp,*) ' ERROR in ',Name_sub
-      write(out_unitp,*) '   Problem with the file associated to RVec'
-      write(out_unitp,*) '   err_file: ',err_file
+      write(out_unit,*) ' ERROR in ',Name_sub
+      write(out_unit,*) '   Problem with the file associated to RVec'
+      write(out_unit,*) '   err_file: ',err_file
       error = 2
     ELSE
       write(nio,iostat=err_file) nvec
       IF (err_file /= 0 .OR. nvec < 1) THEN
-        write(out_unitp,*) ' ERROR in ',Name_sub
-        write(out_unitp,*) '   Error while writing nvec',nvec
+        write(out_unit,*) ' ERROR in ',Name_sub
+        write(out_unit,*) '   Error while writing nvec',nvec
         error = 3
         nvec = 0
       ELSE
         write(nio,iostat=err_file) Rvec%V
         IF (err_file /= 0) THEN
-          write(out_unitp,*) ' ERROR in ',Name_sub
-          write(out_unitp,*) '   Error while reading Rvec'
+          write(out_unit,*) ' ERROR in ',Name_sub
+          write(out_unit,*) '   Error while reading Rvec'
           error = 4
         END IF
       END IF
@@ -249,7 +249,7 @@ SUBROUTINE sub_WriteRVec(RVec,FileName_RVec,err_sub)
 
 END SUBROUTINE sub_WriteRVec
 SUBROUTINE alloc_TypeCVec(vec,nvec)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeCVec), intent(inout) :: vec
@@ -259,8 +259,8 @@ IMPLICIT NONE
   CALL dealloc_TypeCVec(vec)
 
   IF (nvec < 1) THEN
-    write(out_unitp,*) ' ERROR in alloc_TypeCVec'
-    write(out_unitp,*) ' nvec < 1',nvec
+    write(out_unit,*) ' ERROR in alloc_TypeCVec'
+    write(out_unit,*) ' nvec < 1',nvec
     STOP
   END IF
 
@@ -268,7 +268,7 @@ IMPLICIT NONE
 
 END SUBROUTINE alloc_TypeCVec
 SUBROUTINE dealloc_TypeCVec(vec)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeCVec), intent(inout) :: vec
@@ -280,19 +280,19 @@ IMPLICIT NONE
 END SUBROUTINE dealloc_TypeCVec
 
 SUBROUTINE Write_TypeCVec(vec)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeCVec), intent(in) :: vec
 
   IF (allocated(vec%V)) THEN
-    CALL Write_VecMat(vec%V,out_unitp,5,info='R:')
+    CALL Write_VecMat(vec%V,out_unit,5,info='R:')
   END IF
 
 END SUBROUTINE Write_TypeCVec
 
 SUBROUTINE TypeCVec2_TO_TypeCVec1(vec1,vec2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeCVec), intent(inout) :: vec1
@@ -307,7 +307,7 @@ IMPLICIT NONE
 
 END SUBROUTINE TypeCVec2_TO_TypeCVec1
 SUBROUTINE tabC2_TO_TypeCVec1(vec1,tab2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
   TYPE (TypeCVec),                   intent(inout) :: vec1

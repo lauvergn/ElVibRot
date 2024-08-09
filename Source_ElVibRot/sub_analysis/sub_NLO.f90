@@ -50,7 +50,7 @@
 !================================================================
       SUBROUTINE sub_NLO(para_Dip,print_Op,para_H,nb_ana,para_intensity)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_basis
       USE mod_Op
@@ -88,12 +88,12 @@
       mole       => para_H%mole
       para_Tnum  => para_H%para_Tnum
 
-      write(out_unitp,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'BEGINNING ',name_sub
       IF (debug) THEN
-        write(out_unitp,*) 'nb_ana',nb_ana
-        write(out_unitp,*) 'Rvp',shape(para_H%Rvp)
-!       CALL Write_Mat(para_H%Rvp,out_unitp,5)
-        write(out_unitp,*)
+        write(out_unit,*) 'nb_ana',nb_ana
+        write(out_unit,*) 'Rvp',shape(para_H%Rvp)
+!       CALL Write_Mat(para_H%Rvp,out_unit,5)
+        write(out_unit,*)
       END IF
 !-----------------------------------------------------------
 
@@ -102,34 +102,34 @@
         CALL alloc_NParray(Mat_Aif,[nb_ana,nb_ana],'Mat_Aif',name_sub)
         Mat_Aif(:,:) = ZERO
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_ana <=0',nb_ana
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_ana <=0',nb_ana
         STOP
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
 
 
 !     -------------------------------------------
-      write(out_unitp,*) ' ene (ua): ',nb_ana
+      write(out_unit,*) ' ene (ua): ',nb_ana
       DO i=1,nb_ana
-        write(out_unitp,*) i,para_H%Rdiag(i)
+        write(out_unit,*) i,para_H%Rdiag(i)
       END DO
-      write(out_unitp,*) ' END ene',nb_ana
-      write(out_unitp,*)
+      write(out_unit,*) ' END ene',nb_ana
+      write(out_unit,*)
 
-      write(out_unitp,*) '==================================================='
-      write(out_unitp,*) '==================================================='
-      write(out_unitp,*) ' Calculation of "Mat_Aif(:,:)": '
+      write(out_unit,*) '==================================================='
+      write(out_unit,*) '==================================================='
+      write(out_unit,*) ' Calculation of "Mat_Aif(:,:)": '
 
       Mat_Aif(:,:) = ZERO
       DO k=1,3
         Mat_Aif(:,:) = Mat_Aif(:,:) + para_Dip(k)%Rmat(1:nb_ana,1:nb_ana)**2
       END DO
-      CALL Write_Mat(Mat_Aif,out_unitp,5,Rformat='e30.23')
-      write(out_unitp,*) '==================================================='
-      write(out_unitp,*) '==================================================='
-      flush(out_unitp)
+      CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e30.23')
+      write(out_unit,*) '==================================================='
+      write(out_unit,*) '==================================================='
+      flush(out_unit)
 
 
       CALL dealloc_NParray(Mat_Aif,'Mat_Aif',name_sub)
@@ -138,7 +138,7 @@
 !----------------------------------------------------------
       IF (debug) THEN
       END IF
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
 !----------------------------------------------------------
 
       end subroutine sub_NLO

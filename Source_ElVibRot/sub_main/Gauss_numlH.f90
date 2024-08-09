@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       Program Gauss_num
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_poly
       USE mod_GWP
@@ -133,7 +133,7 @@
       testenergy='gaussiene_out'
       restarti='rsi'
       restartf='rsf'
-      read(in_unitp,file)
+      read(in_unit,file)
 
       open(1,file='hessienne')
       open(8,file=restarti)
@@ -147,11 +147,11 @@
       open(71,file=imp)
 
       open(60,file='linear-PZ')
-      write(out_unitp0,*)'x,PZ'
+      write(out_unit0,*)'x,PZ'
       open(61,file='linear-Z')
-      write(out_unitp1,*)'x,Z'
+      write(out_unit1,*)'x,Z'
       open(62,file='phase')
-      write(out_unitp2,*)'x,Phase'
+      write(out_unit2,*)'x,Phase'
       open(64,file='vecY')
   3   FORMAT(22(E12.5,1X))
 
@@ -180,8 +180,8 @@
       newQsym  = .FALSE.
       test     = .FALSE.
 
-      read(in_unitp,niveau)
-      write(out_unitp,niveau)
+      read(in_unit,niveau)
+      write(out_unit,niveau)
 
       memory = product( [mole%nb_var] )
       allocate(DeltaQsym(mole%nb_var),stat=err_mem) ! change alloc done
@@ -192,17 +192,17 @@
       DeltaQsym(:) = 0.
       PQsym(:)  = 0.
       IF (newQsym) THEN
-        write(out_unitp,*) 'variables,DeltaQ,PQ :'
+        write(out_unit,*) 'variables,DeltaQ,PQ :'
         DO i=1,mole%nb_var
-         read(in_unitp,*) para_Q%Qsym0(i),DeltaQsym(i),PQsym(i)
-         write(out_unitp,*) 'Qsym0,DeltaQsym,PQsym(',i,')=',                    &
+         read(in_unit,*) para_Q%Qsym0(i),DeltaQsym(i),PQsym(i)
+         write(out_unit,*) 'Qsym0,DeltaQsym,PQsym(',i,')=',                    &
                       para_Q%Qsym0(i),DeltaQsym(i),PQsym(i)
         END DO
       ELSE
-        write(out_unitp,*) 'variables :'
+        write(out_unit,*) 'variables :'
         DO i=1,mole%nb_var
-         read(in_unitp,*) para_Q%Qsym0(i)
-         write(out_unitp,*) 'Qsym0(',i,')=',para_Q%Qsym0(i)
+         read(in_unit,*) para_Q%Qsym0(i)
+         write(out_unit,*) 'Qsym0(',i,')=',para_Q%Qsym0(i)
         END DO
       END IF
       CALL Qsym_TO_Qact(para_Q%Qsym0,para_Q%Qact0,para_Q%nb_var,        &
@@ -247,7 +247,7 @@
        nrs    = 0
        TFmaxE = 5000.d0 ! maximal enrgy in cm-1
        traj   = .FALSE.
-       read(in_unitp,gauss)
+       read(in_unit,gauss)
 
 !......Allocation Gauss
        CALL init0_GWP(GWP)
@@ -277,7 +277,7 @@
             N = N + 2*ND**2 ! A
          END IF
        END IF
-       write(out_unitp,*) 'ND,N',ND,N
+       write(out_unit,*) 'ND,N',ND,N
 
        memory = product( [N] )
        allocate(Y(N),FU(N),YOUT(N),stat=err_mem) ! change alloc done
@@ -338,7 +338,7 @@
            GWP%Pmean(:)=0.d0
            GWP%Pmean(nak)=ak
          END IF
-         write(out_unitp,*) 'Pmean',nak,GWP%Pmean
+         write(out_unit,*) 'Pmean',nak,GWP%Pmean
 
 !        WIDTH AND CORRELATION MATRIX
 !        ZERO FOR REAL PART OF THE A MATRIX
@@ -360,9 +360,9 @@
          mu0(:) = param_LHA%d0mu
          IF ( pot0 == -huge(1.0d0) ) param_LHA%pot0 = param_LHA%d0Ene
          param_LHA%d0Ene = param_LHA%d0Ene - param_LHA%pot0
-         write(out_unitp,*) 'ene0,pot0 PREMIER APPEL',                          &
+         write(out_unit,*) 'ene0,pot0 PREMIER APPEL',                          &
                          param_LHA%d0Ene,param_LHA%pot0
-         write(out_unitp,*) 'mu0',mu0
+         write(out_unit,*) 'mu0',mu0
 
          nderiv = 2
          IF (GWP%trajectory) nderiv = 1
@@ -387,16 +387,16 @@
            CALL error_memo_allo(err_mem,memory,"A","main")
            CALL calc_freq_width(nd,A,d0c,freq,                          &
                                 param_LHA%d2Ene,param_LHA%d0G)
-           write(out_unitp,*) 'freq cm-1',freq * get_ConvUnit('E','cm-1')
-           write(out_unitp,*) 'width matrix'
-           CALL Write_Mat(A,out_unitp,5)
+           write(out_unit,*) 'freq cm-1',freq * get_ConvUnit('E','cm-1')
+           write(out_unit,*) 'width matrix'
+           CALL Write_Mat(A,out_unit,5)
            memory = size(freq)
            deallocate(freq,stat=err_mem) ! change dealloc done
            CALL error_memo_allo(err_mem,-memory,"freq","main")
            memory = size(d0c)
            deallocate(d0c,stat=err_mem) ! change dealloc done
            CALL error_memo_allo(err_mem,-memory,"d0c","main")
-           write(out_unitp,*)
+           write(out_unit,*)
 
 
 !          k*mu
@@ -409,11 +409,11 @@
            deltaQ(:) = 1.d0/sqrt(deltaQ(:))
 
 
-           write(out_unitp,*)'   '
-           write(out_unitp,*)'hes(i,i), masse,  delta '
-           write(out_unitp,*)'   '
+           write(out_unit,*)'   '
+           write(out_unit,*)'hes(i,i), masse,  delta '
+           write(out_unit,*)'   '
            DO i=1,nd
-             write(out_unitp,21)i,param_LHA%d2Ene(i,i),1.d0/param_LHA%d0G(i,i), &
+             write(out_unit,21)i,param_LHA%d2Ene(i,i),1.d0/param_LHA%d0G(i,i), &
                         deltaQ(i)
  21          format(i3,4(1x,f18.6))
            END DO
@@ -458,7 +458,7 @@
 !        ----------------------------------------------
 !        Qmean, Pmean, CZ, CPZ, gamma => Y(:)
          CALL GWP_TO_Y(GWP,Y,N)
-         write(out_unitp,*) Y(:)
+         write(out_unit,*) Y(:)
          write(8,*) Y(:)
 !-----------------------------------------------------
 
@@ -480,13 +480,13 @@
 !       Normalization
         CALL p1TOp2(p1=poly,p2=conj_poly,conjug=.TRUE.)
         CALL calc_auto_cor(auto_c,conj_poly,poly)
-        write(out_unitp,*) 'norm of GWP:',real(auto_c,kind=Rkind)
+        write(out_unit,*) 'norm of GWP:',real(auto_c,kind=Rkind)
 !       Renormalization of GWP
         GWP%Cphase = GWP%Cphase +eye*0.5d0*log(real(auto_c,kind=Rkind))
         CALL GWP_TO_poly(GWP,poly)
         CALL p1TOp2(p1=poly,p2=conj_poly,conjug=.TRUE.)
         CALL calc_auto_cor(auto_c,conj_poly,poly)
-        write(out_unitp,*) 'New norm of GWP:',real(auto_c,kind=Rkind)
+        write(out_unit,*) 'New norm of GWP:',real(auto_c,kind=Rkind)
         CALL GWP_TO_Y(GWP,Y,N)
 
         CALL GWP1_TO_GWP2(GWP,GWP0)
@@ -519,7 +519,7 @@
 !         ===============================
 !         for trajectory only ......
 !
-          write(out_unitp,*) 'GWP%Qmean mu',GWP%Qmean,param_LHA%d0mu(:)
+          write(out_unit,*) 'GWP%Qmean mu',GWP%Qmean,param_LHA%d0mu(:)
 !         auto_c = dot_product(GWP%Qmean,GWP0%Qmean)
           auto_c = dot_product(param_LHA%d0mu,mu0)
 !
@@ -529,7 +529,7 @@
           CALL GWP_TO_poly(GWP,poly)
           CALL calc_auto_cor(auto_c,poly0,poly)
         END IF
-        write(out_unitp,*) 'auto_c',auto_c
+        write(out_unit,*) 'auto_c',auto_c
         CALL Write_AutoCorr(no,X,auto_c)
 !       -------------------------------------------------
 
@@ -545,7 +545,7 @@
 !       output dynamical information
         xfs=x*0.0241d0
 
-        write(out_unitp,31)x,xfs,param_LHA%d0Ene,energy
+        write(out_unit,31)x,xfs,param_LHA%d0Ene,energy
         write(10,31)x,xfs,param_LHA%d0Ene,energy
  31     format('energy:',4(1x,f18.6))
 
@@ -555,12 +555,12 @@
           write(32,3)x,xfs,GWP%CAmean
           write(41,3)x,xfs,sigma
 
-          write(out_unitp0,*) x,GWP%CPZ
-          write(out_unitp1,*) x,GWP%CZ
-          write(out_unitp2,*) x,GWP%Cphase
+          write(out_unit0,*) x,GWP%CPZ
+          write(out_unit1,*) x,GWP%CZ
+          write(out_unit2,*) x,GWP%Cphase
         END IF
-        write(out_unitp4,*) x,xfs,Y
-        flush(out_unitp)
+        write(out_unit4,*) x,xfs,Y
+        flush(out_unit)
         flush(10)
         flush(31)
         flush(32)
@@ -597,7 +597,7 @@
             END IF
           END DO
           END DO
-          write(out_unitp,*) ' None_symA ',None_symA
+          write(out_unit,*) ' None_symA ',None_symA
 !         bonnes variables : GWP (it0+Delta)
 !         INITIALISATION OF PZ_0 = 2 A_0
           GWP%CPZ(:,:) = 2.d0 * GWP%CAmean(:,:)
@@ -613,10 +613,10 @@
           CALL GWP_TO_poly(GWP,poly)
           CALL p1TOp2(p1=poly,p2=conj_poly,conjug=.TRUE.)
           CALL calc_auto_cor(auto_c,conj_poly,poly)
-          write(out_unitp,*) 'norm of GWP:',real(auto_c,kind=Rkind)
+          write(out_unit,*) 'norm of GWP:',real(auto_c,kind=Rkind)
           IF ( abs(auto_c-1.d0) > 0.2) THEN
-            write(out_unitp,*) ' ERROR in propagation GWP'
-            write(out_unitp,*) ' The norm is NOT conserved',                    &
+            write(out_unit,*) ' ERROR in propagation GWP'
+            write(out_unit,*) ' The norm is NOT conserved',                    &
                                    real(auto_c,kind=Rkind)
             STOP
           END IF
@@ -624,7 +624,7 @@
           IF (ReNorm) THEN
             GWP%Cphase = GWP%Cphase +eye*0.5d0 *                        &
                               log(real(auto_c,kind=Rkind))
-            write(out_unitp,*) 'X,renorm phase',X,GWP%Cphase
+            write(out_unit,*) 'X,renorm phase',X,GWP%Cphase
           END IF
         END IF
 
@@ -686,7 +686,7 @@
       SUBROUTINE FCN(X,Y,FU,ND,N,NdimA,para_Q,mole,                     &
                      onthefly,lo_calc_EG,GWP,param_LHA,                 &
                      para_Tnum)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_GWP
       IMPLICIT NONE
@@ -729,7 +729,7 @@
 
 
       EYE = cmplx(0.0,1.0,kind=Rkind)
-!     write(out_unitp,*) 'FCN',Y
+!     write(out_unit,*) 'FCN',Y
 !     ------------------------------------------------
 !     Y => Q P PZ Z (A)
       CALL Y_TO_GWP(Y,GWP,N)
@@ -850,14 +850,14 @@
          FU(N) = imag(phaseP)
       END IF
 
-!     write(out_unitp,*) 'FCN',FU
+!     write(out_unit,*) 'FCN',FU
 
       end subroutine FCN
 
       SUBROUTINE RK4(Y,DYDX,ND,N,X,H,YOUT,para_Q,mole,                  &
                      NdimA,onthefly,calc_EG,GWP,param_LHA,              &
                      para_Tnum)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_GWP
       IMPLICIT NONE
@@ -909,7 +909,7 @@
 
       end subroutine RK4
       SUBROUTINE GWP_TO_Y(GWP,Y,N)
-      USE mod_system
+      USE EVR_system_m
       USE mod_GWP
       IMPLICIT NONE
 
@@ -919,13 +919,13 @@
        integer         :: ND,ncount
 
        IF (.NOT. GWP%cplx .OR. .NOT. GWP%linearization) THEN
-         write(out_unitp,*) ' ERROR in GWP_TO_Y'
-         write(out_unitp,*) ' Real or without lineariztion impossible !'
-         write(out_unitp,*) ' cplx,linearization',GWP%cplx,GWP%linearization
+         write(out_unit,*) ' ERROR in GWP_TO_Y'
+         write(out_unit,*) ' Real or without lineariztion impossible !'
+         write(out_unit,*) ' cplx,linearization',GWP%cplx,GWP%linearization
          STOP
        END IF
 
-!      write(out_unitp,*) ' BEGINNING GWP_TO_Y'
+!      write(out_unit,*) ' BEGINNING GWP_TO_Y'
 
        ND = GWP%ndim
        Y(:) = 0.d0
@@ -962,11 +962,11 @@
          Y(ncount+2) = imag(GWP%Cphase)
        END IF
 
-!      write(out_unitp,*) ' END GWP_TO_Y'
+!      write(out_unit,*) ' END GWP_TO_Y'
 
       end subroutine GWP_TO_Y
       SUBROUTINE Y_TO_GWP(Y,GWP,N)
-      USE mod_system
+      USE EVR_system_m
       USE mod_GWP
       IMPLICIT NONE
 
@@ -986,13 +986,13 @@
        integer             :: inverse_index(GWP%ndim)
 
        IF (.NOT. GWP%cplx .OR. .NOT. GWP%linearization) THEN
-         write(out_unitp,*) ' ERROR in Y_TO_GWP'
-         write(out_unitp,*) ' Real or without lineariztion impossible !'
-         write(out_unitp,*) ' cplx,linearization',GWP%cplx,GWP%linearization
+         write(out_unit,*) ' ERROR in Y_TO_GWP'
+         write(out_unit,*) ' Real or without lineariztion impossible !'
+         write(out_unit,*) ' cplx,linearization',GWP%cplx,GWP%linearization
          STOP
        END IF
 
-!      write(out_unitp,*) ' BEGINNING Y_TO_GWP'
+!      write(out_unit,*) ' BEGINNING Y_TO_GWP'
 
        ND = GWP%ndim
 
@@ -1029,7 +1029,7 @@
         DO i=1,ND
          ZS(i,i) = ZS(i,i) - 1.d0
         END DO
-!       write(out_unitp,*) 'sum(CZ.ZI-Id):',sum(abs(ZS))
+!       write(out_unit,*) 'sum(CZ.ZI-Id):',sum(abs(ZS))
 
         GWP%CAmean(:,:) = 0.5d0 * matmul(GWP%CPZ,ZI)
 
@@ -1040,7 +1040,7 @@
          GWP%Cphase = cmplx(Y(ncount+1),Y(ncount+2),kind=Rkind)
        END IF
 
-!      write(out_unitp,*) ' END Y_TO_GWP'
+!      write(out_unit,*) ' END Y_TO_GWP'
 
       end subroutine Y_TO_GWP
 !==================================================
@@ -1049,7 +1049,7 @@
 !
 !==================================================
       SUBROUTINE GWP_TO_poly(GWP,poly)
-      USE mod_system
+      USE EVR_system_m
       USE mod_poly
       USE mod_GWP
       IMPLICIT NONE
@@ -1069,23 +1069,23 @@
        eye = cmplx(0.d0,1.d0,kind=Rkind)
 
        IF (.NOT. GWP%init0) THEN
-         write(out_unitp,*) ' ERROR in GWP_TO_poly'
-         write(out_unitp,*) ' GWP has NOT been initiated with init0_GWP'
+         write(out_unit,*) ' ERROR in GWP_TO_poly'
+         write(out_unit,*) ' GWP has NOT been initiated with init0_GWP'
          STOP
        END IF
        IF (GWP%trajectory) THEN
-         write(out_unitp,*) ' ERROR in GWP_TO_poly'
-         write(out_unitp,*) ' GWP%trajectory IS .TRUE.'
-         write(out_unitp,*) ' You should NOT use this subroutine'
+         write(out_unit,*) ' ERROR in GWP_TO_poly'
+         write(out_unit,*) ' GWP%trajectory IS .TRUE.'
+         write(out_unit,*) ' You should NOT use this subroutine'
          STOP
        END IF
        IF (.NOT. poly%init0) THEN
-         write(out_unitp,*) ' ERROR in GWP_TO_poly'
-         write(out_unitp,*) ' poly has NOT been initiated with init0_poly'
+         write(out_unit,*) ' ERROR in GWP_TO_poly'
+         write(out_unit,*) ' poly has NOT been initiated with init0_poly'
          STOP
        END IF
 
-!      write(out_unitp,*) ' BEGINNING GWP_TO_poly'
+!      write(out_unit,*) ' BEGINNING GWP_TO_poly'
 !      CALL write_GWP(GWP)
 
 
@@ -1135,7 +1135,7 @@
        CALL dealloc_poly(w1_poly)
 
 !      CALL write_poly(poly)
-!      write(out_unitp,*) ' END GWP_TO_poly'
+!      write(out_unit,*) ' END GWP_TO_poly'
 
       END SUBROUTINE GWP_TO_poly
 !==================================================
@@ -1144,7 +1144,7 @@
 !
 !==================================================
       SUBROUTINE calc_ene(GWP,G,energyClas,ene0)
-      USE mod_system
+      USE EVR_system_m
       USE mod_GWP
       IMPLICIT NONE
 
@@ -1167,7 +1167,7 @@
 !
 !==================================================
       SUBROUTINE calc1_auto_cor(auto_c,poly0,poly)
-      USE mod_system
+      USE EVR_system_m
       USE mod_poly
       IMPLICIT NONE
 
@@ -1215,7 +1215,7 @@
       id0 = locate(w2_poly,ind_exp)
       lnauto = lnauto + w2_poly%Ccoef(id0)
       auto_c = auto_c * exp(lnauto)
-      write(out_unitp,*) 'auto_c',auto_c
+      write(out_unit,*) 'auto_c',auto_c
       CALL write_poly(w2_poly)
 
       CALL dealloc_poly(w1_poly)
@@ -1229,7 +1229,7 @@
 !
 !==================================================
       SUBROUTINE calc_auto_cor(auto_c,poly0,poly)
-      USE mod_system
+      USE EVR_system_m
       USE mod_poly
       IMPLICIT NONE
 
@@ -1253,7 +1253,7 @@
       CALL init0_poly(w1_poly)
 
       CALL p1PLUSp2TOp3(p1=poly0,p2=poly,p3=NewPoly)
-!     write(out_unitp,*) ' p0PLUSp'
+!     write(out_unit,*) ' p0PLUSp'
 !     CALL write_poly(NewPoly)
 
 
@@ -1268,7 +1268,7 @@
         DO k=1,LTpoly%nb_coef
           IF (LTpoly%ind(i,k) == 1) LTpoly%Ccoef(k) = 0.d0
         END DO
-!       write(out_unitp,*) ' partial LTpoly',i
+!       write(out_unit,*) ' partial LTpoly',i
 !       CALL write_poly(LTpoly)
 
 !       - linear variable (i) transformation with dp0PLUSp
@@ -1277,7 +1277,7 @@
         ind_exp(i) = 1
         id1 = locate(dNewPoly,ind_exp)
         dNewPoly%Ccoef(id1) = 0.d0
-!       write(out_unitp,*) ' dNewPoly',i
+!       write(out_unit,*) ' dNewPoly',i
 !       CALL write_poly(dNewPoly)
 
 
@@ -1288,13 +1288,13 @@
         id2 = locate(NewPoly,ind_exp)
         Ca =  -0.25d0/NewPoly%Ccoef(id2)
         w1_poly%Ccoef(:) = w1_poly%Ccoef(:) * Ca
-!       write(out_unitp,*) ' dNewPoly^2/(-4 a)'
+!       write(out_unit,*) ' dNewPoly^2/(-4 a)'
 !       CALL write_poly(w1_poly)
 
 !       - full LTpoly
 !       - LTpoly = a ui^2 + Remainder (degree =2)
         CALL p1PLUSp2TOp3(p1=LTpoly,p2=w1_poly,p3=NewPoly)
-!       write(out_unitp,*) ' full LTpoly',i
+!       write(out_unit,*) ' full LTpoly',i
 !       CALL write_poly(NewPoly)
 
 !       - integration along ui
@@ -1304,7 +1304,7 @@
       ind_exp(:) = 0
       id0 = locate(NewPoly,ind_exp)
       auto_c = auto_c * exp(NewPoly%Ccoef(id0))
-!     write(out_unitp,*) 'auto_c',auto_c
+!     write(out_unit,*) 'auto_c',auto_c
 
       CALL dealloc_poly(w1_poly)
       CALL dealloc_poly(LTpoly)
@@ -1317,7 +1317,7 @@
 !
 !------------------------------------
       SUBROUTINE gr_hes(Q,ene,gr,hes,n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind) :: Q(n),gr(n),hes(n,n)

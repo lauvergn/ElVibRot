@@ -14,7 +14,7 @@
                                  Tdef2,Tdef1,vep,rho,                   &
                                  Tcor2,Tcor1,Trot,                      &
                                  para_Tnum,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Tnum
       USE mod_Constant
       IMPLICIT NONE
@@ -82,17 +82,17 @@
       !logical, parameter :: debug = .TRUE.
       !-----------------------------------------------------------
        IF (debug .OR. para_Tnum%WriteT) THEN
-         write(out_unitp,*) 'BEGINNING calc_f2_f1Q_ana'
-         write(out_unitp,*) 'ndimG',mole%ndimG
-         write(out_unitp,*) 'WriteCC',mole%WriteCC
-         write(out_unitp,*) 'Qsym0',Qsym0
+         write(out_unit,*) 'BEGINNING calc_f2_f1Q_ana'
+         write(out_unit,*) 'ndimG',mole%ndimG
+         write(out_unit,*) 'WriteCC',mole%WriteCC
+         write(out_unit,*) 'Qsym0',Qsym0
          IF (debug) THEN
-           write(out_unitp,*)
+           write(out_unit,*)
            CALL Write_mole(mole)
-           write(out_unitp,*)
+           write(out_unit,*)
          END IF
-         write(out_unitp,*) 'JJ',para_Tnum%JJ
-         write(out_unitp,*)
+         write(out_unit,*) 'JJ',para_Tnum%JJ
+         write(out_unit,*)
        END IF
 !-----------------------------------------------------------
 
@@ -110,11 +110,11 @@
         Tdef2(i,i) = -HALF*w(i)*eVTOau
       END DO
 
-      !write(out_unitp,*) 'Tdef',Tdef2
+      !write(out_unit,*) 'Tdef',Tdef2
 
 !-----------------------------------------------------------
       IF (debug .OR. para_Tnum%WriteT) THEN
-        write(out_unitp,*) 'END calc_f2_f1Q_ana'
+        write(out_unit,*) 'END calc_f2_f1Q_ana'
       END IF
 !-----------------------------------------------------------
 
@@ -123,7 +123,7 @@
       end subroutine calc_f2_f1Q_ana
 
       SUBROUTINE q2x_RisOO(qq,x)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real (kind=Rkind) :: qq(0:14)
       real (kind=Rkind) :: x(0:20)
@@ -132,15 +132,15 @@
       CALL q2x_RisOO_Oriol_OK(qq,x)
 !     CALL q2x_RisOO_Oriol(qq,x)
 
-      !write(out_unitp,*) ' Oriol subroutine: W2H+'
+      !write(out_unit,*) ' Oriol subroutine: W2H+'
       !DO i=0,20,3
-      !  write(out_unitp,*) x(i+0),x(i+1),x(i+2)
+      !  write(out_unit,*) x(i+0),x(i+1),x(i+2)
       !END DO
 
       end subroutine q2x_RisOO
 
       SUBROUTINE q2x_RisOO_Oriol_OK(qq,x)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real (kind=Rkind) :: q(0:14),qq(0:14)
       real (kind=Rkind) :: dum,q_OriolOrder(0:14)
@@ -155,7 +155,7 @@
       q_OriolOrder(:) = qq(:)
       q_OriolOrder(4) = qq(2) !a
       q_OriolOrder(2) = qq(4) !z
-!     write(out_unitp,*) 'a,z',q_OriolOrder(4),q_OriolOrder(2)
+!     write(out_unit,*) 'a,z',q_OriolOrder(4),q_OriolOrder(2)
 
 
 
@@ -290,7 +290,7 @@
       end subroutine q2x_RisOO_Oriol_OK
 
       SUBROUTINE q2x_RisOO_Oriol(qq,x)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real (kind=Rkind) :: q(0:14),qq(0:14)
       real (kind=Rkind) :: dum,q_OriolOrder(0:14)
@@ -303,7 +303,7 @@
       q_OriolOrder(:) = qq(:)
       q_OriolOrder(4) = qq(2) !a
       q_OriolOrder(2) = qq(4) !z
-!     write(out_unitp,*) 'a,z',q_OriolOrder(4),q_OriolOrder(2)
+!     write(out_unit,*) 'a,z',q_OriolOrder(4),q_OriolOrder(2)
 
 
 
@@ -435,7 +435,7 @@
       end subroutine q2x_RisOO_Oriol
 
       SUBROUTINE qcos2q(q,qout)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real (kind=Rkind) :: q(0:14),qout(0:14)
 !     For the angles defined as cosines transform them to radians
@@ -448,7 +448,7 @@
 
 
       SUBROUTINE eulerMatrix(a,b,c,r,inv)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
       real (kind=Rkind) :: a,b,c
       logical :: inv

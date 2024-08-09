@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_basis_BtoG_GtoB_SGType4
-USE mod_system
+USE EVR_system_m
 !$ USE omp_lib, only : OMP_GET_THREAD_NUM
 USE mod_nDindex
 USE mod_basis_set_alloc
@@ -120,7 +120,7 @@ CONTAINS
 ! added for SmolyakRep
 !---------------------------------------------------------------------------------------
 SUBROUTINE alloc_SmolyakRep_only(SRep,nb_SG,delta,grid,nb0)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis_set_alloc
   IMPLICIT NONE
 
@@ -133,7 +133,7 @@ SUBROUTINE alloc_SmolyakRep_only(SRep,nb_SG,delta,grid,nb0)
   integer, allocatable  :: tab_n(:)
 
 
-  !write(out_unitp,*) 'in alloc_SmolyakRep, shape tab_ind',shape(tab_ind) ; flush(out_unitp)
+  !write(out_unit,*) 'in alloc_SmolyakRep, shape tab_ind',shape(tab_ind) ; flush(out_unit)
   CALL dealloc_SmolyakRep(SRep)
 
   IF (present(nb0)) THEN
@@ -155,17 +155,17 @@ SUBROUTINE alloc_SmolyakRep_only(SRep,nb_SG,delta,grid,nb0)
     SRep%grid = .FALSE.
   END IF
 
-  !write(out_unitp,*) 'Alloc Smolyak Rep' ; flush(out_unitp)
+  !write(out_unit,*) 'Alloc Smolyak Rep' ; flush(out_unit)
 
   allocate(SRep%SmolyakRep( nb_SG ))
 
-  !write(out_unitp,*) 'Size Smolyak Rep:',nb_B ; flush(out_unitp)
+  !write(out_unit,*) 'Size Smolyak Rep:',nb_B ; flush(out_unit)
 
 END SUBROUTINE alloc_SmolyakRep_only
 !=======================================================================================
 
 SUBROUTINE alloc_SmolyakRep(SRep,tab_ind,tab_ba,delta,grid,nb0)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -179,7 +179,7 @@ integer               :: iG,nb_B
 integer, allocatable  :: tab_n(:)
 
 
-!write(out_unitp,*) 'in alloc_SmolyakRep, shape tab_ind',shape(tab_ind) ; flush(out_unitp)
+!write(out_unit,*) 'in alloc_SmolyakRep, shape tab_ind',shape(tab_ind) ; flush(out_unit)
 CALL dealloc_SmolyakRep(SRep)
 
 IF (present(nb0)) THEN
@@ -201,7 +201,7 @@ ELSE
   SRep%grid = .FALSE.
 END IF
 
-!write(out_unitp,*) 'Alloc Smolyak Rep' ; flush(out_unitp)
+!write(out_unit,*) 'Alloc Smolyak Rep' ; flush(out_unit)
 
 allocate(SRep%SmolyakRep( size(tab_ind(1,:)) ))
 CALL alloc_NParray(tab_n,shape(tab_ind(:,1)),'tab_n','alloc_SmolyakRep')
@@ -213,18 +213,18 @@ DO iG=1,size(tab_ind(1,:))
   ELSE
     tab_n = getbis_tab_nb(tab_ind(:,iG),tab_ba)
   END IF
-  !write(out_unitp,*) iG,'tab_n',tab_n ; flush(out_unitp)
+  !write(out_unit,*) iG,'tab_n',tab_n ; flush(out_unit)
   CALL alloc_TypeRVec(SRep%SmolyakRep(iG),nvec=product(tab_n)*SRep%nb0)
 END DO
 
 IF (allocated(tab_n)) CALL dealloc_NParray(tab_n,'tab_n','alloc_SmolyakRep')
 
 nb_B = Size_SmolyakRep(SRep)
-!write(out_unitp,*) 'Size Smolyak Rep:',nb_B ; flush(out_unitp)
+!write(out_unit,*) 'Size Smolyak Rep:',nb_B ; flush(out_unit)
 
 END SUBROUTINE alloc_SmolyakRep
 SUBROUTINE alloc2_SmolyakRep(SRep,nDind_SmolyakRep,tab_ba,delta,grid,nb0)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -259,7 +259,7 @@ ELSE
   SRep%grid = .FALSE.
 END IF
 
-!write(out_unitp,*) 'Alloc Smolyak Rep'
+!write(out_unit,*) 'Alloc Smolyak Rep'
 
 allocate(SRep%SmolyakRep(nDind_SmolyakRep%Max_nDI))
 CALL alloc_NParray(tab_n,[nDind_SmolyakRep%ndim],'tab_n','alloc2_SmolyakRep')
@@ -298,12 +298,12 @@ END IF
 CALL dealloc_NParray(tab_n,'tab_n','alloc2_SmolyakRep')
 
 !nb_B = Size_SmolyakRep(SRep)
-!write(out_unitp,*) 'Size Smolyak Rep:',nb_B
+!write(out_unit,*) 'Size Smolyak Rep:',nb_B
 
 END SUBROUTINE alloc2_SmolyakRep
 
 SUBROUTINE alloc_SmolyakRepC(SRep,tab_ind,tab_ba,delta,grid,nb0)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -317,7 +317,7 @@ integer               :: iG,nb_B
 integer, allocatable  :: tab_n(:)
 
 
-!write(out_unitp,*) 'in alloc_SmolyakRep, shape tab_ind',shape(tab_ind)
+!write(out_unit,*) 'in alloc_SmolyakRep, shape tab_ind',shape(tab_ind)
 CALL dealloc_SmolyakRepC(SRep)
 
 IF (present(nb0)) THEN
@@ -339,7 +339,7 @@ ELSE
   SRep%grid = .FALSE.
 END IF
 
-!write(out_unitp,*) 'Alloc Smolyak Rep'
+!write(out_unit,*) 'Alloc Smolyak Rep'
 
 allocate(SRep%SmolyakRep( size(tab_ind(1,:)) ))
 CALL alloc_NParray(tab_n,shape(tab_ind(:,1)),'tab_n','alloc_SmolyakRepC')
@@ -351,18 +351,18 @@ DO iG=1,size(tab_ind(1,:))
   ELSE
     tab_n = getbis_tab_nb(tab_ind(:,iG),tab_ba)
   END IF
-  !write(out_unitp,*) iG,'tab_n',tab_n
+  !write(out_unit,*) iG,'tab_n',tab_n
   CALL alloc_TypeCVec(SRep%SmolyakRep(iG),nvec=product(tab_n)*SRep%nb0)
 END DO
 
 IF (allocated(tab_n)) CALL dealloc_NParray(tab_n,'tab_n','alloc_SmolyakRepC')
 
 !nb_B = Size_SmolyakRep(SRep)
-!write(out_unitp,*) 'Size Smolyak Rep:',nb_B
+!write(out_unit,*) 'Size Smolyak Rep:',nb_B
 
 END SUBROUTINE alloc_SmolyakRepC
 SUBROUTINE alloc2_SmolyakRepC(SRep,nDind_SmolyakRep,tab_ba,delta,grid,nb0)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -397,7 +397,7 @@ ELSE
   SRep%grid = .FALSE.
 END IF
 
-!write(out_unitp,*) 'Alloc Smolyak Rep'
+!write(out_unit,*) 'Alloc Smolyak Rep'
 
 allocate(SRep%SmolyakRep(nDind_SmolyakRep%Max_nDI))
 CALL alloc_NParray(tab_n,[nDind_SmolyakRep%ndim],'tab_n','alloc2_SmolyakRepC')
@@ -436,12 +436,12 @@ END IF
 CALL dealloc_NParray(tab_n,'tab_n','alloc2_SmolyakRepC')
 
 !nb_B = Size_SmolyakRep(SRep)
-!write(out_unitp,*) 'Size Smolyak Rep:',nb_B
+!write(out_unit,*) 'Size Smolyak Rep:',nb_B
 
 END SUBROUTINE alloc2_SmolyakRepC
 
 SUBROUTINE dealloc_SmolyakRep(SRep)
-  USE mod_system
+  USE EVR_system_m
   USE mod_MPI_aux
   IMPLICIT NONE
 
@@ -458,7 +458,7 @@ SUBROUTINE dealloc_SmolyakRep(SRep)
     !   d1=iGs_MPI(1,MPI_id)
     !   d2=iGs_MPI(2,MPI_id)
     ! ENDIF
-    IF(openmpi) THEN
+    IF (openmpi) THEN
       IF(MPI_scheme==1) THEN
         d1=iGs_MPI(1,MPI_id)
         d2=iGs_MPI(2,MPI_id)
@@ -487,7 +487,7 @@ SUBROUTINE dealloc_SmolyakRep(SRep)
 END SUBROUTINE dealloc_SmolyakRep
 
 SUBROUTINE dealloc_SmolyakRepC(SRep)
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
 
   TYPE(Type_SmolyakRepC), intent(inout)     :: SRep
@@ -508,52 +508,52 @@ SUBROUTINE dealloc_SmolyakRepC(SRep)
 END SUBROUTINE dealloc_SmolyakRepC
 
 SUBROUTINE Write_SmolyakRep(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep), intent(in)     :: SRep
 
 integer               :: iG
 
-  write(out_unitp,*) 'Grid',SRep%Grid
-  write(out_unitp,*) 'Delta',SRep%Delta
-  write(out_unitp,*) 'nb0',SRep%nb0
-  write(out_unitp,*) 'alloc?',allocated(SRep%SmolyakRep)
+  write(out_unit,*) 'Grid',SRep%Grid
+  write(out_unit,*) 'Delta',SRep%Delta
+  write(out_unit,*) 'nb0',SRep%nb0
+  write(out_unit,*) 'alloc?',allocated(SRep%SmolyakRep)
 
 IF (allocated(SRep%SmolyakRep)) THEN
-  write(out_unitp,*) '======== Smolyak Rep ============================'
+  write(out_unit,*) '======== Smolyak Rep ============================'
   DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
-    write(out_unitp,*) iG,size(SRep%SmolyakRep(iG)%V),SRep%SmolyakRep(iG)%V
+    write(out_unit,*) iG,size(SRep%SmolyakRep(iG)%V),SRep%SmolyakRep(iG)%V
   END DO
 END IF
-flush(out_unitp)
+flush(out_unit)
 END SUBROUTINE Write_SmolyakRep
 
 SUBROUTINE Write_SmolyakRepC(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRepC), intent(in)     :: SRep
 
 integer               :: iG
 
-  write(out_unitp,*) 'Grid',SRep%Grid
-  write(out_unitp,*) 'Delta',SRep%Delta
-  write(out_unitp,*) 'nb0',SRep%nb0
-  write(out_unitp,*) 'alloc?',allocated(SRep%SmolyakRep)
+  write(out_unit,*) 'Grid',SRep%Grid
+  write(out_unit,*) 'Delta',SRep%Delta
+  write(out_unit,*) 'nb0',SRep%nb0
+  write(out_unit,*) 'alloc?',allocated(SRep%SmolyakRep)
 
 IF (allocated(SRep%SmolyakRep)) THEN
-  write(out_unitp,*) '======== Smolyak Rep ============================'
+  write(out_unit,*) '======== Smolyak Rep ============================'
   DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
-    write(out_unitp,*) iG,size(SRep%SmolyakRep(iG)%V),SRep%SmolyakRep(iG)%V
+    write(out_unit,*) iG,size(SRep%SmolyakRep(iG)%V),SRep%SmolyakRep(iG)%V
   END DO
 END IF
-flush(out_unitp)
+flush(out_unit)
 END SUBROUTINE Write_SmolyakRepC
 
 
 FUNCTION Size_SmolyakRep(SRep) RESULT(nb_BG)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep), intent(in)     :: SRep
@@ -571,7 +571,7 @@ END IF
 
 END FUNCTION Size_SmolyakRep
 FUNCTION MaxVal_SmolyakRep(SRep) RESULT(maxSRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep), intent(in)     :: SRep
@@ -589,7 +589,7 @@ END IF
 END FUNCTION MaxVal_SmolyakRep
 
 FUNCTION Size_SmolyakRepC(SRep) RESULT(nb_BG)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRepC), intent(in)    :: SRep
@@ -607,7 +607,7 @@ END IF
 
 END FUNCTION Size_SmolyakRepC
 FUNCTION MaxVal_SmolyakRepC(SRep) RESULT(maxSRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRepC), intent(in)    :: SRep
@@ -628,7 +628,7 @@ END FUNCTION MaxVal_SmolyakRepC
 ! mapping table
 !---------------------------------------------------------------------------------------
 SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis_set_alloc
   USE mod_param_SGType2
   USE mod_nDindex
@@ -671,25 +671,25 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
   logical, parameter :: debug=.FALSE.
   character (len=*), parameter :: name_sub='Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis'
 
-  write(out_unitp,*) 'BEGINNING ',name_sub
+  write(out_unit,*) 'BEGINNING ',name_sub
   IF (debug) THEN
-    write(out_unitp,*) 'Write nDindB'
+    write(out_unit,*) 'Write nDindB'
     !CALL write_nDindex(basis_SG%nDindB)
   !  IF (associated(basis_SG%nDindB%Tab_i_TO_l)) THEN
-  !    write(out_unitp,*) 'tab_i_TO_l'
+  !    write(out_unit,*) 'tab_i_TO_l'
   !    DO id=1,basis_SG%nDindB%ndim
   !      CALL Write_IntVec(basis_SG%nDindB%tab_i_TO_l(id))
   !    END DO
   !  END IF
-    write(out_unitp,*) 'END Write nDindB'
-    flush(out_unitp)
+    write(out_unit,*) 'END Write nDindB'
+    flush(out_unit)
   END IF
 
   CALL SYSTEM_CLOCK(COUNT_RATE=nb_ticks_sec, COUNT_MAX=nb_ticks_max)
   CALL SYSTEM_CLOCK(COUNT=nb_ticks_initial)
 
   ! Initialisations
-  IF (debug) write(out_unitp,*) '---------------------------------------------------------------'
+  IF (debug) write(out_unit,*) '---------------------------------------------------------------'
   MaxnD_with_id_and_L(:,:) = 0
 
   max_NBB = basis_SG%nDindB%Max_nDI
@@ -697,9 +697,9 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
 
   DO id=1,basis_SG%nDindB%ndim
     IF (debug) THEN
-      write(out_unitp,*) '------------------------------------ id',id
-      write(out_unitp,*) 'id,tab_i_TO_l',id,':',basis_SG%nDindB%tab_i_TO_l(id)%vec
-      flush(out_unitp)
+      write(out_unit,*) '------------------------------------ id',id
+      write(out_unit,*) 'id,tab_i_TO_l',id,':',basis_SG%nDindB%tab_i_TO_l(id)%vec
+      flush(out_unit)
     END IF
     ib    = 1
     iVal  = 1
@@ -725,12 +725,12 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
   END DO
 
   IF (debug) THEN
-    write(out_unitp,*) '---------------------------------------------------------------'
+    write(out_unit,*) '---------------------------------------------------------------'
     DO l=0,basis_SG%nDindB%Lmax
-      write(out_unitp,*) ' MaxnD_with_id_and_l',l,':',MaxnD_with_id_and_L(:,l)
+      write(out_unit,*) ' MaxnD_with_id_and_l',l,':',MaxnD_with_id_and_L(:,l)
     END DO
-    write(out_unitp,*) '---------------------------------------------------------------'
-    flush(out_unitp)
+    write(out_unit,*) '---------------------------------------------------------------'
+    flush(out_unit)
   END IF
 
   IF (allocated(basis_SG%para_SGType2%tab_iB_OF_SRep_TO_iB)) THEN
@@ -742,13 +742,13 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
   lMax_Srep = sum(int(basis_SG%para_SGType2%tab_nb_OF_SRep(:),kind=ILkind))
   Max_Srep  = sum(basis_SG%para_SGType2%tab_nb_OF_SRep(:))
 
-  write(out_unitp,*) 'nb of terms (grids)',size(basis_SG%para_SGType2%tab_nb_OF_SRep)
-  write(out_unitp,*) 'nb_ba',basis_SG%nDindB%Max_nDI
-  write(out_unitp,*) 'lMax_Srep',lMax_Srep
-  write(out_unitp,*) 'Max_Srep',Max_Srep
+  write(out_unit,*) 'nb of terms (grids)',size(basis_SG%para_SGType2%tab_nb_OF_SRep)
+  write(out_unit,*) 'nb_ba',basis_SG%nDindB%Max_nDI
+  write(out_unit,*) 'lMax_Srep',lMax_Srep
+  write(out_unit,*) 'Max_Srep',Max_Srep
 
   IF (lMax_Srep /= int(Max_Srep,kind=ILkind)) STOP 'ERROR Max_Srep is too large!!'
-  flush(out_unitp)
+  flush(out_unit)
 
   IF(openmpi) THEN
     CALL Set_scheme_MPI(basis_SG,lMax_Srep)
@@ -780,15 +780,15 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
   !nb_thread = 1
 
   IF(.NOT. debug) THEN
-    write(out_unitp,'(a)')              'Tab(:) (%): [--0-10-20-30-40-50-60-70-80-90-100]'
-    write(out_unitp,'(a)',ADVANCE='no') 'Tab(:) (%): ['
-    flush(out_unitp)
+    write(out_unit,'(a)')              'Tab(:) (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+    write(out_unit,'(a)',ADVANCE='no') 'Tab(:) (%): ['
+    flush(out_unit)
   END IF
 
   !$OMP parallel                                                &
   !$OMP default(none)                                           &
   !$OMP shared(basis_SG,nb_thread,Tab_inD_nDindB)               &
-  !$OMP shared(out_unitp,MaxnD_with_id_and_L)                   &
+  !$OMP shared(out_unit,MaxnD_with_id_and_L)                   &
   !$OMP shared(iGs_MPI,MPI_id,MPI_scheme)                       &
   !$OMP shared(MPI_np,n_level2,openmpi)                         &
   !$OMP private(iG,tab_l,ith,tab_nb,tab_ib,nDI,iBDP,iBSRep)     &
@@ -818,15 +818,15 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
 !  DO iG=basis_SG%para_SGType2%iG_th(ith+1),basis_SG%para_SGType2%fG_th(ith+1)
 
     IF (debug) THEN
-      write(out_unitp,*) '============================== iG,nb_G',iG,size(basis_SG%para_SGType2%tab_nb_OF_SRep)
-      write(out_unitp,*) '======================= size(DPB)',basis_SG%para_SGType2%tab_nb_OF_SRep(iG)
-      flush(out_unitp)
+      write(out_unit,*) '============================== iG,nb_G',iG,size(basis_SG%para_SGType2%tab_nb_OF_SRep)
+      write(out_unit,*) '======================= size(DPB)',basis_SG%para_SGType2%tab_nb_OF_SRep(iG)
+      flush(out_unit)
     END IF
 
   !  IF (max(1,size(basis_SG%para_SGType2%tab_nb_OF_SRep)/100) == 0 .OR. &
   !      size(basis_SG%para_SGType2%tab_nb_OF_SRep) < 100) THEN
-  !    IF(MPI_id==0) write(out_unitp,*) 'iG,nb_G',iG,size(basis_SG%para_SGType2%tab_nb_OF_SRep)
-  !    flush(out_unitp)
+  !    IF(MPI_id==0) write(out_unit,*) 'iG,nb_G',iG,size(basis_SG%para_SGType2%tab_nb_OF_SRep)
+  !    flush(out_unit)
   !  END IF
 
     CALL ADD_ONE_TO_nDindex(basis_SG%para_SGType2%nDind_SmolyakRep,tab_l,iG=iG)
@@ -850,8 +850,8 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
       LL = calc_L_OF_nDval(tab_ib,basis_SG%nDindB)
 
       IF (debug) THEN
-        write(out_unitp,*) 'iG,iBDP,',iG,iBDP,'tab',tab_ib,'LL',LL
-        flush(out_unitp)
+        write(out_unit,*) 'iG,iBDP,',iG,iBDP,'tab',tab_ib,'LL',LL
+        flush(out_unit)
       END IF
       IF (LL > basis_SG%nDindB%Lmax) CYCLE
 
@@ -873,21 +873,21 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
 
       IF (err_sub == 0) THEN
         IF (debug) THEN
-          write(out_unitp,*) '     nDI',nDI,nDI,'tab',tab_ib(:)
-          flush(out_unitp)
+          write(out_unit,*) '     nDI',nDI,nDI,'tab',tab_ib(:)
+          flush(out_unit)
         END IF
         IF (allocated(basis_SG%nDindB%Tab_nDval)) THEN
         IF ( .NOT. all(tab_ib == basis_SG%nDindB%Tab_nDval(:,nDI)) ) THEN
-           write(out_unitp,*) 'ERROR in ',name_sub
-           write(out_unitp,*) 'The Tab_ib(:) from both representation are different!'
-           write(out_unitp,*) 'Tab_ib from Smolyak Rep',tab_ib
-           write(out_unitp,*) 'Tab_ib from nDindB     ',basis_SG%nDindB%Tab_nDval(:,nDI)
+           write(out_unit,*) 'ERROR in ',name_sub
+           write(out_unit,*) 'The Tab_ib(:) from both representation are different!'
+           write(out_unit,*) 'Tab_ib from Smolyak Rep',tab_ib
+           write(out_unit,*) 'Tab_ib from nDindB     ',basis_SG%nDindB%Tab_nDval(:,nDI)
            STOP
         END IF
         END IF
       END IF
 
-      !write(out_unitp,*) 'nDI,Max_nDI', nDI,basis_SG%nDindB%Max_nDI ; flush(out_unitp)
+      !write(out_unit,*) 'nDI,Max_nDI', nDI,basis_SG%nDindB%Max_nDI ; flush(out_unit)
 
       IF (nDI > 0 .AND. nDI <= basis_SG%nDindB%Max_nDI) THEN
         basis_SG%para_SGType2%tab_iB_OF_SRep_TO_iB(iBSRep) = nDI
@@ -897,8 +897,8 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
     END DO
 
     IF (mod(iG,max(1,int(basis_SG%nb_SG/10))) == 0 .AND. .NOT. debug) THEN
-      write(out_unitp,'(a)',ADVANCE='no') '---'
-      flush(out_unitp)
+      write(out_unit,'(a)',ADVANCE='no') '---'
+      flush(out_unit)
     END IF
 
   END DO
@@ -910,51 +910,51 @@ SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis(basis_SG)
   IF(openmpi) CALL Mapping_table_MPI(basis_SG,Max_Srep)
 
   IF (.NOT. debug) THEN
-    write(out_unitp,'(a)',ADVANCE='yes') '----]'
-    flush(out_unitp)
+    write(out_unit,'(a)',ADVANCE='yes') '----]'
+    flush(out_unit)
   END IF
 
   IF(MPI_id==0) THEN
-    write(out_unitp,*) 'count 0',count(basis_SG%para_SGType2%tab_iB_OF_SRep_TO_iB == 0)
+    write(out_unit,*) 'count 0',count(basis_SG%para_SGType2%tab_iB_OF_SRep_TO_iB == 0)
     IF (count(basis_SG%para_SGType2%tab_iB_OF_SRep_TO_iB == 0) > 0) THEN
-      write(out_unitp,*) 'WARNING in ',name_sub
-      write(out_unitp,*) 'The Smolyak Basis has more basis function than the nD-Basis'
-      write(out_unitp,*) ' Probably LB < LG'
+      write(out_unit,*) 'WARNING in ',name_sub
+      write(out_unit,*) 'The Smolyak Basis has more basis function than the nD-Basis'
+      write(out_unit,*) ' Probably LB < LG'
     END IF
   ENDIF
 
   IF (count(Tab_inD_nDindB == 0) > 0 .AND. MPI_np<2) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) ' Propblem with the mapping!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) ' Propblem with the mapping!'
     DO nDI=1,basis_SG%nDindB%Max_nDI
-      write(out_unitp,*) nDI,'Tab_ib from nDindB     ',basis_SG%nDindB%Tab_nDval(:,nDI),':',Tab_inD_nDindB(nDI)
+      write(out_unit,*) nDI,'Tab_ib from nDindB     ',basis_SG%nDindB%Tab_nDval(:,nDI),':',Tab_inD_nDindB(nDI)
     END DO
     STOP
   END IF
 
   IF (debug) THEN
-    write(out_unitp,*) ' Mapping nDindB%Tab_nDval'
+    write(out_unit,*) ' Mapping nDindB%Tab_nDval'
     DO nDI=1,basis_SG%nDindB%Max_nDI
-      write(out_unitp,*) nDI,'Tab_inD_nDindB',Tab_inD_nDindB(nDI)
+      write(out_unit,*) nDI,'Tab_inD_nDindB',Tab_inD_nDindB(nDI)
     END DO
-    write(out_unitp,*) ' Mapping tab_iB_OF_SRep_TO_iB'
+    write(out_unit,*) ' Mapping tab_iB_OF_SRep_TO_iB'
     DO iBSRep=1,size(basis_SG%para_SGType2%tab_iB_OF_SRep_TO_iB)
-     write(out_unitp,*) iBSRep,'tab_iB_OF_SRep_TO_iB',basis_SG%para_SGType2%tab_iB_OF_SRep_TO_iB(iBSRep)
+     write(out_unit,*) iBSRep,'tab_iB_OF_SRep_TO_iB',basis_SG%para_SGType2%tab_iB_OF_SRep_TO_iB(iBSRep)
    END DO
   END IF
 
   CALL SYSTEM_CLOCK(COUNT=nb_ticks_final)
   nb_ticks = nb_ticks_final - nb_ticks_initial
   IF (nb_ticks_final < nb_ticks_initial) nb_ticks = nb_ticks + nb_ticks_max
-  write(out_unitp,*) 'real time:',REAL(nb_ticks) / real(nb_ticks_sec,kind=Rkind)
+  write(out_unit,*) 'real time:',REAL(nb_ticks) / real(nb_ticks_sec,kind=Rkind)
 
-  write(out_unitp,*) 'END ',name_sub
-  flush(out_unitp)
+  write(out_unit,*) 'END ',name_sub
+  flush(out_unit)
 
 END SUBROUTINE Set_tables_FOR_SmolyakRepBasis_TO_tabPackedBasis
 
 SUBROUTINE SmolyakRepBasis_TO_tabPackedBasis(SRep,tabR,tab_ba,nDindB,SGType2,WeightSG)
-USE mod_system
+USE EVR_system_m
 USE mod_param_SGType2
 USE mod_nDindex
 USE mod_MPI_aux
@@ -971,12 +971,12 @@ integer :: iBSRep,iG,iB,nb_BG,nR,itabR,nDI
 integer :: ib0,nb_AT_iG,iB_ib0,nDI_ib0
 integer :: d1,d2
 
-!write(out_unitp,*) 'SmolyakRepBasis_TO_tabPackedBasis'
+!write(out_unit,*) 'SmolyakRepBasis_TO_tabPackedBasis'
 !CALL write_SmolyakRep(SRep)
-flush(out_unitp)
+flush(out_unit)
 
 IF (size(tabR) == 0) STOP ' ERROR in SmolyakRepBasis_TO_tabPackedBasis. size(tabR)=0'
-!write(out_unitp,*) 'nb_size',Size_SmolyakRep(SRep) ; flush(out_unitp)
+!write(out_unit,*) 'nb_size',Size_SmolyakRep(SRep) ; flush(out_unit)
 
 tabR(:) = ZERO
 
@@ -1026,8 +1026,8 @@ DO ib0=1,SRep%nb0
   END DO
 END DO
 
-!write(out_unitp,*) 'tabR',tabR
-!write(out_unitp,*) 'END SmolyakRepBasis_TO_tabPackedBasis'
+!write(out_unit,*) 'tabR',tabR
+!write(out_unit,*) 'END SmolyakRepBasis_TO_tabPackedBasis'
 
 
 END SUBROUTINE SmolyakRepBasis_TO_tabPackedBasis
@@ -1035,7 +1035,7 @@ END SUBROUTINE SmolyakRepBasis_TO_tabPackedBasis
 ! warning, for MPI scheme 1, the "SRep" are MPI calculated on different processor
 ! thus not shared by all processor. Be careful with this.
 SUBROUTINE tabPackedBasis_TO_SmolyakRepBasis(SRep,tabR,tab_ba,nDindB,SGType2)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 USE mod_param_SGType2
 USE mod_nDindex
@@ -1052,11 +1052,11 @@ integer :: iBSRep,iG,iB,nb_BG,nR,itabR,nDI
 integer :: ib0,nb_AT_iG,iB_ib0,nDI_ib0
 integer :: d1,d2
 
-!write(out_unitp,*) 'BEGINNING tabPackedBasis_TO_SmolyakRepBasis' ; flush(out_unitp)
+!write(out_unit,*) 'BEGINNING tabPackedBasis_TO_SmolyakRepBasis' ; flush(out_unit)
 
 CALL alloc2_SmolyakRep(SRep,SGType2%nDind_SmolyakRep,tab_ba,grid=.FALSE.,nb0=SGType2%nb0)
 SRep = ZERO
-!write(out_unitp,*) 'nb_size',Size_SmolyakRep(SRep)
+!write(out_unit,*) 'nb_size',Size_SmolyakRep(SRep)
 
 d1=lbound(SRep%SmolyakRep,dim=1)
 d2=ubound(SRep%SmolyakRep,dim=1)
@@ -1093,7 +1093,7 @@ DO ib0=1,SRep%nb0
 
       nDI_ib0 = SGType2%tab_iB_OF_SRep_TO_iB(iBSRep)
 
-      !write(out_unitp,*) 'iG,iB,nDI',iG,iB,nDI ; flush(out_unitp)
+      !write(out_unit,*) 'iG,iB,nDI',iG,iB,nDI ; flush(out_unit)
       IF (nDI_ib0 > 0 .AND. nDI_ib0 <= nDindB%Max_nDI) THEN
 
         nDI = (ib0-1)*nDindB%Max_nDI + nDI_ib0
@@ -1105,12 +1105,12 @@ DO ib0=1,SRep%nb0
 
   END DO
 END DO
-!write(out_unitp,*) 'END tabPackedBasis_TO_SmolyakRepBasis' ; flush(out_unitp)
+!write(out_unit,*) 'END tabPackedBasis_TO_SmolyakRepBasis' ; flush(out_unit)
 
 
 END SUBROUTINE tabPackedBasis_TO_SmolyakRepBasis
 SUBROUTINE tabPackedBasis_TO2_tabR_AT_iG(tabR_iG,tabR,iG,tab_l,tab_ba,SGType2)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 USE mod_param_SGType2
 USE mod_nDindex
@@ -1159,7 +1159,7 @@ DO ib0=1,SGType2%nb0
 
     iBSRep     = iBSRep + 1
     nDI_ib0    = SGType2%tab_iB_OF_SRep_TO_iB(iBSRep)
-    !write(out_unitp,*) 'iG,iB,nDI',iG,iB,nDI ; flush(out_unitp)
+    !write(out_unit,*) 'iG,iB,nDI',iG,iB,nDI ; flush(out_unit)
     IF (nDI_ib0 > 0 .AND. nDI_ib0 <= Max_nDI_ib0) THEN
       nDI = (ib0-1)*Max_nDI_ib0                + nDI_ib0
       iB  = (ib0-1)*SGType2%tab_nb_OF_SRep(iG) + iB_ib0
@@ -1179,7 +1179,7 @@ END SUBROUTINE tabPackedBasis_TO2_tabR_AT_iG
 !> tabR_iG is assigned in the subroutine according to iG using the informtation in tabR
 !=======================================================================================
 SUBROUTINE tabPackedBasis_TO_tabR_AT_iG(tabR_iG,tabR,iG,SGType2)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 USE mod_param_SGType2
 USE mod_nDindex
@@ -1201,12 +1201,12 @@ integer :: ib0,nb_AT_iG,iB_ib0,nDI_ib0,Max_nDI_ib0
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'tabR',tabR(:)
-        write(out_unitp,*) 'nb0',SGType2%nb0
-        write(out_unitp,*) 'iG',iG
-        write(out_unitp,*) 'nb at iG',SGType2%tab_nb_OF_SRep(iG)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'tabR',tabR(:)
+        write(out_unit,*) 'nb0',SGType2%nb0
+        write(out_unit,*) 'iG',iG
+        write(out_unit,*) 'nb at iG',SGType2%tab_nb_OF_SRep(iG)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -1220,7 +1220,7 @@ CALL alloc_NParray(tabR_iG,[SGType2%tab_nb_OF_SRep(iG)*SGType2%nb0],&
 
 tabR_iG(:)  = ZERO
 Max_nDI_ib0 = size(tabR)/SGType2%nb0
-!write(out_unitp,*) 'iG,nb0,nb,Max_nDI_ib0',iG,SGType2%nb0,SGType2%tab_nb_OF_SRep(iG),Max_nDI_ib0 ; flush(out_unitp)
+!write(out_unit,*) 'iG,nb0,nb,Max_nDI_ib0',iG,SGType2%nb0,SGType2%tab_nb_OF_SRep(iG),Max_nDI_ib0 ; flush(out_unit)
 
 DO ib0=1,SGType2%nb0
   iBSRep = SGType2%tab_Sum_nb_OF_SRep(iG)-SGType2%tab_nb_OF_SRep(iG)
@@ -1228,13 +1228,13 @@ DO ib0=1,SGType2%nb0
   DO iB_ib0=1,SGType2%tab_nb_OF_SRep(iG)
     iBSRep  = iBSRep + 1
     nDI_ib0 = SGType2%tab_iB_OF_SRep_TO_iB(iBSRep)
-    !write(out_unitp,*) 'ib0,iB_ib0',ib0,iB_ib0 ; flush(out_unitp)
-    !write(out_unitp,*) 'iBSRep,nDI_ib0',iBSRep,nDI_ib0 ; flush(out_unitp)
+    !write(out_unit,*) 'ib0,iB_ib0',ib0,iB_ib0 ; flush(out_unit)
+    !write(out_unit,*) 'iBSRep,nDI_ib0',iBSRep,nDI_ib0 ; flush(out_unit)
 
     IF (nDI_ib0 > 0 .AND. nDI_ib0 <= Max_nDI_ib0 ) THEN
       nDI = (ib0-1)*Max_nDI_ib0                + nDI_ib0
       iB  = (ib0-1)*SGType2%tab_nb_OF_SRep(iG) + iB_ib0
-      !write(out_unitp,*) 'iB,nDI',iB,nDI ; flush(out_unitp)
+      !write(out_unit,*) 'iB,nDI',iB,nDI ; flush(out_unit)
 
       tabR_iG(iB) = tabR(nDI)
     END IF
@@ -1243,9 +1243,9 @@ DO ib0=1,SGType2%nb0
 END DO
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'tabR_iG: ',tabR_iG(:)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'tabR_iG: ',tabR_iG(:)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 END SUBROUTINE tabPackedBasis_TO_tabR_AT_iG
@@ -1253,7 +1253,7 @@ END SUBROUTINE tabPackedBasis_TO_tabR_AT_iG
 
 !=======================================================================================
 SUBROUTINE tabR_AT_iG_TO_tabPackedBasis(tabR,tabR_iG,iG,SGType2,WeightiG)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 USE mod_param_SGType2
 USE mod_nDindex
@@ -1281,7 +1281,7 @@ DO ib0=1,SGType2%nb0
   DO iB_ib0=1,SGType2%tab_nb_OF_SRep(iG)
     iBSRep = iBSRep + 1
     nDI_ib0    = SGType2%tab_iB_OF_SRep_TO_iB(iBSRep)
-    !write(out_unitp,*) 'iG,iB,nDI',iG,iB,nDI ; flush(out_unitp)
+    !write(out_unit,*) 'iG,iB,nDI',iG,iB,nDI ; flush(out_unit)
     IF (nDI_ib0 > 0 .AND. nDI_ib0 <= Max_nDI_ib0 ) THEN
       nDI = (ib0-1)*Max_nDI_ib0                + nDI_ib0
       iB  = (ib0-1)*SGType2%tab_nb_OF_SRep(iG) + iB_ib0
@@ -1295,7 +1295,7 @@ END SUBROUTINE tabR_AT_iG_TO_tabPackedBasis
 !=======================================================================================
 
 SUBROUTINE SmolyakRep2_TO_tabR1(tabR1,SRep2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 real(kind=Rkind), allocatable,   intent(inout)  :: tabR1(:)
@@ -1339,7 +1339,7 @@ END IF
 
 END SUBROUTINE SmolyakRep2_TO_tabR1
 SUBROUTINE SmolyakRep2_TO_tabR1bis(tabR1,SRep2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 real(kind=Rkind),                intent(inout)  :: tabR1(:)
@@ -1354,8 +1354,8 @@ integer               :: ib0,nb,nb_AT_iG
 
 nb_BG = Size_SmolyakRep(SRep2)
 IF (nb_BG /= size(tabR1)) THEN
-  write(out_unitp,*) ' ERROR in SmolyakRep2_TO_tabR1bis'
-  write(out_unitp,*) ' size of tabR1 and SRep2 are different',size(tabR1),nb_BG
+  write(out_unit,*) ' ERROR in SmolyakRep2_TO_tabR1bis'
+  write(out_unit,*) ' size of tabR1 and SRep2 are different',size(tabR1),nb_BG
   STOP
 END IF
 
@@ -1384,7 +1384,7 @@ END IF
 
 END SUBROUTINE SmolyakRep2_TO_tabR1bis
 SUBROUTINE SmolyakRepC2_TO_tabC1bis(tabC1,SRep2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 complex(kind=Rkind),              intent(inout)  :: tabC1(:)
@@ -1394,8 +1394,8 @@ integer               :: iG,nb_BG,nR,itabR
 
 nb_BG = Size_SmolyakRepC(SRep2)
 IF (nb_BG /= size(tabC1)) THEN
-  write(out_unitp,*) ' ERROR in SmolyakRepC2_TO_tabC1bis'
-  write(out_unitp,*) ' size of tabR1 and SRep2 are different',size(tabC1),nb_BG
+  write(out_unit,*) ' ERROR in SmolyakRepC2_TO_tabC1bis'
+  write(out_unit,*) ' size of tabR1 and SRep2 are different',size(tabC1),nb_BG
   STOP
 END IF
 
@@ -1410,7 +1410,7 @@ END IF
 
 END SUBROUTINE SmolyakRepC2_TO_tabC1bis
 SUBROUTINE tabR2_TO_SmolyakRep1(SRep1,tabR2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 real(kind=Rkind),                intent(in)     :: tabR2(:)
@@ -1424,9 +1424,9 @@ integer               :: ib0,nb,nb_AT_iG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (size(tabR2) /= nb_BG) THEN
-  write(out_unitp,*) ' ERROR in tabR2_TO_SmolyakRep1'
-  write(out_unitp,*) ' sizes are different!!'
-  write(out_unitp,*) ' sizes of tabR2 and SRep1',size(tabR2),nb_BG
+  write(out_unit,*) ' ERROR in tabR2_TO_SmolyakRep1'
+  write(out_unit,*) ' sizes are different!!'
+  write(out_unit,*) ' sizes of tabR2 and SRep1',size(tabR2),nb_BG
   STOP
 END IF
 
@@ -1455,7 +1455,7 @@ END IF
 
 END SUBROUTINE tabR2_TO_SmolyakRep1
 SUBROUTINE tabR2bis_TO_SmolyakRep1(SRep1,tabR2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 real(kind=Rkind),                intent(in)     :: tabR2(:)
@@ -1469,9 +1469,9 @@ integer               :: ib0,nb,nb_AT_iG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (size(tabR2) /= nb_BG) THEN
-  write(out_unitp,*) ' ERROR in tabR2bis_TO_SmolyakRep1'
-  write(out_unitp,*) ' sizes are different!!'
-  write(out_unitp,*) ' sizes of tabR2 and SRep1',size(tabR2),nb_BG
+  write(out_unit,*) ' ERROR in tabR2bis_TO_SmolyakRep1'
+  write(out_unit,*) ' sizes are different!!'
+  write(out_unit,*) ' sizes of tabR2 and SRep1',size(tabR2),nb_BG
   STOP
 END IF
 
@@ -1500,7 +1500,7 @@ END IF
 
 END SUBROUTINE tabR2bis_TO_SmolyakRep1
 SUBROUTINE tabC2bis_TO_SmolyakRepC1(SRep1,tabC2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 complex(kind=Rkind),              intent(in)     :: tabC2(:)
@@ -1514,9 +1514,9 @@ integer               :: ib0,nb,nb_AT_iG
 
 nb_BG = Size_SmolyakRepC(SRep1)
 IF (size(tabC2) /= nb_BG) THEN
-  write(out_unitp,*) ' ERROR in tabC2bis_TO_SmolyakRepC1'
-  write(out_unitp,*) ' sizes are different!!'
-  write(out_unitp,*) ' sizes of tabR2 and SRep1',size(tabC2),nb_BG
+  write(out_unit,*) ' ERROR in tabC2bis_TO_SmolyakRepC1'
+  write(out_unit,*) ' sizes are different!!'
+  write(out_unit,*) ' sizes of tabR2 and SRep1',size(tabC2),nb_BG
   STOP
 END IF
 
@@ -1533,7 +1533,7 @@ END IF
 
 END SUBROUTINE tabC2bis_TO_SmolyakRepC1
 SUBROUTINE tabR2grid_TO_tabR1_AT_iG(tabR1,tabR2,iG,SGType2)
-USE mod_system
+USE EVR_system_m
 USE mod_param_SGType2
 IMPLICIT NONE
 
@@ -1567,7 +1567,7 @@ END SUBROUTINE tabR2grid_TO_tabR1_AT_iG
 ! tabR1: GridOp(:,j,i,iterm)
 !---------------------------------------------------------------------------------------
 SUBROUTINE tabR2gridbis_TO_tabR1_AT_iG(tabR1,tabR2,iG,SGType2)
-USE mod_system
+USE EVR_system_m
 USE mod_param_SGType2
 IMPLICIT NONE
 
@@ -1590,7 +1590,7 @@ END SUBROUTINE tabR2gridbis_TO_tabR1_AT_iG
 !=======================================================================================
 
 SUBROUTINE tabR1_AT_iG_TO_tabR2grid(tabR1,tabR2,iG,SGType2)
-USE mod_system
+USE EVR_system_m
 USE mod_param_SGType2
 IMPLICIT NONE
 
@@ -1621,7 +1621,7 @@ END IF
 END SUBROUTINE tabR1_AT_iG_TO_tabR2grid
 
 SUBROUTINE R2_TO_SmolyakRep1(SRep1,R2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 real(kind=Rkind),                intent(in)     :: R2
@@ -1643,7 +1643,7 @@ END IF
 END SUBROUTINE R2_TO_SmolyakRep1
 
 SUBROUTINE R2_TO_SmolyakRep1_with_tab_i(SRep1,R2,tab_i,tab_ind,tab_ba)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -1688,7 +1688,7 @@ END IF
 END SUBROUTINE R2_TO_SmolyakRep1_with_tab_i
 
 FUNCTION dot_product_SmolyakRep(SRep1,SRep2,WSRep) RESULT(R)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 real(kind=Rkind)  :: R
@@ -1700,8 +1700,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2) .AND. nb_BG /= size(WSRep)) THEN
-  write(out_unitp,*) 'ERROR in dot_product_SmolyakRep'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2),size(WSRep)
+  write(out_unit,*) 'ERROR in dot_product_SmolyakRep'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2),size(WSRep)
   STOP
 END IF
 
@@ -1717,7 +1717,7 @@ END IF
 END FUNCTION dot_product_SmolyakRep
 
 FUNCTION dot_product_SmolyakRep_Grid(SRep1,SRep2,SRep_w,WSRep,ib0) RESULT(R)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 real(kind=Rkind)  :: R
@@ -1729,16 +1729,16 @@ integer,                         intent(in), optional  :: ib0
 
 integer               :: iG,nb_BG,nq_AT_iG,i1,i2
 
-!write(out_unitp,*) 'dot_product_SmolyakRep_Grid: size',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2),Size_SmolyakRep(SRep_w)
-!write(out_unitp,*) 'nb DP terms',size(SRep1%SmolyakRep),size(SRep2%SmolyakRep),size(WSRep),size(WSRep)
+!write(out_unit,*) 'dot_product_SmolyakRep_Grid: size',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2),Size_SmolyakRep(SRep_w)
+!write(out_unit,*) 'nb DP terms',size(SRep1%SmolyakRep),size(SRep2%SmolyakRep),size(WSRep),size(WSRep)
 
-!flush(out_unitp)
+!flush(out_unit)
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2) .OR. size(SRep1%SmolyakRep) /= size(WSRep) .OR. size(SRep2%SmolyakRep) /= size(WSRep)) THEN
-  write(out_unitp,*) 'ERROR in dot_product_SmolyakRep'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
-  write(out_unitp,*) 'nb DP terms',size(SRep1%SmolyakRep),size(SRep2%SmolyakRep),size(WSRep)
+  write(out_unit,*) 'ERROR in dot_product_SmolyakRep'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
+  write(out_unit,*) 'nb DP terms',size(SRep1%SmolyakRep),size(SRep2%SmolyakRep),size(WSRep)
   STOP
 END IF
 
@@ -1764,7 +1764,7 @@ END IF
 END FUNCTION dot_product_SmolyakRep_Grid
 
 FUNCTION dot_product_SmolyakRep_Basis(SRep1,SRep2,WSRep,ib0) RESULT(R)
-USE mod_system
+USE EVR_system_m
 USE mod_MPI_aux
 IMPLICIT NONE
 
@@ -1779,14 +1779,14 @@ integer               :: d1,d2
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2) .OR. size(SRep1%SmolyakRep) /= size(WSRep) .OR. size(SRep2%SmolyakRep) /= size(WSRep)) THEN
-  write(out_unitp,*) 'ERROR in dot_product_SmolyakRep_Basis'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
-  write(out_unitp,*) 'nb DP terms are different',size(SRep1%SmolyakRep),size(SRep2%SmolyakRep),size(WSRep)
+  write(out_unit,*) 'ERROR in dot_product_SmolyakRep_Basis'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
+  write(out_unit,*) 'nb DP terms are different',size(SRep1%SmolyakRep),size(SRep2%SmolyakRep),size(WSRep)
   STOP
 END IF
 
-!write(out_unitp,*) 'dot_product_SmolyakRep_Basis: size',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2),size(WSRep)
-!flush(out_unitp)
+!write(out_unit,*) 'dot_product_SmolyakRep_Basis: size',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2),size(WSRep)
+!flush(out_unit)
 
 d1=lbound(SRep1%SmolyakRep,dim=1)
 d2=ubound(SRep1%SmolyakRep,dim=1)
@@ -1836,7 +1836,7 @@ ENDIF
 END FUNCTION dot_product_SmolyakRep_Basis
 
 SUBROUTINE SmolyakRep2_TO_SmolyakRep1(SRep1,SRep2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep),           intent(in)     :: SRep2
@@ -1863,7 +1863,7 @@ END IF
 
 END SUBROUTINE SmolyakRep2_TO_SmolyakRep1
 SUBROUTINE SmolyakRepC2_TO_SmolyakRepC1(SRep1,SRep2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRepC),           intent(in)     :: SRep2
@@ -1888,7 +1888,7 @@ END IF
 
 END SUBROUTINE SmolyakRepC2_TO_SmolyakRepC1
 FUNCTION SmolyakRep1_TIME_SmolyakRep2(SRep1,SRep2) RESULT(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep),           intent(in)     :: SRep1,SRep2
@@ -1899,8 +1899,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_TIME_SmolyakRep2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_TIME_SmolyakRep2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
   STOP
 END IF
 
@@ -1916,7 +1916,7 @@ END IF
 
 END FUNCTION SmolyakRep1_TIME_SmolyakRep2
 FUNCTION R1_TIME_SmolyakRep2(R1,SRep2) RESULT(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep),           intent(in)     :: SRep2
@@ -1940,7 +1940,7 @@ END IF
 
 END FUNCTION R1_TIME_SmolyakRep2
 FUNCTION SmolyakRep1_TIME_R2(SRep1,R2) RESULT(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep),           intent(in)     :: SRep1
@@ -1964,7 +1964,7 @@ END IF
 
 END FUNCTION SmolyakRep1_TIME_R2
 FUNCTION SmolyakRepC1_TIME_SmolyakRepC2(SRep1,SRep2) RESULT(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRepC),           intent(in)     :: SRep1,SRep2
@@ -1975,8 +1975,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRepC(SRep1)
 IF (nb_BG /= Size_SmolyakRepC(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_TIME_SmolyakRep2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRepC(SRep1),Size_SmolyakRepC(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_TIME_SmolyakRep2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRepC(SRep1),Size_SmolyakRepC(SRep2)
   STOP
 END IF
 
@@ -1992,7 +1992,7 @@ END IF
 
 END FUNCTION SmolyakRepC1_TIME_SmolyakRepC2
 FUNCTION SmolyakRep1_PLUS_SmolyakRep2(SRep1,SRep2) RESULT(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep),           intent(in)     :: SRep1,SRep2
@@ -2003,8 +2003,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_PLUS_SmolyakRep2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_PLUS_SmolyakRep2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
   STOP
 END IF
 
@@ -2020,7 +2020,7 @@ END IF
 
 END FUNCTION SmolyakRep1_PLUS_SmolyakRep2
 FUNCTION SmolyakRepC1_PLUS_SmolyakRepC2(SRep1,SRep2) RESULT(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRepC),           intent(in)     :: SRep1,SRep2
@@ -2031,8 +2031,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRepC(SRep1)
 IF (nb_BG /= Size_SmolyakRepC(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_PLUS_SmolyakRep2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRepC(SRep1),Size_SmolyakRepC(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_PLUS_SmolyakRep2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRepC(SRep1),Size_SmolyakRepC(SRep2)
   STOP
 END IF
 
@@ -2048,7 +2048,7 @@ END IF
 
 END FUNCTION SmolyakRepC1_PLUS_SmolyakRepC2
 FUNCTION SmolyakRep1_MINUS_SmolyakRep2(SRep1,SRep2) RESULT(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRep),           intent(in)     :: SRep1,SRep2
@@ -2059,8 +2059,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRep(SRep1)
 IF (nb_BG /= Size_SmolyakRep(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_MINUS_SmolyakRep2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_MINUS_SmolyakRep2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRep(SRep1),Size_SmolyakRep(SRep2)
   STOP
 END IF
 
@@ -2076,7 +2076,7 @@ END IF
 
 END FUNCTION SmolyakRep1_MINUS_SmolyakRep2
 FUNCTION SmolyakRepC1_MINUS_SmolyakRepC2(SRep1,SRep2) RESULT(SRep)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(Type_SmolyakRepC),           intent(in)     :: SRep1,SRep2
@@ -2087,8 +2087,8 @@ integer               :: iG,nb_BG
 
 nb_BG = Size_SmolyakRepC(SRep1)
 IF (nb_BG /= Size_SmolyakRepC(SRep2)) THEN
-  write(out_unitp,*) 'ERROR in SmolyakRep1_MINUS_SmolyakRep2'
-  write(out_unitp,*) 'sizes are different',Size_SmolyakRepC(SRep1),Size_SmolyakRepC(SRep2)
+  write(out_unit,*) 'ERROR in SmolyakRep1_MINUS_SmolyakRep2'
+  write(out_unit,*) 'sizes are different',Size_SmolyakRepC(SRep1),Size_SmolyakRepC(SRep2)
   STOP
 END IF
 
@@ -2104,7 +2104,7 @@ END IF
 
 END FUNCTION SmolyakRepC1_MINUS_SmolyakRepC2
 SUBROUTINE GSmolyakRep_TO_BSmolyakRep(SRep,tab_ind,tab_ba,nb0)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2156,7 +2156,7 @@ SRep%Grid = .FALSE.
 END SUBROUTINE GSmolyakRep_TO_BSmolyakRep
 
 SUBROUTINE GSmolyakRep_TO3_BSmolyakRep(SRep,SGType2,tab_ba)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2219,7 +2219,7 @@ SRep%Grid = .FALSE.
 END SUBROUTINE GSmolyakRep_TO3_BSmolyakRep
 
 SUBROUTINE BSmolyakRep_TO_GSmolyakRep(SRep,tab_ind,tab_ba,nb0)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2310,7 +2310,7 @@ SRep%Grid = .TRUE.
 END SUBROUTINE BSmolyakRep_TO_GSmolyakRep
 
 SUBROUTINE BSmolyakRep_TO3_GSmolyakRep(SRep,SGType2,tab_ba)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2388,7 +2388,7 @@ SRep%Grid = .TRUE.
 END SUBROUTINE BSmolyakRep_TO3_GSmolyakRep
 
 SUBROUTINE BDP_TO_GDP_OF_SmolyakRep(R,tab_ba,tab_l,tab_nq,tab_nb,nb0)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2411,14 +2411,14 @@ real(kind=Rkind), allocatable      :: RG(:,:),RB(:,:)
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'tab_l(:) ',tab_l(:)
-    write(out_unitp,*) 'tab_nb(:)',tab_nb(:)
-    write(out_unitp,*) 'tab_nq(:)',tab_nq(:)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'tab_l(:) ',tab_l(:)
+    write(out_unit,*) 'tab_nb(:)',tab_nb(:)
+    write(out_unit,*) 'tab_nq(:)',tab_nq(:)
 
-    IF (present(nb0)) write(out_unitp,*) 'nb0',nb0
-    write(out_unitp,*) 'size(R)',size(R)
-    flush(out_unitp)
+    IF (present(nb0)) write(out_unit,*) 'nb0',nb0
+    write(out_unit,*) 'size(R)',size(R)
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
  nb0_loc = 1
@@ -2483,14 +2483,14 @@ real(kind=Rkind), allocatable      :: RG(:,:),RB(:,:)
   CALL dealloc_NParray(RG,'RG',name_sub)
 
   IF (debug) THEN
-    write(out_unitp,*) 'size(R)',size(R)
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'size(R)',size(R)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 
 END SUBROUTINE BDP_TO_GDP_OF_SmolyakRep
 SUBROUTINE GDP_TO_BDP_OF_SmolyakRep(R,tab_ba,tab_l,tab_nq,tab_nb,nb0)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2568,7 +2568,7 @@ real(kind=Rkind), allocatable      :: RG(:,:),RB(:,:)
  END SUBROUTINE GDP_TO_BDP_OF_SmolyakRep
 
 SUBROUTINE DerivOp_TO3_GSmolyakRep(SRep,SGType2,tab_ba,tab_der)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2621,7 +2621,7 @@ IF (allocated(tab_nq)) deallocate(tab_nq)
 END SUBROUTINE DerivOp_TO3_GSmolyakRep
 
 SUBROUTINE DerivOp_TO3_GSmolyakRepC(SRep,SGType2,tab_ba,tab_der)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2699,9 +2699,9 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRep(R,tab_ba,tab_l,tab_nq,tab_der)
   !---------------------------------------------------------------------
 
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'R(:)',R(:)
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'R(:)',R(:)
+    flush(out_unit)
   END IF
 
   IF (present(tab_der)) THEN
@@ -2709,16 +2709,16 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRep(R,tab_ba,tab_l,tab_nq,tab_der)
   ELSE
     tab_der_loc(:) = 0
   END IF
-  IF (debug) write(out_unitp,*) 'tab_der_loc',tab_der_loc
+  IF (debug) write(out_unit,*) 'tab_der_loc',tab_der_loc
   WHERE (tab_der_loc < 0) tab_der_loc = 0
 
   nq = size(R)
 
   IF (nq < 1 .OR. any(tab_nq < 1) .OR. any(tab_l < 0)) THEN
-    write(out_unitp,*) ' Wrong arguments values'
-    write(out_unitp,*) ' nq size(R): ',nq
-    write(out_unitp,*) ' tab_l(:)  : ',tab_l
-    write(out_unitp,*) ' tab_nq(:) : ',tab_nq
+    write(out_unit,*) ' Wrong arguments values'
+    write(out_unit,*) ' nq size(R): ',nq
+    write(out_unit,*) ' tab_l(:)  : ',tab_l
+    write(out_unit,*) ' tab_nq(:) : ',tab_nq
     STOP 'ERROR in DerivOp_TO_RDP_OF_SmolaykRep'
   END IF
 
@@ -2775,8 +2775,8 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRep(R,tab_ba,tab_l,tab_nq,tab_der)
    END IF
 
   IF (debug) THEN
-    write(out_unitp,*) 'R(:)',R(:)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'R(:)',R(:)
+    write(out_unit,*) 'END ',name_sub
   END IF
 
 END SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRep
@@ -2806,9 +2806,9 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRepC(R,tab_ba,tab_l,tab_nq,tab_der)
   !---------------------------------------------------------------------
 
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'R(:)',R(:)
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'R(:)',R(:)
+    flush(out_unit)
   END IF
 
   IF (present(tab_der)) THEN
@@ -2816,16 +2816,16 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRepC(R,tab_ba,tab_l,tab_nq,tab_der)
   ELSE
     tab_der_loc(:) = 0
   END IF
-  IF (debug) write(out_unitp,*) 'tab_der_loc',tab_der_loc
+  IF (debug) write(out_unit,*) 'tab_der_loc',tab_der_loc
   WHERE (tab_der_loc < 0) tab_der_loc = 0
 
   nq = size(R)
 
   IF (nq < 1 .OR. any(tab_nq < 1) .OR. any(tab_l < 0)) THEN
-    write(out_unitp,*) ' Wrong arguments values'
-    write(out_unitp,*) ' nq size(R): ',nq
-    write(out_unitp,*) ' tab_l(:)  : ',tab_l
-    write(out_unitp,*) ' tab_nq(:) : ',tab_nq
+    write(out_unit,*) ' Wrong arguments values'
+    write(out_unit,*) ' nq size(R): ',nq
+    write(out_unit,*) ' tab_l(:)  : ',tab_l
+    write(out_unit,*) ' tab_nq(:) : ',tab_nq
     STOP 'ERROR in DerivOp_TO_RDP_OF_SmolaykRep'
   END IF
 
@@ -2882,14 +2882,14 @@ SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRepC(R,tab_ba,tab_l,tab_nq,tab_der)
    END IF
 
   IF (debug) THEN
-    write(out_unitp,*) 'R(:)',R(:)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'R(:)',R(:)
+    write(out_unit,*) 'END ',name_sub
   END IF
 
 END SUBROUTINE DerivOp_TO_RDP_OF_SmolaykRepC
 
 SUBROUTINE Set_weight_TO_SmolyakRep(SRep,tab_ind,tab_ba)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 
@@ -2958,7 +2958,7 @@ character (len=*), parameter :: name_sub='Set_weight_TO_SmolyakRep'
 END SUBROUTINE Set_weight_TO_SmolyakRep
 
 SUBROUTINE Get_weight_FROM_OneDP(wrho,iG,tab_ind,tab_ba)
-USE mod_system
+USE EVR_system_m
 USE mod_basis_set_alloc
 IMPLICIT NONE
 

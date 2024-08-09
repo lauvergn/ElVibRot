@@ -47,7 +47,7 @@
 !===========================================================================
     PROGRAM ElVibRot
       USE, intrinsic :: ISO_FORTRAN_ENV, ONLY : INPUT_UNIT
-      USE mod_system
+      USE EVR_system_m
 !$    USE omp_lib, only : omp_get_max_threads
       USE mod_nDGridFit
       IMPLICIT NONE
@@ -160,7 +160,7 @@
 
         ! version and copyright statement
         CALL versionEVRT(.TRUE.)
-        write(out_unitp,*)
+        write(out_unit,*)
         IF(Popenmpi) THEN
           CALL ini_MPI()
           CALL time_perso('MPI start, initial time')
@@ -171,40 +171,40 @@
         !> automatically decide the reading of namelist, from file or shell
         !> NOTE: remember to use vib to ensure "rm namelist" to prevent the
         !> reading of old namelist
-        CALL file_open2(input_filename,in_unitp,old=.TRUE.,err_file=err)
+        CALL file_open2(input_filename,in_unit,old=.TRUE.,err_file=err)
         IF(err/=0) THEN
-          write(out_unitp,*) input_filename,' file does not exist or error.'
-          write(out_unitp,*) '   => reading input data from shell.'
-          in_unitp=INPUT_UNIT
+          write(out_unit,*) input_filename,' file does not exist or error.'
+          write(out_unit,*) '   => reading input data from shell.'
+          in_unit=INPUT_UNIT
         ELSE
-          write(out_unitp,*) input_filename,' file does exist.'
-          write(out_unitp,*) '   => reading input data from the file.'
+          write(out_unit,*) input_filename,' file does exist.'
+          write(out_unit,*) '   => reading input data from the file.'
         ENDIF
-        read(in_unitp,system,IOSTAT=err)
+        read(in_unit,system,IOSTAT=err)
 
         IF (err < 0) THEN
-          write(out_unitp,*) ' ERROR in ElVibRot (main program)'
-          write(out_unitp,*) ' End-of-file or End-of-record'
-          write(out_unitp,*) ' The namelist "system" is probably absent'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,*) ' ERROR in ElVibRot (main program)'
+          write(out_unit,*) ' ERROR in ElVibRot (main program)'
+          write(out_unit,*) ' End-of-file or End-of-record'
+          write(out_unit,*) ' The namelist "system" is probably absent'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,*) ' ERROR in ElVibRot (main program)'
           STOP
         ELSE IF (err > 0) THEN
-          write(out_unitp,*) ' ERROR in ElVibRot (main program)'
-          write(out_unitp,*) ' Some parameter name of the namelist "system" are probaly wrong'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in ElVibRot (main program)'
+          write(out_unit,*) ' ERROR in ElVibRot (main program)'
+          write(out_unit,*) ' Some parameter name of the namelist "system" are probaly wrong'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in ElVibRot (main program)'
           STOP
         END IF
 
         IF (base_FileName /= "" .AND. File_path /= "") THEN
-          write(out_unitp,*) ' ERROR in ElVibRot (main program)'
-          write(out_unitp,*) ' base_FileName and File_path are both set!!'
-          write(out_unitp,*) ' You MUST define only File_path.'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in ElVibRot (main program)'
+          write(out_unit,*) ' ERROR in ElVibRot (main program)'
+          write(out_unit,*) ' base_FileName and File_path are both set!!'
+          write(out_unit,*) ' You MUST define only File_path.'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in ElVibRot (main program)'
           STOP
         ELSE IF (base_FileName /= "") THEN
           File_path = base_FileName
@@ -217,7 +217,7 @@
                      OpPsi_test .OR. cart .OR. main_test .OR. nDfit .OR. &
                      nDGrid .OR. Opt_CAP_Basis .OR. optimization /= 0 .OR. analysis_only)
 
-        IF (printlevel > 1) write(out_unitp,system)
+        IF (printlevel > 1) write(out_unit,system)
 
         para_EVRT_calc%optimization     = optimization
         para_EVRT_calc%EVR              = EVR
@@ -234,7 +234,7 @@
         para_EVRT_calc%main_test        = main_test
         para_EVRT_calc%Opt_CAP_Basis    = Opt_CAP_Basis
 
-        CALL set_print_level(printlevel,force=.TRUE.) ! print_level = printlevel ! print_level is in mod_system.mod
+        CALL set_print_level(printlevel,force=.TRUE.) ! print_level = printlevel ! print_level is in EVR_system_m.mod
 
         EneIO_format  = EneFormat
         RMatIO_format = RMatFormat
@@ -319,80 +319,80 @@
         CRP_maxth_init          = CRP_maxth
         SG4_maxth_init          = SG4_maxth
 
-        write(out_unitp,*) '========================================='
-        write(out_unitp,*) 'OpenMP parameters:',openmp
-        write(out_unitp,*) 'Max number of threads:           ',maxth
-        write(out_unitp,*) 'MatOp_omp,      MatOp_maxth      ',MatOp_omp,MatOp_maxth
-        write(out_unitp,*) 'OpPsi_omp,      OpPsi_maxth      ',OpPsi_omp,OpPsi_maxth
-        write(out_unitp,*) 'BasisTOGrid_omp,BasisTOGrid_maxth',BasisTOGrid_omp,BasisTOGrid_maxth
-        write(out_unitp,*) 'Grid_omp,       Grid_maxth       ',Grid_omp,Grid_maxth
-        write(out_unitp,*) 'CRP_omp,        CRP_maxth        ',CRP_omp,CRP_maxth
-        write(out_unitp,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
-        write(out_unitp,*) '========================================='
+        write(out_unit,*) '========================================='
+        write(out_unit,*) 'OpenMP parameters:',openmp
+        write(out_unit,*) 'Max number of threads:           ',maxth
+        write(out_unit,*) 'MatOp_omp,      MatOp_maxth      ',MatOp_omp,MatOp_maxth
+        write(out_unit,*) 'OpPsi_omp,      OpPsi_maxth      ',OpPsi_omp,OpPsi_maxth
+        write(out_unit,*) 'BasisTOGrid_omp,BasisTOGrid_maxth',BasisTOGrid_omp,BasisTOGrid_maxth
+        write(out_unit,*) 'Grid_omp,       Grid_maxth       ',Grid_omp,Grid_maxth
+        write(out_unit,*) 'CRP_omp,        CRP_maxth        ',CRP_omp,CRP_maxth
+        write(out_unit,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
+        write(out_unit,*) '========================================='
 
-        write(out_unitp,*) '========================================='
-        write(out_unitp,*) 'File_path: ',trim(adjustl(File_path))
-        write(out_unitp,*) '========================================='
+        write(out_unit,*) '========================================='
+        write(out_unit,*) 'File_path: ',trim(adjustl(File_path))
+        write(out_unit,*) '========================================='
 
         para_mem%max_mem    = max_mem/Rkind
-        write(out_unitp,*) '========================================='
-        write(out_unitp,*) '========================================='
+        write(out_unit,*) '========================================='
+        write(out_unit,*) '========================================='
 
         IF (para_EVRT_calc%optimization /= 0) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' Optimization calculation'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' Optimization calculation'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL sub_Optimization_OF_VibParam(max_mem)
 
         ELSE IF (para_EVRT_calc%nDfit .OR. para_EVRT_calc%nDGrid) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' nDfit or nDGrid calculation'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' nDfit or nDGrid calculation'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL sub_nDGrid_nDfit()
 
         ELSE IF (para_EVRT_calc%EVR) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' ElVibRot calculation'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' ElVibRot calculation'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL vib(max_mem,test,intensity_only)
 
         ELSE IF (para_EVRT_calc%cart) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' cart calculation'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' cart calculation'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL sub_cart(max_mem)
 
         ELSE IF (para_EVRT_calc%GridTOBasis_test) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' sub_GridTOBasis calculation'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' sub_GridTOBasis calculation'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL sub_GridTOBasis_test(max_mem)
 
         ELSE IF (para_EVRT_calc%OpPsi_test) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' OpPsi calculation'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' OpPsi calculation'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL Sub_OpPsi_test(max_mem)
 
         ELSE IF (para_EVRT_calc%analysis_only) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' WP analysis calculation'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' WP analysis calculation'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL sub_analysis_only(max_mem)
 
         ELSE IF (para_EVRT_calc%main_test) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' Smolyat test calculation'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' Smolyat test calculation'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL sub_main_Smolyak_test()
 
         ELSE IF (para_EVRT_calc%Opt_CAP_Basis) THEN
-          IF(MPI_id==0) write(out_unitp,*) ' Optimization of the CAP and basis parameters (CRP)'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' Optimization of the CAP and basis parameters (CRP)'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL sub_Opt_CAP_basis()
 
         ELSE
-          IF(MPI_id==0) write(out_unitp,*) ' ElVibRot calculation (default)'
-          IF(MPI_id==0) write(out_unitp,*) '========================================='
+          IF(MPI_id==0) write(out_unit,*) ' ElVibRot calculation (default)'
+          IF(MPI_id==0) write(out_unit,*) '========================================='
           CALL vib(max_mem,test,intensity_only)
         END IF
 
-        write(out_unitp,*) '========================================='
-        write(out_unitp,*) '========================================='
+        write(out_unit,*) '========================================='
+        write(out_unit,*) '========================================='
 
-        close(in_unitp)   ! CALL file_close cannot be used
+        close(in_unit)   ! CALL file_close cannot be used
         IF(openmpi) THEN
           CALL time_perso('MPI closed')
           CALL end_MPI()
@@ -400,7 +400,7 @@
 
       END PROGRAM ElVibRot
 SUBROUTINE read_arg(input_filename)
-  USE mod_system
+  USE EVR_system_m
   IMPLICIT NONE
 
   character(len=:), allocatable, intent(inout) :: input_filename
@@ -410,10 +410,10 @@ SUBROUTINE read_arg(input_filename)
   integer :: i,arg_len
 
   IF (COMMAND_ARGUMENT_COUNT() /= 0 .AND. COMMAND_ARGUMENT_COUNT() /= 2) THEN
-    write(out_unitp,*) ' ERROR in read_arg'
-    write(out_unitp,*) ' Wrong ElVibRot argument number!'
-    write(out_unitp,*) 'argument number',COMMAND_ARGUMENT_COUNT()
-    write(out_unitp,*) ' You can have 0 or 2 arguments.'
+    write(out_unit,*) ' ERROR in read_arg'
+    write(out_unit,*) ' Wrong ElVibRot argument number!'
+    write(out_unit,*) 'argument number',COMMAND_ARGUMENT_COUNT()
+    write(out_unit,*) ' You can have 0 or 2 arguments.'
     STOP 'Wrong ElVibRot argument number'
   END IF
 
@@ -432,27 +432,27 @@ SUBROUTINE read_arg(input_filename)
     CASE("-i","--input")
       input_filename = arg2
     CASE Default
-      write(out_unitp,*) ' ERROR in read_arg'
-      write(out_unitp,*) ' Wrong ElVibRot argument!'
-      write(out_unitp,*) '   arg: "',arg,'"'
-      write(out_unitp,*) ' The possibilities are:'
-      write(out_unitp,*) '    -i or --input'
+      write(out_unit,*) ' ERROR in read_arg'
+      write(out_unit,*) ' Wrong ElVibRot argument!'
+      write(out_unit,*) '   arg: "',arg,'"'
+      write(out_unit,*) ' The possibilities are:'
+      write(out_unit,*) '    -i or --input'
       STOP 'Wrong ElVibRot argument'
     END SELECT
 
-    write(out_unitp,*) 'Argument number: ',i,' ==> arg: "',arg,'", arg2: "',arg2,'"'
+    write(out_unit,*) 'Argument number: ',i,' ==> arg: "',arg,'", arg2: "',arg2,'"'
 
     deallocate(arg)
     deallocate(arg2)
   END DO
   IF (.NOT. allocated(input_filename)) THEN
-    write(out_unitp,*) ' WARNING in read_arg'
-    write(out_unitp,*) ' No input file name argument'
-    write(out_unitp,*) '    => the file name is "namelist".'
+    write(out_unit,*) ' WARNING in read_arg'
+    write(out_unit,*) ' No input file name argument'
+    write(out_unit,*) '    => the file name is "namelist".'
     input_filename = 'namelist'
   END IF
 
-  write(out_unitp,*) '=================================='
-  write(out_unitp,*) '=================================='
+  write(out_unit,*) '=================================='
+  write(out_unit,*) '=================================='
 
 END SUBROUTINE read_arg

@@ -52,7 +52,7 @@
 !=====================================================================
       SUBROUTINE calc_td0b_OpRVd0bW(iq,k,td0b,d0MatOpd0bWrho,WnD,kmem,  &
                                     d0MatOp,para_Op,BasisnD)
-      USE mod_system
+      USE EVR_system_m
       USE mod_PrimOp, only: Write_d0MatOp
       USE mod_basis
       USE mod_SetOp
@@ -92,16 +92,16 @@
        !logical, parameter :: debug = .TRUE.
 !---------------------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'iq,k,kmem',iq,k,kmem
-         write(out_unitp,*) 'nb_ba',para_Op%nb_ba
-         write(out_unitp,*) 'nb_act1',para_Op%nb_act1
-         write(out_unitp,*)
-         write(out_unitp,*) 'WnD',WnD
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'iq,k,kmem',iq,k,kmem
+         write(out_unit,*) 'nb_ba',para_Op%nb_ba
+         write(out_unit,*) 'nb_act1',para_Op%nb_act1
+         write(out_unit,*)
+         write(out_unit,*) 'WnD',WnD
          ! CALL write_param_Op(para_Op)
-          write(out_unitp,*) 'd0MatOp:'
+          write(out_unit,*) 'd0MatOp:'
           CALL Write_d0MatOp(d0MatOp)
-         write(out_unitp,*)
+         write(out_unit,*)
        END IF
 !-----------------------------------------------------------
 
@@ -160,17 +160,17 @@
 
 !-----------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' td0b(:,k)',k,para_Op%nb_ba
-        CALL Write_Vec(td0b(:,k),out_unitp,8)
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0MatOpd0bWrho(:,:)'
+        write(out_unit,*)
+        write(out_unit,*) ' td0b(:,k)',k,para_Op%nb_ba
+        CALL Write_Vec(td0b(:,k),out_unit,8)
+        write(out_unit,*)
+        write(out_unit,*) ' d0MatOpd0bWrho(:,:)'
         DO i=1,ubound(d0MatOpd0bWrho,dim=2)
-          write(out_unitp,*) 'k,i',k,i
+          write(out_unit,*) 'k,i',k,i
           CALL Write_d0MatOp(d0MatOpd0bWrho(k,i))
         END DO
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 
       END SUBROUTINE calc_td0b_OpRVd0bW

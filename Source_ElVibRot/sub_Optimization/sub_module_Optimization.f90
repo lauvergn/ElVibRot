@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_Optimization
-  USE mod_system
+  USE EVR_system_m
   USE mod_SimulatedAnnealing
   USE mod_BFGS
   IMPLICIT NONE
@@ -108,12 +108,12 @@ CONTAINS
 
     para_Optimization%nb_Opt = para_FOR_optimization%nb_OptParam
     IF (para_Optimization%nb_Opt < 1) THEN
-      write(out_unitp,*) 'ERROR in sub_Optimization_OF_VibParam'
-      write(out_unitp,*) 'Wrong number  nb_OptParam',para_Optimization%nb_Opt
-      write(out_unitp,*) ' Check your data!!'
+      write(out_unit,*) 'ERROR in sub_Optimization_OF_VibParam'
+      write(out_unit,*) 'Wrong number  nb_OptParam',para_Optimization%nb_Opt
+      write(out_unit,*) ' Check your data!!'
       STOP
     END IF
-    IF (print_level > 1) write(out_unitp,*) 'para_Optimization%nb_Opt',para_Optimization%nb_Opt
+    IF (print_level > 1) write(out_unit,*) 'para_Optimization%nb_Opt',para_Optimization%nb_Opt
 
     IF (read_nml) THEN
       Optimization_method = 'SimulatedAnnealing'
@@ -123,15 +123,15 @@ CONTAINS
       Grad                = .FALSE. ! Calculation of the gradiant
       ReadRange           = .FALSE.
 
-      read(in_unitp,Optimization,IOSTAT=err_io)
+      read(in_unit,Optimization,IOSTAT=err_io)
       IF (err_io /= 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '  while reading the "Optimization" namelist'
-        write(out_unitp,*) ' end of file or end of record'
-        write(out_unitp,*) ' Check your data !!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '  while reading the "Optimization" namelist'
+        write(out_unit,*) ' end of file or end of record'
+        write(out_unit,*) ' Check your data !!'
         STOP 'ERROR in Read_param_Optimization while reading the "Optimization" namelist'
       END IF
-      IF (print_level > 1) write(out_unitp,Optimization)
+      IF (print_level > 1) write(out_unit,Optimization)
 
       para_Optimization%Optimization_method    = TO_lowercase(Optimization_method)
       para_Optimization%Optimization_param     = TO_lowercase(Optimization_param)
@@ -152,9 +152,9 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
         CALL Read_param_BFGS(para_Optimization%para_BFGS,para_Optimization%nb_Opt)
 
       CASE DEFAULT
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'Wrong Optimization_method: ',para_Optimization%Optimization_method
-        write(out_unitp,*) ' Check your data!!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'Wrong Optimization_method: ',para_Optimization%Optimization_method
+        write(out_unit,*) ' Check your data!!'
         STOP 'ERROR in Read_param_Optimization: Wrong Optimization_method'
       END SELECT
     END IF
@@ -166,7 +166,7 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
        CALL dealloc_NParray(para_FOR_optimization%opt_RVec,'para_FOR_optimization%opt_RVec',name_sub)
 
     IF (para_Optimization%nb_Opt > 0) THEN
-      !write(out_unitp,*) 'para_FOR_optimization%nb_Opt',para_Optimization%nb_Opt
+      !write(out_unit,*) 'para_FOR_optimization%nb_Opt',para_Optimization%nb_Opt
       CALL alloc_NParray(para_FOR_optimization%Val_RVec,[para_Optimization%nb_Opt],     &
                         'para_FOR_optimization%Val_RVec',name_sub)
       para_FOR_optimization%Val_RVec(:) = ZERO
@@ -206,11 +206,11 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
                   BasisnD%ndim,BasisnD%nqc)
       IF (para_Optimization%ReadRange) THEN
          DO i=1,size(para_Optimization%QA)
-           read(in_unitp,*,IOSTAT=err_io) name_dum,para_Optimization%QA(i),para_Optimization%QB(i)
+           read(in_unit,*,IOSTAT=err_io) name_dum,para_Optimization%QA(i),para_Optimization%QB(i)
            IF (err_io /= 0) THEN
-             write(out_unitp,*) ' WARNING in name_sub'
-             write(out_unitp,*) '  while reading the variable range'
-             write(out_unitp,*) ' Check your data !!'
+             write(out_unit,*) ' WARNING in name_sub'
+             write(out_unit,*) '  while reading the variable range'
+             write(out_unit,*) ' Check your data !!'
              STOP
            END IF
          END DO
@@ -233,27 +233,27 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
 
     TYPE (param_Optimization), intent(in) :: para_Optimization
 
-    write(out_unitp,*) 'WRITE param_Optimization'
-    write(out_unitp,*)
-    write(out_unitp,*) 'Optimization_method        ',para_Optimization%Optimization_method
-    write(out_unitp,*) 'Optimization_param         ',para_Optimization%Optimization_param
-    write(out_unitp,*) 'ReadRange                  ',para_Optimization%ReadRange
-    write(out_unitp,*) 'FinalEnergy                ',para_Optimization%FinalEnergy
-    write(out_unitp,*) 'Grad                       ',para_Optimization%Grad
-    write(out_unitp,*) 'Freq                       ',para_Optimization%Freq
-    write(out_unitp,*) 'nb_Opt                     ',para_Optimization%nb_Opt
+    write(out_unit,*) 'WRITE param_Optimization'
+    write(out_unit,*)
+    write(out_unit,*) 'Optimization_method        ',para_Optimization%Optimization_method
+    write(out_unit,*) 'Optimization_param         ',para_Optimization%Optimization_param
+    write(out_unit,*) 'ReadRange                  ',para_Optimization%ReadRange
+    write(out_unit,*) 'FinalEnergy                ',para_Optimization%FinalEnergy
+    write(out_unit,*) 'Grad                       ',para_Optimization%Grad
+    write(out_unit,*) 'Freq                       ',para_Optimization%Freq
+    write(out_unit,*) 'nb_Opt                     ',para_Optimization%nb_Opt
 
     IF (allocated(para_Optimization%xOpt_min)) &
-    write(out_unitp,*) 'xOpt_min(:)                 ',para_Optimization%xOpt_min
+    write(out_unit,*) 'xOpt_min(:)                 ',para_Optimization%xOpt_min
 
     IF (allocated(para_Optimization%SQ)) &
-    write(out_unitp,*) 'SQ(:)                       ',para_Optimization%SQ
+    write(out_unit,*) 'SQ(:)                       ',para_Optimization%SQ
 
     IF (allocated(para_Optimization%QA)) &
-    write(out_unitp,*) 'QA(:)                       ',para_Optimization%QA
+    write(out_unit,*) 'QA(:)                       ',para_Optimization%QA
 
     IF (allocated(para_Optimization%QB)) &
-    write(out_unitp,*) 'QB(:)                       ',para_Optimization%QB
+    write(out_unit,*) 'QB(:)                       ',para_Optimization%QB
 
     SELECT CASE (para_Optimization%Optimization_method)
     CASE ('simulatedannealing','sa')
@@ -261,11 +261,11 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
     CASE ('bfgs')
       CALL Write_param_BFGS(para_Optimization%para_BFGS)
     CASE DEFAULT
-      write(out_unitp,*) 'WARNING in Write_param_param_Optimization'
-      write(out_unitp,*) 'No parameter for this Optimization_method',para_Optimization%Optimization_method
+      write(out_unit,*) 'WARNING in Write_param_param_Optimization'
+      write(out_unit,*) 'No parameter for this Optimization_method',para_Optimization%Optimization_method
     END SELECT
-    write(out_unitp,*) 'END WRITE param_Optimization'
-    flush(out_unitp)
+    write(out_unit,*) 'END WRITE param_Optimization'
+    flush(out_unit)
   END SUBROUTINE Write_param_Optimization
 
   SUBROUTINE dealloc_param_Optimization(para_Optimization)
@@ -293,7 +293,7 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
 
   END SUBROUTINE dealloc_param_Optimization
   SUBROUTINE Sub_Optimization(BasisnD,para_Tnum,mole,PrimOp,Qopt,para_Optimization)
-    USE mod_system
+    USE EVR_system_m
     USE mod_dnSVM
     use mod_Coord_KEO, only: CoordType, Tnum, alloc_array, dealloc_array
     USE mod_PrimOp
@@ -322,14 +322,14 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
 
 
     SQini(:) = para_Optimization%SQ(:)
-    !write(out_unitp,*) 'SQini(1:10)',SQini(1:min(10,size(SQini)))
+    !write(out_unit,*) 'SQini(1:10)',SQini(1:min(10,size(SQini)))
 
     SELECT CASE (para_Optimization%Optimization_method)
     CASE ('simulatedannealing','sa') ! simulated annealing
       DO i=0,para_Optimization%para_SimulatedAnnealing%Restart_Opt
         para_Optimization%SQ(:) = SQini(:) * para_Optimization%para_SimulatedAnnealing%RangeScalInit
-        !write(out_unitp,*) 'SQini(1:10)',SQini(1:min(10,size(SQ)))
-        !write(out_unitp,*) 'SQ(1:10)',SQ(1:min(10,size(SQ)))
+        !write(out_unit,*) 'SQini(1:10)',SQini(1:min(10,size(SQ)))
+        !write(out_unit,*) 'SQ(1:10)',SQ(1:min(10,size(SQ)))
 
         IF (para_FOR_optimization%Optimization_param == 'cubature') THEN
           CALL Sub_SimulatedAnnealing_cuba(BasisnD,para_Optimization%xOpt_min,           &
@@ -346,7 +346,7 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
         END IF
 
       END DO
-      write(out_unitp,*) 'Norm_min',i,Norm_min
+      write(out_unit,*) 'Norm_min',i,Norm_min
 
     CASE ('bfgs')
       IF (para_Optimization%para_BFGS%calc_hessian_always) THEN
@@ -362,10 +362,10 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
       END IF
 
     CASE DEFAULT
-      write(out_unitp,*) 'ERROR in sub_Optimization_OF_VibParam'
-      write(out_unitp,*) 'Wrong Optimization_method: ',                 &
+      write(out_unit,*) 'ERROR in sub_Optimization_OF_VibParam'
+      write(out_unit,*) 'Wrong Optimization_method: ',                 &
                                  para_Optimization%Optimization_method
-      write(out_unitp,*) ' Check your data!!'
+      write(out_unit,*) ' Check your data!!'
       STOP
     END SELECT
 

@@ -59,7 +59,7 @@ CONTAINS
 !
 !================================================================
 SUBROUTINE sub_ExactFact_analysis(T,psi,ana_psi,para_H,Tmax,deltaT,para_field)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   USE mod_psi,    ONLY : param_psi,param_ana_psi
   USE mod_Op
@@ -87,36 +87,36 @@ SUBROUTINE sub_ExactFact_analysis(T,psi,ana_psi,para_H,Tmax,deltaT,para_field)
   !logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'Time',T
-    write(out_unitp,*)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'Time',T
+    write(out_unit,*)
    END IF
 !-------------------------------------------------------
 
   ! normally, the psi is known on the basis ( psi%CvecB(:) ) and on the grid ( psi%CvecG(:) )
   IF (.NOT. allocated(psi%CvecG) ) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  psi%CvecG is not allocated'
-    write(out_unitp,*) '  => check the source!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  psi%CvecG is not allocated'
+    write(out_unit,*) '  => check the source!!'
     STOP
   END IF
 
   ! the diabatic potential is in para_H%OpGrid(iterm_pot)%Grid(1:nb_qa,1:nb_be,1:nb_be).
   ! Normally, iterm_pot=1 for the potential, but it is better to use para_H%derive_term_TO_iterm(0,0)
   IF (.NOT. associated(para_H%OpGrid)) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  para_H%OpGrid is not associated.'
-    write(out_unitp,*) '  the operators have to be stored in memory'
-    write(out_unitp,*) '  Use direct=2 in &active namelist.'
-    write(out_unitp,*) '  => check your data!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  para_H%OpGrid is not associated.'
+    write(out_unit,*) '  the operators have to be stored in memory'
+    write(out_unit,*) '  Use direct=2 in &active namelist.'
+    write(out_unit,*) '  => check your data!!'
     STOP
   END IF
   iterm_pot = para_H%derive_term_TO_iterm(0,0)
   IF (.NOT. associated(para_H%OpGrid(iterm_pot)%Grid)) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  para_H%OpGrid(iterm_pot)%Grid is not associated.'
-    write(out_unitp,*) '  iterm_pot',iterm_pot
-    write(out_unitp,*) '  => check the source!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  para_H%OpGrid(iterm_pot)%Grid is not associated.'
+    write(out_unit,*) '  iterm_pot',iterm_pot
+    write(out_unit,*) '  => check the source!!'
     STOP
   END IF
 
@@ -130,23 +130,23 @@ SUBROUTINE sub_ExactFact_analysis(T,psi,ana_psi,para_H,Tmax,deltaT,para_field)
     CALL sub_ExactFact_analysis_option2(T,psi,ana_psi,para_H)
     STOP 'EF option 2: not yet'
   CASE Default
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  The option for the Exact Factorization are: 1 or 2'
-    write(out_unitp,*) '  The option value (ExactFact) is',ana_psi%ExactFact
-    write(out_unitp,*) '  => Check the ExactFact value in the &analyse'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  The option for the Exact Factorization are: 1 or 2'
+    write(out_unit,*) '  The option value (ExactFact) is',ana_psi%ExactFact
+    write(out_unit,*) '  => Check the ExactFact value in the &analyse'
     STOP 'ERROR in sub_ExactFact_analysis: no default'
   END SELECT
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 !----------------------------------------------------------
 
 END SUBROUTINE sub_ExactFact_analysis
 SUBROUTINE sub_ExactFact_analysis_option2(T,psi,ana_psi,para_H)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   USE mod_psi,    ONLY : param_psi,param_ana_psi,dealloc_psi,           &
                          sub_PsiBasisRep_TO_GridRep,                    &
@@ -190,9 +190,9 @@ SUBROUTINE sub_ExactFact_analysis_option2(T,psi,ana_psi,para_H)
   !logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'Time',T
-    write(out_unitp,*)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'Time',T
+    write(out_unit,*)
    END IF
 !-------------------------------------------------------
 
@@ -247,14 +247,14 @@ SUBROUTINE sub_ExactFact_analysis_option2(T,psi,ana_psi,para_H)
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 !----------------------------------------------------------
 
 END SUBROUTINE sub_ExactFact_analysis_option2
 SUBROUTINE sub_ExactFact_analysis_gV(psi,para_H,Tmax,deltaT)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   USE mod_psi,    ONLY : param_psi
   USE mod_Op
@@ -286,8 +286,8 @@ SUBROUTINE sub_ExactFact_analysis_gV(psi,para_H,Tmax,deltaT)
   !logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*)
    END IF
 !-------------------------------------------------------
 
@@ -334,14 +334,14 @@ SUBROUTINE sub_ExactFact_analysis_gV(psi,para_H,Tmax,deltaT)
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 !----------------------------------------------------------
 
 END SUBROUTINE sub_ExactFact_analysis_gV
 SUBROUTINE sub_ExactFact_analysis_option1(T,psi,ana_psi,para_H)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   USE mod_psi,    ONLY : param_psi,param_ana_psi,dealloc_psi,           &
                          sub_PsiBasisRep_TO_GridRep,                    &
@@ -382,9 +382,9 @@ SUBROUTINE sub_ExactFact_analysis_option1(T,psi,ana_psi,para_H)
   !logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'Time',T
-    write(out_unitp,*)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'Time',T
+    write(out_unit,*)
    END IF
 !-------------------------------------------------------
 
@@ -452,14 +452,14 @@ SUBROUTINE sub_ExactFact_analysis_option1(T,psi,ana_psi,para_H)
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 !----------------------------------------------------------
 
 END SUBROUTINE sub_ExactFact_analysis_option1
 SUBROUTINE sub_ExactFact_analysis_v1(T,psi,ana_psi,para_H,Tmax,deltaT,para_field)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   USE mod_psi,    ONLY : param_psi,param_ana_psi,dealloc_psi,           &
                          sub_PsiBasisRep_TO_GridRep,                    &
@@ -506,36 +506,36 @@ SUBROUTINE sub_ExactFact_analysis_v1(T,psi,ana_psi,para_H,Tmax,deltaT,para_field
   !logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'Time',T
-    write(out_unitp,*)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'Time',T
+    write(out_unit,*)
    END IF
 !-------------------------------------------------------
 
   ! normally, the psi is known on the basis ( psi%CvecB(:) ) and on the grid ( psi%CvecG(:) )
   IF (.NOT. allocated(psi%CvecG) ) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  psi%CvecG is not allocated'
-    write(out_unitp,*) '  => check the source!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  psi%CvecG is not allocated'
+    write(out_unit,*) '  => check the source!!'
     STOP
   END IF
 
   ! the diabatic potential is in para_H%OpGrid(iterm_pot)%Grid(1:nb_qa,1:nb_be,1:nb_be).
   ! Normally, iterm_pot=1 for the potential, but it is better to use para_H%derive_term_TO_iterm(0,0)
   IF (.NOT. associated(para_H%OpGrid)) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  para_H%OpGrid is not associated.'
-    write(out_unitp,*) '  the operators have to be stored in memory'
-    write(out_unitp,*) '  Use direct=2 in &active namelist.'
-    write(out_unitp,*) '  => check your data!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  para_H%OpGrid is not associated.'
+    write(out_unit,*) '  the operators have to be stored in memory'
+    write(out_unit,*) '  Use direct=2 in &active namelist.'
+    write(out_unit,*) '  => check your data!!'
     STOP
   END IF
   iterm_pot = para_H%derive_term_TO_iterm(0,0)
   IF (.NOT. associated(para_H%OpGrid(iterm_pot)%Grid)) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  para_H%OpGrid(iterm_pot)%Grid is not associated.'
-    write(out_unitp,*) '  iterm_pot',iterm_pot
-    write(out_unitp,*) '  => check the source!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  para_H%OpGrid(iterm_pot)%Grid is not associated.'
+    write(out_unit,*) '  iterm_pot',iterm_pot
+    write(out_unit,*) '  => check the source!!'
     STOP
   END IF
 
@@ -629,14 +629,14 @@ SUBROUTINE sub_ExactFact_analysis_v1(T,psi,ana_psi,para_H,Tmax,deltaT,para_field
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 !----------------------------------------------------------
 
 END SUBROUTINE sub_ExactFact_analysis_v1
 SUBROUTINE sub_ExactFact_analysis_v0(T,psi,ana_psi,para_H,para_field)
-  USE mod_system
+  USE EVR_system_m
   USE mod_basis
   USE mod_psi,    ONLY : param_psi,param_ana_psi
 
@@ -668,36 +668,36 @@ SUBROUTINE sub_ExactFact_analysis_v0(T,psi,ana_psi,para_H,para_field)
 ! logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'Time',T
-    write(out_unitp,*)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'Time',T
+    write(out_unit,*)
    END IF
 !-------------------------------------------------------
 
 ! normally, the psi is known on the basis ( psi%CvecB(:) ) and on the grid ( psi%CvecG(:) )
   IF (.NOT. allocated(psi%CvecG) ) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  psi%CvecG is not allocated'
-    write(out_unitp,*) '  => check the source!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  psi%CvecG is not allocated'
+    write(out_unit,*) '  => check the source!!'
     STOP
   END IF
 
   ! the diabatic potential is in para_H%OpGrid(iterm_pot)%Grid(1:nb_qa,1:nb_be,1:nb_be).
   ! Normally, iterm_pot=1 for the potential, but it is better to use para_H%derive_term_TO_iterm(0,0)
   IF (.NOT. associated(para_H%OpGrid)) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  para_H%OpGrid is not associated.'
-    write(out_unitp,*) '  the operators have to be stored in memory'
-    write(out_unitp,*) '  Use direct=2 in &active namelist.'
-    write(out_unitp,*) '  => check your data!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  para_H%OpGrid is not associated.'
+    write(out_unit,*) '  the operators have to be stored in memory'
+    write(out_unit,*) '  Use direct=2 in &active namelist.'
+    write(out_unit,*) '  => check your data!!'
     STOP
   END IF
   iterm_pot = para_H%derive_term_TO_iterm(0,0)
   IF (.NOT. associated(para_H%OpGrid(iterm_pot)%Grid)) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  para_H%OpGrid(iterm_pot)%Grid is not associated.'
-    write(out_unitp,*) '  iterm_pot',iterm_pot
-    write(out_unitp,*) '  => check the source!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  para_H%OpGrid(iterm_pot)%Grid is not associated.'
+    write(out_unit,*) '  iterm_pot',iterm_pot
+    write(out_unit,*) '  => check the source!!'
     STOP
   END IF
 
@@ -744,11 +744,11 @@ SUBROUTINE sub_ExactFact_analysis_v0(T,psi,ana_psi,para_H,para_field)
   CALL alloc_NParray(Qact,[para_H%mole%nb_var],'Qact',name_sub)
   DO iq=1,psi%nb_qa
     CALL Rec_Qact(Qact,psi%BasisnD,iq,para_H%mole)
-    write(out_unitp,*) 'EF_Scal_Pot',T,Qact(1:para_H%mole%nb_act1),chi2(iq),&
+    write(out_unit,*) 'EF_Scal_Pot',T,Qact(1:para_H%mole%nb_act1),chi2(iq),&
            (para_H%OpGrid(iterm_pot)%Grid(iq,ie,ie),ie=1,psi%nb_be),    &
            EF_Scal_Pot(iq),EF_Scal_Pot(iq)/chi2(iq)
   END DO
-  write(out_unitp,*)
+  write(out_unit,*)
   CALL dealloc_NParray(Qact,'Qact',name_sub)
   !---------------------------------------------------------------------
 
@@ -762,7 +762,7 @@ SUBROUTINE sub_ExactFact_analysis_v0(T,psi,ana_psi,para_H,para_field)
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
 !----------------------------------------------------------
 END SUBROUTINE sub_ExactFact_analysis_v0

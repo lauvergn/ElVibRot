@@ -54,7 +54,7 @@ MODULE mod_OpPsi_MPI
 !> OpPsi = (OpPsi - E0*Psi) / Esc, for working on full Smolyak rep.
 !=======================================================================================
     SUBROUTINE sub_scaledOpPsi_SR_MPI(Psi,OpPsi,E0,Esc)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,ONLY:param_psi,ecri_psi
       IMPLICIT NONE
 

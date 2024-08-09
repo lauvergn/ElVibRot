@@ -64,7 +64,7 @@ CONTAINS
 !
 !======================================================
       FUNCTION skip_term(derOp,derOp_FROM_Qdyn)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       logical :: skip_term
@@ -81,9 +81,9 @@ CONTAINS
       !logical, parameter :: debug = .TRUE.
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'derOp          : ',derOp
-        write(out_unitp,*) 'derOp_FROM_Qdyn: ',derOp_FROM_Qdyn
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'derOp          : ',derOp
+        write(out_unit,*) 'derOp_FROM_Qdyn: ',derOp_FROM_Qdyn
       END IF
 
 
@@ -103,10 +103,10 @@ CONTAINS
       skip_term = .NOT. not_skip
 
       IF (debug) THEN
-        write(out_unitp,*) 'skip_term: ',(.NOT. not_skip)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'skip_term: ',(.NOT. not_skip)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      !write(out_unitp,*) 'skip_term: ',derOp,derOp_FROM_Qdyn,(.NOT. not_skip)
+      !write(out_unit,*) 'skip_term: ',derOp,derOp_FROM_Qdyn,(.NOT. not_skip)
 
       END FUNCTION skip_term
 
@@ -117,7 +117,7 @@ CONTAINS
 !
 !======================================================
       SUBROUTINE sub_PsiOpPsi(E,Psi,OpPsi,para_Op,iOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,             ONLY : param_psi,ecri_psi,Overlap_psi1_psi2
       USE mod_SetOp,           ONLY : param_Op,write_param_Op
       USE mod_MPI
@@ -137,20 +137,20 @@ CONTAINS
   !logical, parameter :: debug = .TRUE.
   !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_PsiOpPsi',para_Op%nb_tot,     &
+        write(out_unit,*) 'BEGINNING sub_PsiOpPsi',para_Op%nb_tot,     &
                                para_Op%nb_ba,para_Op%nb_bi,para_Op%nb_be
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
-        IF (present(iOp)) write(out_unitp,*) 'iOp',iOp
-        write(out_unitp,*)
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
+        IF (present(iOp)) write(out_unit,*) 'iOp',iOp
+        write(out_unit,*)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat)) CALL Write_Mat(para_Op%Cmat,out_unitp,3)
-        IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unitp,5)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        IF (allocated(para_Op%Cmat)) CALL Write_Mat(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -161,7 +161,7 @@ CONTAINS
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) 'Op.PsiBasisRep'
+        write(out_unit,*) 'Op.PsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
       END IF
 
@@ -169,8 +169,8 @@ CONTAINS
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'E (au)',E
-         write(out_unitp,*) 'END sub_PsiOpPsi'
+         write(out_unit,*) 'E (au)',E
+         write(out_unit,*) 'END sub_PsiOpPsi'
        END IF
 !-----------------------------------------------------------
 
@@ -178,7 +178,7 @@ CONTAINS
 
 !===============================================================================
       SUBROUTINE sub_OpPsi(Psi,OpPsi,para_Op,derOp,With_Grid,TransfoOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,             ONLY : param_psi,ecri_psi,dealloc_psi
       USE mod_SetOp,           ONLY : param_Op,write_param_Op
       USE mod_MPI_aux
@@ -209,18 +209,18 @@ CONTAINS
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
-        write(out_unitp,*) 'para_Op%mat_done',para_Op%mat_done
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
+        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+        flush(out_unit)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unitp,3)
-        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unitp,5)
-        write(out_unitp,*)
-        write(out_unitp,*) 'Psi'
+        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        write(out_unit,*)
+        write(out_unit,*) 'Psi'
         CALL ecri_psi(Psi=Psi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
       IF (present(derOp)) THEN
@@ -262,10 +262,10 @@ CONTAINS
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiBasisRep'
+        write(out_unit,*) 'OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -274,7 +274,7 @@ CONTAINS
 
 !===============================================================================
       SUBROUTINE sub_PrimOpPsi(Psi,OpPsi,para_Op,derOp,With_Grid,pot_only)
-      USE mod_system
+      USE EVR_system_m
       USE mod_SymAbelian,     ONLY : Calc_symab1_EOR_symab2
       USE mod_psi,            ONLY : param_psi,ecri_psi,copy_psi2TOpsi1,&
                                      alloc_psi,dealloc_psi,             &
@@ -313,20 +313,20 @@ CONTAINS
       !-------------------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
-        write(out_unitp,*) 'para_Op%mat_done',para_Op%mat_done
-        write(out_unitp,*) 'para_Op%... %Save_MemGrid_done',            &
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
+        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+        write(out_unit,*) 'para_Op%... %Save_MemGrid_done',            &
                     para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
-        flush(out_unitp)
+        flush(out_unit)
         !CALL write_param_Op(para_Op)
-        !IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unitp,3)
-        !IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unitp,5)
-        write(out_unitp,*)
-        write(out_unitp,*) 'Psi'
+        !IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unit,3)
+        !IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        write(out_unit,*)
+        write(out_unit,*) 'Psi'
         CALL ecri_psi(Psi=Psi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-------------------------------------------------------------------------
 
@@ -358,9 +358,9 @@ CONTAINS
       !-----------------------------------------------------------------
       !     - test on nb_bi : nb_bi>0
       IF (para_Op%nb_bi <= 0) THEN
-        write(out_unitp,*) ' ERROR : nb_bi MUST be > 0'
-        write(out_unitp,*) 'nb_bi',para_Op%nb_bi
-        write(out_unitp,*) 'STOP in ',name_sub
+        write(out_unit,*) ' ERROR : nb_bi MUST be > 0'
+        write(out_unit,*) 'nb_bi',para_Op%nb_bi
+        write(out_unit,*) 'STOP in ',name_sub
         STOP
       END IF
       !-------------------------------------------------------------------------
@@ -380,8 +380,8 @@ CONTAINS
 
 !SGtype4=.FALSE.
 
-      IF (debug) write(out_unitp,*) 'SGtype4,direct_KEO',SGtype4,direct_KEO
-      flush(out_unitp)
+      IF (debug) write(out_unit,*) 'SGtype4,direct_KEO',SGtype4,direct_KEO
+      flush(out_unit)
 
       ! Number of Hamiltonian operation counter
       para_Op%nb_OpPsi = para_Op%nb_OpPsi + 1
@@ -431,10 +431,10 @@ CONTAINS
             ! With_Grid_loc F
             IF (With_Grid_loc) THEN
               IF (.NOT. Psi%GridRep) THEN
-                write(out_unitp,*) ' ERROR in ',name_sub
-                write(out_unitp,*) '      Psi%GridRep=F and With_Grid=T'
-                write(out_unitp,*) 'The wavepacket MUST be on the grid'
-                write(out_unitp,*) 'CHECK the fortran!'
+                write(out_unit,*) ' ERROR in ',name_sub
+                write(out_unit,*) '      Psi%GridRep=F and With_Grid=T'
+                write(out_unit,*) 'The wavepacket MUST be on the grid'
+                write(out_unit,*) 'CHECK the fortran!'
                 STOP
               END IF
 
@@ -500,19 +500,19 @@ CONTAINS
 
                       ! Real part
                       RPsi%RvecB(:) = Real(Psi%CvecB(:),kind=Rkind)
-                      !write(out_unitp,*) 'Real part of Psi'
+                      !write(out_unit,*) 'Real part of Psi'
                       !CALL ecri_psi(Psi=RPsi)
                       CALL sub_OpPsi_WITH_MemGrid_BGG_Hamil10(RPsi,ROpPsi,para_Op,derOp_loc,.FALSE.,pot_only=pot_only_loc)
-                      !write(out_unitp,*) 'Real part of OpPsi'
+                      !write(out_unit,*) 'Real part of OpPsi'
                       !CALL ecri_psi(Psi=ROpPsi)
                       OpPsi%CvecG(:) = cmplx(ROpPsi%RvecG,kind=Rkind)
 
                       ! Imaginary part
                       RPsi%RvecB(:) = aimag(Psi%CvecB(:))
-                      !write(out_unitp,*) 'Imag part of Psi'
+                      !write(out_unit,*) 'Imag part of Psi'
                       !CALL ecri_psi(Psi=RPsi)
                       CALL sub_OpPsi_WITH_MemGrid_BGG_Hamil10(RPsi,ROpPsi,para_Op,derOp_loc,.FALSE.,pot_only=pot_only_loc)
-                      !write(out_unitp,*) 'Imag part of OpPsi'
+                      !write(out_unit,*) 'Imag part of OpPsi'
                       !CALL ecri_psi(Psi=ROpPsi)
                       OpPsi%CvecG(:) = OpPsi%CvecG + EYE * ROpPsi%RvecG
 
@@ -565,29 +565,29 @@ CONTAINS
 !      Symmetrization of  Op.Psi (if psi is on the basis)
 !
 !=====================================================================
-      IF (debug) write(out_unitp,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
+      IF (debug) write(out_unit,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
 
       IF(keep_MPI) THEN
         OpPsi_symab = Calc_symab1_EOR_symab2(para_Op%symab,psi%symab)
         CALL Set_symab_OF_psiBasisRep(OpPsi,OpPsi_symab)
       ENDIF
-      IF (debug) write(out_unitp,*) 'OpPsi_symab',OpPsi%symab
+      IF (debug) write(out_unit,*) 'OpPsi_symab',OpPsi%symab
 
-!write(out_unitp,*) 'para_Op,psi symab ',para_Op%symab,psi%symab
-!write(out_unitp,*) 'OpPsi_symab',OpPsi%symab
+!write(out_unit,*) 'para_Op,psi symab ',para_Op%symab,psi%symab
+!write(out_unit,*) 'OpPsi_symab',OpPsi%symab
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiBasisRep'
+        write(out_unit,*) 'OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_PrimOpPsi
 
       SUBROUTINE sub_OpBasis_OneBF(Psi,OpPsi,para_Op,i)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,     ONLY : param_psi,Set_symab_OF_psiBasisRep
       USE mod_SetOp
       IMPLICIT NONE
@@ -603,10 +603,10 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
-        write(out_unitp,*) 'Build Op(:,i) ',para_Op%nb_tot
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'Build Op(:,i) ',para_Op%nb_tot
+        flush(out_unit)
       END IF
 
       psi = ZERO
@@ -621,13 +621,13 @@ CONTAINS
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !----------------------------------------------------------
 
       END SUBROUTINE sub_OpBasis_OneBF
       SUBROUTINE sub_OpBasis_OneCBF(Psi,OpPsi,para_Op,i)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,     ONLY : param_psi,Set_symab_OF_psiBasisRep,dealloc_psi
       USE mod_SetOp
       IMPLICIT NONE
@@ -649,10 +649,10 @@ CONTAINS
       !logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
-        write(out_unitp,*) 'Build Op(:,i) ',para_Op%nb_tot
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'Build Op(:,i) ',para_Op%nb_tot
+        flush(out_unit)
       END IF
 
       CALL init_psi(Temp_OpPsi,para_Op,para_Op%cplx)
@@ -689,10 +689,10 @@ CONTAINS
 
       CALL dealloc_psi(Temp_OpPsi)
 !     ----------------------------------------------------------
-       !write(out_unitp,*) 'out total memory: ',para_mem%mem_tot
+       !write(out_unit,*) 'out total memory: ',para_mem%mem_tot
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 !----------------------------------------------------------
 
@@ -704,7 +704,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
 !     | OpPsi> = Op | Psi>
 !=======================================================================================
       SUBROUTINE sub_TabOpPsi(TabPsi,TabOpPsi,para_Op,derOp,With_Grid,TransfoOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,        ONLY : param_psi,ecri_psi,dealloc_psi
       USE mod_SetOp,      ONLY : param_Op,write_param_Op
       IMPLICIT NONE
@@ -734,19 +734,19 @@ END SUBROUTINE sub_OpBasis_OneCBF
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'para_Op%mat_done',para_Op%mat_done
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+        flush(out_unit)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unitp,3)
-        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unitp,5)
-        write(out_unitp,*)
-        write(out_unitp,*) 'TabPsi'
+        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        write(out_unit,*)
+        write(out_unit,*) 'TabPsi'
         DO i=1,size(TabPsi)
           CALL ecri_psi(Psi=TabPsi(i))
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 !CALL Check_mem()
@@ -786,12 +786,12 @@ END SUBROUTINE sub_OpBasis_OneCBF
 !CALL UnCheck_mem()
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'TabOpPsiBasisRep'
+        write(out_unit,*) 'TabOpPsiBasisRep'
         DO i=1,size(TabPsi)
           CALL ecri_psi(Psi=TabOpPsi(i))
         END DO
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -800,7 +800,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
 
 !=======================================================================================
       SUBROUTINE sub_PrimTabOpPsi(TabPsi,TabOpPsi,para_Op,derOp,With_Grid)
-      USE mod_system
+      USE EVR_system_m
       USE mod_SymAbelian,    ONLY : Calc_symab1_EOR_symab2
       USE mod_psi,           ONLY : param_psi,alloc_psi,dealloc_psi,    &
                                     ecri_psi,Set_symab_OF_psiBasisRep,  &
@@ -836,17 +836,17 @@ END SUBROUTINE sub_OpBasis_OneCBF
 
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'para_Op%mat_done',para_Op%mat_done
-        flush(out_unitp)
-        write(out_unitp,*)
-        write(out_unitp,*) 'TabPsi'
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+        flush(out_unit)
+        write(out_unit,*)
+        write(out_unit,*) 'TabPsi'
         !DO i=1,size(TabPsi)
         DO i=1,size_TabPsi
           CALL ecri_psi(Psi=TabPsi(i))
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
@@ -854,9 +854,9 @@ END SUBROUTINE sub_OpBasis_OneCBF
       !-----------------------------------------------------------------
       !- test on nb_bi : nb_bi>0
       IF (para_Op%nb_bi <= 0) THEN
-        write(out_unitp,*) ' ERROR : nb_bi MUST be > 0'
-        write(out_unitp,*) 'nb_bi',para_Op%nb_bi
-        write(out_unitp,*) 'STOP in ',name_sub
+        write(out_unit,*) ' ERROR : nb_bi MUST be > 0'
+        write(out_unit,*) 'nb_bi',para_Op%nb_bi
+        write(out_unit,*) 'STOP in ',name_sub
         STOP
       END IF
       !-----------------------------------------------------------------
@@ -887,8 +887,8 @@ END SUBROUTINE sub_OpBasis_OneCBF
         RETURN
       END IF
 
-      IF (debug) write(out_unitp,*) 'SGtype4,direct_KEO',SGtype4,direct_KEO
-      flush(out_unitp)
+      IF (debug) write(out_unit,*) 'SGtype4,direct_KEO',SGtype4,direct_KEO
+      flush(out_unit)
 
       ! direct_KEO false by defult
       ! note this part is not modified for MPI yet
@@ -927,8 +927,8 @@ END SUBROUTINE sub_OpBasis_OneCBF
             OpPsi_symab = Calc_symab1_EOR_symab2(para_Op%symab,TabPsi(i)%symab)
             CALL Set_symab_OF_psiBasisRep(TabOpPsi(i),OpPsi_symab)
 
-            !write(out_unitp,*) 'para_Op,psi symab ',para_Op%symab,TabPsi(i)%symab
-            !write(out_unitp,*) 'OpPsi_symab',TabOpPsi(i)%symab
+            !write(out_unit,*) 'para_Op,psi symab ',para_Op%symab,TabPsi(i)%symab
+            !write(out_unit,*) 'OpPsi_symab',TabOpPsi(i)%symab
 
           END DO
         END IF
@@ -942,13 +942,13 @@ END SUBROUTINE sub_OpBasis_OneCBF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiBasisRep'
-        write(out_unitp,*) 'TabOpPsiBasisRep'
+        write(out_unit,*) 'OpPsiBasisRep'
+        write(out_unit,*) 'TabOpPsiBasisRep'
         DO i=1,size(TabOpPsi)
           CALL ecri_psi(Psi=TabOpPsi(i))
         END DO
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -957,7 +957,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
 
 !=======================================================================================
       SUBROUTINE sub_OpPsi_WITH_MatOp(Psi,OpPsi,para_Op)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,        ONLY : param_psi,ecri_psi
       USE mod_SetOp,      ONLY : param_Op,write_param_Op
       IMPLICIT NONE
@@ -978,21 +978,21 @@ END SUBROUTINE sub_OpBasis_OneCBF
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*) 'para_Op%mat_done',para_Op%mat_done
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+        flush(out_unit)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unitp,3)
-        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unitp,5)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        !write(out_unitp,*) 'ini OpPsiBasisRep'
+        !write(out_unit,*) 'ini OpPsiBasisRep'
         !CALL ecri_psi(Psi=OpPsi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
@@ -1049,18 +1049,18 @@ END SUBROUTINE sub_OpBasis_OneCBF
           END IF
         END IF
       ELSE
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'Make_Mat=.FALSE. is not possible in this subroutine'
-        write(out_unitp,*) 'Check the fortran'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'Make_Mat=.FALSE. is not possible in this subroutine'
+        write(out_unit,*) 'Check the fortran'
         STOP
       END IF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiBasisRep'
+        write(out_unit,*) 'OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -1068,7 +1068,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
 !=======================================================================================
 
       SUBROUTINE sub_OpPsi_WITH_MemGrid(Psi,OpPsi,para_Op,derOp,pot_only)
-      USE mod_system
+      USE EVR_system_m
 !$    USE omp_lib,      only : OMP_GET_THREAD_NUM
       USE mod_psi,      ONLY : param_psi,ecri_psi,                      &
                                alloc_psi,alloc_array,dealloc_array,     &
@@ -1113,19 +1113,19 @@ END SUBROUTINE sub_OpBasis_OneCBF
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*) 'para_Op%mat_done',para_Op%mat_done
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+        flush(out_unit)
         CALL write_param_Op(para_Op)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        write(out_unitp,*) 'ini OpPsiBasisRep'
+        write(out_unit,*) 'ini OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
@@ -1137,7 +1137,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
         ELSE
           nb_thread = OpPsi_maxth
         END IF
-        IF (debug) write(out_unitp,*) 'nb_thread in ',name_sub,' : ',nb_thread
+        IF (debug) write(out_unit,*) 'nb_thread in ',name_sub,' : ',nb_thread
 
         !-----------------------------------------------------------------
         IF (nb_thread == 1) THEN
@@ -1175,7 +1175,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
             ELSE
               CALL sub_d0d1d2PsiBasisRep_TO_GridRep(Psi,para_Op%derive_termQdyn(:,iterm))
 
-              !write(out_unitp,*) 'iterm,Grid',iterm,Grid
+              !write(out_unit,*) 'iterm,Grid',iterm,Grid
               DO i1_bi=1,para_Op%nb_bie
               DO i2_bi=1,para_Op%nb_bie
                 iqi1 = 1         + (i1_bi-1) * Psi%nb_qa
@@ -1292,26 +1292,26 @@ END SUBROUTINE sub_OpBasis_OneCBF
         END IF
 
       ELSE
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'Save_MemGrid_done=.FALSE. is not possible in this subroutine'
-        write(out_unitp,*) 'Check the fortran!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'Save_MemGrid_done=.FALSE. is not possible in this subroutine'
+        write(out_unit,*) 'Check the fortran!'
         STOP
       END IF
 
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiGridRep'
+        write(out_unit,*) 'OpPsiGridRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_OpPsi_WITH_MemGrid
 
       SUBROUTINE sub_OpPsi_WITH_MemGrid_BGG(Psi,OpPsi,para_Op,derOp,With_Grid,pot_only)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_BtoG_GtoB, ONLY : DerivOp_TO_CVecG,DerivOp_TO_RVecG
       USE mod_psi,             ONLY : param_psi,ecri_psi,ecri_init_psi,sub_PsiBasisRep_TO_GridRep
       USE mod_SetOp,           ONLY : param_Op,write_param_Op
@@ -1350,18 +1350,18 @@ END SUBROUTINE sub_OpBasis_OneCBF
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*) 'para_Op...%Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
-        !flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*) 'para_Op...%Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
+        !flush(out_unit)
         !CALL write_param_Op(para_Op)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_init_psi(Psi=Psi)
         !CALL ecri_psi(Psi=Psi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
@@ -1370,16 +1370,16 @@ END SUBROUTINE sub_OpBasis_OneCBF
         IF (.NOT. With_Grid) THEN
           nb_mult_OpPsi = 0
           CALL sub_PsiBasisRep_TO_GridRep(Psi)
-          IF (debug) write(out_unitp,*) 'PsiGridRep'
+          IF (debug) write(out_unit,*) 'PsiGridRep'
           IF (debug) CALL ecri_psi(Psi=Psi)
 
           nb_mult_OpPsi = nb_mult_OpPsi + nb_mult_BTOG
           IF (debug) THEN
-            write(out_unitp,*) 'PsiGridRep done'
-            write(out_unitp,*) 'PsiBasisRep'
+            write(out_unit,*) 'PsiGridRep done'
+            write(out_unit,*) 'PsiBasisRep'
             !CALL ecri_init_psi(Psi=Psi)
             CALL ecri_psi(Psi=Psi)
-            flush(out_unitp)
+            flush(out_unit)
           END IF
         END IF
 
@@ -1431,7 +1431,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
             END DO
           ELSE
 
-            !write(out_unitp,*) 'iterm,Grid',iterm,Grid
+            !write(out_unit,*) 'iterm,Grid',iterm,Grid
             DO i1_bi=1,para_Op%nb_bie
             DO i2_bi=1,para_Op%nb_bie
               iqi1 = 1         + (i1_bi-1) * Psi%nb_qa
@@ -1508,9 +1508,9 @@ END SUBROUTINE sub_OpBasis_OneCBF
 
 
       ELSE
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'Save_MemGrid_done=.FALSE. is not possible in this subroutine'
-        write(out_unitp,*) 'Check the fortran!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'Save_MemGrid_done=.FALSE. is not possible in this subroutine'
+        write(out_unit,*) 'Check the fortran!'
         STOP
       END IF
 
@@ -1519,11 +1519,11 @@ END SUBROUTINE sub_OpBasis_OneCBF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiGridRep'
+        write(out_unit,*) 'OpPsiGridRep'
         CALL ecri_init_psi(Psi=OpPsi)
         !CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_OpPsi_WITH_MemGrid_BGG
@@ -1531,7 +1531,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
 
 
       SUBROUTINE sub_OpPsi_WITH_MemGrid_BGG_Hamil10(Psi,OpPsi,para_Op,derOp,With_Grid,pot_only)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO,       ONLY : get_d0GG
       USE mod_basis,           ONLY : rec_Qact
       USE mod_basis_BtoG_GtoB, ONLY : DerivOp_TO_RVecG
@@ -1579,17 +1579,17 @@ END SUBROUTINE sub_OpBasis_OneCBF
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*) 'para_Op...%Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
-        !flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*) 'para_Op...%Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
+        !flush(out_unit)
         !CALL write_param_Op(para_Op)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         !CALL ecri_psi(Psi=Psi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
@@ -1620,10 +1620,10 @@ END SUBROUTINE sub_OpBasis_OneCBF
           CALL sub_PsiBasisRep_TO_GridRep(Psi)
           nb_mult_OpPsi = nb_mult_OpPsi + nb_mult_BTOG
           IF (debug) THEN
-            write(out_unitp,*) 'PsiGridRep done'
-            write(out_unitp,*) 'PsiBasisRep'
+            write(out_unit,*) 'PsiGridRep done'
+            write(out_unit,*) 'PsiBasisRep'
             !CALL ecri_psi(Psi=Psi)
-            flush(out_unitp)
+            flush(out_unit)
           END IF
         END IF
 
@@ -1775,9 +1775,9 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
 
       ELSE
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'Save_MemGrid_done=.FALSE. is not possible in this subroutine'
-        write(out_unitp,*) 'Check the fortran!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'Save_MemGrid_done=.FALSE. is not possible in this subroutine'
+        write(out_unit,*) 'Check the fortran!'
         STOP
       END IF
 
@@ -1789,10 +1789,10 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiGridRep'
+        write(out_unit,*) 'OpPsiGridRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -1800,7 +1800,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
  !SUBROUTINE sub_TabOpPsi_WITH_MemGrid_BGG_Hamil10(Psi,OpPsi,para_Op,derOp,With_Grid,pot_only)
  SUBROUTINE sub_TabOpPsi_WITH_MemGrid_BGG_Hamil10(Psi,OpPsi,para_Op,derOp,With_Grid)
- USE mod_system
+ USE EVR_system_m
  USE mod_Coord_KEO,               ONLY : get_d0GG
 
  USE mod_basis,                   ONLY : rec_Qact
@@ -1855,19 +1855,19 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
  !-----------------------------------------------------------------
  n = para_Op%nb_tot
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-   write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-   write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-   write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-   write(out_unitp,*) 'para_Op...%Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
-   !flush(out_unitp)
+   write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+   write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+   write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+   write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+   write(out_unit,*) 'para_Op...%Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
+   !flush(out_unit)
    !CALL write_param_Op(para_Op)
-   write(out_unitp,*)
-   write(out_unitp,*) 'PsiBasisRep'
+   write(out_unit,*)
+   write(out_unit,*) 'PsiBasisRep'
    DO itab=1,size(Psi)
      CALL ecri_psi(Psi=Psi(itab))
    END DO
-   flush(out_unitp)
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------------
  IF (Psi(1)%cplx) STOP 'cplx in sub_TabOpPsi_WITH_MemGrid_BGG_Hamil10'
@@ -1904,10 +1904,10 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
    END IF
 
    IF (debug) THEN
-     write(out_unitp,*) 'PsiGridRep done'
-     write(out_unitp,*) 'PsiBasisRep'
+     write(out_unit,*) 'PsiGridRep done'
+     write(out_unit,*) 'PsiBasisRep'
      CALL ecri_psi(Psi=Psi(itab))
-     flush(out_unitp)
+     flush(out_unit)
    END IF
 
    !CALL ecri_psi(Psi=Psi(itab),ecri_GridRep=.TRUE.)
@@ -1917,9 +1917,9 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
  END DO
 
  IF (.NOT. allocated(para_Op%para_AllBasis%basis_ext%Jac)) THEN
-   write(out_unitp,*) ' ERROR in ',name_sub
-   write(out_unitp,*) ' ....%basis_ext%Jac(:) is not allocated '
-   write(out_unitp,*) ' Set JacSave = .TRUE., around line 186 of sub_HSH_harm.f90.'
+   write(out_unit,*) ' ERROR in ',name_sub
+   write(out_unit,*) ' ....%basis_ext%Jac(:) is not allocated '
+   write(out_unit,*) ' Set JacSave = .TRUE., around line 186 of sub_HSH_harm.f90.'
    STOP
  END IF
 
@@ -1943,9 +1943,9 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
    OpPsi(itab)%RvecG(:) = ZERO
  END IF
 
- !write(out_unitp,*) 'sqRhoOVERJac',para_Op%para_AllBasis%basis_ext%sqRhoOVERJac(:)
- !write(out_unitp,*) 'Jac',para_Op%para_AllBasis%basis_ext%Jac(:)
- !write(out_unitp,*) 'V',para_Op%OpGrid(iterm)%Grid(:,1,1)
+ !write(out_unit,*) 'sqRhoOVERJac',para_Op%para_AllBasis%basis_ext%sqRhoOVERJac(:)
+ !write(out_unit,*) 'Jac',para_Op%para_AllBasis%basis_ext%Jac(:)
+ !write(out_unit,*) 'V',para_Op%OpGrid(iterm)%Grid(:,1,1)
 
  !Transfert sqRhoOVERJac, Jac and the potential in Smolyak rep (Grid)
  IF (debug) THEN
@@ -1959,7 +1959,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
  DO itab=1,size(Psi)
 
    IF (debug) THEN
-     write(out_unitp,*) 'Psi * sqRhoOVERJac'
+     write(out_unit,*) 'Psi * sqRhoOVERJac'
      SRep = Psi(itab)%RvecG
      CALL Write_SmolyakRep(SRep)
    END IF
@@ -1970,7 +1970,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
      CALL DerivOp_TO_RVecG(derRGi(:,i,itab),Psi(itab)%nb_qa,para_Op%BasisnD,  &
                            derive_termQdyn)
      IF (debug) THEN
-       write(out_unitp,*) 'dQi ',i
+       write(out_unit,*) 'dQi ',i
        CALL tabR2bis_TO_SmolyakRep1(SRep,derRGi(:,i,itab))
        CALL Write_SmolyakRep(SRep)
      END IF
@@ -2001,7 +2001,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
       DO iq=iq1,iq2
         CALL Rec_Qact(Qact,para_Op%para_AllBasis%BasisnD,iq,para_Op%mole)
         CALL get_d0GG(Qact,para_Op%para_Tnum,para_Op%mole,d0GG=GGiq(iq-iq1+1,:,:),def=.TRUE.)
-        !write(out_unitp,*) 'iq,Gij',iq,GGiq(iq-iq1+1,:,:)
+        !write(out_unit,*) 'iq,Gij',iq,GGiq(iq-iq1+1,:,:)
       END DO
       !$OMP end do
       CALL dealloc_NParray(Qact,'Qact',name_sub)
@@ -2035,7 +2035,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
      CALL DerivOp_TO_RVecG(derRGj(:,j,itab),Psi(itab)%nb_qa,para_Op%BasisnD,derive_termQdyn)
 
      IF (debug) THEN
-       write(out_unitp,*) 'dQj ',j
+       write(out_unit,*) 'dQj ',j
        CALL tabR2bis_TO_SmolyakRep1(SRep,derRGj(:,j,itab))
        CALL Write_SmolyakRep(SRep)
      END IF
@@ -2053,7 +2053,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
    CALL sub_sqRhoOVERJac_Psi(OpPsi(itab),para_Op,inv=.TRUE.)
 
    IF (debug) THEN
-     write(out_unitp,*) 'OpPsi Grid '
+     write(out_unit,*) 'OpPsi Grid '
      CALL tabR2bis_TO_SmolyakRep1(SRep,OpPsi(itab)%RvecG)
      CALL Write_SmolyakRep(SRep)
    END IF
@@ -2065,17 +2065,17 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'OpPsiGridRep'
+   write(out_unit,*) 'OpPsiGridRep'
    DO itab=1,size(Psi)
      CALL ecri_psi(Psi=OpPsi(itab))
    END DO
-   write(out_unitp,*)
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*)
+   write(out_unit,*) 'END ',name_sub
  END IF
  END SUBROUTINE sub_TabOpPsi_WITH_MemGrid_BGG_Hamil10
 
       SUBROUTINE sub_OpPsi_WITH_FileGrid_type12_BGG(Psi,OpPsi,para_Op,derOp,With_Grid,pot_only)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_BtoG_GtoB, ONLY : DerivOp_TO_CVecG,DerivOp_TO_RVecG
 
       USE mod_psi,             ONLY : param_psi,ecri_psi,alloc_psi,dealloc_psi,&
@@ -2120,18 +2120,18 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*) 'para_Op...%Save_MemGrid_done',              &
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*) 'para_Op...%Save_MemGrid_done',              &
                      para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
-        !flush(out_unitp)
+        !flush(out_unit)
         !CALL write_param_Op(para_Op)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
@@ -2148,10 +2148,10 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
           CALL sub_PsiBasisRep_TO_GridRep(Psi)
           nb_mult_OpPsi = nb_mult_OpPsi + nb_mult_BTOG
           IF (debug) THEN
-            write(out_unitp,*) 'PsiGridRep done'
-            write(out_unitp,*) 'PsiBasisRep'
+            write(out_unit,*) 'PsiGridRep done'
+            write(out_unit,*) 'PsiBasisRep'
             CALL ecri_psi(Psi=Psi)
-            flush(out_unitp)
+            flush(out_unit)
           END IF
         END IF
 
@@ -2211,7 +2211,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
             END IF
             !$OMP end critical(CRIT2_sub_OpPsi_WITH_FileGrid_type12_BGG)
 
-            !write(out_unitp,*) 'iterm,Grid',iterm,Grid
+            !write(out_unit,*) 'iterm,Grid',iterm,Grid
             DO i1_bi=1,para_Op%nb_bie
             DO i2_bi=1,para_Op%nb_bie
               iqi1 = 1         + (i1_bi-1) * Psi%nb_qa
@@ -2298,9 +2298,9 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
 
       ELSE
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'Save_MemGrid_done=.TRUE. is not possible in this subroutine'
-        write(out_unitp,*) 'Check the fortran!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'Save_MemGrid_done=.TRUE. is not possible in this subroutine'
+        write(out_unit,*) 'Check the fortran!'
         STOP
       END IF
 
@@ -2309,10 +2309,10 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiGridRep'
+        write(out_unit,*) 'OpPsiGridRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_OpPsi_WITH_FileGrid_type12_BGG
@@ -2320,7 +2320,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
 
       SUBROUTINE sub_OpPsi_WITH_FileGrid_type12(Psi,OpPsi,para_Op,derOp,pot_only)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,          ONLY : param_psi,ecri_psi,                  &
                                    sub_d0d1d2PsiBasisRep_TO_GridRep,    &
                                    sub_PsiBasisRep_TO_GridRep
@@ -2358,21 +2358,21 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 !      logical, parameter :: debug = .TRUE.
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
-      !write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
+      !write(out_unit,*) 'BEGINNING ',name_sub,' ',n
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*) 'para_Op%mat_done',para_Op%mat_done
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+        flush(out_unit)
         CALL write_param_Op(para_Op)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        write(out_unitp,*) 'ini OpPsiBasisRep'
+        write(out_unit,*) 'ini OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
@@ -2380,9 +2380,9 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
       !-----------------------------------------------------------------
 !     - test on nb_bi : nb_bi>0
       IF (para_Op%nb_bi <= 0) THEN
-        write(out_unitp,*) ' ERROR : nb_bi MUST be > 0'
-        write(out_unitp,*) 'nb_bi',para_Op%nb_bi
-        write(out_unitp,*) 'STOP in ',name_sub
+        write(out_unit,*) ' ERROR : nb_bi MUST be > 0'
+        write(out_unit,*) 'nb_bi',para_Op%nb_bi
+        write(out_unit,*) 'STOP in ',name_sub
         STOP
       END IF
       !-----------------------------------------------------------------
@@ -2441,7 +2441,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
             !$OMP end critical(CRIT2_sub_OpPsi)
 
 
-            !write(out_unitp,*) 'iterm,Grid',iterm,Grid
+            !write(out_unit,*) 'iterm,Grid',iterm,Grid
             DO i1_bi=1,para_Op%nb_bie
             DO i2_bi=1,para_Op%nb_bie
               iqi1 = 1         + (i1_bi-1) * Psi%nb_qa
@@ -2514,26 +2514,26 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
         CALL dealloc_NParray(Grid,'Grid',name_sub)
 
       ELSE
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'Save_MemGrid=.TRUE. or Type_FileGrid=0 is not possible in this subroutine'
-        write(out_unitp,*) 'Check the fortran!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'Save_MemGrid=.TRUE. or Type_FileGrid=0 is not possible in this subroutine'
+        write(out_unit,*) 'Check the fortran!'
         STOP
       END IF
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiGridRep'
+        write(out_unit,*) 'OpPsiGridRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
-      !write(out_unitp,*) 'END ',name_sub
+      !write(out_unit,*) 'END ',name_sub
 
       END SUBROUTINE sub_OpPsi_WITH_FileGrid_type12
 
 
       SUBROUTINE  sub_OpPsi_WITH_FileGrid_type0(Psi,OpPsi,para_Op,derOp,pot_only)
-      USE mod_system
+      USE EVR_system_m
       USE mod_PrimOp,  ONLY : param_d0MatOp,Init_d0MatOp,dealloc_d0MatOp
       USE mod_psi,     ONLY : param_psi,ecri_psi,alloc_psi,dealloc_psi, &
                               alloc_array,dealloc_array,                &
@@ -2595,19 +2595,19 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
       !-----------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*) 'para_Op%mat_done',para_Op%mat_done
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+        flush(out_unit)
         CALL write_param_Op(para_Op)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        write(out_unitp,*) 'ini OpPsiBasisRep'
+        write(out_unit,*) 'ini OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
@@ -2639,9 +2639,9 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
         IF (para_Op%name_Op == 'H') THEN
           type_Op = para_Op%para_ReadOp%Type_HamilOp ! H
           IF (type_Op /= 1) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) '    Type_HamilOp MUST be equal to 1 for HADA or cHAC'
-            write(out_unitp,*) '    CHECK your data!!'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) '    Type_HamilOp MUST be equal to 1 for HADA or cHAC'
+            write(out_unit,*) '    CHECK your data!!'
             STOP
           END IF
         ELSE
@@ -2711,24 +2711,24 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
         CALL dealloc_array(tab_Psi,"tab_Psi","sub_OpPsi")
 
       ELSE
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'Save_MemGrid=.TRUE. or Type_FileGrid=1,2 is not possible in this subroutine'
-        write(out_unitp,*) 'Check the fortran!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'Save_MemGrid=.TRUE. or Type_FileGrid=1,2 is not possible in this subroutine'
+        write(out_unit,*) 'Check the fortran!'
       END IF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiGridRep'
+        write(out_unit,*) 'OpPsiGridRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_OpPsi_WITH_FileGrid_type0
 
       SUBROUTINE sub_itermOpPsi_GridRep(Psi,OpPsi,iterm,para_Op)
-      USE mod_system
+      USE EVR_system_m
       USE mod_SetOp,    ONLY : param_Op,write_param_Op
       USE mod_psi,      ONLY : param_psi,ecri_psi,sub_d0d1d2PsiBasisRep_TO_GridRep
       IMPLICIT NONE
@@ -2752,11 +2752,11 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 !     logical, parameter :: debug = .TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_itermOpPsi_GridRep'
-        write(out_unitp,*) 'iterm',iterm
-        write(out_unitp,*) 'PsiBasisRep'
+        write(out_unit,*) 'BEGINNING sub_itermOpPsi_GridRep'
+        write(out_unit,*) 'iterm',iterm
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        write(out_unitp,*) 'ini OpPsiBasisRep'
+        write(out_unit,*) 'ini OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
       END IF
 !-----------------------------------------------------------
@@ -2814,8 +2814,8 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
         END DO
 
       ELSE ! para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done = .FLASE.
-         write(out_unitp,*) 'ERROR in  sub_itermOpPsi_GridRep'
-         write(out_unitp,*) 'Save_MemGrid_done = .FALSE. is not possible'
+         write(out_unit,*) 'ERROR in  sub_itermOpPsi_GridRep'
+         write(out_unit,*) 'Save_MemGrid_done = .FALSE. is not possible'
          STOP
       END IF
 
@@ -2826,7 +2826,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 !>     Note the symab
 !=======================================================================================
       SUBROUTINE sub_scaledOpPsi(Psi,OpPsi,E0,Esc)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,   ONLY : param_psi,ecri_psi
       IMPLICIT NONE
 
@@ -2843,11 +2843,11 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
       character (len=*), parameter :: name_sub = 'sub_scaledOpPsi'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'E0,Esc',E0,Esc
-        write(out_unitp,*) 'Psi'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'E0,Esc',E0,Esc
+        write(out_unit,*) 'Psi'
         CALL ecri_psi(Psi=Psi)
-        write(out_unitp,*) 'OpPsi'
+        write(out_unit,*) 'OpPsi'
         CALL ecri_psi(Psi=OpPsi)
       END IF
 
@@ -2861,10 +2861,10 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'sub_scaledOpPsi'
+        write(out_unit,*) 'sub_scaledOpPsi'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -2877,7 +2877,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 !
 !=======================================================================================
       SUBROUTINE sub_OpiPsi(Psi,OpPsi,para_Op,iOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_SetOp,   ONLY : param_Op,write_param_Op,alloc_para_Op,read_OpGrid_OF_Op
       USE mod_psi,     ONLY : param_psi,ecri_psi,alloc_psi,dealloc_psi, &
                               sub_d0d1d2PsiBasisRep_TO_GridRep,         &
@@ -2911,18 +2911,18 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 !---------------------------------------------------------------------
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat)) CALL Write_Mat(para_Op%Cmat,out_unitp,3)
-        IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unitp,5)
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        IF (allocated(para_Op%Cmat)) CALL Write_Mat(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        write(out_unitp,*) 'ini OpPsiBasisRep'
+        write(out_unit,*) 'ini OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
       END IF
 !-----------------------------------------------------------
@@ -2931,9 +2931,9 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 !     ----------------------------------------------------------------
 !     - test on nb_bi : nb_bi>0
       IF (para_Op%nb_bi <= 0) THEN
-        write(out_unitp,*) ' ERROR : nb_bi MUST be > 0'
-        write(out_unitp,*) 'nb_bi',para_Op%nb_bi
-        write(out_unitp,*) 'STOP in ',name_sub
+        write(out_unit,*) ' ERROR : nb_bi MUST be > 0'
+        write(out_unit,*) 'nb_bi',para_Op%nb_bi
+        write(out_unit,*) 'STOP in ',name_sub
         STOP
       END IF
 !     ----------------------------------------------------------------
@@ -2967,7 +2967,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
 !-------------------------------------------------------------
       IF (old .OR. psi%nb_baie>psi%nb_tot) THEN
-         write(out_unitp,*) ' Impossible with old OpPsi : ',name_sub
+         write(out_unit,*) ' Impossible with old OpPsi : ',name_sub
          STOP
       END IF
 !-------------------------------------------------------------
@@ -2981,7 +2981,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 !-------------------------------------------------------------
 
 
-!       write(out_unitp,*) 'para_Op%derive_termQact',iOp,para_Op%derive_termQact(:,iOp)
+!       write(out_unit,*) 'para_Op%derive_termQact',iOp,para_Op%derive_termQact(:,iOp)
 !       - calculation of d0d1d2psi as a function derive_termQact
 
         IF (.NOT. para_Op%OpGrid(iOp)%grid_zero) THEN
@@ -3034,7 +3034,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
         END IF
 
 !     - the projection of PsiGridRep on PsiBasisRep -------------------
-!     write(out_unitp,*) 'OpPsiGridRep'
+!     write(out_unit,*) 'OpPsiGridRep'
 !     CALL ecri_psi(Psi=OpPsi)
       CALL sub_PsiGridRep_TO_BasisRep(OpPsi)
 !     --------------------------------------------------------
@@ -3052,17 +3052,17 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 !
 !=====================================================================
       ELSE ! para_Op%para_ReadOp%para_FileGrid%Save_MemGrid = .FLASE.
-         write(out_unitp,*) 'ERROR in ',name_sub
-         write(out_unitp,*) 'Save_MemGrid = .FALSE. is not possible'
+         write(out_unit,*) 'ERROR in ',name_sub
+         write(out_unit,*) 'Save_MemGrid = .FALSE. is not possible'
          STOP
       END IF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'OpPsiBasisRep'
+        write(out_unit,*) 'OpPsiBasisRep'
         CALL ecri_psi(Psi=OpPsi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -3070,7 +3070,7 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
       END SUBROUTINE sub_OpiPsi
 
       SUBROUTINE sub_sqRhoOVERJac_Psi(Psi,para_Op,inv)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,       ONLY : param_psi,ecri_psi
       USE mod_SetOp,     ONLY : param_Op,write_param_Op
 
@@ -3100,30 +3100,30 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
       n = para_Op%nb_tot
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unitp,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unitp,*) 'nb_act1',para_Op%mole%nb_act1
-        write(out_unitp,*) 'nb_var',para_Op%mole%nb_var
-        write(out_unitp,*)
-        write(out_unitp,*) 'PsiBasisRep'
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+        write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
+        write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+        write(out_unit,*)
+        write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------------
 
       IF (.NOT. allocated(para_Op%para_AllBasis%basis_ext%sqRhoOVERJac)) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) ' sqRhoOVERJac MUST be on allocated!!!'
-         write(out_unitp,*) ' ... You have to force it in "sub_HSOp_inact"!!'
-         write(out_unitp,*) ' Check the fortran !!'
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) ' sqRhoOVERJac MUST be on allocated!!!'
+         write(out_unit,*) ' ... You have to force it in "sub_HSOp_inact"!!'
+         write(out_unit,*) ' Check the fortran !!'
          STOP
       END IF
 
       IF (Psi%cplx) THEN
        IF (.NOT. allocated(Psi%CvecG)) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) ' psi MUST be on the grid'
-         write(out_unitp,*) ' Check the fortran !!'
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) ' psi MUST be on the grid'
+         write(out_unit,*) ' Check the fortran !!'
          STOP
        END IF
 
@@ -3148,9 +3148,9 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
       ELSE
 
         IF (.NOT. allocated(Psi%RvecG)) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' psi MUST be on the grid'
-          write(out_unitp,*) ' Check the fortran !!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' psi MUST be on the grid'
+          write(out_unit,*) ' Check the fortran !!'
           STOP
         END IF
 
@@ -3181,16 +3181,16 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'PsiGridRep * sqrt(Rho/Jac)'
+        write(out_unit,*) 'PsiGridRep * sqrt(Rho/Jac)'
         CALL ecri_psi(Psi=Psi)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_sqRhoOVERJac_Psi
 
 SUBROUTINE sub_PsiDia_TO_PsiAdia_WITH_MemGrid(Psi,para_H)
-  USE mod_system
+  USE EVR_system_m
   USE mod_psi,      ONLY : param_psi,ecri_psi,                                  &
                            get_CVec_OF_psi_AT_ind_a,get_RVec_OF_psi_AT_ind_a,   &
                            set_CVec_OF_psi_AT_ind_a,set_RVec_OF_psi_AT_ind_a
@@ -3229,14 +3229,14 @@ SUBROUTINE sub_PsiDia_TO_PsiAdia_WITH_MemGrid(Psi,para_H)
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_bie,nb_baie',para_H%nb_bie,para_H%nb_baie
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_bie,nb_baie',para_H%nb_bie,para_H%nb_baie
+    flush(out_unit)
     !CALL write_param_Op(para_H)
-    write(out_unitp,*)
-    write(out_unitp,*) 'PsiDia'
+    write(out_unit,*)
+    write(out_unit,*) 'PsiDia'
     CALL ecri_psi(Psi=Psi)
-    flush(out_unitp)
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------------
 
@@ -3246,9 +3246,9 @@ SUBROUTINE sub_PsiDia_TO_PsiAdia_WITH_MemGrid(Psi,para_H)
     GridDone = allocated(Psi%RvecG)
   END IF
   IF (debug) THEN
-    write(out_unitp,*) 'GridDone',GridDone
-    write(out_unitp,*) 'allo RvecG',allocated(Psi%RvecG)
-    write(out_unitp,*) 'allo CvecG',allocated(Psi%CvecG)
+    write(out_unit,*) 'GridDone',GridDone
+    write(out_unit,*) 'allo RvecG',allocated(Psi%RvecG)
+    write(out_unit,*) 'allo CvecG',allocated(Psi%CvecG)
   END IF
 
   IF (para_H%para_ReadOp%para_FileGrid%Save_MemGrid_done .AND. GridDone) THEN
@@ -3256,9 +3256,9 @@ SUBROUTINE sub_PsiDia_TO_PsiAdia_WITH_MemGrid(Psi,para_H)
     iterm = para_H%derive_term_TO_iterm(0,0) ! The potential term index
 
     IF (debug) THEN
-      write(out_unitp,*) 'iterm    ',iterm
-      write(out_unitp,*) 'grid_zero',para_H%OpGrid(iterm)%grid_zero
-      write(out_unitp,*) 'grid_cte ',para_H%OpGrid(iterm)%grid_cte
+      write(out_unit,*) 'iterm    ',iterm
+      write(out_unit,*) 'grid_zero',para_H%OpGrid(iterm)%grid_zero
+      write(out_unit,*) 'grid_cte ',para_H%OpGrid(iterm)%grid_cte
     END IF
 
     IF (para_H%OpGrid(iterm)%grid_zero) THEN
@@ -3316,22 +3316,22 @@ SUBROUTINE sub_PsiDia_TO_PsiAdia_WITH_MemGrid(Psi,para_H)
     END IF
 
   ELSE
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) 'Save_MemGrid_done=.FALSE. is not possible in this subroutine'
-    write(out_unitp,*) '  Save_MemGrid_done',para_H%para_ReadOp%para_FileGrid%Save_MemGrid_done
-    write(out_unitp,*) 'OR'
-    write(out_unitp,*) 'The wave function is not on the grid:'
-    write(out_unitp,*) '  alloc Psi%CvecG',allocated(Psi%CvecG)
-    write(out_unitp,*) '  alloc Psi%RvecG',allocated(Psi%RvecG)
-    write(out_unitp,*) 'Check the fortran!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) 'Save_MemGrid_done=.FALSE. is not possible in this subroutine'
+    write(out_unit,*) '  Save_MemGrid_done',para_H%para_ReadOp%para_FileGrid%Save_MemGrid_done
+    write(out_unit,*) 'OR'
+    write(out_unit,*) 'The wave function is not on the grid:'
+    write(out_unit,*) '  alloc Psi%CvecG',allocated(Psi%CvecG)
+    write(out_unit,*) '  alloc Psi%RvecG',allocated(Psi%RvecG)
+    write(out_unit,*) 'Check the fortran!'
     STOP
   END IF
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'PsiAdia'
+    write(out_unit,*) 'PsiAdia'
     CALL ecri_psi(Psi=Psi)
-    write(out_unitp,*)
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*)
+    write(out_unit,*) 'END ',name_sub
   END IF
   !-----------------------------------------------------------
 
@@ -3342,7 +3342,7 @@ END SUBROUTINE sub_PsiDia_TO_PsiAdia_WITH_MemGrid
 !
 !================================================================
 SUBROUTINE sub_moyABC(Psi,iPsi,info,ABC,para_H,PsiAna)
-  USE mod_system
+  USE EVR_system_m
   USE mod_Constant
   USE mod_Coord_KEO
   USE mod_psi,      ONLY : param_psi,dealloc_psi
@@ -3372,9 +3372,9 @@ SUBROUTINE sub_moyABC(Psi,iPsi,info,ABC,para_H,PsiAna)
   !logical, parameter :: debug=.TRUE.
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING sub_moyABC'
-    write(out_unitp,*) 'ipsi,info',iPsi,info
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING sub_moyABC'
+    write(out_unit,*) 'ipsi,info',iPsi,info
+    flush(out_unit)
  END IF
 !-----------------------------------------------------------
     IF (.NOT. allocated(PsiAna)) PsiAna = ''
@@ -3417,8 +3417,8 @@ SUBROUTINE sub_moyABC(Psi,iPsi,info,ABC,para_H,PsiAna)
     TensorI(j,i) = real(avOp,kind=Rkind)
 
     IF (para_Tnum%Inertia) THEN
-      IF (debug) write(out_unitp,*) iPsi,'TensorI',info
-      IF (debug) write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
+      IF (debug) write(out_unit,*) iPsi,'TensorI',info
+      IF (debug) write(out_unit,"(3(3(f15.6,1x),/))") TensorI(:,:)
 
       CALL ADD_TO_string(PsiAna,'TensorI',info ,new_line('nl'), &
                         TO_string(TensorI(:,1)),new_line('nl'), &
@@ -3432,8 +3432,8 @@ SUBROUTINE sub_moyABC(Psi,iPsi,info,ABC,para_H,PsiAna)
 
       TensorI = inv_OF_Mat_TO(mat)
 
-      IF (debug) write(out_unitp,*) iPsi,'TensorI (invers of G)',info
-      IF (debug) write(out_unitp,"(3(3(f15.6,1x),/))") TensorI(:,:)
+      IF (debug) write(out_unit,*) iPsi,'TensorI (invers of G)',info
+      IF (debug) write(out_unit,"(3(3(f15.6,1x),/))") TensorI(:,:)
 
       CALL ADD_TO_string(PsiAna,'TensorI (invers of G)',info ,new_line('nl'), &
                          TO_string(TensorI(:,1)),new_line('nl'), &
@@ -3441,8 +3441,8 @@ SUBROUTINE sub_moyABC(Psi,iPsi,info,ABC,para_H,PsiAna)
                          TO_string(TensorI(:,3)),new_line('nl'))
     END IF
 
-    IF (debug) write(out_unitp,*) iPsi,'avMhu',info
-    IF (debug) write(out_unitp,"(3(3(f15.9,1x),/))") avMhu(:,:)
+    IF (debug) write(out_unit,*) iPsi,'avMhu',info
+    IF (debug) write(out_unit,"(3(3(f15.9,1x),/))") avMhu(:,:)
 
     CALL ADD_TO_string(PsiAna,'avMhu (part of G)',info ,new_line('nl'), &
                       TO_string(TensorI(:,1)),new_line('nl'), &
@@ -3464,11 +3464,11 @@ SUBROUTINE sub_moyABC(Psi,iPsi,info,ABC,para_H,PsiAna)
 
   !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,21) iPsi,' ABC (cm-1) at ',info,ABC(:) * get_Conv_au_TO_unit('E','cm-1')
-    write(out_unitp,21) iPsi,' ABC (GHz) at ',info,ABC(:) * get_Conv_au_TO_unit('E','GHz')
+    write(out_unit,21) iPsi,' ABC (cm-1) at ',info,ABC(:) * get_Conv_au_TO_unit('E','cm-1')
+    write(out_unit,21) iPsi,' ABC (GHz) at ',info,ABC(:) * get_Conv_au_TO_unit('E','GHz')
 21    format(i4,2A,3f18.5)
-    write(out_unitp,*) 'END sub_moyABC'
-    flush(out_unitp)
+    write(out_unit,*) 'END sub_moyABC'
+    flush(out_unit)
   END IF
   !----------------------------------------------------------
 
@@ -3479,7 +3479,7 @@ END SUBROUTINE sub_moyABC
 !
 !================================================================
 SUBROUTINE sub_moyScalOp(Psi,iPsi,info,tab_Op,PsiAna)
-  USE mod_system
+  USE EVR_system_m
   USE mod_psi,      ONLY : param_psi,dealloc_psi
   USE mod_SetOp,    ONLY : param_Op
   IMPLICIT NONE
@@ -3504,11 +3504,11 @@ SUBROUTINE sub_moyScalOp(Psi,iPsi,info,tab_Op,PsiAna)
   !-----------------------------------------------------------
   nb_scalar_Op = tab_Op(1)%para_ReadOp%nb_scalar_Op
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING sub_moyScalOp'
-    write(out_unitp,*) 'ipsi,info',iPsi,info
-    write(out_unitp,*) 'nb_scalar_Op',nb_scalar_Op
+    write(out_unit,*) 'BEGINNING sub_moyScalOp'
+    write(out_unit,*) 'ipsi,info',iPsi,info
+    write(out_unit,*) 'nb_scalar_Op',nb_scalar_Op
     DO iOp=1,size(tab_Op)
-      write(out_unitp,*) iOp,'Save_MemGrid_done', &
+      write(out_unit,*) iOp,'Save_MemGrid_done', &
          tab_Op(iOp)%para_ReadOp%para_FileGrid%Save_MemGrid_done
     END DO
   END IF
@@ -3535,16 +3535,16 @@ SUBROUTINE sub_moyScalOp(Psi,iPsi,info,tab_Op,PsiAna)
 
   !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,"(i0,2a,100(f15.9,1x))") iPsi,' avScalOp: ',info,avScalOp
-    write(out_unitp,*) 'END sub_moyScalOp'
-    flush(out_unitp)
+    write(out_unit,"(i0,2a,100(f15.9,1x))") iPsi,' avScalOp: ',info,avScalOp
+    write(out_unit,*) 'END sub_moyScalOp'
+    flush(out_unit)
   END IF
   !----------------------------------------------------------
 
 
 end SUBROUTINE sub_moyScalOp
 SUBROUTINE sub_psiHitermPsi(Psi,iPsi,info,para_H,PsiAna)
-  USE mod_system
+  USE EVR_system_m
   USE mod_SetOp,    ONLY : param_Op
   USE mod_psi,      ONLY : param_psi,dealloc_psi
   IMPLICIT NONE
@@ -3565,10 +3565,10 @@ SUBROUTINE sub_psiHitermPsi(Psi,iPsi,info,para_H,PsiAna)
   !logical, parameter :: debug=.TRUE.
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING sub_psiHitermPsi'
-    write(out_unitp,*) 'ipsi,info',iPsi,info
-    write(out_unitp,*) 'nb_Term',para_H%nb_Term
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING sub_psiHitermPsi'
+    write(out_unit,*) 'ipsi,info',iPsi,info
+    write(out_unit,*) 'nb_Term',para_H%nb_Term
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
  
@@ -3577,11 +3577,11 @@ SUBROUTINE sub_psiHitermPsi(Psi,iPsi,info,para_H,PsiAna)
 
   !for H
   IF (para_H%name_Op /= 'H') THEN 
-    write(out_unitp,*) 'ERROR in sub_psiHitermPsi'
-    write(out_unitp,*) 'The operator is wrong.'
-    write(out_unitp,*) '  Expected: H'
-    write(out_unitp,*) '  We have: ',para_H%name_Op
-    flush(out_unitp)
+    write(out_unit,*) 'ERROR in sub_psiHitermPsi'
+    write(out_unit,*) 'The operator is wrong.'
+    write(out_unit,*) '  Expected: H'
+    write(out_unit,*) '  We have: ',para_H%name_Op
+    flush(out_unit)
     STOP 'ERROR sub_psiHitermPsi: in wrong Operator !!'
   END IF
   DO iOp=1,para_H%nb_Term
@@ -3598,10 +3598,10 @@ SUBROUTINE sub_psiHitermPsi(Psi,iPsi,info,para_H,PsiAna)
 
   !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,"(i0,a,i0,a,2(i0,1x),2a,f15.9,1x,f15.9)") iPsi,  &
+    write(out_unit,"(i0,a,i0,a,2(i0,1x),2a,f15.9,1x,f15.9)") iPsi,  &
        ' H(',iOp,') der[',para_H%derive_termQact(:,iOp),']: ',info,avOp
-    write(out_unitp,*) 'END sub_psiHitermPsi'
-    flush(out_unitp)
+    write(out_unit,*) 'END sub_psiHitermPsi'
+    flush(out_unit)
   END IF
   !----------------------------------------------------------
 

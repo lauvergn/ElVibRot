@@ -67,7 +67,7 @@
                           para_ana,para_intensity,intensity_only,       &
                           para_propa)
 
-      use mod_system
+      use EVR_system_m
       USE mod_dnSVM,     only : Type_dnMat
       USE mod_Constant,  only : constant, sub_constantes, REAL_WU
       USE mod_Coord_KEO, only : CoordType, Tnum, get_Qact0, read_RefGeom
@@ -127,8 +127,8 @@
       character (len=*), parameter :: name_sub = 'ini_data'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -140,15 +140,15 @@
 !------ read or set up the physical constants ------------------------
       CALL sub_constantes(const_phys,.TRUE.)
 
-      flush(out_unitp)
+      flush(out_unit)
       IF(MPI_id==0) THEN
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "=== COORDINATES (TNUM) ====================================="
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "=== COORDINATES (TNUM) ====================================="
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
       ENDIF
-      flush(out_unitp)
+      flush(out_unit)
 
 !---------------------------------------------------------------------
 !------- read the coordinates ....     -------------------------------
@@ -167,12 +167,12 @@
 !-----------------------------------------------------------------------
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "=== END COORDINATES (TNUM) ================================="
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        flush(out_unitp)
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "=== END COORDINATES (TNUM) ================================="
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        flush(out_unit)
       ENDIF
 
 !---------------------------------------------------------------------
@@ -183,37 +183,37 @@
 !     on the grid points.
 !     ----------------------------------------------------------------
       IF(MPI_id==0) THEN
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "=== BASIS =================================================="
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        flush(out_unitp)
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "=== BASIS =================================================="
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        flush(out_unit)
       ENDIF
 
       ! allocate para_AllBasis, but no big mem at this point
       CALL alloc_AllBasis(para_AllBasis)
 
-      flush(out_unitp)
+      flush(out_unit)
       IF(MPI_id==0) THEN
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) '== READ ACTIVE BASIS ============================'
-        write(out_unitp,*) '================================================='
-        flush(out_unitp)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) '== READ ACTIVE BASIS ============================'
+        write(out_unit,*) '================================================='
+        flush(out_unit)
       ENDIF
 
       ! basis information in BasisnD
       CALL read_basis5(para_AllBasis%BasisnD,mole)
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) '== END READ ACTIVE BASIS ========================'
-        write(out_unitp,*) '================================================='
+        write(out_unit,*) '================================================='
+        write(out_unit,*) '== END READ ACTIVE BASIS ========================'
+        write(out_unit,*) '================================================='
 
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) '== INACTIVE BASIS ==============================='
-        write(out_unitp,*) '================================================='
-        flush(out_unitp)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) '== INACTIVE BASIS ==============================='
+        write(out_unit,*) '================================================='
+        flush(out_unit)
       ENDIF
 
       CALL read_inactive(para_AllBasis,mole,para_Tnum%para_PES_FromTnum%QMLib)
@@ -241,21 +241,21 @@
       END IF
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) '== END INACTIVE BASIS ==========================='
-        write(out_unitp,*) '================================================='
-        flush(out_unitp)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) '== END INACTIVE BASIS ==========================='
+        write(out_unit,*) '================================================='
+        flush(out_unit)
       ENDIF
 !---------------------------------------------------------------------
 
 !---------------------------------------------------------------------
       IF(MPI_id==0) THEN
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "=== END BASIS =============================================="
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        flush(out_unitp)
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "=== END BASIS =============================================="
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        flush(out_unit)
       ENDIF
 
       CALL read_active(para_Tnum,mole,para_ReadOp)
@@ -270,17 +270,17 @@
       CALL dealloc_NParray(Qana,"Qana",name_sub)
 
       IF (para_ana%VibRot .AND. para_ana%JJmax <= 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '  VibRot=t and JJmax<1'
-        write(out_unitp,*) ' It is impossible, you have to:'
-        write(out_unitp,*) '(i)     Set VibRot=f'
-        write(out_unitp,*) '(ii) or Set VibRot=t and JJmax > 0'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '  VibRot=t and JJmax<1'
+        write(out_unit,*) ' It is impossible, you have to:'
+        write(out_unit,*) '(i)     Set VibRot=f'
+        write(out_unit,*) '(ii) or Set VibRot=t and JJmax > 0'
         STOP
       END IF
       IF (para_ana%VibRot .AND. para_ana%JJmax > 0 .AND. Para_Tnum%JJ > 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '  VibRot=t and ...'
-        write(out_unitp,*) '  para_ana%JJmax > 0 and Para_Tnum%JJ > 0'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '  VibRot=t and ...'
+        write(out_unit,*) '  para_ana%JJmax > 0 and Para_Tnum%JJ > 0'
         STOP
       END IF
 !---------------------------------------------------------------------
@@ -292,12 +292,12 @@
       IF (para_ana%intensity) THEN
         CALL read_intensity(para_intensity)
         IF (para_intensity%l_IntVR .AND.para_Tnum%JJ == 0) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) '   You have incompatible parameters in: '
-          write(out_unitp,*) ' l_IntVR in the namelist "intensity"',para_intensity%l_IntVR
-          write(out_unitp,*) ' JJ in the namelist "variable"',para_Tnum%JJ
-          write(out_unitp,*) ' You should have: l_IntVR=f and JJ=0 '
-          write(out_unitp,*) ' or : l_IntVR=t and JJ>0'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) '   You have incompatible parameters in: '
+          write(out_unit,*) ' l_IntVR in the namelist "intensity"',para_intensity%l_IntVR
+          write(out_unit,*) ' JJ in the namelist "variable"',para_Tnum%JJ
+          write(out_unit,*) ' You should have: l_IntVR=f and JJ=0 '
+          write(out_unit,*) ' or : l_IntVR=t and JJ>0'
           STOP
         END IF
       END IF
@@ -418,28 +418,28 @@
 !      End of data reading
 !
 !=====================================================================
-      flush(out_unitp)
+      flush(out_unit)
       IF(MPI_id==0) THEN
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "=== AUTO BASIS ============================================="
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        flush(out_unitp)
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "=== AUTO BASIS ============================================="
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        flush(out_unit)
       ENDIF
-      write(out_unitp,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
+      write(out_unit,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
 
       CALL Auto_basis(para_Tnum,mole,para_AllBasis,para_ReadOp)
 
-      write(out_unitp,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
+      write(out_unit,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
 
  !      !CALL Set_TDParam_FROM_basis(para_AllBasis%BasisnD,[3.0_Rkind,5.0_Rkind,2.0_Rkind,12.0_Rkind])
  !      CALL Set_TDParam_FROM_basis(para_AllBasis%BasisnD,[3.0_Rkind,5.0_Rkind,2.0_Rkind])
- !      write(out_unitp,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
- !      write(out_unitp,*) "coucou"
+ !      write(out_unit,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
+ !      write(out_unit,*) "coucou"
  !
  !       CALL Auto_basis(para_Tnum,mole,para_AllBasis,para_ReadOp)
- !       write(out_unitp,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
+ !       write(out_unit,*) "BuildBasis_done? ",para_AllBasis%BasisnD%BuildBasis_done
  ! stop
 
       IF (para_AllBasis%BasisnD%SparseGrid_type == 4) THEN
@@ -462,21 +462,21 @@
 
       IF(MPI_id==0) THEN
         !CALL RecWrite_basis(para_AllBasis%BasisnD,write_all=.TRUE.) ; stop
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
         IF (debug) THEN
           CALL RecWrite_basis(para_AllBasis%BasisnD)
           CALL write_basis_ext2n(para_AllBasis%basis_ext2n)
         END IF
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "=== END AUTO BASIS ========================================="
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        flush(out_unitp)
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "=== END AUTO BASIS ========================================="
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        flush(out_unit)
       ENDIF
 
-       !write(out_unitp,*) 'pack ?',para_AllBasis%BasisnD%packed_done
+       !write(out_unit,*) 'pack ?',para_AllBasis%BasisnD%packed_done
        !IF (para_AllBasis%BasisnD%packed_done) THEN
        !  CALL sub_MatOFdnSX_basis(para_AllBasis%BasisnD)
        !END IF
@@ -504,30 +504,30 @@
 !     i=5 => for ScalOp4 : n_op = 4
 !     ....
       IF(MPI_id==0) THEN
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "====== List of Operators ==================================="
-        write(out_unitp,*)
-        write(out_unitp,*) 'para_ReadOp%nb_scalar_Op:    ',para_ReadOp%nb_scalar_Op
-        write(out_unitp,*) 'para_ReadOp%PrimOp_t%nb_CAP: ',para_ReadOp%PrimOp_t%nb_CAP
-        write(out_unitp,*) 'Pi Operators:                ',para_ana%ana_psi%AvPi
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "====== List of Operators ==================================="
+        write(out_unit,*)
+        write(out_unit,*) 'para_ReadOp%nb_scalar_Op:    ',para_ReadOp%nb_scalar_Op
+        write(out_unit,*) 'para_ReadOp%PrimOp_t%nb_CAP: ',para_ReadOp%PrimOp_t%nb_CAP
+        write(out_unit,*) 'Pi Operators:                ',para_ana%ana_psi%AvPi
       ENDIF
 
       IF (para_ReadOp%nb_scalar_Op > 27) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) 'You have defined too many Operator'
-        write(out_unitp,*) ' nb_scalar_Op must be < 28',para_ReadOp%nb_scalar_Op
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) 'You have defined too many Operator'
+        write(out_unit,*) ' nb_scalar_Op must be < 28',para_ReadOp%nb_scalar_Op
         STOP
       END IF
       IF (para_ReadOp%calc_scalar_Op .AND. para_ReadOp%nb_scalar_Op < 1) THEN
         para_ReadOp%nb_scalar_Op = 3
-        write(out_unitp,*) ' WARNING in ',name_sub
-        write(out_unitp,*) 'calc_scalar_Op=t and nb_scalar_Op < 1'
-        write(out_unitp,*) ' You MUST set nb_scalar_Op in the namelist "minimun"'
+        write(out_unit,*) ' WARNING in ',name_sub
+        write(out_unit,*) 'calc_scalar_Op=t and nb_scalar_Op < 1'
+        write(out_unit,*) ' You MUST set nb_scalar_Op in the namelist "minimun"'
       END IF
       IF (para_ReadOp%calc_scalar_Op .AND. para_ReadOp%nb_scalar_Op < 3) THEN
-        write(out_unitp,*) ' WARNING in ',name_sub
-        write(out_unitp,*) 'calc_scalar_Op=t and nb_scalar_Op < 3'
+        write(out_unit,*) ' WARNING in ',name_sub
+        write(out_unit,*) 'calc_scalar_Op=t and nb_scalar_Op < 3'
       END IF
       para_ReadOp%calc_scalar_Op = (para_ReadOp%nb_scalar_Op > 0)
 
@@ -536,7 +536,7 @@
                              para_ReadOp%nb_CAP + para_ReadOp%nb_FluxOp
       IF (para_ana%ana_psi%AvPi) para_AllOp%nb_Op = para_AllOp%nb_Op + 2*mole%nb_act1
 
-      IF (debug) write(out_unitp,*) 'para_AllOp%nb_Op        : ',para_AllOp%nb_Op
+      IF (debug) write(out_unit,*) 'para_AllOp%nb_Op        : ',para_AllOp%nb_Op
 
       CALL alloc_array(para_AllOp%tab_Op,[para_AllOp%nb_Op],        &
                       'para_AllOp%tab_Op',name_sub)
@@ -558,9 +558,9 @@
       para_AllOp%tab_Op(iOp)%symab      = 0 ! totally symmetric
       IF (para_ana%VibRot) Para_Tnum%JJ = 0
       IF(MPI_id==0) THEN
-        write(out_unitp,*) 'para_H%...%Make_Mat           ',para_AllOp%tab_Op(iOp)%para_ReadOp%Make_Mat
-        write(out_unitp,*) 'para_H%Make_Mat               ',para_AllOp%tab_Op(iOp)%Make_Mat
-        write(out_unitp,*) 'para_H%...%Op_WithContracRVec ',para_AllOp%tab_Op(iOp)%para_ReadOp%Op_WithContracRVec
+        write(out_unit,*) 'para_H%...%Make_Mat           ',para_AllOp%tab_Op(iOp)%para_ReadOp%Make_Mat
+        write(out_unit,*) 'para_H%Make_Mat               ',para_AllOp%tab_Op(iOp)%Make_Mat
+        write(out_unit,*) 'para_H%...%Op_WithContracRVec ',para_AllOp%tab_Op(iOp)%para_ReadOp%Op_WithContracRVec
       ENDIF
 
       IF (debug) CALL Write_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp)
@@ -723,23 +723,23 @@
 
       IF(MPI_id==0) THEN
         DO i=1,para_AllOp%nb_Op
-          write(out_unitp,*) i,'Operator name: ',trim(para_AllOp%tab_Op(i)%name_Op)
+          write(out_unit,*) i,'Operator name: ',trim(para_AllOp%tab_Op(i)%name_Op)
           IF (para_AllOp%tab_Op(i)%para_ReadOp%save_MatOp .OR.                  &
             para_AllOp%tab_Op(i)%para_ReadOp%restart_MatOp) THEN
-            write(out_unitp,*) '    restart MatOp file: ',                      &
+            write(out_unit,*) '    restart MatOp file: ',                      &
                 para_AllOp%tab_Op(i)%para_ReadOp%FileMat%name
           END IF
         END DO
 
-        write(out_unitp,*)
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
+        write(out_unit,*)
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
 
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "============================================================"
-        write(out_unitp,*) "====== Finalize RPH transfo (Tnum) and ... ================="
-        write(out_unitp,*) "====== ... EneH0 of the basis sets ========================="
-        write(out_unitp,*)
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "============================================================"
+        write(out_unit,*) "====== Finalize RPH transfo (Tnum) and ... ================="
+        write(out_unit,*) "====== ... EneH0 of the basis sets ========================="
+        write(out_unit,*)
       ENDIF
 
       IF (associated(mole%RPHTransfo)) THEN
@@ -759,21 +759,21 @@
       END IF
 
 
-      write(out_unitp,*)
-      write(out_unitp,*) "============================================================"
-      write(out_unitp,*) "============================================================"
+      write(out_unit,*)
+      write(out_unit,*) "============================================================"
+      write(out_unit,*) "============================================================"
 !=====================================================================
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'nb_Op',para_AllOp%nb_Op
+        write(out_unit,*) 'nb_Op',para_AllOp%nb_Op
         DO i=1,para_AllOp%nb_Op
           CALL write_param_Op(para_AllOp%tab_Op(i))
         END DO
         DO i=1,para_AllBasis%BasisnD%nb_basis
-          write(out_unitp,*) 'basis',i
+          write(out_unit,*) 'basis',i
           CALL RecWrite_basis(para_AllBasis%BasisnD)
         END DO
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
       !---------------------------------------------------------------------
       END SUBROUTINE ini_data
@@ -781,7 +781,7 @@
 
 !===============================================================================
 SUBROUTINE MemoryEstimation(nb,nq,nb_Q,nb_channels,nb_psi)
-USE mod_system
+USE EVR_system_m
 USE mod_MPI_aux
 IMPLICIT NONE
 
@@ -808,58 +808,58 @@ KEO_type10_Mem = GridMem  * real((nb_Q**2 + 2),       kind=Rkind) ! size of G + 
 MPI_S%nb_channels=nb_channels
 MPI_S%nb_psi=nb_psi_loc
 
-write(out_unitp,*) "============================================================"
-write(out_unitp,*) "============================================================"
-write(out_unitp,*) "====== Memory psi and H ===================================="
+write(out_unit,*) "============================================================"
+write(out_unit,*) "============================================================"
+write(out_unit,*) "====== Memory psi and H ===================================="
 
-write(out_unitp,*) "------------------------------------------------------------"
+write(out_unit,*) "------------------------------------------------------------"
 Mem = psi_Mem
 CALL convertMem(Mem,MemUnit)
-IF(MPI_id==0) write(out_unitp,'(a,f10.0,1x,a)') "One psi: ",Mem,MemUnit
+IF(MPI_id==0) write(out_unit,'(a,f10.0,1x,a)') "One psi: ",Mem,MemUnit
 Mem = psi_Mem * 4
 CALL convertMem(Mem,MemUnit)
-IF(MPI_id==0) write(out_unitp,'(a,f10.0,1x,a)') "One psi's with Davidson (num_resetH=1): ",Mem,MemUnit
-IF(MPI_id==0) write(out_unitp,*) "------------------------------------------------------------"
+IF(MPI_id==0) write(out_unit,'(a,f10.0,1x,a)') "One psi's with Davidson (num_resetH=1): ",Mem,MemUnit
+IF(MPI_id==0) write(out_unit,*) "------------------------------------------------------------"
 
 IF (nb_psi_loc > 0) THEN
   Mem = psi_Mem * real(nb_psi_loc,kind=Rkind)
   CALL convertMem(Mem,MemUnit)
-  IF(MPI_id==0) write(out_unitp,'(i0,a,f10.0,1x,a)') nb_psi_loc," psi's: ",Mem,MemUnit
+  IF(MPI_id==0) write(out_unit,'(i0,a,f10.0,1x,a)') nb_psi_loc," psi's: ",Mem,MemUnit
   Mem = psi_Mem * real(nb_psi_loc,kind=Rkind) * FOUR
   CALL convertMem(Mem,MemUnit)
-  IF(MPI_id==0) write(out_unitp,'(i0,a,f10.0,1x,a)') nb_psi_loc," psi's with Davidson (num_resetH=1): ",Mem,MemUnit
-  IF(MPI_id==0) write(out_unitp,*) "------------------------------------------------------------"
+  IF(MPI_id==0) write(out_unit,'(i0,a,f10.0,1x,a)') nb_psi_loc," psi's with Davidson (num_resetH=1): ",Mem,MemUnit
+  IF(MPI_id==0) write(out_unit,*) "------------------------------------------------------------"
 END IF
 
-IF(MPI_id==0) write(out_unitp,*) "====== Memory for Type 1 (F2+F1+Vep+V) ====================="
-IF(MPI_id==0) write(out_unitp,*) "-SG4 Full direct --"
+IF(MPI_id==0) write(out_unit,*) "====== Memory for Type 1 (F2+F1+Vep+V) ====================="
+IF(MPI_id==0) write(out_unit,*) "-SG4 Full direct --"
 Mem = MappingSG4Meme
 CALL convertMem(Mem,MemUnit)
-IF(MPI_id==0) write(out_unitp,'(a,f10.0,1x,a)') "H memory (mapping):       ",Mem,MemUnit
-IF(MPI_id==0) write(out_unitp,*) "-SG4 KEO direct --"
+IF(MPI_id==0) write(out_unit,'(a,f10.0,1x,a)') "H memory (mapping):       ",Mem,MemUnit
+IF(MPI_id==0) write(out_unit,*) "-SG4 KEO direct --"
 Mem = MappingSG4Meme+PotMem
 CALL convertMem(Mem,MemUnit)
-IF(MPI_id==0) write(out_unitp,'(a,f10.0,1x,a)') "H memory (mapping+V):     ",Mem,MemUnit
-IF(MPI_id==0) write(out_unitp,*) "-SG4 --"
+IF(MPI_id==0) write(out_unit,'(a,f10.0,1x,a)') "H memory (mapping+V):     ",Mem,MemUnit
+IF(MPI_id==0) write(out_unit,*) "-SG4 --"
 Mem = MappingSG4Meme+KEO_type1_Mem ! PotMem is not here because is already counted in KEO_type1_Mem
 CALL convertMem(Mem,MemUnit)
-IF(MPI_id==0) write(out_unitp,'(a,f10.0,1x,a)') "H memory (mapping+V+KEO): ",Mem,MemUnit
+IF(MPI_id==0) write(out_unit,'(a,f10.0,1x,a)') "H memory (mapping+V+KEO): ",Mem,MemUnit
 
-IF(MPI_id==0) write(out_unitp,*) "====== Memory for Type 10 (G+V) ============================"
-IF(MPI_id==0) write(out_unitp,*) "-SG4 Full direct --"
+IF(MPI_id==0) write(out_unit,*) "====== Memory for Type 10 (G+V) ============================"
+IF(MPI_id==0) write(out_unit,*) "-SG4 Full direct --"
 Mem = MappingSG4Meme
 CALL convertMem(Mem,MemUnit)
-IF(MPI_id==0) write(out_unitp,'(a,f10.0,1x,a)') "H memory (mapping):       ",Mem,MemUnit
-IF(MPI_id==0) write(out_unitp,*) "-SG4 KEO direct --"
+IF(MPI_id==0) write(out_unit,'(a,f10.0,1x,a)') "H memory (mapping):       ",Mem,MemUnit
+IF(MPI_id==0) write(out_unit,*) "-SG4 KEO direct --"
 Mem = MappingSG4Meme+PotMem
 CALL convertMem(Mem,MemUnit)
-IF(MPI_id==0) write(out_unitp,'(a,f10.0,1x,a)') "H memory (mapping+V):     ",Mem,MemUnit
-IF(MPI_id==0) write(out_unitp,*) "-SG4 --"
+IF(MPI_id==0) write(out_unit,'(a,f10.0,1x,a)') "H memory (mapping+V):     ",Mem,MemUnit
+IF(MPI_id==0) write(out_unit,*) "-SG4 --"
 Mem = MappingSG4Meme+PotMem+KEO_type10_Mem
 CALL convertMem(Mem,MemUnit)
-IF(MPI_id==0) write(out_unitp,'(a,f10.0,1x,a)') "H memory (mapping+V+KEO): ",Mem,MemUnit
+IF(MPI_id==0) write(out_unit,'(a,f10.0,1x,a)') "H memory (mapping+V+KEO): ",Mem,MemUnit
 
-write(out_unitp,*) "============================================================"
-write(out_unitp,*) "============================================================"
+write(out_unit,*) "============================================================"
+write(out_unit,*) "============================================================"
 
 END SUBROUTINE MemoryEstimation

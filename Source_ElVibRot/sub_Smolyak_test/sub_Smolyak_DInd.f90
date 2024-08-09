@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_Smolyak_DInd
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 PRIVATE
@@ -72,7 +72,7 @@ PUBLIC :: TypeDInd, alloc_TypeDInd, dealloc_TypeDInd, Write_TypeDInd,   &
 CONTAINS
 
 SUBROUTINE alloc_TypeDInd(DInd,ndim,MaxnD)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 integer        :: ndim,MaxnD
@@ -91,7 +91,7 @@ allocate(DInd%tab_q(ndim))
 
 END SUBROUTINE alloc_TypeDInd
 SUBROUTINE dealloc_TypeDInd(DInd)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeDInd) :: DInd
@@ -106,7 +106,7 @@ IF (allocated(DInd%tab_q))       deallocate(DInd%tab_q)
 
 END SUBROUTINE dealloc_TypeDInd
 SUBROUTINE TypeDInd2_TO_TypeDInd1(DInd1,DInd2)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE (TypeDInd),     intent(in)    :: DInd2
@@ -127,27 +127,27 @@ DInd1%tab_q       = DInd2%tab_q
 
 END SUBROUTINE TypeDInd2_TO_TypeDInd1
 SUBROUTINE Write_TypeDInd(DInd)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeDInd) :: DInd
 
 integer :: I
 
-write(out_unitp,*) 'BEGINNING Write_TypeDind'
-write(out_unitp,*) 'ndim',DInd%ndim
-write(out_unitp,*) 'MaxnD',DInd%MaxnD
-write(out_unitp,*) 'tab_q(:)',DInd%tab_q(:)
-write(out_unitp,*) 'I,L,indD_OF_Dm1,ind(:)'
+write(out_unit,*) 'BEGINNING Write_TypeDind'
+write(out_unit,*) 'ndim',DInd%ndim
+write(out_unit,*) 'MaxnD',DInd%MaxnD
+write(out_unit,*) 'tab_q(:)',DInd%tab_q(:)
+write(out_unit,*) 'I,L,indD_OF_Dm1,ind(:)'
 DO I=1,DInd%MaxnD
-  write(out_unitp,*) I,DInd%i_TO_l(I),DInd%indD_OF_Dm1(I),':',DInd%tab_ind(:,I)
+  write(out_unit,*) I,DInd%i_TO_l(I),DInd%indD_OF_Dm1(I),':',DInd%tab_ind(:,I)
 END DO
-write(out_unitp,*) 'END Write_TypeDind'
-flush(out_unitp)
+write(out_unit,*) 'END Write_TypeDind'
+flush(out_unit)
 
 END SUBROUTINE Write_TypeDInd
 SUBROUTINE Set_Smolyak_nDInd(SnDind,D,Lmin,Lmax)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 integer        :: D,Lmin,Lmax
@@ -167,7 +167,7 @@ CALL dealloc_nDInd(nDind)
 
 END SUBROUTINE Set_Smolyak_nDInd
 SUBROUTINE Set_nDInd(nDind,D,Lmin,Lmax)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 integer        :: D,Lmin,Lmax
@@ -177,7 +177,7 @@ CALL Set_nDInd_01order(nDind,D,Lmin,Lmax,0)
 
 END SUBROUTINE Set_nDInd
 SUBROUTINE Set_nDInd_01order(nDind,D,Lmin,Lmax,type_l_TO_n)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 integer        :: D,Lmin,Lmax,type_l_TO_n
@@ -248,24 +248,24 @@ DO id=2,D+1
         nDind(id)%tab_ind(nDind(id)%ndim,iG) = i
         nDind(id)%i_TO_l(iG)                 = lll
         nDind(id)%indD_OF_Dm1(iG)            = iGm1
-        !write(out_unitp,*) 'id,iG,l(:)',id,iG,nDind(id)%tab_ind(:,iG),nDind(id)%indD_OF_Dm1(iG) ; flush(out_unitp)
+        !write(out_unit,*) 'id,iG,l(:)',id,iG,nDind(id)%tab_ind(:,iG),nDind(id)%indD_OF_Dm1(iG) ; flush(out_unit)
       END IF
     END DO
   END DO
-  !write(out_unitp,*) '======================================='
-  !write(out_unitp,*) 'id,tab_q ',id,':',nDind(id)%tab_q
-  !write(out_unitp,*) 'id,MaxnD ',id,':',nDind(id)%MaxnD
-  !write(out_unitp,*) 'id,i_TO_l',id,':',i_TO_l(:)
+  !write(out_unit,*) '======================================='
+  !write(out_unit,*) 'id,tab_q ',id,':',nDind(id)%tab_q
+  !write(out_unit,*) 'id,MaxnD ',id,':',nDind(id)%MaxnD
+  !write(out_unit,*) 'id,i_TO_l',id,':',i_TO_l(:)
   deallocate(i_TO_l)
   !CALL Write_TypeDInd(nDind(id))
-  !flush(out_unitp)
+  !flush(out_unit)
 
 END DO
 
 
 END SUBROUTINE Set_nDInd_01order
 SUBROUTINE Set_nDInd_10order(nDind,D,Lmin,Lmax)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 integer        :: D,Lmin,Lmax
@@ -327,23 +327,23 @@ DO id=D-1,0,-1
         nDind(id)%tab_ind(1,iG) = l
 
         nDind(id)%indD_OF_Dm1(iG)    = iGp1
-        !write(out_unitp,*) 'id,iG,l(:)',id,iG,nDind(id)%tab_ind(:,iG),nDind(id)%indD_OF_Dm1(iG) ; flush(out_unitp)
+        !write(out_unit,*) 'id,iG,l(:)',id,iG,nDind(id)%tab_ind(:,iG),nDind(id)%indD_OF_Dm1(iG) ; flush(out_unit)
 
       END IF
     END DO
   END DO
-  !write(out_unitp,*) '======================================='
-  !write(out_unitp,*) 'id,tab_q',id,':',nDind(id)%tab_q
-  !write(out_unitp,*) 'id,MaxnD',id,':',nDind(id)%MaxnD
+  !write(out_unit,*) '======================================='
+  !write(out_unit,*) 'id,tab_q',id,':',nDind(id)%tab_q
+  !write(out_unit,*) 'id,MaxnD',id,':',nDind(id)%MaxnD
   !CALL Write_TypeDInd(nDind(id))
-  flush(out_unitp)
+  flush(out_unit)
 
 END DO
 
 END SUBROUTINE Set_nDInd_10order
 
 SUBROUTINE dealloc_nDInd(nDind)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeDInd), allocatable :: nDind(:)
@@ -363,25 +363,25 @@ END IF
 
 END SUBROUTINE dealloc_nDInd
 SUBROUTINE Write_nDInd(nDind)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 TYPE(TypeDInd), allocatable :: nDind(:)
 
 integer :: i
 
-write(out_unitp,*) 'BEGINNING Write_nDInd'
+write(out_unit,*) 'BEGINNING Write_nDInd'
 
 DO i=lbound(nDind,dim=1),ubound(nDind,dim=1)
-  write(out_unitp,*) 'index:',i
+  write(out_unit,*) 'index:',i
   CALL Write_TypeDInd(nDind(i))
 END DO
-write(out_unitp,*) 'END Write_nDInd'
+write(out_unit,*) 'END Write_nDInd'
 
 END SUBROUTINE Write_nDInd
 
 SUBROUTINE InD_TO_tabi(InD,D,tabn,tabi)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 integer          :: D,InD
@@ -402,12 +402,12 @@ CALL tabi_TO_InD(II,D,tabn,tabi)
 
 
 IF (II /= InD) STOP 'II /= InD'
-!write(out_unitp,*) 'InD,tabn',InD,tabn
-!write(out_unitp,*) 'InD,tabi',II,tabi
+!write(out_unit,*) 'InD,tabn',InD,tabn
+!write(out_unit,*) 'InD,tabi',II,tabi
 
 END SUBROUTINE InD_TO_tabi
 SUBROUTINE tabi_TO_InD(InD,D,tabn,tabi)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 
 integer          :: D,InD
@@ -422,13 +422,13 @@ DO id=D,1,-1
   InD = tabi(id) + tabn(id)*(InD-1)
 END DO
 
-!write(out_unitp,*) 'InD,tabn',InD,tabn
-!write(out_unitp,*) 'InD,tabi',InD,tabi
+!write(out_unit,*) 'InD,tabn',InD,tabn
+!write(out_unit,*) 'InD,tabi',InD,tabi
 
 END SUBROUTINE tabi_TO_InD
 
 FUNCTION l_TO_n(l,typ,B)
-USE mod_system
+USE EVR_system_m
 IMPLICIT NONE
 integer :: l_TO_n
 

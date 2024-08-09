@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 MODULE mod_march_MPI
-  USE mod_system
+  USE EVR_system_m
   USE mod_psi,  ONLY:param_psi,alloc_NParray,dealloc_NParray,dealloc_psi
   USE mod_propa,ONLY:param_propa,Calc_AutoCorr,Write_AutoCorr
   USE mod_march_SG4
@@ -174,7 +174,7 @@ MODULE mod_march_MPI
       IF(abs(UPsiOnKrylov(k))<para_propa%para_poly%poly_tol .OR.                       &
          k==para_propa%para_poly%npoly) THEN
         n=k
-        write(out_unitp,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
+        write(out_unit,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
         EXIT
       END IF
 
@@ -206,8 +206,8 @@ MODULE mod_march_MPI
     !CALL norm2_psi(psi)
 
     IF(psi%norm2 > para_propa%max_norm2) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
       para_propa%march_error  =.TRUE.
       para_propa%test_max_norm=.TRUE.
       STOP
@@ -308,9 +308,9 @@ MODULE mod_march_MPI
     
     CALL Overlap_psi1_psi2_SRB_MPI(Overlap,psi,psi)
     
-    write(out_unitp,*) call_from, ' Real part: ',CvecR
-    write(out_unitp,*) call_from, ' imag part: ',CvecC
-    write(out_unitp,*) call_from, ' overlap  : ',Overlap
+    write(out_unit,*) call_from, ' Real part: ',CvecR
+    write(out_unit,*) call_from, ' imag part: ',CvecC
+    write(out_unit,*) call_from, ' overlap  : ',Overlap
 
 #endif
   END SUBROUTINE SRB_to_packB_write
@@ -431,7 +431,7 @@ MODULE mod_march_MPI
       IF(abs(UPsiOnKrylov(k))<para_propa%para_poly%poly_tol .OR.                       &
          k==para_propa%para_poly%npoly) THEN
         n=k
-        write(out_unitp,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
+        write(out_unit,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
         EXIT
       END IF
 
@@ -449,7 +449,7 @@ MODULE mod_march_MPI
       CALL norm2_psi_SR_MPI(w1,3) !< 3: normalize SR_G with existing norm. constant
       tab_KrylovSpace(k+1)=w1    
     ENDDO ! for k=1,para_propa%para_poly%npoly
-    write(out_unitp,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n)), 'from ',MPI_id
+    write(out_unit,*) 'abs(UPsiOnKrylov)',abs(UPsiOnKrylov(1:n)), 'from ',MPI_id
 
     psi=ZERO
     DO k=1,n
@@ -461,8 +461,8 @@ MODULE mod_march_MPI
     !> check normalization
     CALL norm2_psi_SR_MPI(psi,2) !< 2: just calculate the normalization constant 
     IF(psi%norm2 > para_propa%max_norm2) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
       para_propa%march_error  =.TRUE.
       para_propa%test_max_norm=.TRUE.
       STOP
@@ -1317,13 +1317,13 @@ MODULE mod_march_MPI
     character (len=*), parameter :: name_sub='UPsi_spec'
 !-----------------------------------------------------------
     IF (debug) THEN
-      write(out_unitp,*) 'BEGINNING ',name_sub
-      write(out_unitp,*) 'deltaT',deltaT
-      write(out_unitp,*) 'n',n
-      write(out_unitp,*) 'With_diago',With_diago
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'deltaT',deltaT
+      write(out_unit,*) 'n',n
+      write(out_unit,*) 'With_diago',With_diago
       IF (With_diago .AND. n <= nmax) THEN
-        write(out_unitp,*) 'H'
-        CALL Write_Mat(H,out_unitp,6)
+        write(out_unit,*) 'H'
+        CALL Write_Mat(H,out_unit,6)
       END IF
     END IF
 !-----------------------------------------------------------

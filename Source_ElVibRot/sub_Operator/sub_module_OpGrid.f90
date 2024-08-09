@@ -47,7 +47,7 @@
 !===========================================================================
       MODULE mod_OpGrid
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_BtoG_GtoB_SGType4
       IMPLICIT NONE
 
@@ -276,27 +276,27 @@
 
       TYPE (File_tGrid), intent(in) :: para_FileGrid
 
-      write(out_unitp,*) 'BEGINNING Write_FileGrid'
+      write(out_unit,*) 'BEGINNING Write_FileGrid'
 
-      write(out_unitp,*) 'Save_FileGrid      ',para_FileGrid%Save_FileGrid
-      write(out_unitp,*) 'Save_FileGrid_done ',para_FileGrid%Save_FileGrid_done
-      write(out_unitp,*) 'Read_FileGrid      ',para_FileGrid%Read_FileGrid
-      write(out_unitp,*) 'Formatted_FileGrid ',para_FileGrid%Formatted_FileGrid
+      write(out_unit,*) 'Save_FileGrid      ',para_FileGrid%Save_FileGrid
+      write(out_unit,*) 'Save_FileGrid_done ',para_FileGrid%Save_FileGrid_done
+      write(out_unit,*) 'Read_FileGrid      ',para_FileGrid%Read_FileGrid
+      write(out_unit,*) 'Formatted_FileGrid ',para_FileGrid%Formatted_FileGrid
 
-      write(out_unitp,*) 'Type_FileGrid      ',para_FileGrid%Type_FileGrid
-      write(out_unitp,*) 'Keep_FileGrid      ',para_FileGrid%Keep_FileGrid
+      write(out_unit,*) 'Type_FileGrid      ',para_FileGrid%Type_FileGrid
+      write(out_unit,*) 'Keep_FileGrid      ',para_FileGrid%Keep_FileGrid
 
-      write(out_unitp,*) 'Save_MemGrid       ',para_FileGrid%Save_MemGrid
-      write(out_unitp,*) 'Save_MemGrid_done  ',para_FileGrid%Save_MemGrid_done
+      write(out_unit,*) 'Save_MemGrid       ',para_FileGrid%Save_MemGrid
+      write(out_unit,*) 'Save_MemGrid_done  ',para_FileGrid%Save_MemGrid_done
 
-      write(out_unitp,*) 'Base_FileName_Grid: ',trim(adjustl(para_FileGrid%Base_FileName_Grid))
+      write(out_unit,*) 'Base_FileName_Grid: ',trim(adjustl(para_FileGrid%Base_FileName_Grid))
 
-      write(out_unitp,*) 'Test_Grid           ',para_FileGrid%Test_Grid
-      write(out_unitp,*) 'Restart_Grid        ',para_FileGrid%Restart_Grid
-      write(out_unitp,*) 'First_GridPoint     ',para_FileGrid%First_GridPoint
-      write(out_unitp,*) 'Last_GridPoint      ',para_FileGrid%Last_GridPoint
+      write(out_unit,*) 'Test_Grid           ',para_FileGrid%Test_Grid
+      write(out_unit,*) 'Restart_Grid        ',para_FileGrid%Restart_Grid
+      write(out_unit,*) 'First_GridPoint     ',para_FileGrid%First_GridPoint
+      write(out_unit,*) 'Last_GridPoint      ',para_FileGrid%Last_GridPoint
 
-      write(out_unitp,*) 'END Write_FileGrid'
+      write(out_unit,*) 'END Write_FileGrid'
 
       END SUBROUTINE Write_FileGrid
 
@@ -323,13 +323,13 @@
       !logical, parameter :: debug = .TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_qa,nb_bie,nb_SG',nb_qa,nb_bie,nb_SG
-        write(out_unitp,*) 'derive_termQact(:)',derive_termQact(:)
-        write(out_unitp,*) 'derive_termQdyn(:)',derive_termQdyn(:)
-        write(out_unitp,*) 'grid_cte',OpGrid%grid_cte
-        write(out_unitp,*) 'Save_MemGrid',OpGrid%para_FileGrid%Save_MemGrid
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_qa,nb_bie,nb_SG',nb_qa,nb_bie,nb_SG
+        write(out_unit,*) 'derive_termQact(:)',derive_termQact(:)
+        write(out_unit,*) 'derive_termQdyn(:)',derive_termQdyn(:)
+        write(out_unit,*) 'grid_cte',OpGrid%grid_cte
+        write(out_unit,*) 'Save_MemGrid',OpGrid%para_FileGrid%Save_MemGrid
+        flush(out_unit)
       END IF
 
        OpGrid%nb_qa      = nb_qa
@@ -344,8 +344,8 @@
        OpGrid%derive_termQdyn(:) = derive_termQdyn(:)
 
        IF (nb_bie <1) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' nb_bie <1',nb_bie
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' nb_bie <1',nb_bie
           STOP
        END IF
 
@@ -353,7 +353,7 @@
        CALL alloc_array(OpGrid%Mat_cte,[nb_bie,nb_bie],            &
                        "OpGrid%Mat_cte",info2)
        OpGrid%Mat_cte(:,:) = ZERO
-       IF (debug) write(out_unitp,*) info2,'Mat_cte(:,:)',size(OpGrid%Mat_cte)
+       IF (debug) write(out_unit,*) info2,'Mat_cte(:,:)',size(OpGrid%Mat_cte)
 
        IF (.NOT. OpGrid%grid_cte .AND. OpGrid%para_FileGrid%Save_MemGrid) THEN
 
@@ -362,22 +362,22 @@
            CALL alloc_array(OpGrid%Grid,[nb_qa,nb_bie,nb_bie],"OpGrid%Grid",info2)
            OpGrid%Grid(:,:,:) = ZERO
 
-write(out_unitp,*) info2,size(OpGrid%Grid)
-           IF(print_level>-1 .AND. MPI_id==0) write(out_unitp,*) info2,size(OpGrid%Grid)
+write(out_unit,*) info2,size(OpGrid%Grid)
+           IF(print_level>-1 .AND. MPI_id==0) write(out_unit,*) info2,size(OpGrid%Grid)
          ENDIF
 
          IF (SmolyakRep) THEN
            IF (print_level>-1 .AND. MPI_id==0)                                         &
-                                   write(out_unitp,*) info2 // ': OpGrid%SRep allocated'
+                                   write(out_unit,*) info2 // ': OpGrid%SRep allocated'
            CALL alloc_SmolyakRep_only(OpGrid%SRep,nb_SG,                               &
                                       delta=.FALSE.,grid=.TRUE.,nb0=nb_bie)
          END IF
        END IF
-       flush(out_unitp)
+       flush(out_unit)
 
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
-         flush(out_unitp)
+         write(out_unit,*) 'END ',name_sub
+         flush(out_unit)
        END IF
 
       END SUBROUTINE alloc_OpGrid
@@ -434,39 +434,39 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       TYPE (param_OpGrid), intent(inout) :: OpGrid
 
 
-      write(out_unitp,*) 'BEGINNING Write_OpGrid'
+      write(out_unit,*) 'BEGINNING Write_OpGrid'
 
-      write(out_unitp,*) 'nb_qa,nb_bie      ',OpGrid%nb_qa,OpGrid%nb_bie
+      write(out_unit,*) 'nb_qa,nb_bie      ',OpGrid%nb_qa,OpGrid%nb_bie
       IF (associated(OpGrid%derive_termQact)) THEN
-        write(out_unitp,*) 'derive_termQact   ',OpGrid%derive_termQact
+        write(out_unit,*) 'derive_termQact   ',OpGrid%derive_termQact
       ELSE
-        write(out_unitp,*) 'derive_termQact: not associated'
+        write(out_unit,*) 'derive_termQact: not associated'
 
       END IF
       IF (associated(OpGrid%derive_termQdyn)) THEN
-        write(out_unitp,*) 'derive_termQdyn   ',OpGrid%derive_termQdyn
+        write(out_unit,*) 'derive_termQdyn   ',OpGrid%derive_termQdyn
       ELSE
-        write(out_unitp,*) 'derive_termQdyn: not associated'
+        write(out_unit,*) 'derive_termQdyn: not associated'
       END IF
-      write(out_unitp,*) 'grid_zero         ',OpGrid%grid_zero
-      write(out_unitp,*) 'grid_cte          ',OpGrid%grid_cte
-      write(out_unitp,*) 'ana_grid          ',OpGrid%ana_grid
-      write(out_unitp,*) 'cplx              ',OpGrid%cplx
-      write(out_unitp,*) 'alloc_Grid        ',OpGrid%alloc_Grid
-      write(out_unitp,*) 'Grid_done         ',OpGrid%Grid_done
-      write(out_unitp,*) 'asso Grid         ',associated(OpGrid%Grid)
-      write(out_unitp,*) 'asso Mat_cte      ',associated(OpGrid%Mat_cte)
-      write(out_unitp,*) 'alloc Smolyak Rep ',allocated(OpGrid%SRep%SmolyakRep)
-      write(out_unitp,*) 'iq_min,Op_min     ',OpGrid%iq_min,OpGrid%Op_min
-      write(out_unitp,*) 'iq_max,Op_max     ',OpGrid%iq_max,OpGrid%Op_max
-      flush(out_unitp)
+      write(out_unit,*) 'grid_zero         ',OpGrid%grid_zero
+      write(out_unit,*) 'grid_cte          ',OpGrid%grid_cte
+      write(out_unit,*) 'ana_grid          ',OpGrid%ana_grid
+      write(out_unit,*) 'cplx              ',OpGrid%cplx
+      write(out_unit,*) 'alloc_Grid        ',OpGrid%alloc_Grid
+      write(out_unit,*) 'Grid_done         ',OpGrid%Grid_done
+      write(out_unit,*) 'asso Grid         ',associated(OpGrid%Grid)
+      write(out_unit,*) 'asso Mat_cte      ',associated(OpGrid%Mat_cte)
+      write(out_unit,*) 'alloc Smolyak Rep ',allocated(OpGrid%SRep%SmolyakRep)
+      write(out_unit,*) 'iq_min,Op_min     ',OpGrid%iq_min,OpGrid%Op_min
+      write(out_unit,*) 'iq_max,Op_max     ',OpGrid%iq_max,OpGrid%Op_max
+      flush(out_unit)
 
       IF (associated(OpGrid%Mat_cte)) &
-         write(out_unitp,*) 'Mat_cte           ',OpGrid%Mat_cte
-      flush(out_unitp)
+         write(out_unit,*) 'Mat_cte           ',OpGrid%Mat_cte
+      flush(out_unit)
 
-      write(out_unitp,*) 'END Write_OpGrid'
-      flush(out_unitp)
+      write(out_unit,*) 'END Write_OpGrid'
+      flush(out_unit)
 
       END SUBROUTINE Write_OpGrid
 
@@ -545,7 +545,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       integer :: err_mem,memory
       character (len=*), parameter :: name_sub='Set_file_OF_OpGrid'
 
-      !write(out_unitp,*) ' in ',name_sub,' asso OpGrid ',associated(OpGrid), 'name_Op: ',name_Op
+      !write(out_unit,*) ' in ',name_sub,' asso OpGrid ',associated(OpGrid), 'name_Op: ',name_Op
       IF (.NOT. associated(OpGrid)) RETURN
       IF (size(OpGrid) < 1) RETURN
 
@@ -622,9 +622,9 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
           END IF
 
         CASE default ! normal SH_HADA file
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  Wrong Type_FileGrid value: ',OpGrid(iterm)%para_fileGrid%Type_FileGrid
-          write(out_unitp,*) '  The possible values are [0,1,2,4,5]'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  Wrong Type_FileGrid value: ',OpGrid(iterm)%para_fileGrid%Type_FileGrid
+          write(out_unit,*) '  The possible values are [0,1,2,4,5]'
           STOP 'ERROR in Set_file_OF_OpGrid: no default'
         END SELECT
 
@@ -647,7 +647,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       integer :: err_mem,memory
       character (len=*), parameter :: name_sub='Set_file_Grid'
 
-      !write(out_unitp,*) ' in ',name_sub
+      !write(out_unit,*) ' in ',name_sub
 
         IF (Grid_omp == 0) THEN
           file_Grid%nb_thread = 1
@@ -706,9 +706,9 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
           END IF
 
         CASE default ! normal SH_HADA file
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  Wrong Type_FileGrid value: ',para_fileGrid%Type_FileGrid
-          write(out_unitp,*) '  The possible values are [0,1,2,4,5]'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  Wrong Type_FileGrid value: ',para_fileGrid%Type_FileGrid
+          write(out_unit,*) '  The possible values are [0,1,2,4,5]'
           STOP 'ERROR in Set_file_Grid: no default'
         END SELECT
 
@@ -731,7 +731,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       integer :: err_mem,memory
       character (len=*), parameter :: name_sub='Set_file_Grid_old'
 
-      !write(out_unitp,*) ' in ',name_sub
+      !write(out_unit,*) ' in ',name_sub
 
         IF (Grid_omp == 0) THEN
           file_Grid%nb_thread = 1
@@ -790,9 +790,9 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
           END IF
 
         CASE default ! normal SH_HADA file
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  Wrong Type_FileGrid value: ',Type_FileGrid
-          write(out_unitp,*) '  The possible values are [0,1,2,4]'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  Wrong Type_FileGrid value: ',Type_FileGrid
+          write(out_unit,*) '  The possible values are [0,1,2,4]'
           STOP 'ERROR in Set_file_Grid_old: no default'
         END SELECT
 
@@ -862,7 +862,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
 
 
       SUBROUTINE sub_ReadDir_Grid_iterm(Grid,OpGrid)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind), intent(inout) :: Grid(:,:,:) ! grid when Save_Grid_iterm=t
@@ -882,10 +882,10 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
          read(nio,REC=i_qa,iostat=error) Grid(i_qa,:,:)
 
          IF (error /= 0) THEN
-           write(out_unitp,*) ' ERROR in sub_ReadDir_Grid_iterm'
-           write(out_unitp,*) ' Impossible to read the file: ',         &
+           write(out_unit,*) ' ERROR in sub_ReadDir_Grid_iterm'
+           write(out_unit,*) ' Impossible to read the file: ',         &
                   OpGrid%file_Grid%name
-           write(out_unitp,*) ' i_qa,nb_qa',i_qa,nb_qa
+           write(out_unit,*) ' i_qa,nb_qa',i_qa,nb_qa
 
            STOP
          END IF
@@ -894,7 +894,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
 
       END SUBROUTINE sub_ReadDir_Grid_iterm
       SUBROUTINE sub_ReadSeq_Grid_iterm(Grid,OpGrid)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind), intent(inout) :: Grid(:,:,:) ! grid when Save_Grid_iterm=t
@@ -908,22 +908,22 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       nb_qa = size(Grid,dim=1)
       ! for parallel calculation of the Grid file
       IF (OpGrid%file_Grid%nb_thread > 1) THEN
-        !write(out_unitp,*) ' OMP: read one term of HADA file'
+        !write(out_unit,*) ' OMP: read one term of HADA file'
         ithread      = 0
         file_is_para = .TRUE.
         nio = OpGrid%file_Grid%tab_unit(ithread)
       ELSE
         nio = OpGrid%file_Grid%unit
-        !write(out_unitp,*) ' non OMP: read one term of HADA file'
+        !write(out_unit,*) ' non OMP: read one term of HADA file'
       END IF
 
       DO i_qa=1,nb_qa
          read(nio,iostat=error) Grid(i_qa,:,:)
 
          IF (error > 0 .OR. error < 0 .AND. .NOT. file_is_para) THEN
-           write(out_unitp,*) ' ERROR in sub_ReadSeq_Grid_iterm'
-           write(out_unitp,*) ' ERROR on file: ',OpGrid%file_Grid%name
-           write(out_unitp,*) ' i_qa,nb_qa',i_qa,nb_qa
+           write(out_unit,*) ' ERROR in sub_ReadSeq_Grid_iterm'
+           write(out_unit,*) ' ERROR on file: ',OpGrid%file_Grid%name
+           write(out_unit,*) ' i_qa,nb_qa',i_qa,nb_qa
            STOP
          ELSE IF (error < 0 .AND. file_is_para) THEN ! end of file
            ithread = ithread + 1
@@ -932,7 +932,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
            read(nio) Grid(i_qa,:,:)
 
          END IF
-         !write(out_unitp,*) 'i_qa,Grid',i_qa,Grid(i_qa,:,:)
+         !write(out_unit,*) 'i_qa,Grid',i_qa,Grid(i_qa,:,:)
 
        END DO
 
@@ -962,9 +962,9 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       IF (size(OpGrid) < 1 ) RETURN
 
       IF (print_level>-1 .AND. MPI_id==0) THEN
-        write(out_unitp,*)'--------------------------------------------------------------'
-        write(out_unitp,*)'n_Op,k_term,derive_term,cte,zero,    minval,    maxval,dealloc'
-        flush(out_unitp)
+        write(out_unit,*)'--------------------------------------------------------------'
+        write(out_unit,*)'n_Op,k_term,derive_term,cte,zero,    minval,    maxval,dealloc'
+        flush(out_unit)
       END IF
 
       DO k_term=1,size(OpGrid)
@@ -1012,7 +1012,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
           END IF
 
           IF (print_level>-1 .AND. MPI_id==0) THEN
-            write(out_unitp,'(i5,1x,i6,2x,2i5,l3,1x,l4,1x,2e11.2,1x,l3)')   &
+            write(out_unit,'(i5,1x,i6,2x,2i5,l3,1x,l4,1x,2e11.2,1x,l3)')   &
                    n_Op,k_term,OpGrid(k_term)%derive_termQact(:),       &
                    OpGrid(k_term)%grid_cte,OpGrid(k_term)%grid_zero,    &
                    OpGrid(k_term)%Op_min,OpGrid(k_term)%Op_max,         &
@@ -1025,7 +1025,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
                  (sum(abs(OpGrid(k_term)%Mat_cte(:,:))) < ONETENTH**12)
 
           IF (print_level>-1 .AND. MPI_id==0) THEN
-            write(out_unitp,'(i5,1x,i6,2x,2i5,l3,1x,l4,24x,l3)') n_Op,k_term,    &
+            write(out_unit,'(i5,1x,i6,2x,2i5,l3,1x,l4,24x,l3)') n_Op,k_term,    &
                    OpGrid(k_term)%derive_termQact(:),                   &
                    OpGrid(k_term)%grid_cte,OpGrid(k_term)%grid_zero,    &
                    (.NOT. associated(OpGrid(k_term)%Grid))
@@ -1036,8 +1036,8 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       END DO
 
       IF (print_level>-1 .AND. MPI_id==0) THEN
-        write(out_unitp,*)'--------------------------------------------------------------'
-        flush(out_unitp)
+        write(out_unit,*)'--------------------------------------------------------------'
+        flush(out_unit)
       END IF
 
       END SUBROUTINE Analysis_OpGrid
@@ -1057,9 +1057,9 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       IF (size(OpGrid) < 1 ) RETURN
 
       IF (print_level>-1 .AND. MPI_id==0) THEN
-        write(out_unitp,*)'--------------------------------------------------------------'
-        write(out_unitp,*)'n_Op,k_term,derive_term,cte,zero,    minval,    maxval,dealloc'
-        flush(out_unitp)
+        write(out_unit,*)'--------------------------------------------------------------'
+        write(out_unit,*)'n_Op,k_term,derive_term,cte,zero,    minval,    maxval,dealloc'
+        flush(out_unit)
       END IF
 
       DO k_term=1,size(OpGrid)
@@ -1107,7 +1107,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
           END IF
 
           IF (print_level>-1 .AND. MPI_id==0) THEN
-            write(out_unitp,'(i5,1x,i6,2x,2i5,l3,1x,l4,1x,2e11.2,1x,l3)')   &
+            write(out_unit,'(i5,1x,i6,2x,2i5,l3,1x,l4,1x,2e11.2,1x,l3)')   &
                    n_Op,k_term,OpGrid(k_term)%derive_termQact(:),       &
                    OpGrid(k_term)%grid_cte,OpGrid(k_term)%grid_zero,    &
                    OpGrid(k_term)%Op_min,OpGrid(k_term)%Op_max,         &
@@ -1120,7 +1120,7 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
                  (sum(abs(OpGrid(k_term)%Mat_cte(:,:))) < ONETENTH**12)
 
           IF (print_level>-1 .AND. MPI_id==0) THEN
-            write(out_unitp,'(i5,1x,i6,2x,2i5,l3,1x,l4,24x,l3)') n_Op,k_term,    &
+            write(out_unit,'(i5,1x,i6,2x,2i5,l3,1x,l4,24x,l3)') n_Op,k_term,    &
                    OpGrid(k_term)%derive_termQact(:),                   &
                    OpGrid(k_term)%grid_cte,OpGrid(k_term)%grid_zero,    &
                    (.NOT. associated(OpGrid(k_term)%Grid))
@@ -1131,8 +1131,8 @@ write(out_unitp,*) info2,size(OpGrid%Grid)
       END DO
 
       IF (print_level>-1 .AND. MPI_id==0) THEN
-        write(out_unitp,*)'--------------------------------------------------------------'
-        flush(out_unitp)
+        write(out_unit,*)'--------------------------------------------------------------'
+        flush(out_unit)
       END IF
 
     END SUBROUTINE SaveFile_OpGrid

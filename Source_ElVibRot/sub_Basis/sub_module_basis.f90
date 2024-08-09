@@ -62,7 +62,7 @@ MODULE mod_basis
       CONTAINS
 
       RECURSIVE SUBROUTINE Set_basis_para_FOR_optimization(basis_set,Set_Val)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- for the CoordType and Tnum --------------------------------------
@@ -77,7 +77,7 @@ MODULE mod_basis
       character (len=*), parameter :: name_sub = 'Set_basis_para_FOR_optimization'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ MODULE mod_basis
 
         ! for basis_set%A
         nopt = count(basis_set%opt_A /= 0)
-        IF (debug) write(out_unitp,*) 'nopt A',nopt
+        IF (debug) write(out_unit,*) 'nopt A',nopt
         IF (nopt > 0) THEN
           i1 = para_FOR_optimization%i_OptParam+1
           i2 = para_FOR_optimization%i_OptParam+nopt
@@ -108,7 +108,7 @@ MODULE mod_basis
 
          ! for basis_set%B
         nopt = count(basis_set%opt_B /= 0)
-        IF (debug) write(out_unitp,*) 'nopt B',nopt
+        IF (debug) write(out_unit,*) 'nopt B',nopt
 
         IF (nopt > 0) THEN
           i1 = para_FOR_optimization%i_OptParam+1
@@ -132,7 +132,7 @@ MODULE mod_basis
 
         ! for basis_set%Q0
         nopt = count(basis_set%opt_Q0 /= 0)
-        IF (debug) write(out_unitp,*) 'nopt Q0',nopt
+        IF (debug) write(out_unit,*) 'nopt Q0',nopt
         IF (nopt > 0) THEN
           i1 = para_FOR_optimization%i_OptParam+1
           i2 = para_FOR_optimization%i_OptParam+nopt
@@ -155,7 +155,7 @@ MODULE mod_basis
 
         ! for basis_set%scaleQ
         nopt = count(basis_set%opt_scaleQ /= 0)
-        IF (debug) write(out_unitp,*) 'nopt scaleQ',nopt
+        IF (debug) write(out_unit,*) 'nopt scaleQ',nopt
 
         IF (nopt > 0) THEN
           i1 = para_FOR_optimization%i_OptParam+1
@@ -186,15 +186,15 @@ MODULE mod_basis
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'nb_OptParam ',para_FOR_optimization%nb_OptParam
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'nb_OptParam ',para_FOR_optimization%nb_OptParam
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
       END SUBROUTINE Set_basis_para_FOR_optimization
 
       RECURSIVE FUNCTION get_nb_TDParam_FROM_basis(basis_set) RESULT (nb_TDParam)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- for the CoordType and Tnum --------------------------------------
@@ -209,7 +209,7 @@ MODULE mod_basis
       character (len=*), parameter :: name_sub = 'get_nb_TDParam_FROM_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -229,14 +229,14 @@ MODULE mod_basis
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
     END FUNCTION get_nb_TDParam_FROM_basis
 
       RECURSIVE SUBROUTINE Set_TDParam_FROM_basis(basis_set,TDParam)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- for the CoordType and Tnum --------------------------------------
@@ -251,7 +251,7 @@ MODULE mod_basis
       character (len=*), parameter :: name_sub = 'Set_TDParam_FROM_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -262,11 +262,11 @@ MODULE mod_basis
         nopt = count(basis_set%TD_Q0) + count(basis_set%TD_scaleQ)
 
         IF (size(TDParam) < nopt) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' The size of TDParam is smaller than the number of parameters to be optimized!'
-          write(out_unitp,*) ' size(TDParam)',size(TDParam)
-          write(out_unitp,*) ' nopt',nopt
-          write(out_unitp,*) ' TD_Q0,TD_scaleQ',count(basis_set%TD_Q0),         &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' The size of TDParam is smaller than the number of parameters to be optimized!'
+          write(out_unit,*) ' size(TDParam)',size(TDParam)
+          write(out_unit,*) ' nopt',nopt
+          write(out_unit,*) ' TD_Q0,TD_scaleQ',count(basis_set%TD_Q0),         &
                                                 count(basis_set%TD_scaleQ)
           STOP
         END IF
@@ -277,7 +277,7 @@ MODULE mod_basis
 
         ! for basis_set%Q0
         nopt = count(basis_set%TD_Q0)
-        IF (debug) write(out_unitp,*) 'nopt TD_Q0',nopt
+        IF (debug) write(out_unit,*) 'nopt TD_Q0',nopt
         IF (nopt > 0) THEN
           basis_set%Q0(1:nopt) = TDParam(i_Opt+1:i_Opt+nopt)
           i_Opt = i_Opt + nopt
@@ -285,7 +285,7 @@ MODULE mod_basis
 
         ! for basis_set%scaleQ
         nopt = count(basis_set%TD_scaleQ)
-        IF (debug) write(out_unitp,*) 'nopt TD_scaleQ',nopt
+        IF (debug) write(out_unit,*) 'nopt TD_scaleQ',nopt
         IF (nopt > 0) THEN
           basis_set%scaleQ(1:nopt) = TDParam(i_Opt+1:i_Opt+nopt)
           i_Opt = i_Opt + nopt
@@ -311,13 +311,13 @@ MODULE mod_basis
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
     END SUBROUTINE Set_TDParam_FROM_basis
     RECURSIVE SUBROUTINE Get_TDParam_FROM_basis(basis_set,TDParam)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- for the CoordType and Tnum --------------------------------------
@@ -332,7 +332,7 @@ MODULE mod_basis
       character (len=*), parameter :: name_sub = 'Get_TDParam_FROM_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -342,11 +342,11 @@ MODULE mod_basis
 
         nopt = count(basis_set%TD_Q0) + count(basis_set%TD_scaleQ)
         IF (size(TDParam) < nopt) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' The size of TDParam is smaller than the number of parameters to be optimized!'
-          write(out_unitp,*) ' size(TDParam)',size(TDParam)
-          write(out_unitp,*) ' nopt',nopt
-          write(out_unitp,*) ' TD_Q0,TD_scaleQ',count(basis_set%TD_Q0),         &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' The size of TDParam is smaller than the number of parameters to be optimized!'
+          write(out_unit,*) ' size(TDParam)',size(TDParam)
+          write(out_unit,*) ' nopt',nopt
+          write(out_unit,*) ' TD_Q0,TD_scaleQ',count(basis_set%TD_Q0),         &
                                                 count(basis_set%TD_scaleQ)
           STOP
         END IF
@@ -355,7 +355,7 @@ MODULE mod_basis
 
         ! for basis_set%Q0
         nopt = count(basis_set%TD_Q0)
-        IF (debug) write(out_unitp,*) 'nopt Q0',nopt
+        IF (debug) write(out_unit,*) 'nopt Q0',nopt
         IF (nopt > 0) THEN
           TDParam(i_Opt+1:i_Opt+nopt) = basis_set%Q0(1:nopt)
           i_Opt = i_Opt + nopt
@@ -363,7 +363,7 @@ MODULE mod_basis
 
         ! for basis_set%scaleQ
         nopt = count(basis_set%TD_scaleQ)
-        IF (debug) write(out_unitp,*) 'nopt scaleQ',nopt
+        IF (debug) write(out_unit,*) 'nopt scaleQ',nopt
         IF (nopt > 0) THEN
           TDParam(i_Opt+1:i_Opt+nopt) = basis_set%scaleQ(1:nopt)
           i_Opt = i_Opt + nopt
@@ -385,8 +385,8 @@ MODULE mod_basis
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 
     END SUBROUTINE Get_TDParam_FROM_basis
@@ -419,23 +419,23 @@ MODULE mod_basis
       !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_primi)
       END IF
 !---------------------------------------------------------------------
 
-      !write(out_unitp,*) 'scaleQ,QO',basis_primi%scaleQ,basis_primi%Q0
+      !write(out_unit,*) 'scaleQ,QO',basis_primi%scaleQ,basis_primi%Q0
 
-      write(out_unitp,*) 'BuildBasis_done ? for ',basis_primi%name,basis_primi%BuildBasis_done
+      write(out_unit,*) 'BuildBasis_done ? for ',basis_primi%name,basis_primi%BuildBasis_done
       IF (.NOT. basis_primi%active .OR. basis_primi%BuildBasis_done) then
-        write(out_unitp,*) 'No construct for ',basis_primi%name
-        IF (debug) write(out_unitp,*) 'No basis set construct'
-        IF (debug) write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'No construct for ',basis_primi%name
+        IF (debug) write(out_unit,*) 'No basis set construct'
+        IF (debug) write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
         RETURN
       END IF
-      write(out_unitp,*) 'Construct for ',basis_primi%name
+      write(out_unit,*) 'Construct for ',basis_primi%name
 
 
 !     - analyze the name -------------------------------
@@ -449,10 +449,10 @@ MODULE mod_basis
         nb_shift = nb_word -2
         read(basis_primi%name,*) word,nstep,(tab_shift(ic),ic=1,nb_shift)
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' the analysis of the basis_primi%name has failed'
-        write(out_unitp,*) ' basis:',basis_primi%name
-        write(out_unitp,*) ' nb_word=',nb_word
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' the analysis of the basis_primi%name has failed'
+        write(out_unit,*) ' basis:',basis_primi%name
+        write(out_unit,*) ' nb_word=',nb_word
         CALL RecWrite_basis(basis_primi)
         STOP
       END IF
@@ -482,19 +482,19 @@ MODULE mod_basis
       SELECT CASE (word)
       CASE ("0")
         basis_temp%type = 0
-        write(out_unitp,*) ' ERROR : in ',name_sub
-        write(out_unitp,*) 'Basis "0" CANNOT be a primitive basis'
+        write(out_unit,*) ' ERROR : in ',name_sub
+        write(out_unit,*) 'Basis "0" CANNOT be a primitive basis'
         STOP
 
       CASE ("direct_prod","sb","sg","sparse")
         basis_temp%type = 1
-        write(out_unitp,*) ' ERROR : in ',name_sub
-        write(out_unitp,*) 'Basis 1 (',trim(word),') CANNOT be a primitive basis'
+        write(out_unit,*) ' ERROR : in ',name_sub
+        write(out_unit,*) 'Basis 1 (',trim(word),') CANNOT be a primitive basis'
         STOP
 
       CASE ("el")
         basis_temp%type = 2
-        write(out_unitp,*) 'Basis "El": for several diabatic PES'
+        write(out_unit,*) 'Basis "El": for several diabatic PES'
         CALL sub_basis_El(basis_temp)
 
       CASE ("pl0")
@@ -532,9 +532,9 @@ MODULE mod_basis
           !CALL sub_quadra_hermite_old(basis_temp,-1)
           CALL sub_quadra_hermite(basis_temp,-1)
         ELSE
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' hermite with the parameter value of Nested is not possible',basis_temp%Nested
-          write(out_unitp,*) ' Nested',basis_temp%Nested
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' hermite with the parameter value of Nested is not possible',basis_temp%Nested
+          write(out_unit,*) ' Nested',basis_temp%Nested
           STOP
         END IF
       CASE ("ho_0","hm_0")
@@ -582,7 +582,7 @@ MODULE mod_basis
         IF (.NOT. basis_temp%xPOGridRep_done) THEN ! because the scaling factors are already calculated
           basis_temp%Q0     = (basis_temp%B+basis_temp%A)*HALF
           basis_temp%scaleQ = (pi+pi)/(basis_temp%B-basis_temp%A)
-          write(out_unitp,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
+          write(out_unit,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
                                      basis_temp%Q0,basis_temp%scaleQ
         END IF
 
@@ -594,7 +594,7 @@ MODULE mod_basis
         IF (.NOT. basis_temp%xPOGridRep_done) THEN ! because the scaling factors are already calculated
           basis_temp%Q0     = basis_temp%A
           basis_temp%scaleQ = pi/(basis_temp%B-basis_temp%A)
-          write(out_unitp,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
+          write(out_unit,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
                                      basis_temp%Q0,basis_temp%scaleQ
         END IF
       CASE ("boxab_fft","dfst")
@@ -604,7 +604,7 @@ MODULE mod_basis
         IF (.NOT. basis_temp%xPOGridRep_done) THEN ! because the scaling factors are already calculated
           basis_temp%Q0     = basis_temp%A
           basis_temp%scaleQ = pi/(basis_temp%B-basis_temp%A)
-          write(out_unitp,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
+          write(out_unit,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
                                      basis_temp%Q0,basis_temp%scaleQ
         END IF
       CASE ("sincdvr")
@@ -613,7 +613,7 @@ MODULE mod_basis
         IF (.NOT. basis_temp%xPOGridRep_done) THEN ! because the scaling factors are already calculated
           basis_temp%Q0     = basis_temp%A
           basis_temp%scaleQ = pi/(basis_temp%B-basis_temp%A)
-          write(out_unitp,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
+          write(out_unit,*) 'A,B,Q0,scaleQ',basis_temp%A,basis_temp%B,         &
                                      basis_temp%Q0,basis_temp%scaleQ
         END IF
 
@@ -632,51 +632,51 @@ MODULE mod_basis
 
 
       CASE DEFAULT
-        write(out_unitp,*) ' This basis is unknown: ',word
-        write(out_unitp,*) ' The possibilities :'
-        !write(out_unitp,*) '  0 : No basis!                           : 0'
-        !write(out_unitp,*)
-        write(out_unitp,*) '  2 : Diabatic Electronic states          : El'
-        write(out_unitp,*)
-        write(out_unitp,*) '  1 : Direct product basis                : direct_prod'
-        write(out_unitp,*) '  1 : Sparse basis and Smolyak Grids      : sparse or SB or SG'
-        write(out_unitp,*)
-        write(out_unitp,*) ' 10 : Legendre Poly.                      : Pl0'
-        write(out_unitp,*) ' 100: Legendre Poly. (even)               : Pl0_0'
-        write(out_unitp,*) ' 101: Legendre Poly. (odd)                : Pl0_1'
-        write(out_unitp,*)
-        write(out_unitp,*) ' 11 : Legendre Poly. theta                : Pl0_a'
-        write(out_unitp,*) ' 110: Legendre Poly. theta (even)         : Pl0_a_0'
-        write(out_unitp,*) ' 111: Legendre Poly. theta (odd)          : Pl0_a_1'
-        write(out_unitp,*)
-        write(out_unitp,*) ' 20 : Hermite Poly.                       : HO or Hm or hermite'
-        write(out_unitp,*) ' 200: Hermite Poly. (even)                : HO_0 or Hm_0'
-        write(out_unitp,*) ' 201: Hermite Poly. (odd)                 : HO_1 or Hm_1'
-        write(out_unitp,*) ' 21 : Hermite Poly. + points from boxAB   : HObox or Hmbox'
-        write(out_unitp,*) ' 22 : Hermite Poly. + variable transfo    : HOAB'
-        write(out_unitp,*) ' 2000:Hermite Poly. + cubature (nD)       : cuba_HO or cuba_Hm or cuba_hermite'
+        write(out_unit,*) ' This basis is unknown: ',word
+        write(out_unit,*) ' The possibilities :'
+        !write(out_unit,*) '  0 : No basis!                           : 0'
+        !write(out_unit,*)
+        write(out_unit,*) '  2 : Diabatic Electronic states          : El'
+        write(out_unit,*)
+        write(out_unit,*) '  1 : Direct product basis                : direct_prod'
+        write(out_unit,*) '  1 : Sparse basis and Smolyak Grids      : sparse or SB or SG'
+        write(out_unit,*)
+        write(out_unit,*) ' 10 : Legendre Poly.                      : Pl0'
+        write(out_unit,*) ' 100: Legendre Poly. (even)               : Pl0_0'
+        write(out_unit,*) ' 101: Legendre Poly. (odd)                : Pl0_1'
+        write(out_unit,*)
+        write(out_unit,*) ' 11 : Legendre Poly. theta                : Pl0_a'
+        write(out_unit,*) ' 110: Legendre Poly. theta (even)         : Pl0_a_0'
+        write(out_unit,*) ' 111: Legendre Poly. theta (odd)          : Pl0_a_1'
+        write(out_unit,*)
+        write(out_unit,*) ' 20 : Hermite Poly.                       : HO or Hm or hermite'
+        write(out_unit,*) ' 200: Hermite Poly. (even)                : HO_0 or Hm_0'
+        write(out_unit,*) ' 201: Hermite Poly. (odd)                 : HO_1 or Hm_1'
+        write(out_unit,*) ' 21 : Hermite Poly. + points from boxAB   : HObox or Hmbox'
+        write(out_unit,*) ' 22 : Hermite Poly. + variable transfo    : HOAB'
+        write(out_unit,*) ' 2000:Hermite Poly. + cubature (nD)       : cuba_HO or cuba_Hm or cuba_hermite'
 
-        write(out_unitp,*)
-        write(out_unitp,*) ' 80 : Hermite Poly. ([0,+inf])            : HO+ or Hm+'
+        write(out_unit,*)
+        write(out_unit,*) ' 80 : Hermite Poly. ([0,+inf])            : HO+ or Hm+'
 
-        write(out_unitp,*)
-        write(out_unitp,*) ' 90 : Laguerre Poly.                      : Lm or Laguerre'
+        write(out_unit,*)
+        write(out_unit,*) ' 90 : Laguerre Poly.                      : Lm or Laguerre'
 
-        write(out_unitp,*)
-        write(out_unitp,*) ' 30 : Fourier Series                      : cos ou sin ou fourier'
-        write(out_unitp,*) ' 40 : Fourier Series [A B]                : cosAB'
-        write(out_unitp,*) ' 40 : Fourier Series [A B]                : cosABnosym'
-        write(out_unitp,*) ' 50 : Particle-in-a-box[A B]              : boxAB'
-        write(out_unitp,*) ' 50 : Particle-in-a-box[A B]              : boxABnosym'
-        write(out_unitp,*) ' 50 : Sinc DVR in [A B]                   : SincDVR'
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) ' 30 : Fourier Series                      : cos ou sin ou fourier'
+        write(out_unit,*) ' 40 : Fourier Series [A B]                : cosAB'
+        write(out_unit,*) ' 40 : Fourier Series [A B]                : cosABnosym'
+        write(out_unit,*) ' 50 : Particle-in-a-box[A B]              : boxAB'
+        write(out_unit,*) ' 50 : Particle-in-a-box[A B]              : boxABnosym'
+        write(out_unit,*) ' 50 : Sinc DVR in [A B]                   : SincDVR'
+        write(out_unit,*)
 
-        write(out_unitp,*) ' 60 : Ylm                                 : Ylm'
-        write(out_unitp,*) ' 600: Ylm_0a                              : Ylm, even in l'
-        write(out_unitp,*) ' 601: Ylm_1a                              : Ylm,  odd in l'
-        write(out_unitp,*)
+        write(out_unit,*) ' 60 : Ylm                                 : Ylm'
+        write(out_unit,*) ' 600: Ylm_0a                              : Ylm, even in l'
+        write(out_unit,*) ' 601: Ylm_1a                              : Ylm,  odd in l'
+        write(out_unit,*)
 
-        write(out_unitp,*) ' 70 : Pl1m*Pl2m*Fourier                   : coll_ABplusCD'
+        write(out_unit,*) ' 70 : Pl1m*Pl2m*Fourier                   : coll_ABplusCD'
 
         STOP
       END SELECT
@@ -686,7 +686,7 @@ MODULE mod_basis
       CALL dealloc_basis(basis_temp)
 
       nq = get_nq_FROM_basis(basis_primi)
-      !write(out_unitp,*) 'basis_primi nq',nq
+      !write(out_unit,*) 'basis_primi nq',nq
       IF (nq < 1) RETURN
 
       basis_primi%primitive      = .TRUE.
@@ -747,14 +747,14 @@ MODULE mod_basis
 
       !- scaling of the basis ---------------------------------
       CALL sub_scale_basis(basis_primi)
-      !write(out_unitp,*) 'x (grid points)',basis_primi%x
+      !write(out_unit,*) 'x (grid points)',basis_primi%x
 
       IF (basis_primi%xPOGridRep_done) RETURN
-      flush(out_unitp)
+      flush(out_unit)
 !     - d1b => d1BasisRep and  d2b => d2BasisRep ------------
       CALL sub_dnGB_TO_dnBB(basis_primi)
 
-      flush(out_unitp)
+      flush(out_unit)
 !     - d1b => dnBGG%d1 and  d2b => dnBGG%d2 ------------
       CALL sub_dnGB_TO_dnGG(basis_primi)
 
@@ -769,13 +769,13 @@ MODULE mod_basis
       CALL check_ortho_basis(basis_primi)
 
       IF (print_level > 2 .AND. allocated(basis_primi%x)) THEN
-        write(out_unitp,*) '---------------------------------------'
-        write(out_unitp,*) 'x Grid:',basis_primi%x
-        write(out_unitp,*) '---------------------------------------'
+        write(out_unit,*) '---------------------------------------'
+        write(out_unit,*) 'x Grid:',basis_primi%x
+        write(out_unit,*) '---------------------------------------'
       END IF
 
 !    DO k=1,size(basis_primi%x,dim=2)
-!      write(out_unitp66,'(101(x,f10.5))') basis_primi%x(:,k),basis_primi%dnRGB%d0(k,1:min(10,basis_primi%nb))
+!      write(out_unit66,'(101(x,f10.5))') basis_primi%x(:,k),basis_primi%dnRGB%d0(k,1:min(10,basis_primi%nb))
 !    END DO
 
 !---------------------------------------------------------------------
@@ -785,8 +785,8 @@ MODULE mod_basis
         ELSE
           CALL RecWrite_basis(basis_primi)
         END IF
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !---------------------------------------------------------------------
 
@@ -814,8 +814,8 @@ MODULE mod_basis
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_temp)
       END IF
 !---------------------------------------------------------------------
@@ -849,7 +849,7 @@ MODULE mod_basis
       CASE ("ho","hm","hermite")
 
         d0b = sqrt(basis_temp%scaleQ(1))*poly_Hermite_exp(x,ib-1)
-        !write(out_unitp,*) 'ib,x,d0b',ib,x,d0b
+        !write(out_unit,*) 'ib,x,d0b',ib,x,d0b
       CASE ("ho_0","hm_0")
         STOP
 
@@ -899,7 +899,7 @@ MODULE mod_basis
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
       END FUNCTION d0b_OF_primitive_basis_AT_Q
@@ -918,7 +918,7 @@ MODULE mod_basis
       !!@param: without_read  if this parameter is .TRUE., the contraction coeficients are already in basis_set,
       !!                      otherwise, the coeficients are read from a file
       SUBROUTINE sub_contraction_basis(basis_set,without_read)
-      USE mod_system
+      USE EVR_system_m
       USE mod_dnSVM
       use mod_nDindex
       IMPLICIT NONE
@@ -961,10 +961,10 @@ MODULE mod_basis
       !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         CALL RecWrite_basis(basis_set,.TRUE.)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
@@ -976,31 +976,31 @@ MODULE mod_basis
       nb_bc = basis_set%nbc
       nb_b  = basis_set%nb
 
-      IF (debug .OR. print_level > -1) write(out_unitp,*) 'nb',basis_set%nb
-      IF (debug .OR. print_level > -1) write(out_unitp,*) 'nbc',basis_set%nbc
+      IF (debug .OR. print_level > -1) write(out_unit,*) 'nb',basis_set%nb
+      IF (debug .OR. print_level > -1) write(out_unit,*) 'nbc',basis_set%nbc
 
       IF (.NOT. without_read) THEN
 
 !       - test and read a matrix ------------------------
-        nio = in_unitp
+        nio = in_unit
         IF (basis_set%read_contrac_file) CALL file_open(basis_set%file_contrac,nio)
 
         read(nio,*)
         read(nio,*) nb_col,nb_bc1,nb_b1
         IF (debug .OR. print_level > -1) THEN
-          write(out_unitp,*) 'nb_col,nb_bc1,nb_b1',nb_col,nb_bc1,nb_b1
-          write(out_unitp,*) '    The basis is contracted'
-          write(out_unitp,*) '      nbc nbc_lect: ',nb_bc,nb_bc1
-          write(out_unitp,*) '      nb: ',nb_b1
+          write(out_unit,*) 'nb_col,nb_bc1,nb_b1',nb_col,nb_bc1,nb_b1
+          write(out_unit,*) '    The basis is contracted'
+          write(out_unit,*) '      nbc nbc_lect: ',nb_bc,nb_bc1
+          write(out_unit,*) '      nb: ',nb_b1
         END IF
 
         IF (nb_b1 /= nb_b .OR. nb_bc1 < nb_bc) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' nb_bc =',nb_bc,' and the matrice v10 has',       &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' nb_bc =',nb_bc,' and the matrice v10 has',       &
                        nb_bc1,'columns'
-          write(out_unitp,*) ' nb_b =',nb_b,' and the matrice v10 has',         &
+          write(out_unit,*) ' nb_b =',nb_b,' and the matrice v10 has',         &
                        nb_b1,'lignes'
-          write(out_unitp,*) ' Rq: You MUST have nb_b1=nb_b and nb_bc1=>nb_bc'
+          write(out_unit,*) ' Rq: You MUST have nb_b1=nb_b and nb_bc1=>nb_bc'
           STOP
         END IF
 
@@ -1010,15 +1010,15 @@ MODULE mod_basis
         CALL alloc_NParray(Mat_read,[nb_b1,nb_bc1],"Mat_read",name_sub)
         CALL Read_Mat(Mat_read,nio,nb_col,err)
         IF (err /= 0) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' reading the matrix "Mat_read"'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' reading the matrix "Mat_read"'
           STOP
         END IF
         IF (debug) THEN
-          write(out_unitp,*) ' contraction basis'
-          write(out_unitp,*)
-          CALL Write_Mat(Mat_read,out_unitp,nb_col)
-          flush(out_unitp)
+          write(out_unit,*) ' contraction basis'
+          write(out_unit,*)
+          CALL Write_Mat(Mat_read,out_unit,nb_col)
+          flush(out_unit)
         END IF
 !       -------------------------------------------------
         IF (basis_set%read_contrac_file) CALL file_close(basis_set%file_contrac)
@@ -1033,9 +1033,9 @@ MODULE mod_basis
         CALL dealloc_NParray(Mat_read,"Mat_read",name_sub)
       ELSE
         IF (.NOT. allocated(basis_set%Rvec)) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' without_read=t and basis_set%Rvec is not allocated!'
-          write(out_unitp,*) ' CHECK the source!!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' without_read=t and basis_set%Rvec is not allocated!'
+          write(out_unit,*) ' CHECK the source!!'
           STOP
         END IF
       END IF
@@ -1044,7 +1044,7 @@ MODULE mod_basis
       CALL alloc_NParray(tab_contract_symab,[basis_set%nbc],          &
                         "tab_contract_symab",name_sub)
       !analyze the symmetry of each Rvec(:,i)
-      !write(out_unitp,*) 'basis_set%tab_symab',basis_set%tab_symab
+      !write(out_unit,*) 'basis_set%tab_symab',basis_set%tab_symab
       DO i=1,nb_bc
         ! symmetry of the basis function with the largest coefficient
         iloc = sum(maxloc(abs(basis_set%Rvec(:,i))))
@@ -1065,13 +1065,13 @@ MODULE mod_basis
           jsym = Get_symabOFSymAbelianOFBasis_AT_ib(basis_set,jloc)
           IF (isym == jsym) THEN
              Sij = dot_product(basis_set%Rvec(:,i),basis_set%Rvec(:,j))
-             !write(out_unitp,*) 'i,j,Sij',i,isym,j,jsym,Sij
+             !write(out_unit,*) 'i,j,Sij',i,isym,j,jsym,Sij
              basis_set%Rvec(:,i) = basis_set%Rvec(:,i) - Sij*basis_set%Rvec(:,j)
           END IF
         END DO
         norm = dot_product(basis_set%Rvec(:,i),basis_set%Rvec(:,i))
         IF ((ONE-norm) > ONETENTH**6)                                    &
-          write(out_unitp,*) 'WARNING the contracted coefficients break the symmetry',norm
+          write(out_unit,*) 'WARNING the contracted coefficients break the symmetry',norm
         basis_set%Rvec(:,i) = basis_set%Rvec(:,i)/sqrt(norm)
 
         ! Once again schmidt orthogonalization
@@ -1081,7 +1081,7 @@ MODULE mod_basis
           jsym = Get_symabOFSymAbelianOFBasis_AT_ib(basis_set,jloc)
           IF (isym == jsym) THEN
              Sij = dot_product(basis_set%Rvec(:,i),basis_set%Rvec(:,j))
-             !write(out_unitp,*) 'i,j,Sij',i,j,Sij
+             !write(out_unit,*) 'i,j,Sij',i,j,Sij
              basis_set%Rvec(:,i) = basis_set%Rvec(:,i) - Sij*basis_set%Rvec(:,j)
           END IF
         END DO
@@ -1099,7 +1099,7 @@ MODULE mod_basis
 
       !-------------------------------------------------
       !-- secondly, the basis d0b,d1b,d2b or d0b, dnRBB
-      !write(out_unitp,*) ' matmul contra'
+      !write(out_unit,*) ' matmul contra'
       nq = get_nq_FROM_basis(basis_set)
 
       IF (basis_set%dnRGB%alloc) THEN
@@ -1247,9 +1247,9 @@ MODULE mod_basis
 
       IF (.NOT. basis_set%contrac_WITH_nDindB) CALL sort_basis(basis_set)
       IF (print_level > -1) THEN
-        write(out_unitp,*) 'tab_ndim_index contr',basis_set%tab_ndim_index(1,:)
+        write(out_unit,*) 'tab_ndim_index contr',basis_set%tab_ndim_index(1,:)
 
-        write(out_unitp,*) 'Tab_Norm(:) of Contracted basis',           &
+        write(out_unit,*) 'Tab_Norm(:) of Contracted basis',           &
                                             basis_set%nDindB%Tab_Norm(:)
       END IF
       !-------------------------------------------------
@@ -1264,10 +1264,10 @@ MODULE mod_basis
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        !write(out_unitp,*) 'shape basis_set%Rvec',shape(basis_set%Rvec)
+        !write(out_unit,*) 'shape basis_set%Rvec',shape(basis_set%Rvec)
         CALL RecWrite_basis(basis_set)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -1306,24 +1306,24 @@ MODULE mod_basis
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
         !CALL RecWrite_basis(basis_set,.TRUE.)
-        write(out_unitp,*)
-        write(out_unitp,*) 'sort basis set, nb,iQdyn',basis_set%nb,basis_set%iQdyn(:)
-        write(out_unitp,*) 'type_OF_nDindex',basis_set%nDindB%type_OF_nDindex
+        write(out_unit,*)
+        write(out_unit,*) 'sort basis set, nb,iQdyn',basis_set%nb,basis_set%iQdyn(:)
+        write(out_unit,*) 'type_OF_nDindex',basis_set%nDindB%type_OF_nDindex
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
 
      IF (.NOT. basis_set%nDindB%packed_done .OR. .NOT. basis_set%packed_done) THEN
         CALL RecWrite_basis(basis_set,.TRUE.)
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' I cannot sort the basis set: '
-        write(out_unitp,*) ' The multidimensional index (nDindB) is unpacked'
-        write(out_unitp,*) ' or the basis_set is unpacked'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' I cannot sort the basis set: '
+        write(out_unit,*) ' The multidimensional index (nDindB) is unpacked'
+        write(out_unit,*) ' or the basis_set is unpacked'
 
-        write(out_unitp,*) ' CHECK the fortran source !!'
+        write(out_unit,*) ' CHECK the fortran source !!'
         STOP
       END IF
       nq = get_nq_FROM_basis(basis_set)
@@ -1336,15 +1336,15 @@ MODULE mod_basis
       CALL alloc_NParray(ni,   [basis_set%ndim],       'ni',name_sub)
 
       IF (debug) THEN
-        write(out_unitp,*) ' Unsorted basis set with Norm of nDindB'
+        write(out_unit,*) ' Unsorted basis set with Norm of nDindB'
         DO ib=1,basis_set%nb
           Normi = calc_Norm_OF_nDI(basis_set%nDindB,ib)
           CALL calc_nDindex(basis_set%nDindB,ib,nDval)
-          write(out_unitp,*) 'ib,nDval,Normi',ib,':',nDval,Normi
+          write(out_unit,*) 'ib,nDval,Normi',ib,':',nDval,Normi
         END DO
       END IF
 
-      !write(out_unitp,*) 'Permutation'
+      !write(out_unit,*) 'Permutation'
       DO ib=1,basis_set%nb
         DO jb=ib+1,basis_set%nb
           Normi = calc_Norm_OF_nDI(basis_set%nDindB,ib)
@@ -1364,7 +1364,7 @@ MODULE mod_basis
               CALL dealloc_NParray(bcci,'bcci',name_sub)
             END IF
 
-            !write(out_unitp,*) 'permutation',ib,jb
+            !write(out_unit,*) 'permutation',ib,jb
             ! first the basis coef : d0b, d1b, d2b
             IF (allocated(basis_set%tab_ndim_index)) THEN
               ni(:)                          = basis_set%tab_ndim_index(:,ib)
@@ -1447,16 +1447,16 @@ MODULE mod_basis
 
         END DO
       END DO
-      !write(out_unitp,*) 'END Permutation'
+      !write(out_unit,*) 'END Permutation'
 
       CALL sub_dnGB_TO_dnBG(basis_set)
 
       IF (debug) THEN
-        write(out_unitp,*) ' Sorted basis set with Norm of nDindB'
+        write(out_unit,*) ' Sorted basis set with Norm of nDindB'
         DO ib=1,basis_set%nb
           Normi = calc_Norm_OF_nDI(basis_set%nDindB,ib)
           CALL calc_nDindex(basis_set%nDindB,ib,nDval)
-          write(out_unitp,*) 'ib,nDval,Normi',ib,':',nDval,Normi
+          write(out_unit,*) 'ib,nDval,Normi',ib,':',nDval,Normi
         END DO
       END IF
 
@@ -1470,10 +1470,10 @@ MODULE mod_basis
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_set)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -1512,10 +1512,10 @@ MODULE mod_basis
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING sub_scale_basis'
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING sub_scale_basis'
         !CALL RecWrite_basis(basis_sc)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -1528,9 +1528,9 @@ MODULE mod_basis
       IF ( .NOT. not_scaled ) THEN
 
         IF (basis_sc%print_info_OF_basisDP .AND. print_level > -1) THEN
-          write(out_unitp,*) '    The basis is scaled'
-          write(out_unitp,*) '          Q0(:) ',basis_sc%Q0(:)
-          write(out_unitp,*) '      scaleQ(:) ',basis_sc%scaleQ(:)
+          write(out_unit,*) '    The basis is scaled'
+          write(out_unit,*) '          Q0(:) ',basis_sc%Q0(:)
+          write(out_unit,*) '      scaleQ(:) ',basis_sc%scaleQ(:)
         END IF
 
         scaleQ = product(basis_sc%scaleQ)
@@ -1546,9 +1546,9 @@ MODULE mod_basis
         END DO
         END DO
 
-        !write(out_unitp,*) 'alloc + shape x',allocated(basis_sc%x),shape(basis_sc%x)
-        !write(out_unitp,*) 'nq',get_nq_FROM_basis(basis_sc)
-        !flush(out_unitp)
+        !write(out_unit,*) 'alloc + shape x',allocated(basis_sc%x),shape(basis_sc%x)
+        !write(out_unit,*) 'nq',get_nq_FROM_basis(basis_sc)
+        !flush(out_unit)
         DO i=1,basis_sc%ndim
           basis_sc%x(i,:) = basis_sc%Q0(i) + basis_sc%x(i,:) / basis_sc%scaleQ(i)
         END DO
@@ -1569,11 +1569,11 @@ MODULE mod_basis
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        !write(out_unitp,*) 'basis_sc%x',basis_sc%x
+        write(out_unit,*)
+        !write(out_unit,*) 'basis_sc%x',basis_sc%x
         CALL RecWrite_basis(basis_sc)
         CALL check_ortho_basis(basis_sc)
-        write(out_unitp,*) 'END sub_scale_basis'
+        write(out_unit,*) 'END sub_scale_basis'
       END IF
 !---------------------------------------------------------------------
 
@@ -1611,8 +1611,8 @@ MODULE mod_basis
 
       nq = get_nq_FROM_basis(basis_set)
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb,nq',basis_set%nb,nq
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb,nq',basis_set%nb,nq
       END IF
 !-----------------------------------------------------------
 
@@ -1656,7 +1656,7 @@ MODULE mod_basis
       IF (debug) THEN
         CALL Write_dnMat(basis_set%dnRBB)
         !CALL RecWrite_basis(basis_set)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_dnGB_TO_dnBB
@@ -1699,9 +1699,9 @@ MODULE mod_basis
 
       nq = get_nq_FROM_basis(basis_set)
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb,nq',basis_set%nb,nq
-        write(out_unitp,*) 'nb_TD',nb_TD
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb,nq',basis_set%nb,nq
+        write(out_unit,*) 'nb_TD',nb_TD
       END IF
 !-----------------------------------------------------------
       TP_param(1:basis_set%ndim) = basis_set%TD_Q0
@@ -1853,7 +1853,7 @@ MODULE mod_basis
       IF (debug) THEN
         CALL Write_dnMat(basis_set%dnPara_OF_RGB)
         !CALL RecWrite_basis(basis_set)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
   END SUBROUTINE sub_dnGB_TO_dnPara_OF_GB
@@ -1889,9 +1889,9 @@ MODULE mod_basis
 
       nq = get_nq_FROM_basis(basis_set)
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb,nq',basis_set%nb,nq
-        write(out_unitp,*) 'nb_TD',nb_TD
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb,nq',basis_set%nb,nq
+        write(out_unit,*) 'nb_TD',nb_TD
       END IF
 !-----------------------------------------------------------
 
@@ -1938,7 +1938,7 @@ MODULE mod_basis
       IF (debug) THEN
         CALL Write_dnMat(basis_set%dnPara_OF_RBB)
         !CALL RecWrite_basis(basis_set)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
   END SUBROUTINE sub_dnPara_OF_dnGB_TO_dnPara_OF_BB
@@ -1963,9 +1963,9 @@ MODULE mod_basis
 
       nq = get_nq_FROM_basis(basis_set)
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb,nq',basis_set%nb,nq
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb,nq',basis_set%nb,nq
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -2004,7 +2004,7 @@ MODULE mod_basis
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL Write_dnMat(basis_set%dnRGB)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE sub_dnGB_TO_dnBG
@@ -2025,8 +2025,8 @@ MODULE mod_basis
       character (len=*), parameter :: name_sub='Set_dnGGRep'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'With_GG',With_GG
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'With_GG',With_GG
       END IF
 !-----------------------------------------------------------
 
@@ -2038,7 +2038,7 @@ MODULE mod_basis
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE Set_dnGGRep
@@ -2085,12 +2085,12 @@ MODULE mod_basis
 
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb,nq',nb,nq
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb,nq',nb,nq
 
-        write(out_unitp,*) 'dnRGB'
+        write(out_unit,*) 'dnRGB'
         CALL write_dnSVM(basis_set%dnRGB)
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -2113,9 +2113,9 @@ MODULE mod_basis
 
 
           IF (debug) THEN
-            write(out_unitp,*) 'd0bxd0bT'
-            CALL Write_VecMat(d0bxd0bT,out_unitp,5)
-            flush(out_unitp)
+            write(out_unit,*) 'd0bxd0bT'
+            CALL Write_VecMat(d0bxd0bT,out_unit,5)
+            flush(out_unit)
           END IF
 
           epsi = ONETENTH**10
@@ -2124,7 +2124,7 @@ MODULE mod_basis
             ! The SVD procedure does not work all the time !! Why ????
 
             IF (debug) THEN
-              write(out_unitp,*) ' Computation with pseudonverse, SVD'
+              write(out_unit,*) ' Computation with pseudonverse, SVD'
             END IF
 
           ELSE
@@ -2134,8 +2134,8 @@ MODULE mod_basis
             CALL diagonalization(d0bxd0bT,valP,VecP,nq,3,-1,.FALSE.)
 
             IF (debug) THEN
-              write(out_unitp,*) 'diago : ValP(:)',ValP(:)
-              flush(out_unitp)
+              write(out_unit,*) 'diago : ValP(:)',ValP(:)
+              flush(out_unit)
             END IF
             d0bxd0bT(:,:) = ZERO
             DO i=1,nb
@@ -2145,7 +2145,7 @@ MODULE mod_basis
             !  pseudo_inv_OK = .FALSE.
             !  DO
             !    IF (pseudo_inv_OK) EXIT
-            !    IF (debug) write(out_unitp,*) 'diago : count non zero',count(valP > epsi)
+            !    IF (debug) write(out_unit,*) 'diago : count non zero',count(valP > epsi)
             !    IF (count(valP > epsi) > nb) THEN
             !      epsi = epsi * TWO
             !    ELSE
@@ -2158,36 +2158,36 @@ MODULE mod_basis
             !    IF (abs(valP(i)) > epsi) d0bxd0bT(:,i) = VecP(:,i)/valP(i)
             !  END DO
             d0bxd0bT_inv = matmul(d0bxd0bT,transpose(VecP))
-            !CALL Write_VecMat(matmul(d0bxd0bT,d0bxd0bT_inv),out_unitp,5)
-            !CALL Write_VecMat(matmul(d0bxd0bT_inv,d0bxd0bT),out_unitp,5)
+            !CALL Write_VecMat(matmul(d0bxd0bT,d0bxd0bT_inv),out_unit,5)
+            !CALL Write_VecMat(matmul(d0bxd0bT_inv,d0bxd0bT),out_unit,5)
 
             CALL dealloc_NParray(valP,'valP',name_sub)
             CALL dealloc_NParray(vecP,'vecP',name_sub)
 
             IF (debug) THEN
-              write(out_unitp,*) ' Computation with pseudonverse, diago'
+              write(out_unit,*) ' Computation with pseudonverse, diago'
             END IF
 
           END IF
 
           IF (debug) THEN
-            write(out_unitp,*) 'd0bxd0bT_inv'
-            CALL Write_VecMat(d0bxd0bT_inv,out_unitp,5)
-            flush(out_unitp)
+            write(out_unit,*) 'd0bxd0bT_inv'
+            CALL Write_VecMat(d0bxd0bT_inv,out_unit,5)
+            flush(out_unit)
           END IF
 
 
 
           d0b_pseudoInv =  matmul(basis_set%dnRBG%d0,d0bxd0bT_inv)
           IF (debug) THEN
-            write(out_unitp,*) 'True d0b_pseudoInv'
-            CALL Write_VecMat(d0b_pseudoInv,out_unitp,5)
-            flush(out_unitp)
+            write(out_unit,*) 'True d0b_pseudoInv'
+            CALL Write_VecMat(d0b_pseudoInv,out_unit,5)
+            flush(out_unit)
           END IF
         ELSE
 
           IF (debug) THEN
-            write(out_unitp,*) ' Standard computation'
+            write(out_unit,*) ' Standard computation'
           END IF
 
           DO i=1,nb
@@ -2195,27 +2195,27 @@ MODULE mod_basis
           END DO
 
           IF (debug) THEN
-            write(out_unitp,*) 'Standard d0b_pseudoInv'
-            CALL Write_VecMat(d0b_pseudoInv,out_unitp,5)
-            flush(out_unitp)
+            write(out_unit,*) 'Standard d0b_pseudoInv'
+            CALL Write_VecMat(d0b_pseudoInv,out_unit,5)
+            flush(out_unit)
           END IF
         END IF
 
         basis_set%dnRGG%d0 =  matmul(basis_set%dnRGB%d0(:,1:nb),d0b_pseudoInv)
 
         IF (debug) THEN
-          !write(out_unitp,*) 'dnRGG%d0'
-          !CALL Write_VecMat(basis_set%dnRGG%d0,out_unitp,5)
-          write(out_unitp,*) 'dnRGG%d0 done'
-          flush(out_unitp)
+          !write(out_unit,*) 'dnRGG%d0'
+          !CALL Write_VecMat(basis_set%dnRGG%d0,out_unit,5)
+          write(out_unit,*) 'dnRGG%d0 done'
+          flush(out_unit)
         END IF
 
         IF (.NOT. associated(basis_set%dnRGB%d1) .OR.                   &
                               .NOT. associated(basis_set%dnRGB%d2)) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  dnRGB%d1 or dnRGB%d2',                  &
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  dnRGB%d1 or dnRGB%d2',                  &
             associated(basis_set%dnRGB%d1),associated(basis_set%dnRGB%d2)
-          write(out_unitp,*) '  dnRGB%d1 or dnRGB%d2 are not associated!!'
+          write(out_unit,*) '  dnRGB%d1 or dnRGB%d2 are not associated!!'
           STOP
         END IF
 
@@ -2223,12 +2223,12 @@ MODULE mod_basis
           basis_set%dnRGG%d1(:,:,i) =  matmul(basis_set%dnRGB%d1(:,1:nb,i),d0b_pseudoInv)
         END DO
         IF (debug) THEN
-          write(out_unitp,*) 'dnRGG%d1'
+          write(out_unit,*) 'dnRGG%d1'
           DO i=1,basis_set%ndim
-          !  CALL Write_VecMat(basis_set%dnRGG%d1(:,:,i),out_unitp,5)
+          !  CALL Write_VecMat(basis_set%dnRGG%d1(:,:,i),out_unit,5)
           END DO
-          write(out_unitp,*) 'dnRGG%d1 done'
-          flush(out_unitp)
+          write(out_unit,*) 'dnRGG%d1 done'
+          flush(out_unit)
         END IF
 
         DO i=1,basis_set%ndim
@@ -2237,71 +2237,71 @@ MODULE mod_basis
         END DO
         END DO
         IF (debug) THEN
-          write(out_unitp,*) 'dnRGG%d2 done'
-          flush(out_unitp)
+          write(out_unit,*) 'dnRGG%d2 done'
+          flush(out_unit)
         END IF
 
         IF (Check) THEN
 
-          write(out_unitp,*) '-------------------------------------------'
-          write(out_unitp,*) 'Check d1GG^2 - d2GG, nb,nq',nb,nq
+          write(out_unit,*) '-------------------------------------------'
+          write(out_unit,*) 'Check d1GG^2 - d2GG, nb,nq',nb,nq
           DO i=1,basis_set%ndim
           DO j=1,basis_set%ndim
             Check_bGB = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))
-            IF (debug) CALL Write_VecMat(Check_bGB,out_unitp,5,info='d1GG^2')
-            IF (debug) CALL Write_VecMat(basis_set%dnRGG%d2(:,:,i,j),out_unitp,5,info='d2GG')
+            IF (debug) CALL Write_VecMat(Check_bGB,out_unit,5,info='d1GG^2')
+            IF (debug) CALL Write_VecMat(basis_set%dnRGG%d2(:,:,i,j),out_unit,5,info='d2GG')
 
             Check_bGB = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))-basis_set%dnRGG%d2(:,:,i,j)
-            IF (debug) CALL Write_VecMat(Check_bGB,out_unitp,5,info='d1GG^2 - d2GG')
+            IF (debug) CALL Write_VecMat(Check_bGB,out_unit,5,info='d1GG^2 - d2GG')
 
             Max_err_d1GG2md2GG = maxval(abs(Check_bGB))
             !IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
-              write(out_unitp,'(a,4x,i0,x,i0,x,e9.2)') 'Check d1GG^2 - d2GG',i,j,maxval(abs(Check_bGB))
+              write(out_unit,'(a,4x,i0,x,i0,x,e9.2)') 'Check d1GG^2 - d2GG',i,j,maxval(abs(Check_bGB))
             !END IF
-            flush(out_unitp)
+            flush(out_unit)
             !basis_set%dnRGG%d2(:,:,i,j) = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))
           END DO
           END DO
 
           IF (debug) THEN
-            write(out_unitp,*) '-------------------------------------------'
-            write(out_unitp,*) 'Check dnRGG, nb,nq',nb,nq
-            flush(out_unitp)
+            write(out_unit,*) '-------------------------------------------'
+            write(out_unit,*) 'Check dnRGG, nb,nq',nb,nq
+            flush(out_unit)
           END IF
           Check_bGB = basis_set%dnRGB%d0(:,1:nb)-matmul(basis_set%dnRGG%d0,basis_set%dnRGB%d0(:,1:nb))
           Max_err_Check_bGB = maxval(abs(Check_bGB))
           IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
-            write(out_unitp,'(a,4x,e9.2)') 'Check_bGB%d0',maxval(abs(Check_bGB))
-            CALL Write_VecMat(Check_bGB,out_unitp,5)
+            write(out_unit,'(a,4x,e9.2)') 'Check_bGB%d0',maxval(abs(Check_bGB))
+            CALL Write_VecMat(Check_bGB,out_unit,5)
           END IF
-          flush(out_unitp)
+          flush(out_unit)
 
           DO i=1,basis_set%ndim
             Check_bGB = basis_set%dnRGB%d1(:,1:nb,i)-matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGB%d0(:,1:nb))
             Max_err_Check_bGB = max(Max_err_Check_bGB,maxval(abs(Check_bGB)))
             IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
-              write(out_unitp,'(a,1x,i0,2x,e9.2)') 'Check_bGB%d1',i,maxval(abs(Check_bGB))
-              CALL Write_VecMat(Check_bGB,out_unitp,5)
+              write(out_unit,'(a,1x,i0,2x,e9.2)') 'Check_bGB%d1',i,maxval(abs(Check_bGB))
+              CALL Write_VecMat(Check_bGB,out_unit,5)
             END IF
           END DO
-          flush(out_unitp)
+          flush(out_unit)
 
           DO i=1,basis_set%ndim
           DO j=1,basis_set%ndim
             Check_bGB = basis_set%dnRGB%d2(:,1:nb,i,j)-matmul(basis_set%dnRGG%d2(:,:,i,j),basis_set%dnRGB%d0(:,1:nb))
             Max_err_Check_bGB = max(Max_err_Check_bGB,maxval(abs(Check_bGB)))
             IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
-              write(out_unitp,'(a,1x,i0,1x,i0,e9.2)') 'Check_bGB%d2',i,j,maxval(abs(Check_bGB))
-              CALL Write_VecMat(Check_bGB,out_unitp,5)
+              write(out_unit,'(a,1x,i0,1x,i0,e9.2)') 'Check_bGB%d2',i,j,maxval(abs(Check_bGB))
+              CALL Write_VecMat(Check_bGB,out_unit,5)
             END IF
           END DO
           END DO
-          IF (debug) write(out_unitp,*) '-------------------------------------------'
-          flush(out_unitp)
+          IF (debug) write(out_unit,*) '-------------------------------------------'
+          flush(out_unit)
 
           IF (Max_err_Check_bGB > ONETENTH**6) THEN
-            write(out_unitp,*) 'ERROR in ',name_sub
-            write(out_unitp,'(a,e9.2)') 'Max_err_Check_bGB is too large! ',Max_err_Check_bGB
+            write(out_unit,*) 'ERROR in ',name_sub
+            write(out_unit,'(a,e9.2)') 'Max_err_Check_bGB is too large! ',Max_err_Check_bGB
             STOP
           END IF
            
@@ -2318,8 +2318,8 @@ MODULE mod_basis
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL alloc_dnMat(basis_set%dnRGG)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
       !stop 'coucou sub_dnGB_TO_dnGG'
@@ -2352,19 +2352,19 @@ MODULE mod_basis
       IF (basis_set%ndim == 0 .OR. .NOT. basis_set%packed .OR. basis_set%packed_done) RETURN
 
       nqo = get_nq_FROM_basis(basis_set)
-      !write(out_unitp,*) 'BEGINNING ',name_sub
-      !write(out_unitp,*) 'nb,nq',basis_set%nb,nqo
+      !write(out_unit,*) 'BEGINNING ',name_sub
+      !write(out_unit,*) 'nb,nq',basis_set%nb,nqo
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) '--------------------------'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) '--------------------------'
         CALL RecWrite_basis(basis_set,write_all=.TRUE.)
-        write(out_unitp,*) '--------------------------'
+        write(out_unit,*) '--------------------------'
 
-        write(out_unitp,*) 'unpacked Grid: ',nqo
+        write(out_unit,*) 'unpacked Grid: ',nqo
         DO iq=1,nqo
           CALL Rec_x(X,basis_set,iq)
-          write(out_unitp,*) 'iq,x',iq,X(:)
+          write(out_unit,*) 'iq,x',iq,X(:)
         END DO
         !STOP
       END IF
@@ -2416,7 +2416,7 @@ MODULE mod_basis
 
    DO ib=1,basis_set%nb
      CALL Rec_ndim_index(basis_set,basis_set%tab_ndim_index(:,ib),ib)
-     IF (debug) write(out_unitp,*) 'ib,ndim_index',ib,basis_set%tab_ndim_index(:,ib)
+     IF (debug) write(out_unit,*) 'ib,ndim_index',ib,basis_set%tab_ndim_index(:,ib)
    END DO
 
    IF (associated(basis_set%tab_PbasisSG)) THEN
@@ -2432,16 +2432,16 @@ MODULE mod_basis
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'pack done '
+    write(out_unit,*) 'pack done '
     CALL RecWrite_basis(basis_set,write_all=.TRUE.)
 
     nqo = get_nq_FROM_basis(basis_set)
-    write(out_unitp,*) 'packed Grid: ',nqo
+    write(out_unit,*) 'packed Grid: ',nqo
     DO iq=1,nqo
-      write(out_unitp,*) 'iq,x',iq,basis_set%x(:,iq)
+      write(out_unit,*) 'iq,x',iq,basis_set%x(:,iq)
     END DO
 
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
 
 
   END IF
@@ -2476,19 +2476,19 @@ SUBROUTINE pack_basis_old(basis_set,sortX)
       IF (basis_set%packed_done) RETURN
 
       nqo = get_nq_FROM_basis(basis_set)
-      !write(out_unitp,*) 'BEGINNING ',name_sub
-      !write(out_unitp,*) 'nb,nq',basis_set%nb,nqo
+      !write(out_unit,*) 'BEGINNING ',name_sub
+      !write(out_unit,*) 'nb,nq',basis_set%nb,nqo
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) '--------------------------'
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) '--------------------------'
         CALL RecWrite_basis(basis_set,write_all=.TRUE.)
-        write(out_unitp,*) '--------------------------'
+        write(out_unit,*) '--------------------------'
 
-        write(out_unitp,*) 'unpacked Grid: ',nqo
+        write(out_unit,*) 'unpacked Grid: ',nqo
         DO iq=1,nqo
           CALL Rec_x(X,basis_set,iq)
-          write(out_unitp,*) 'iq,x',iq,X(:)
+          write(out_unit,*) 'iq,x',iq,X(:)
         END DO
         !STOP
       END IF
@@ -2540,7 +2540,7 @@ STOP 'pack and SG2 does not work!!!'
        DO iq=1,nqo
 
          CALL Rec_x(Xmin(:),basis_set,tab_iqXmin(iq))
-         !write(out_unitp,*) 'tab_iqXmin(iq),Xmin(:)',iq,tab_iqXmin(iq),Xmin(:)
+         !write(out_unit,*) 'tab_iqXmin(iq),Xmin(:)',iq,tab_iqXmin(iq),Xmin(:)
 
          ! 3d: find iqm
          DO iq1=iq+1,nqo
@@ -2553,7 +2553,7 @@ STOP 'pack and SG2 does not work!!!'
              Xmin(:) = X(:)
            END IF
          END DO
-         !write(out_unitp,*) 'tab_iqXmin(iq),Xmin(:)',iq,tab_iqXmin(iq),Xmin(:)
+         !write(out_unit,*) 'tab_iqXmin(iq),Xmin(:)',iq,tab_iqXmin(iq),Xmin(:)
        END DO
 
        ! first the new number of points
@@ -2570,8 +2570,8 @@ STOP 'pack and SG2 does not work!!!'
          END IF
 
        END DO
-       !IF (print_level > -1) write(out_unitp,*) 'old/new nq',nqo,nq
-       write(out_unitp,*) 'old/new nq',nqo,nq
+       !IF (print_level > -1) write(out_unit,*) 'old/new nq',nqo,nq
+       write(out_unit,*) 'old/new nq',nqo,nq
 !nq=nqo
 !tab_iqXmin = abs(tab_iqXmin)
        ! set up the basis set with the right number of points
@@ -2599,8 +2599,8 @@ STOP 'pack and SG2 does not work!!!'
          ELSE  ! two (or more) identical points, just one is consider. But the weight must be changed
            iq1 = abs(tab_iqXmin(iq))
 
-           write(out_unitp,*) 'd0RGB,wrho',iq0,basis_set%dnRGB%d0(iq0,:),basis_set%wrho(iq0)
-           write(out_unitp,*) 'd0RGB,wrho',iq1,basis_loc%dnRGB%d0(iq1,:),Rec_WrhonD(basis_set,iq1)
+           write(out_unit,*) 'd0RGB,wrho',iq0,basis_set%dnRGB%d0(iq0,:),basis_set%wrho(iq0)
+           write(out_unit,*) 'd0RGB,wrho',iq1,basis_loc%dnRGB%d0(iq1,:),Rec_WrhonD(basis_set,iq1)
 
 
            ! be carrefull, rho remains unchanged. It just function of Xmin
@@ -2666,7 +2666,7 @@ write(6,*) 'coucou0 sort' ; flush(6)
        DO iq=1,nqo
 
          CALL Rec_x(Xmin(:),basis_set,tab_iqXmin(iq))
-         !write(out_unitp,*) 'tab_iqXmin(iq),Xmin(:)',iq,tab_iqXmin(iq),Xmin(:)
+         !write(out_unit,*) 'tab_iqXmin(iq),Xmin(:)',iq,tab_iqXmin(iq),Xmin(:)
 
          ! 3d: find iqm
          DO iq1=iq+1,nqo
@@ -2679,7 +2679,7 @@ write(6,*) 'coucou0 sort' ; flush(6)
              Xmin(:) = X(:)
            END IF
          END DO
-         !write(out_unitp,*) 'tab_iqXmin(iq),Xmin(:)',iq,tab_iqXmin(iq),Xmin(:)
+         !write(out_unit,*) 'tab_iqXmin(iq),Xmin(:)',iq,tab_iqXmin(iq),Xmin(:)
        END DO
 
        ! first the new number of points
@@ -2697,9 +2697,9 @@ write(6,*) 'coucou0 sort' ; flush(6)
 
        END DO
        DO iq=1,nqo
-         write(out_unitp,*) iq,'tab_iqXmin',tab_iqXmin(iq)
+         write(out_unit,*) iq,'tab_iqXmin',tab_iqXmin(iq)
        END DO
-       IF (print_level > -1) write(out_unitp,*) 'old/new nq',nqo,nq
+       IF (print_level > -1) write(out_unit,*) 'old/new nq',nqo,nq
 
        ! set up the basis set with the right number of points
        CALL Set_nq_OF_basis(basis_set,nq)
@@ -2773,7 +2773,7 @@ write(6,*) 'coucou2 sort,iq,iq0,iq1',iq,iq0,iq1 ; flush(6)
 
    DO ib=1,basis_set%nb
      CALL Rec_ndim_index(basis_set,basis_set%tab_ndim_index(:,ib),ib)
-     IF (debug) write(out_unitp,*) 'ib,ndim_index',ib,basis_set%tab_ndim_index(:,ib)
+     IF (debug) write(out_unit,*) 'ib,ndim_index',ib,basis_set%tab_ndim_index(:,ib)
    END DO
 
    IF (associated(basis_set%tab_PbasisSG)) THEN
@@ -2789,16 +2789,16 @@ write(6,*) 'coucou2 sort,iq,iq0,iq1',iq,iq0,iq1 ; flush(6)
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'pack done '
+    write(out_unit,*) 'pack done '
     CALL RecWrite_basis(basis_set,write_all=.TRUE.)
 
     nqo = get_nq_FROM_basis(basis_set)
-    write(out_unitp,*) 'packed Grid: ',nqo
+    write(out_unit,*) 'packed Grid: ',nqo
     DO iq=1,nqo
-      write(out_unitp,*) 'iq,x',iq,basis_set%x(:,iq)
+      write(out_unit,*) 'iq,x',iq,basis_set%x(:,iq)
     END DO
 
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
 
 
   END IF
@@ -2835,19 +2835,19 @@ END SUBROUTINE pack_basis_old
       !logical,parameter :: debug= .TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'check_basis: ',basis_temp%check_basis
-        write(out_unitp,*) 'packed_done: ',basis_temp%packed_done
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'check_basis: ',basis_temp%check_basis
+        write(out_unit,*) 'packed_done: ',basis_temp%packed_done
         CALL RecWrite_basis(basis_temp,write_all=.TRUE.)
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
       IF (basis_temp%ndim == 0) RETURN
       IF (.NOT. basis_temp%check_basis .OR. .NOT. basis_temp%packed_done) RETURN
       !IF (.NOT. basis_temp%packed_done) RETURN
       nq = get_nq_FROM_basis(basis_temp)
-      !write(out_unitp,*) 'nq,nb',nq,basis_temp%nb
+      !write(out_unit,*) 'nq,nb',nq,basis_temp%nb
       IF ( (basis_temp%nb*nq) > 1000000000) RETURN
 
       Print_basis = basis_temp%print_info_OF_basisDP .AND. print_level > -1 .OR. debug
@@ -2878,9 +2878,9 @@ END SUBROUTINE pack_basis_old
 
 
         IF (max_Sii > ONETENTH**5 .OR. max_Sij > ONETENTH**5) THEN
-          write(out_unitp,*) ' Overlap Matrix:'
+          write(out_unit,*) ' Overlap Matrix:'
           CALL Write_nDindex(basis_temp%nDindB)
-          CALL Write_Mat(matS,out_unitp,5)
+          CALL Write_Mat(matS,out_unit,5)
         END IF
 
 
@@ -2888,11 +2888,11 @@ END SUBROUTINE pack_basis_old
         CALL dealloc_NParray(matS,'matS',name_sub)
 
       IF (max_Sii > ONETENTH**5 .OR. max_Sij > ONETENTH**5) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' the basis is not orthonormal !!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' the basis is not orthonormal !!'
         IF (loc_test_stop) THEN
           CALL RecWrite_basis(basis_temp,write_all=.FALSE.)
-          write(out_unitp,*) ' The basis is not orthonormal !!'
+          write(out_unit,*) ' The basis is not orthonormal !!'
           STOP 'ERROR: None orthonormal Basis'
         END IF
       END IF
@@ -2900,7 +2900,7 @@ END SUBROUTINE pack_basis_old
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -2919,13 +2919,13 @@ END SUBROUTINE pack_basis_old
       !logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) '  With_L          ',PrimBasis%With_L
-         write(out_unitp,*) '  Norm_OF_nDindB  ',PrimBasis%Norm_OF_nDindB
-         write(out_unitp,*) '  L               ',L
-         write(out_unitp,*) '  weight_OF_nDindB',PrimBasis%weight_OF_nDindB
-         write(out_unitp,*) '  contrac         ',PrimBasis%contrac
-         write(out_unitp,*) '  contrac_analysis',PrimBasis%contrac_analysis
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) '  With_L          ',PrimBasis%With_L
+         write(out_unit,*) '  Norm_OF_nDindB  ',PrimBasis%Norm_OF_nDindB
+         write(out_unit,*) '  L               ',L
+         write(out_unit,*) '  weight_OF_nDindB',PrimBasis%weight_OF_nDindB
+         write(out_unit,*) '  contrac         ',PrimBasis%contrac
+         write(out_unit,*) '  contrac_analysis',PrimBasis%contrac_analysis
 
        END IF
 !-----------------------------------------------------------
@@ -2933,10 +2933,10 @@ END SUBROUTINE pack_basis_old
          IF (PrimBasis%contrac .AND. .NOT. PrimBasis%contrac_analysis) THEN
            PrimBasis%nbc = get_n_FROM_Basis_L_TO_n(PrimBasis%L_TO_nb,L)
            Get_nb_FROM_l_OF_PrimBasis = PrimBasis%nb
-           IF (debug) write(out_unitp,*) ' nb',Get_nb_FROM_l_OF_PrimBasis
+           IF (debug) write(out_unit,*) ' nb',Get_nb_FROM_l_OF_PrimBasis
          ELSE
            Get_nb_FROM_l_OF_PrimBasis = get_n_FROM_Basis_L_TO_n(PrimBasis%L_TO_nb,L)
-           IF (debug) write(out_unitp,*) ' nb',Get_nb_FROM_l_OF_PrimBasis
+           IF (debug) write(out_unit,*) ' nb',Get_nb_FROM_l_OF_PrimBasis
          END IF
        ELSE
           IF (PrimBasis%nb < 1) THEN
@@ -2948,22 +2948,22 @@ END SUBROUTINE pack_basis_old
        END IF
 
        IF (Get_nb_FROM_l_OF_PrimBasis < 1) THEN
-         write(out_unitp,*) 'ERROR in ',name_sub
-         write(out_unitp,*) '  L',L
-         write(out_unitp,*) '  contrac',PrimBasis%contrac
-         write(out_unitp,*) '  nb',Get_nb_FROM_l_OF_PrimBasis
-         write(out_unitp,*) '  nb (from PrimBasis)',PrimBasis%nb
-         write(out_unitp,*) '  With_L',PrimBasis%With_L
-         write(out_unitp,*) '  Norm_OF_nDindB',PrimBasis%Norm_OF_nDindB
-         write(out_unitp,*) '  weight_OF_nDindB',PrimBasis%weight_OF_nDindB
+         write(out_unit,*) 'ERROR in ',name_sub
+         write(out_unit,*) '  L',L
+         write(out_unit,*) '  contrac',PrimBasis%contrac
+         write(out_unit,*) '  nb',Get_nb_FROM_l_OF_PrimBasis
+         write(out_unit,*) '  nb (from PrimBasis)',PrimBasis%nb
+         write(out_unit,*) '  With_L',PrimBasis%With_L
+         write(out_unit,*) '  Norm_OF_nDindB',PrimBasis%Norm_OF_nDindB
+         write(out_unit,*) '  weight_OF_nDindB',PrimBasis%weight_OF_nDindB
          STOP
        END IF
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'nb',Get_nb_FROM_l_OF_PrimBasis
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'nb',Get_nb_FROM_l_OF_PrimBasis
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 
@@ -2982,9 +2982,9 @@ END SUBROUTINE pack_basis_old
       !logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'L',L
-         write(out_unitp,*) 'PrimBasis%L_SparseBasis',PrimBasis%L_SparseBasis
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'L',L
+         write(out_unit,*) 'PrimBasis%L_SparseBasis',PrimBasis%L_SparseBasis
        END IF
 !-----------------------------------------------------------
 
@@ -2997,15 +2997,15 @@ END SUBROUTINE pack_basis_old
        END IF
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'nq',Get_nq_FROM_l_OF_PrimBasis
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'nq',Get_nq_FROM_l_OF_PrimBasis
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 
       END FUNCTION Get_nq_FROM_l_OF_PrimBasis
 
       RECURSIVE SUBROUTINE Rec_ndim_index(BasisnD,ndim_index,ib)
-      USE mod_system
+      USE EVR_system_m
       implicit none
 
 !----- variables for the Basis and quadrature points -----------------
@@ -3025,7 +3025,7 @@ END SUBROUTINE pack_basis_old
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'BEGINNING ',name_sub
        END IF
 !-----------------------------------------------------------
        IF (BasisnD%packed_done) THEN
@@ -3033,8 +3033,8 @@ END SUBROUTINE pack_basis_old
        ELSE ! BasisnD%nb_basis MUST BE > 0
          IF (BasisnD%nb_basis == 0 ) THEN
             CALL RecWriteMini_basis(BasisnD)
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' This basis should be packed'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' This basis should be packed'
 
             STOP
          END IF
@@ -3068,9 +3068,9 @@ END SUBROUTINE pack_basis_old
            END DO
 
          CASE DEFAULT
-           write(out_unitp,*) ' ERROR in',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+           write(out_unit,*) ' ERROR in',name_sub
+           write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+           write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
            STOP
          END SELECT
 
@@ -3078,15 +3078,15 @@ END SUBROUTINE pack_basis_old
 
       !-------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'ib,ndim_index',ib,ndim_index
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'ib,ndim_index',ib,ndim_index
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
       !-------------------------------------------------------
       END SUBROUTINE Rec_ndim_index
       SUBROUTINE calc_InD_FROM_ndim_index(BasisnD,ndim_index,InD,ibGuess)
-      USE mod_system
+      USE EVR_system_m
       implicit none
 
 !----- variables for the Basis and quadrature points -----------------
@@ -3105,7 +3105,7 @@ END SUBROUTINE pack_basis_old
 !     logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING calc_InD_FROM_ndim_index'
+         write(out_unit,*) 'BEGINNING calc_InD_FROM_ndim_index'
        END IF
 !-----------------------------------------------------------
        IF (present(ibGuess)) THEN
@@ -3128,15 +3128,15 @@ END SUBROUTINE pack_basis_old
          IF (ib < ibGuess_loc) InD = ib
        END IF
 
-       !write(out_unitp,*) 'ndim_index',ndim_index,':',ibGuess_loc,ib,BasisnD%nb
+       !write(out_unit,*) 'ndim_index',ndim_index,':',ibGuess_loc,ib,BasisnD%nb
 
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'InD,ndim_index',InD,ndim_index
-        write(out_unitp,*)
-        write(out_unitp,*) 'END calc_InD_FROM_ndim_index'
+        write(out_unit,*)
+        write(out_unit,*) 'InD,ndim_index',InD,ndim_index
+        write(out_unit,*)
+        write(out_unit,*) 'END calc_InD_FROM_ndim_index'
       END IF
 !     -------------------------------------------------------
 
@@ -3151,7 +3151,7 @@ END SUBROUTINE pack_basis_old
       !!@param: TODO
       !!@param: TODO
       RECURSIVE FUNCTION Rec_WrhonD(BasisnD,iq,OldPara) result(WrhonD)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_BtoG_GtoB_SGType4, ONLY : getbis_tab_nq
       implicit none
 
@@ -3181,10 +3181,10 @@ END SUBROUTINE pack_basis_old
        character (len=*), parameter :: name_sub = 'Rec_WrhonD'
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'iq',iq
-         write(out_unitp,*) 'BasisnD%nb_basis',BasisnD%nb_basis
-         write(out_unitp,*) 'BasisnD%packed_done',BasisnD%packed_done
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'iq',iq
+         write(out_unit,*) 'BasisnD%nb_basis',BasisnD%nb_basis
+         write(out_unit,*) 'BasisnD%packed_done',BasisnD%packed_done
        END IF
 !-----------------------------------------------------------
 !
@@ -3193,7 +3193,7 @@ END SUBROUTINE pack_basis_old
        ELSE IF (BasisnD%packed_done) THEN
          !CALL RecWrite_basis(BasisnD,write_all=.TRUE.)
          !IF (.NOT. allocated(BasisnD%wrho)) STOP 'problem with primitive basis. wrho is not allocated !!'
-         !write(out_unitp,*) 'shape wrho, iq',shape(BasisnD%wrho),iq
+         !write(out_unit,*) 'shape wrho, iq',shape(BasisnD%wrho),iq
          WrhonD = BasisnD%wrho(iq)
        ELSE ! BasisnD%nb_basis MUST BE > 0
          IF (BasisnD%nb_basis == 0 ) STOP ' ERROR with packed in Rec_WrhonD !!!'
@@ -3201,7 +3201,7 @@ END SUBROUTINE pack_basis_old
          SELECT CASE (BasisnD%SparseGrid_type)
          CASE (0) ! Direct product
            CALL calc_nDindex(BasisnD%nDindG,iq,nDval)
-           IF (debug) write(out_unitp,*) 'DP: nDval',nDval(:)
+           IF (debug) write(out_unit,*) 'DP: nDval',nDval(:)
            WrhonD = ONE
            DO i=1,BasisnD%nb_basis
              WrhonD = WrhonD * Rec_WrhonD(BasisnD%tab_Pbasis(i)%Pbasis,nDval(i))
@@ -3214,7 +3214,7 @@ END SUBROUTINE pack_basis_old
              IF (iq_SG <= nq) EXIT
              iq_SG = iq_SG - nq
            END DO
-           IF (debug) write(out_unitp,*) 'i_SG,iq_SG',i_SG,iq_SG
+           IF (debug) write(out_unit,*) 'i_SG,iq_SG',i_SG,iq_SG
            WrhonD = BasisnD%WeightSG(i_SG) *                            &
                     Rec_WrhonD(BasisnD%tab_PbasisSG(i_SG)%Pbasis,iq_SG)
 
@@ -3222,7 +3222,7 @@ END SUBROUTINE pack_basis_old
            CALL get_Tabiq_Tabil_FROM_iq_old(nDval_SG2,nDl_SG2,          &
                                      i_SG,iq_SG,iq,BasisnD%para_SGType2)
 !           IF (present(OldPara)) THEN
-!             !write(out_unitp,*) 'OldPara in Rec_WrhonD:',OldPara
+!             !write(out_unit,*) 'OldPara in Rec_WrhonD:',OldPara
 !             CALL get_Tabiq_Tabil_FROM_iq(nDval_SG2,nDl_SG2,          &
 !                                     i_SG,iq_SG,iq,BasisnD%para_SGType2,&
 !                                     OldPara,err_sub=err_sub)
@@ -3239,9 +3239,9 @@ END SUBROUTINE pack_basis_old
              iq_ib = nDval_SG2(ib)
              WrhonD = WrhonD * Rec_WrhonD(BasisnD%tab_basisPrimSG(L,ib),iq_ib)
            END DO
-           IF (debug) write(out_unitp,*) 'iq,i_SG,iq_SG',iq,i_SG,iq_SG
-           IF (debug) write(out_unitp,*) 'DP: nDval',nDval_SG2(:)
-           IF (debug) write(out_unitp,*) 'WrhonD',iq,WrhonD
+           IF (debug) write(out_unit,*) 'iq,i_SG,iq_SG',iq,i_SG,iq_SG
+           IF (debug) write(out_unit,*) 'DP: nDval',nDval_SG2(:)
+           IF (debug) write(out_unit,*) 'WrhonD',iq,WrhonD
 
          CASE (4) ! Sparse basis (Smolyak 4th implementation)
 
@@ -3262,19 +3262,19 @@ END SUBROUTINE pack_basis_old
            END DO
 
          CASE DEFAULT
-           write(out_unitp,*) ' ERROR in',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+           write(out_unit,*) ' ERROR in',name_sub
+           write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+           write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
            STOP
          END SELECT
        END IF
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' WrhonD',WrhonD
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) ' WrhonD',WrhonD
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 
@@ -3282,7 +3282,7 @@ END SUBROUTINE pack_basis_old
 
 
       RECURSIVE SUBROUTINE Rec_tab_iq(tab_iq,BasisnD,iq,iqi)
-      USE mod_system
+      USE EVR_system_m
       implicit none
 
 !----- variables for the Basis and quadrature points -----------------
@@ -3308,8 +3308,8 @@ END SUBROUTINE pack_basis_old
        character (len=*), parameter :: name_sub = 'Rec_tab_iq'
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'iq',iq
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'iq',iq
        END IF
 !-----------------------------------------------------------
 !
@@ -3327,7 +3327,7 @@ END SUBROUTINE pack_basis_old
          SELECT CASE (BasisnD%SparseGrid_type)
          CASE (0) ! Direct product
            CALL calc_nDindex(BasisnD%nDindG,iq,nDval)
-           IF (debug) write(out_unitp,*) 'DP: nDval',nDval(:)
+           IF (debug) write(out_unit,*) 'DP: nDval',nDval(:)
            idim = 0
            DO i=1,BasisnD%nb_basis
              ndim = BasisnD%tab_Pbasis(i)%Pbasis%ndim
@@ -3344,7 +3344,7 @@ END SUBROUTINE pack_basis_old
              IF (iq_SG <= nq) EXIT
              iq_SG = iq_SG - nq
            END DO
-           IF (debug) write(out_unitp,*) 'i_SG,iq_SG',i_SG,iq_SG
+           IF (debug) write(out_unit,*) 'i_SG,iq_SG',i_SG,iq_SG
            CALL Rec_tab_iq(tab_iq,BasisnD%tab_PbasisSG(i_SG)%Pbasis,iq_SG)
 
          CASE (2) ! Sparse basis (Smolyak 2d  implementation)
@@ -3362,33 +3362,33 @@ END SUBROUTINE pack_basis_old
                iqi_loc = iqi_loc + get_nq_FROM_basis(BasisnD%tab_basisPrimSG(Lm,ib))
              END DO
              ndim  = BasisnD%tab_basisPrimSG(L,ib)%ndim
-             write(out_unitp,*) 'ib,L,idim,ndim',ib,L,idim,ndim
+             write(out_unit,*) 'ib,L,idim,ndim',ib,L,idim,ndim
              CALL Rec_tab_iq(tab_iq(idim+1:idim+ndim),                  &
                          BasisnD%tab_basisPrimSG(L,ib),iq_ib,iqi=iqi_loc)
              idim = idim+ndim
            END DO
-           IF (debug) write(out_unitp,*) 'iq,i_SG,iq_SG',iq,i_SG,iq_SG
-           IF (debug) write(out_unitp,*) 'DP: nDval',nDval_SG2(:)
-           IF (debug) write(out_unitp,*) 'WrhonD',iq,WrhonD
+           IF (debug) write(out_unit,*) 'iq,i_SG,iq_SG',iq,i_SG,iq_SG
+           IF (debug) write(out_unit,*) 'DP: nDval',nDval_SG2(:)
+           IF (debug) write(out_unit,*) 'WrhonD',iq,WrhonD
 
          CASE (4) ! Sparse basis (Smolyak 4th implementation)
-           write(out_unitp,*) ' ERROR in',name_sub
+           write(out_unit,*) ' ERROR in',name_sub
            STOP 'Rec_tab_iq: SparseGrid_type=4'
 
          CASE DEFAULT
-           write(out_unitp,*) ' ERROR in',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+           write(out_unit,*) ' ERROR in',name_sub
+           write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+           write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
            STOP
          END SELECT
        END IF
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' tab_iq',tab_iq(:)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) ' tab_iq',tab_iq(:)
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 
@@ -3400,7 +3400,7 @@ END SUBROUTINE pack_basis_old
 !
 !=====================================================================
       RECURSIVE FUNCTION Rec_rhonD(BasisnD,iq,OldPara) result(rhonD)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_BtoG_GtoB_SGType4, ONLY : getbis_tab_nq
       implicit none
 
@@ -3430,12 +3430,12 @@ END SUBROUTINE pack_basis_old
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'BasisnD%nb_basis',BasisnD%nb_basis
-         write(out_unitp,*) 'BasisnD%SparseGrid_type',BasisnD%SparseGrid_type
-         write(out_unitp,*) 'BasisnD%packed_done',BasisnD%packed_done
-         write(out_unitp,*) 'iq',iq
-         flush(out_unitp)
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'BasisnD%nb_basis',BasisnD%nb_basis
+         write(out_unit,*) 'BasisnD%SparseGrid_type',BasisnD%SparseGrid_type
+         write(out_unit,*) 'BasisnD%packed_done',BasisnD%packed_done
+         write(out_unit,*) 'iq',iq
+         flush(out_unit)
        END IF
 !-----------------------------------------------------------
 
@@ -3449,7 +3449,7 @@ END SUBROUTINE pack_basis_old
          SELECT CASE (BasisnD%SparseGrid_type)
          CASE (0) ! Direct product
            CALL calc_nDindex(BasisnD%nDindG,iq,nDval)
-           IF (debug) write(out_unitp,*) 'iq',iq,'nDval:',nDval
+           IF (debug) write(out_unit,*) 'iq',iq,'nDval:',nDval
            rhonD = ONE
            DO i=1,BasisnD%nb_basis
              rhonD = rhonD * Rec_rhonD(BasisnD%tab_Pbasis(i)%Pbasis,nDval(i))
@@ -3494,27 +3494,27 @@ END SUBROUTINE pack_basis_old
            END DO
 
          CASE DEFAULT
-           write(out_unitp,*) ' ERROR in',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+           write(out_unit,*) ' ERROR in',name_sub
+           write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+           write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
            STOP
          END SELECT
        END IF
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' rhonD',rhonD
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*)
+        write(out_unit,*) ' rhonD',rhonD
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !     -------------------------------------------------------
 
       END FUNCTION Rec_rhonD
 
       RECURSIVE FUNCTION Rec_WnD(BasisnD,iq) result(WnD)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_BtoG_GtoB_SGType4, ONLY : getbis_tab_nq
       implicit none
 
@@ -3542,8 +3542,8 @@ END SUBROUTINE pack_basis_old
       character (len=*), parameter :: name_sub = 'Rec_WnD'
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'BasisnD%nb_basis',BasisnD%nb_basis
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'BasisnD%nb_basis',BasisnD%nb_basis
        END IF
 !-----------------------------------------------------------
 !
@@ -3604,9 +3604,9 @@ END SUBROUTINE pack_basis_old
            END DO
 
          CASE DEFAULT
-           write(out_unitp,*) ' ERROR in',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+           write(out_unit,*) ' ERROR in',name_sub
+           write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+           write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
            STOP
          END SELECT
 
@@ -3614,10 +3614,10 @@ END SUBROUTINE pack_basis_old
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' WnD',WnD
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) ' WnD',WnD
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 
@@ -3628,7 +3628,7 @@ END SUBROUTINE pack_basis_old
       !!@param: TODO
       !!@param: TODO
       RECURSIVE SUBROUTINE Rec_x(x,BasisnD,iq,OldPara)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_BtoG_GtoB_SGType4, ONLY : getbis_tab_nq
       USE mod_nDindex
       IMPLICIT NONE
@@ -3661,17 +3661,17 @@ END SUBROUTINE pack_basis_old
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         flush(out_unitp)
+         write(out_unit,*) 'BEGINNING ',name_sub
+         flush(out_unit)
        END IF
 !-----------------------------------------------------------
-      !write(out_unitp,*) ' in ',name_sub,'iq',iq
+      !write(out_unit,*) ' in ',name_sub,'iq',iq
 
 
        IF (BasisnD%ndim == 0) THEN
          CONTINUE ! no grid point
        ELSE IF (BasisnD%packed_done) THEN
-         !write(out_unitp,*) 'iq',iq ; flush(out_unitp)
+         !write(out_unit,*) 'iq',iq ; flush(out_unit)
          x(:) = BasisnD%x(:,iq)
        ELSE ! BasisnD%nb_basis MUST BE > 0
          IF (BasisnD%nb_basis == 0 ) STOP ' ERROR with packed in Rec_x!!!'
@@ -3698,7 +3698,7 @@ END SUBROUTINE pack_basis_old
 !         CASE (2) ! Sparse basis (Smolyak 2d implementation)
 !
 !           IF (present(OldPara)) THEN
-!             !write(out_unitp,*) 'OldPara in Rec_x:',OldPara
+!             !write(out_unit,*) 'OldPara in Rec_x:',OldPara
 !             CALL get_Tabiq_Tabil_FROM_iq(nDval_SG2,nDl_SG2,          &
 !                                     i_SG,iq_SG,iq,BasisnD%para_SGType2,&
 !                                     OldPara,err_sub=err_sub)
@@ -3718,7 +3718,7 @@ END SUBROUTINE pack_basis_old
 !             CALL Rec_x(x(i0+1:i1),BasisnD%tab_basisPrimSG(L,ib),iq_ib)
 !             i0 = i1
 !           END DO
-!           !write(out_unitp,*) ' Qbasis',iq,x
+!           !write(out_unit,*) ' Qbasis',iq,x
 
          CASE (2,4) ! Sparse basis (Smolyak 4th implementation)
 
@@ -3742,29 +3742,29 @@ END SUBROUTINE pack_basis_old
 
 
          CASE DEFAULT
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4, 3'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+           write(out_unit,*) ' The possibilities are: 0, 1, 2, 4, 3'
            STOP
          END SELECT
 
        END IF
 
-      !write(out_unitp,*) ' out ',name_sub,'iq,x',iq,x
+      !write(out_unit,*) ' out ',name_sub,'iq,x',iq,x
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' Qbasis, x',x
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*)
+        write(out_unit,*) ' Qbasis, x',x
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !     -------------------------------------------------------
 
       END SUBROUTINE Rec_x
   SUBROUTINE Rec_x_SG4(x,tab_ba,tab_l,nDind_DPG,iq,err_sub)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
   IMPLICIT NONE
 
@@ -3789,16 +3789,16 @@ END SUBROUTINE pack_basis_old
 
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'BEGINNING ',name_sub
     CALL Write_nDindex(nDind_DPG,' in ' // name_sub // ': ')
-    flush(out_unitp)
+    flush(out_unit)
   END IF
   !-----------------------------------------------------------
 
   CALL calc_nDindex(nDind_DPG,iq,tab_iq,err_sub)
   IF (err_sub /= 0) THEN
-    write(out_unitp,*) ' ERROR in ',name_sub
-    write(out_unitp,*) '  from nDind_DPG'
+    write(out_unit,*) ' ERROR in ',name_sub
+    write(out_unit,*) '  from nDind_DPG'
     STOP 'calc_nDindex'
   END IF
 
@@ -3815,18 +3815,18 @@ END SUBROUTINE pack_basis_old
 
 ! -------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*)
-    write(out_unitp,*) ' Qbasis, x',x
-    write(out_unitp,*)
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*)
+    write(out_unit,*) ' Qbasis, x',x
+    write(out_unit,*)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 ! -------------------------------------------------------
 
   END SUBROUTINE Rec_x_SG4
 
   SUBROUTINE Rec_Qact(Qact,BasisnD,iq,mole,OldPara)
-  USE mod_system
+  USE EVR_system_m
   USE mod_Coord_KEO
 
   IMPLICIT NONE
@@ -3851,11 +3851,11 @@ END SUBROUTINE pack_basis_old
   character (len=*), parameter :: name_sub = 'Rec_Qact'
   !-------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_act1',mole%nb_act1
-    write(out_unitp,*) 'iq',iq
-    write(out_unitp,*) 'BasisnD%ndim',BasisnD%ndim
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_act1',mole%nb_act1
+    write(out_unit,*) 'iq',iq
+    write(out_unit,*) 'BasisnD%ndim',BasisnD%ndim
+    flush(out_unit)
    END IF
   !-------------------------------------------------------
 
@@ -3875,29 +3875,29 @@ END SUBROUTINE pack_basis_old
   IF (size(Qact) > BasisnD%ndim .AND. size(Qact) == mole%nb_var) THEN
     CALL Adding_InactiveCoord_TO_Qact(Qact,mole%ActiveTransfo)
   ELSE IF (size(Qact) > BasisnD%ndim .AND. size(Qact) /= mole%nb_var) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) 'size(Qact)   ',size(Qact)
-    write(out_unitp,*) 'BasisnD%ndim ',BasisnD%ndim
-    write(out_unitp,*) 'mole%nb_var  ',mole%nb_var
-    write(out_unitp,*) ' Qact size MUST be equal to BasisnD%ndim or mole%nb_var'
-    write(out_unitp,*) '   Check the fortran!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) 'size(Qact)   ',size(Qact)
+    write(out_unit,*) 'BasisnD%ndim ',BasisnD%ndim
+    write(out_unit,*) 'mole%nb_var  ',mole%nb_var
+    write(out_unit,*) ' Qact size MUST be equal to BasisnD%ndim or mole%nb_var'
+    write(out_unit,*) '   Check the fortran!'
     STOP ' ERROR in Rec_Qact: wrong Qact size'
   END IF
 
   ! -------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*)
-    write(out_unitp,*) ' Qact',Qact
-    write(out_unitp,*)
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*)
+    write(out_unit,*) ' Qact',Qact
+    write(out_unit,*)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
   ! -------------------------------------------------------
 
   END SUBROUTINE Rec_Qact
 
   SUBROUTINE Rec_Qact_SG4(Qact,tab_ba,tab_l,nDind_DPG,iq,mole,err_sub)
-  USE mod_system
+  USE EVR_system_m
   USE mod_nDindex
   USE mod_Coord_KEO
   IMPLICIT NONE
@@ -3920,12 +3920,12 @@ END SUBROUTINE pack_basis_old
    character (len=*), parameter :: name_sub = 'Rec_Qact_SG4'
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'nb_act1',mole%nb_act1
-         write(out_unitp,*) 'iq',iq
-         write(out_unitp,*) 'tab_l',tab_l
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'nb_act1',mole%nb_act1
+         write(out_unit,*) 'iq',iq
+         write(out_unit,*) 'tab_l',tab_l
          CALL Write_nDindex(nDind_DPG,' in ' // name_sub // ': ')
-         flush(out_unitp)
+         flush(out_unit)
        END IF
 !-----------------------------------------------------------
        ndim = 0
@@ -3937,8 +3937,8 @@ END SUBROUTINE pack_basis_old
 
        CALL Rec_x_SG4(x,tab_ba,tab_l,nDind_DPG,iq,err_sub)
        IF (err_sub /= 0) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) '  from nDind_DPG'
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) '  from nDind_DPG'
          STOP 'Rec_x_SG4'
        END IF
 
@@ -3958,29 +3958,29 @@ END SUBROUTINE pack_basis_old
   IF (size(Qact) > ndim .AND. size(Qact) == mole%nb_var) THEN
     CALL Adding_InactiveCoord_TO_Qact(Qact,mole%ActiveTransfo)
   ELSE IF (size(Qact) > ndim .AND. size(Qact) /= mole%nb_var) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) 'size(Qact)   ',size(Qact)
-    write(out_unitp,*) 'ndim (basis) ',ndim
-    write(out_unitp,*) 'mole%nb_var  ',mole%nb_var
-    write(out_unitp,*) ' Qact size MUST be equal to ndim or mole%nb_var'
-    write(out_unitp,*) '   Check the fortran!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) 'size(Qact)   ',size(Qact)
+    write(out_unit,*) 'ndim (basis) ',ndim
+    write(out_unit,*) 'mole%nb_var  ',mole%nb_var
+    write(out_unit,*) ' Qact size MUST be equal to ndim or mole%nb_var'
+    write(out_unit,*) '   Check the fortran!'
     STOP ' ERROR in Rec_Qact: wrong Qact size'
   END IF
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' Qact',Qact
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*)
+        write(out_unit,*) ' Qact',Qact
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !     -------------------------------------------------------
 
   END SUBROUTINE Rec_Qact_SG4
 
   SUBROUTINE Rec_Qact_SG4_with_Tab_iq(Qact,tab_ba,tab_l,tab_iq,mole,err_sub)
-  USE mod_system
+  USE EVR_system_m
   USE mod_Coord_KEO
   IMPLICIT NONE
 
@@ -4001,11 +4001,11 @@ END SUBROUTINE pack_basis_old
   character (len=*), parameter :: name_sub = 'Rec_Qact_SG4_with_Tab_iq'
 !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
-    write(out_unitp,*) 'nb_act1',mole%nb_act1
-    write(out_unitp,*) 'tab_l',tab_l
-    write(out_unitp,*) 'tab_iq',tab_iq
-    flush(out_unitp)
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'nb_act1',mole%nb_act1
+    write(out_unit,*) 'tab_l',tab_l
+    write(out_unit,*) 'tab_iq',tab_iq
+    flush(out_unit)
   END IF
 !-----------------------------------------------------------
 
@@ -4030,29 +4030,29 @@ END SUBROUTINE pack_basis_old
   IF (size(Qact) > ndim_tot .AND. size(Qact) == mole%nb_var) THEN
     CALL Adding_InactiveCoord_TO_Qact(Qact,mole%ActiveTransfo)
   ELSE IF (size(Qact) > ndim .AND. size(Qact) /= mole%nb_var) THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) 'size(Qact)       ',size(Qact)
-    write(out_unitp,*) 'ndim_tot (basis) ',ndim_tot
-    write(out_unitp,*) 'mole%nb_var      ',mole%nb_var
-    write(out_unitp,*) ' Qact size MUST be equal to ndim_tot or mole%nb_var'
-    write(out_unitp,*) '   Check the fortran!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) 'size(Qact)       ',size(Qact)
+    write(out_unit,*) 'ndim_tot (basis) ',ndim_tot
+    write(out_unit,*) 'mole%nb_var      ',mole%nb_var
+    write(out_unit,*) ' Qact size MUST be equal to ndim_tot or mole%nb_var'
+    write(out_unit,*) '   Check the fortran!'
     STOP ' ERROR in Rec_Qact: wrong Qact size'
   END IF
 
 ! -------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*)
-    write(out_unitp,*) ' Qact',Qact
-    write(out_unitp,*)
-    write(out_unitp,*) 'END ',name_sub
-    flush(out_unitp)
+    write(out_unit,*)
+    write(out_unit,*) ' Qact',Qact
+    write(out_unit,*)
+    write(out_unit,*) 'END ',name_sub
+    flush(out_unit)
   END IF
 ! -------------------------------------------------------
 
   END SUBROUTINE Rec_Qact_SG4_with_Tab_iq
 
   SUBROUTINE Rec_Qact_SG4_with_Tab_iq_old(Qact,tab_ba,tab_l,tab_iq,mole,err_sub)
-  USE mod_system
+  USE EVR_system_m
   USE mod_Coord_KEO
   IMPLICIT NONE
 
@@ -4073,11 +4073,11 @@ END SUBROUTINE pack_basis_old
    character (len=*), parameter :: name_sub = 'Rec_Qact_SG4_with_Tab_iq_old'
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'nb_act1',mole%nb_act1
-         write(out_unitp,*) 'tab_l',tab_l
-         write(out_unitp,*) 'tab_iq',tab_iq
-         flush(out_unitp)
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'nb_act1',mole%nb_act1
+         write(out_unit,*) 'tab_l',tab_l
+         write(out_unit,*) 'tab_iq',tab_iq
+         flush(out_unit)
        END IF
 !-----------------------------------------------------------
        ndim = 0
@@ -4109,11 +4109,11 @@ END SUBROUTINE pack_basis_old
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' Qact',Qact
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*)
+        write(out_unit,*) ' Qact',Qact
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !     -------------------------------------------------------
 
@@ -4130,7 +4130,7 @@ END SUBROUTINE pack_basis_old
       !!@param: TODO
       !!@param: TODO
       RECURSIVE FUNCTION Rec_d0bnD(BasisnD,iq,ib) result(d0bnD)
-      USE mod_system
+      USE EVR_system_m
       implicit none
 
 !----- variables for the Basis and quadrature points -----------------
@@ -4152,7 +4152,7 @@ END SUBROUTINE pack_basis_old
       character (len=*), parameter :: name_sub = 'Rec_d0bnD'
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'BEGINNING ',name_sub
        END IF
 !-----------------------------------------------------------
 
@@ -4181,17 +4181,17 @@ END SUBROUTINE pack_basis_old
            d0bnD = Rec_d0bnD(BasisnD%tab_PbasisSG(i_SG)%Pbasis,iq_SG,ib)
 
          CASE (2) ! Sparse basis (Smolyak 2d  implementation)
-           write(out_unitp,*) ' ERROR in',name_sub
+           write(out_unit,*) ' ERROR in',name_sub
            STOP 'Rec_d0bnD: SparseGrid_type=2'
 
          CASE (4) ! Sparse basis (Smolyak 4th implementation)
-           write(out_unitp,*) ' ERROR in',name_sub
+           write(out_unit,*) ' ERROR in',name_sub
            STOP 'Rec_d0bnD: SparseGrid_type=4'
 
          CASE DEFAULT
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4, 3 (type 21)'
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+           write(out_unit,*) ' The possibilities are: 0, 1, 2, 4, 3 (type 21)'
            STOP
          END SELECT
 
@@ -4199,16 +4199,16 @@ END SUBROUTINE pack_basis_old
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0bnD',d0bnD
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) ' d0bnD',d0bnD
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 
       END FUNCTION Rec_d0bnD
       RECURSIVE FUNCTION Rec_d0bnD_AT_Q(BasisnD,ib,Qbasis) result(d0bnD)
-      USE mod_system
+      USE EVR_system_m
       implicit none
 
 !----- variables for the Basis and quadrature points -----------------
@@ -4229,7 +4229,7 @@ END SUBROUTINE pack_basis_old
       character (len=*), parameter :: name_sub = 'Rec_d0bnD_AT_Q'
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'BEGINNING ',name_sub
        END IF
 !-----------------------------------------------------------
 
@@ -4251,10 +4251,10 @@ END SUBROUTINE pack_basis_old
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0bnD',d0bnD
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) ' d0bnD',d0bnD
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 
@@ -4269,7 +4269,7 @@ END SUBROUTINE pack_basis_old
       !!@param: TODO
       !!@param: TODO
       RECURSIVE SUBROUTINE Rec_d0d1d2bnD(d0b,d1b,d2b,BasisnD,iq,ib)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis_BtoG_GtoB_SGType4, ONLY : getbis_tab_nq
       implicit none
 
@@ -4310,18 +4310,18 @@ END SUBROUTINE pack_basis_old
        character (len=*), parameter :: name_sub = 'Rec_d0d1d2bnD'
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'iq,ib',iq,ib
-         !write(out_unitp,*) '--------------------------'
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'iq,ib',iq,ib
+         !write(out_unit,*) '--------------------------'
          !CALL RecWrite_basis(BasisnD,write_all=.TRUE.)
-         !write(out_unitp,*) '--------------------------'
+         !write(out_unit,*) '--------------------------'
        END IF
 !-----------------------------------------------------------
 
        IF (ib < 0 .OR. ib > BasisnD%nb) THEN
-         write(out_unitp,*) ' ERROR in',name_sub
-         write(out_unitp,*) ' Wrong range of ib',ib
-         write(out_unitp,*) ' nb',BasisnD%nb
+         write(out_unit,*) ' ERROR in',name_sub
+         write(out_unit,*) ' Wrong range of ib',ib
+         write(out_unit,*) ' nb',BasisnD%nb
          STOP ' ERROR in Rec_d0d1d2bnD: Wrong range of ib'
        END IF
 
@@ -4406,14 +4406,14 @@ END SUBROUTINE pack_basis_old
 
          CASE (2) ! Sparse basis (Smolyak 2d  implementation)
            CALL calc_nDindex(BasisnD%nDindB,ib,nDvalB)
-           write(out_unitp,*) 'ib,nDvalB',ib,':',nDvalB
+           write(out_unit,*) 'ib,nDvalB',ib,':',nDvalB
 
            CALL get_Tabiq_Tabil_FROM_iq_old(nDval_SG2,tab_l,          &
                                      i_SG2,iq_SG,iq,BasisnD%para_SGType2)
 
-           write(out_unitp,*) 'iq,i_SG2',iq,i_SG2
-           write(out_unitp,*) 'tab_l',nDl_SG2
-           write(out_unitp,*) 'tab_iq',nDval_SG2
+           write(out_unit,*) 'iq,i_SG2',iq,i_SG2
+           write(out_unit,*) 'tab_l',nDl_SG2
+           write(out_unit,*) 'tab_iq',nDval_SG2
 
            d0b      = ONE
            d1b(:)   = ONE
@@ -4425,7 +4425,7 @@ END SUBROUTINE pack_basis_old
              iqi   = nDval_SG2(i)
              ibi   = nDvalB(i)
 
-             write(out_unitp,*) 'ibasis,L,iqi,ibi',i,L,iqi,ibi
+             write(out_unit,*) 'ibasis,L,iqi,ibi',i,L,iqi,ibi
 
              ndimi = BasisnD%tab_basisPrimSG(L,ib)%ndim
              i1    = i0 + ndimi
@@ -4467,12 +4467,12 @@ END SUBROUTINE pack_basis_old
            END DO
 
 
-           !write(out_unitp,*) ' ERROR in',name_sub
+           !write(out_unit,*) ' ERROR in',name_sub
            !STOP 'Rec_d0d1d2bnD: SparseGrid_type=2'
 
          CASE (4) ! Sparse basis (Smolyak 4th implementation)
            CALL calc_nDindex(BasisnD%nDindB,ib,nDvalB)
-           write(out_unitp,*) 'ib,nDvalB',ib,':',nDvalB
+           write(out_unit,*) 'ib,nDvalB',ib,':',nDvalB
 
            CALL get_Tabiq_Tabil_FROM_iq(tab_iq,tab_l,i_SG,iq_SG,iq,BasisnD%para_SGType2,err_sub=err_sub)
 
@@ -4482,9 +4482,9 @@ END SUBROUTINE pack_basis_old
 
            CALL calc_nDval_m1(tab_iq,iq_SG,tab_nq,BasisnD%nb_basis)
 
-           write(out_unitp,*) 'iq,i_SG',iq,i_SG
-           write(out_unitp,*) 'tab_l',tab_l
-           write(out_unitp,*) 'tab_iq',tab_iq
+           write(out_unit,*) 'iq,i_SG',iq,i_SG
+           write(out_unit,*) 'tab_l',tab_l
+           write(out_unit,*) 'tab_iq',tab_iq
 
            d0b      = ONE
            d1b(:)   = ONE
@@ -4496,13 +4496,13 @@ END SUBROUTINE pack_basis_old
              iqi   = tab_iq(i)
              ibi   = nDvalB(i)
 
-             write(out_unitp,*) 'ibasis,L,iqi,ibi',i,L,iqi,ibi
-             write(out_unitp,*) 'ibasis,ibi,nb',i,ibi,BasisnD%tab_basisPrimSG(L,i)%nb
+             write(out_unit,*) 'ibasis,L,iqi,ibi',i,L,iqi,ibi
+             write(out_unit,*) 'ibasis,ibi,nb',i,ibi,BasisnD%tab_basisPrimSG(L,i)%nb
 
 
              IF (ibi > BasisnD%tab_basisPrimSG(L,i)%nb) STOP 'Wrong ibi'
 
-             write(out_unitp,*) 'ibasis,L,iqi,ibi',i,L,iqi,ibi
+             write(out_unit,*) 'ibasis,L,iqi,ibi',i,L,iqi,ibi
 
              ndimi = BasisnD%tab_basisPrimSG(L,i)%ndim
              i1    = i0 + ndimi
@@ -4543,13 +4543,13 @@ END SUBROUTINE pack_basis_old
              i0 = i1
            END DO
 
-           !write(out_unitp,*) ' ERROR in',name_sub
+           !write(out_unit,*) ' ERROR in',name_sub
            !STOP 'Rec_d0d1d2bnD: SparseGrid_type=4'
 
          CASE DEFAULT
-           write(out_unitp,*) ' ERROR in',name_sub
-           write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-           write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+           write(out_unit,*) ' ERROR in',name_sub
+           write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+           write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
            STOP
          END SELECT
 
@@ -4557,12 +4557,12 @@ END SUBROUTINE pack_basis_old
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0b',d0b
-        write(out_unitp,*) ' d1b',d1b
-        write(out_unitp,*) ' d2b',d2b
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) ' d0b',d0b
+        write(out_unit,*) ' d1b',d1b
+        write(out_unit,*) ' d2b',d2b
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
 !     -------------------------------------------------------
 
@@ -4571,7 +4571,7 @@ END SUBROUTINE pack_basis_old
 
 
       SUBROUTINE calc_d0b(d0b,BasisnD,iq)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 
@@ -4591,8 +4591,8 @@ END SUBROUTINE pack_basis_old
 !     logical, parameter :: debug = .TRUE.
 !---------------------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING calc_d0b'
-         write(out_unitp,*) 'nb_ba',BasisnD%nb
+         write(out_unit,*) 'BEGINNING calc_d0b'
+         write(out_unit,*) 'nb_ba',BasisnD%nb
        END IF
 !-----------------------------------------------------------
 
@@ -4610,11 +4610,11 @@ END SUBROUTINE pack_basis_old
 
 !     -------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0b',BasisnD%nb
-        CALL Write_Vec(d0b,out_unitp,8)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END calc_d0b'
+        write(out_unit,*)
+        write(out_unit,*) ' d0b',BasisnD%nb
+        CALL Write_Vec(d0b,out_unit,8)
+        write(out_unit,*)
+        write(out_unit,*) 'END calc_d0b'
       END IF
 !     -------------------------------------------------------
 
@@ -4638,11 +4638,11 @@ END SUBROUTINE pack_basis_old
       !logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'asso: nrho of basisnD',                            &
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'asso: nrho of basisnD',                            &
                                  allocated(para_AllBasis%BasisnD%nrho)
          IF (allocated(para_AllBasis%BasisnD%nrho))                    &
-                write(out_unitp,*) 'nrho of basisnD',para_AllBasis%BasisnD%nrho
+                write(out_unit,*) 'nrho of basisnD',para_AllBasis%BasisnD%nrho
        END IF
 !-----------------------------------------------------------
 
@@ -4671,8 +4671,8 @@ END SUBROUTINE pack_basis_old
          CALL Write_rho(mole)
 
          IF (debug) THEN
-           write(out_unitp,*) 'mole%nrho_OF_Qdyn',mole%nrho_OF_Qdyn
-           write(out_unitp,*) 'END  ',name_sub
+           write(out_unit,*) 'mole%nrho_OF_Qdyn',mole%nrho_OF_Qdyn
+           write(out_unit,*) 'END  ',name_sub
          END IF
 
       END SUBROUTINE nrho_Basis_TO_nhro_Tnum

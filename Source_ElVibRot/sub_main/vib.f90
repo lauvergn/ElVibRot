@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       SUBROUTINE vib(max_mem,test_mem,intensity_only)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_Coord_KEO
       USE mod_PrimOp
@@ -130,23 +130,23 @@
 
 !---------------------------------------------------------------------------------------
 !=====================================================================
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' VIB: initialization of variables'
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' VIB: initialization of variables'
 
       ! Disassociate for initialization
       nullify(para_H)
       nullify(para_S)
       nullify(para_Dip)
 
-      write(out_unitp,*) ' END VIB: initialization of variables'
-      write(out_unitp,*) '================================================='
+      write(out_unit,*) ' END VIB: initialization of variables'
+      write(out_unit,*) '================================================='
 
-      write(out_unitp,*)
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' VIB: BEGINNING ini_data'
+      write(out_unit,*)
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' VIB: BEGINNING ini_data'
       CALL write_mem_file('ini_data ini')
       CALL time_perso('ini_data ini')
-      write(out_unitp,*)
+      write(out_unit,*)
 
       !CALL system_mem_usage(memory_RSS,'before ini_data')
 
@@ -158,13 +158,13 @@
       !CALL system_mem_usage(memory_RSS,'after ini_data')
       para_H => para_AllOp%tab_Op(1)
 
-      write(out_unitp,*)
+      write(out_unit,*)
       CALL time_perso('ini_data end')
       CALL write_mem_file('ini_data end')
-      write(out_unitp,*)
-      write(out_unitp,*) ' VIB: END ini_data'
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*) ' VIB: END ini_data'
+      write(out_unit,*) '================================================='
+      write(out_unit,*)
 !---------------------------------------------------------------------------------------
 
       IF (intensity_only) GOTO 100
@@ -178,21 +178,21 @@
 !#if(run_MPI)
 !      Grid_allco=.FALSE.
 !#endif
-      write(out_unitp,*)
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' VIB: BEGINNING sub_qa_bhe'
+      write(out_unit,*)
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' VIB: BEGINNING sub_qa_bhe'
       CALL write_mem_file('sub_qa_bhe ini')
       CALL time_perso('sub_qa_bhe ini')
-      write(out_unitp,*)
+      write(out_unit,*)
 
       IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Read_FileGrid) THEN ! test only for H
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) ' The grid of operators (S V Veff T1 and T2) will be read'
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) ' The grid of operators (S V Veff T1 and T2) will be read'
+          write(out_unit,*)
         ENDIF
         IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid) THEN
-          IF(MPI_id==0) write(out_unitp,*) 'Test_Grid=.TRUE. => STOP in vib'
+          IF(MPI_id==0) write(out_unit,*) 'Test_Grid=.TRUE. => STOP in vib'
           STOP
         END IF
       END IF
@@ -210,12 +210,12 @@
          para_Tnum%With_Cart_Transfo = (para_Tnum%JJ>0) .AND. mole%Cart_transfo
       END IF
 
-      write(out_unitp,*)
+      write(out_unit,*)
       CALL time_perso('sub_qa_bhe end')
       CALL write_mem_file('sub_qa_bhe end')
-      write(out_unitp,*) ' VIB: END sub_qa_bhe'
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*)
+      write(out_unit,*) ' VIB: END sub_qa_bhe'
+      write(out_unit,*) '================================================='
+      write(out_unit,*)
 
       IF (para_EVRT_calc%Grid_only) STOP 'EVRT stop: Grid_only=.TRUE.'
 !#if(run_MPI)
@@ -226,27 +226,27 @@
 !---------------------------------------------------------------------------------------
       IF (para_H%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC .AND. para_H%nb_bi>1) THEN
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING HADA contraction',          &
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING HADA contraction',          &
                                    para_AllBasis%BasisnD%nb
           CALL write_mem_file('HADA contraction ini')
           CALL time_perso('HADA contraction ini')
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
         ENDIF
 
         CALL sub_MatOp_HADA(para_H,para_ana,para_intensity,para_AllOp,  &
                             const_phys)
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('HADA contraction end')
           CALL write_mem_file('HADA contraction end')
-          write(out_unitp,*) ' VIB: END HADA contraction'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END HADA contraction'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         ENDIF
 
         para_AllOp%tab_Op(:)%nb_tot = para_H%para_ReadOp%nb_elec *      &
@@ -262,20 +262,20 @@
 !---------------------------------------------------------------------------------------
 !       => Time-dependent calculation
 !---------------------------------------------------------------------------------------
-        write(out_unitp,*) 'Propogation start'
+        write(out_unit,*) 'Propogation start'
         CALL write_mem_file('psi0 ini')
 
         CALL init_psi(WP0(1),para_H,cplx=.TRUE.)
-        write(out_unitp,*) 'Propogation initialized'
+        write(out_unit,*) 'Propogation initialized'
 
         ! building of WP0 for WP propagation ------------------------------------------
         IF (.NOT. para_ana%control .AND. para_propa%type_WPpropa /=100) THEN
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: Generate Psi0',WP0%nb_tot
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: Generate Psi0',WP0%nb_tot
             CALL time_perso('psi0 ini')
-            write(out_unitp,*)
+            write(out_unit,*)
           ENDIF
 
           IF ( .NOT. abs(para_propa%type_WPpropa) == 33 .AND.           &
@@ -292,9 +292,9 @@
               iOp = 2
               para_Dip => para_AllOp%tab_Op(iOp+1:iOp+3)
 
-              write(out_unitp,*) ' calculation Mu|WP0> with: ',para_Dip(ip)%name_Op
-              write(out_unitp,*) ' th_WP0: ',para_propa%para_WP0%th_WP0
-              flush(out_unitp)
+              write(out_unit,*) ' calculation Mu|WP0> with: ',para_Dip(ip)%name_Op
+              write(out_unit,*) ' th_WP0: ',para_propa%para_WP0%th_WP0
+              flush(out_unit)
 
               WP0tmp = WP0(1)
               CALL sub_OpPsi(WP0tmp,MuWP0,para_Dip(ip))
@@ -308,7 +308,7 @@
             END IF ! for ip > 0 .AND. ip <4
 
             IF (para_propa%para_WP0%WP0_nb_CleanChannel > 0) THEN
-              write(out_unitp,*) ' clean channel of |WP0>'
+              write(out_unit,*) ' clean channel of |WP0>'
               DO i=1,para_propa%para_WP0%WP0_nb_CleanChannel
                 i_baie = 1 +                                            &
                 (para_propa%para_WP0%WP0_CleanChannellist(i)-1)*WP0(1)%nb_ba
@@ -325,10 +325,10 @@
             CALL MPI_Bcast_(WP0(1)%norm2,size1_MPI,root_MPI)
 
             IF(keep_MPI) THEN
-              write(out_unitp,*) ' Norm^2 of |WP0>',WP0(1)%norm2
+              write(out_unit,*) ' Norm^2 of |WP0>',WP0(1)%norm2
               CALL renorm_psi_With_norm2(WP0(1))
-              write(out_unitp,*) ' Analysis of |WP0> or Mu|WP0>'
-              write(out_unitp,*)
+              write(out_unit,*) ' Analysis of |WP0> or Mu|WP0>'
+              write(out_unit,*)
             ENDIF
 
             IF(keep_MPI) THEN
@@ -343,23 +343,23 @@
             ! spectral tranformation cannot be done here,
             !   because the matrix representation is not done yet
 
-            write(out_unitp,*)
+            write(out_unit,*)
 
           ELSE ! for optimal control
 
-            write(out_unitp,*) ' WP0 will be read later!'
+            write(out_unit,*) ' WP0 will be read later!'
 
           END IF ! for .NOT. abs(para_propa%type_WPpropa) == 33
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
+            write(out_unit,*)
             CALL time_perso('psi0 end')
             CALL write_mem_file('psi0 end')
-            write(out_unitp,*) ' VIB: END Generate Psi0'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END Generate Psi0'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
-          flush(out_unitp)
+          flush(out_unit)
         END IF ! .NOT. para_ana%control .AND. para_propa%type_WPpropa /=100
 
         !================================================================
@@ -379,13 +379,13 @@
         !================================================================
         IF (para_H%Make_Mat .AND. .NOT. para_H%spectral) THEN
 
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
           CALL write_mem_file('sub_matOp: H and S ini')
           CALL time_perso('sub_matOp: H and S ini')
-          write(out_unitp,*) 'para_S...%comput_S',para_AllOp%tab_Op(2)%para_ReadOp%comput_S
-          write(out_unitp,*)
+          write(out_unit,*) 'para_S...%comput_S',para_AllOp%tab_Op(2)%para_ReadOp%comput_S
+          write(out_unit,*)
 
 
           IF (para_AllOp%tab_Op(2)%para_ReadOp%comput_S) THEN
@@ -402,22 +402,22 @@
           CALL sub_MatOp(para_H,para_ana%print)
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_matOp: H and S end')
             CALL write_mem_file('sub_matOp: H and S end')
-            write(out_unitp,*) ' VIB: END sub_matOp'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END sub_matOp'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
         ELSE IF (para_H%Make_Mat .AND. para_H%spectral) THEN
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING Spectral Representation',para_H%nb_tot
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING Spectral Representation',para_H%nb_tot
             CALL write_mem_file('Spectral: All Op ini')
             CALL time_perso('Spectral: All Op ini')
-            write(out_unitp,*)
+            write(out_unit,*)
           ENDIF
 
           DO i=1,size(para_AllOp%tab_Op)
@@ -438,7 +438,7 @@
           END IF
 
           IF (para_H%Spectral .AND. para_H%spectral_done .AND. .NOT. para_ana%control) THEN
-            write(out_unitp,*) 'WP0 spectral representation'
+            write(out_unit,*) 'WP0 spectral representation'
             DO i=1,size(WP0)
               IF (para_H%cplx) THEN
                 ! 1st: project psi on the spectral basis
@@ -451,12 +451,12 @@
           END IF
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
+            write(out_unit,*)
             CALL time_perso('Spectral: All Op')
             CALL write_mem_file('Spectral: All Op end')
-            write(out_unitp,*) ' VIB: END Spectral Representation'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END Spectral Representation'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
         END IF ! IF (para_H%Make_Mat .AND. .NOT. para_H%spectral)
         !================================================================
@@ -465,14 +465,14 @@
         !================================================================
         !===== Hmax calculation
         !================================================================
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================'
-        write(out_unitp,*) ' VIB: Hmax and Hmin calculation'
+        write(out_unit,*)
+        write(out_unit,*) '================================================'
+        write(out_unit,*) ' VIB: Hmax and Hmin calculation'
         CALL write_mem_file('sub_Hmax ini')
         CALL time_perso('sub_Hmax ini')
 
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
 
         IF ( .NOT. abs(para_propa%type_WPpropa) == 33 .AND.           &
              .NOT. abs(para_propa%type_WPpropa) == 34 .AND.           &
@@ -484,15 +484,15 @@
             CALL sub_Hmax(para_propa,para_H)
 
         ELSE
-          write(out_unitp,*) ' Calculation of Hmax is skiped'
+          write(out_unit,*) ' Calculation of Hmax is skiped'
         ENDIF
 
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL time_perso('sub_Hmax end')
         CALL write_mem_file('sub_Hmax end')
-        write(out_unitp,*) ' VIB: END Hmax and Hmin calculation'
-        write(out_unitp,*) '================================================'
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END Hmax and Hmin calculation'
+        write(out_unit,*) '================================================'
+        write(out_unit,*)
         !================================================================
         !================================================================
 
@@ -502,50 +502,50 @@
         IF (para_ana%control) THEN
 !         - control -----------------------------------------------
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*) ' VIB: control'
-            write(out_unitp,*) ' VIB: propagation'
+            write(out_unit,*)
+            write(out_unit,*) '================================================'
+            write(out_unit,*) ' VIB: control'
+            write(out_unit,*) ' VIB: propagation'
             CALL write_mem_file('sub_control ini')
             CALL time_perso('sub_control ini')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
           CALL sub_Opt_control(para_AllOp,para_propa)
 !         CALL sub_nonOpt_control(para_AllOp,para_propa)
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_control end')
             CALL write_mem_file('sub_control end')
-            write(out_unitp,*) ' VIB: END control'
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END control'
+            write(out_unit,*) '================================================'
+            write(out_unit,*)
           ENDIF
         ELSE
 !         - propagation -----------------------------------------------
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*) ' VIB: propagation'
+            write(out_unit,*)
+            write(out_unit,*) '================================================'
+            write(out_unit,*) ' VIB: propagation'
             CALL write_mem_file('sub_propagation ini')
             CALL time_perso('sub_propagation ini')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
           CALL sub_propagation(WP0,para_AllOp,para_propa)
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_propagation end')
             CALL write_mem_file('sub_propagation end')
-            write(out_unitp,*) ' VIB: END propagation'
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END propagation'
+            write(out_unit,*) '================================================'
+            write(out_unit,*)
           ENDIF
         END IF
         !================================================================
@@ -575,14 +575,14 @@
         !================================================================
         IF (para_H%Make_Mat) THEN
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
             CALL write_mem_file('sub_matOp: H and S ini')
             CALL time_perso('sub_matOp: H and S')
-            write(out_unitp,*)
-            write(out_unitp,*) 'para_S...%comput_S',para_AllOp%tab_Op(2)%para_ReadOp%comput_S
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*) 'para_S...%comput_S',para_AllOp%tab_Op(2)%para_ReadOp%comput_S
+            write(out_unit,*)
           ENDIF
 
           IF (para_AllOp%tab_Op(2)%para_ReadOp%comput_S) THEN
@@ -600,13 +600,13 @@
           CALL sub_MatOp(para_H,para_ana%print)
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_matOp: H and S')
             CALL write_mem_file('sub_matOp: H and S end')
-            write(out_unitp,*) ' VIB: END sub_matOp'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END sub_matOp'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
         END IF ! for para_H%Make_Mat
         !================================================================
@@ -617,13 +617,13 @@
         !================================================================
         IF (para_ana%filter .AND. para_propa%auto_Hmax) THEN
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*) ' VIB: Hmax and Hmin calculation'
+            write(out_unit,*)
+            write(out_unit,*) '================================================'
+            write(out_unit,*) ' VIB: Hmax and Hmin calculation'
             CALL write_mem_file('sub_Hmax ini2')
             CALL time_perso('sub_Hmax ini2')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
           !IF(.NOT. openmpi) CALL sub_Hmax(para_propa,para_H)
@@ -631,13 +631,13 @@
             CALL sub_Hmax(para_propa,para_H)
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_Hmax end2')
             CALL write_mem_file('sub_Hmax end2')
-            write(out_unitp,*) ' VIB: END Hmax and Hmin calculation'
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END Hmax and Hmin calculation'
+            write(out_unit,*) '================================================'
+            write(out_unit,*)
           ENDIF
         END IF ! for para_ana%filter .AND. para_propa%auto_Hmax
 
@@ -646,26 +646,26 @@
 
         IF (.NOT. para_H%cplx .AND. para_ana%CRP > 0) THEN
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*) ' VIB: BEGINNING sub_CRP',para_H%nb_tot
+            write(out_unit,*)
+            write(out_unit,*) '================================================'
+            write(out_unit,*) ' VIB: BEGINNING sub_CRP',para_H%nb_tot
             CALL time_perso('sub_CRP ini')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
           CALL sub_CRP(para_AllOp%tab_Op,size(para_AllOp%tab_Op),para_ana%print,para_ana%para_CRP)
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_CRP end')
-            write(out_unitp,*) ' VIB: END sub_CRP'
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END sub_CRP'
+            write(out_unit,*) '================================================'
+            write(out_unit,*)
           ENDIF
         END IF ! for .NOT. para_H%cplx .AND. para_ana%CRP > 0
-        flush(out_unitp)
+        flush(out_unit)
 
         !================================================================
         !===== Diagonalisation ==========================================
@@ -673,11 +673,11 @@
         IF (para_ana%davidson .OR. para_ana%arpack .OR. para_ana%filter) THEN
           IF (para_H%Partial_MatOp) STOP 'STOP the Matrix is incomplete'
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING ITERATIVE DIAGONALIZATION'
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING ITERATIVE DIAGONALIZATION'
             CALL time_perso('sub_Iterative_Diago')
-            write(out_unitp,*)
+            write(out_unit,*)
           ENDIF
 
 
@@ -741,23 +741,23 @@
           para_H%spectral = .TRUE.
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_Iterative_Diago')
-            write(out_unitp,*) ' VIB: END ITERATIVE DIAGONALIZATION'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END ITERATIVE DIAGONALIZATION'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
 
         ELSE IF (para_ana%CRP == 0) THEN ! for para_ana%davidson .OR. para_ana%arpack .OR. para_ana%filter
           IF (para_H%Partial_MatOp) STOP 'STOP the Matrix is incomplete'
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING DIAGONALIZATION'
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING DIAGONALIZATION'
             CALL time_perso('sub_diago_H')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
           nb_diago  = para_H%nb_tot
@@ -797,8 +797,8 @@
               CALL sub_diago_H(para_H%Rmat,para_H%Rdiag,para_H%Rvp,       &
                                para_H%nb_tot,para_H%sym_Hamil)
 
-              write(out_unitp,*) 'HMin,HMax (ua)  : ',[minval(para_H%Rdiag),maxval(para_H%Rdiag)]
-              write(out_unitp,*) 'HMin,HMax (cm-1): ',   &
+              write(out_unit,*) 'HMin,HMax (ua)  : ',[minval(para_H%Rdiag),maxval(para_H%Rdiag)]
+              write(out_unit,*) 'HMin,HMax (cm-1): ',   &
                   [minval(para_H%Rdiag),maxval(para_H%Rdiag)]*get_Conv_au_TO_unit('E','cm-1')
 
               nb_diago = count((para_H%Rdiag(:)-para_H%Rdiag(1))< para_ana%max_ene)
@@ -838,15 +838,15 @@
           para_ana%max_ana = nb_diago
 
           IF(MPI_id==0) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_diago_H')
-            write(out_unitp,*) ' VIB: END DIAGONALIZATION'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END DIAGONALIZATION'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
         END IF ! for para_ana%davidson .OR. para_ana%arpack .OR. para_ana%filter
-        flush(out_unitp)
+        flush(out_unit)
         !===============================================================
         !===============================================================
 
@@ -854,23 +854,23 @@
         !===============================================================
         !===============================================================
         IF (para_ana%CRP == 0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING WAVE FUNCTION ANALYSIS'
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING WAVE FUNCTION ANALYSIS'
           CALL time_perso('sub_analyse ini')
-          write(out_unitp,*)
+          write(out_unit,*)
 
           IF(keep_MPI) THEN
              CALL sub_analyse(Tab_Psi,nb_diago,para_H,                                 &
                               para_ana,para_intensity,para_AllOp,const_phys)
           ENDIF
 
-          flush(out_unitp)
+          flush(out_unit)
 
           IF (.NOT. para_H%cplx .AND. para_ana%VibRot) THEN
             CALL sub_VibRot(Tab_Psi,para_ana%max_ana,para_H,para_ana)
           END IF
-          flush(out_unitp)
+          flush(out_unit)
 
           !===============================================================
           ! Spectral representation of operator
@@ -881,25 +881,25 @@
 
               IF (para_AllOp%tab_Op(iOp)%n_Op == -1) CYCLE ! S
               IF (para_AllOp%tab_Op(iOp)%spectral) THEN
-                write(out_unitp,*) '==========================================='
-                write(out_unitp,*) ' Spectral representation of: ',        &
+                write(out_unit,*) '==========================================='
+                write(out_unit,*) ' Spectral representation of: ',        &
                                    trim(para_AllOp%tab_Op(iOp)%name_Op)
 
                 CALL sub_build_MatOp(Tab_Psi,nb_diago,                     &
                                      para_AllOp%tab_Op(iOp),.TRUE.,print_mat)
 
-                write(out_unitp,*) '==========================================='
-                flush(out_unitp)
+                write(out_unit,*) '==========================================='
+                flush(out_unit)
               END IF
             END DO
           END IF
 
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_analyse end')
-          write(out_unitp,*) ' VIB: END WAVE FUNCTION ANALYSIS'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END WAVE FUNCTION ANALYSIS'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         END IF
         !===============================================================
         !===============================================================
@@ -930,12 +930,12 @@
 !=====================================================================
 100   CONTINUE
       IF (.NOT. para_H%cplx .AND. para_ana%intensity) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================'
-        write(out_unitp,*) ' VIB: BEGINNING sub_intensity',para_H%nb_tot,para_ana%max_ana
+        write(out_unit,*)
+        write(out_unit,*) '================================================'
+        write(out_unit,*) ' VIB: BEGINNING sub_intensity',para_H%nb_tot,para_ana%max_ana
         CALL time_perso('sub_intensity')
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
 
         !         ----- file for restart or for changed the temprature --------------
         IF(MPI_id==0) THEN
@@ -950,21 +950,21 @@
 
           CALL Read_Vec(para_H%Rdiag,nio_res_int,5,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR in vib'
-            write(out_unitp,*) ' reading the vector "para_H%Rdiag"'
+            write(out_unit,*) 'ERROR in vib'
+            write(out_unit,*) ' reading the vector "para_H%Rdiag"'
             STOP
           END IF
 
           IF (intensity_only) THEN
-            write(out_unitp,*)
+            write(out_unit,*)
             Q =  part_func(para_H%Rdiag,size(para_H%Rdiag),para_ana%Temp,const_phys)
             fac = const_phys%Eh / (const_phys%k * para_ana%Temp)
             zpe = minval(para_H%Rdiag(:))
-            write(out_unitp,*) 'population at T, Q',para_ana%Temp,Q
-            write(out_unitp,*) 'Energy level (',const_phys%ene_unit,') pop:'
+            write(out_unit,*) 'population at T, Q',para_ana%Temp,Q
+            write(out_unit,*) 'Energy level (',const_phys%ene_unit,') pop:'
             DO i=1,size(para_H%Rdiag)
               pop = exp(-(para_H%Rdiag(i)-zpe)*fac)
-              write(out_unitp,10) i,para_H%Rdiag(i) * const_phys%auTOenergy,&
+              write(out_unit,10) i,para_H%Rdiag(i) * const_phys%auTOenergy,&
                     (para_H%Rdiag(i) - zpe) * const_phys%auTOenergy,pop/Q
 10             format(i4,x,3f20.5)
             END DO
@@ -974,23 +974,23 @@
 
           CALL Read_Mat(para_H%Rvp,nio_res_int,5,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR in vib'
-            write(out_unitp,*) ' reading the matrix "para_H%Rvp"'
+            write(out_unit,*) 'ERROR in vib'
+            write(out_unit,*) ' reading the matrix "para_H%Rvp"'
             STOP
           END IF
         ELSE ! for intensity_only
-          write(out_unitp,*) 'write restart file for intensity: ',                     &
+          write(out_unit,*) 'write restart file for intensity: ',                     &
                  para_intensity%file_resart_int%name
-          flush(out_unitp)
+          flush(out_unit)
           write(nio_res_int,*) para_H%nb_tot,para_ana%max_ana
           write(nio_res_int,*) 'ene'
           CALL Write_Vec(para_H%Rdiag,nio_res_int,5,Rformat='e30.23')
           write(nio_res_int,*) 'psi'
-          flush(out_unitp)
+          flush(out_unit)
           CALL Write_Mat(para_H%Rvp,nio_res_int,5,Rformat='e30.23')
           flush(nio_res_int)
         END IF ! for intensity_only
-        flush(out_unitp)
+        flush(out_unit)
 !         -------------------------------------------------------------------
 
         iOp = 2
@@ -1000,25 +1000,25 @@
                            para_intensity,const_phys,intensity_only,nio_res_int)
         ENDIF ! MPI_id==0
 
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
         CALL time_perso('sub_intensity')
-        write(out_unitp,*) ' VIB: END sub_intensity'
-        write(out_unitp,*) '================================================'
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END sub_intensity'
+        write(out_unit,*) '================================================'
+        write(out_unit,*)
 
         IF(MPI_id==0) CALL file_close(para_intensity%file_resart_int)
         nullify(para_Dip)
       END IF !for .NOT. para_H%cplx .AND. para_ana%intensity
-      flush(out_unitp)
+      flush(out_unit)
 
       IF (.NOT. para_H%cplx .AND. para_ana%Psi_ScalOp) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================'
-        write(out_unitp,*) ' VIB: BEGINNING sub_AnalysePsy_ScalOp',para_H%nb_tot,para_ana%max_ana
+        write(out_unit,*)
+        write(out_unit,*) '================================================'
+        write(out_unit,*) ' VIB: BEGINNING sub_AnalysePsy_ScalOp',para_H%nb_tot,para_ana%max_ana
         CALL time_perso('sub_AnalysePsy_ScalOp')
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_scalar_Op',para_H%para_ReadOp%nb_scalar_Op
+        write(out_unit,*)
+        write(out_unit,*) 'nb_scalar_Op',para_H%para_ReadOp%nb_scalar_Op
 
         IF(MPI_id==0) THEN
           iOp = 2
@@ -1027,24 +1027,24 @@
           CALL sub_AnalysePsy_ScalOp(para_Dip,nb_ScalOp,para_H,para_ana%max_ana)
         ENDIF
 
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
         CALL time_perso('sub_AnalysePsy_ScalOp')
-        write(out_unitp,*) ' VIB: END sub_AnalysePsy_ScalOp'
-        write(out_unitp,*) '================================================'
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END sub_AnalysePsy_ScalOp'
+        write(out_unit,*) '================================================'
+        write(out_unit,*)
 
         nullify(para_Dip)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       IF (.NOT. para_H%cplx .AND. para_ana%NLO) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================'
-        write(out_unitp,*) ' VIB: BEGINNING sub_NLO',para_H%nb_tot,para_ana%max_ana
+        write(out_unit,*)
+        write(out_unit,*) '================================================'
+        write(out_unit,*) ' VIB: BEGINNING sub_NLO',para_H%nb_tot,para_ana%max_ana
         CALL time_perso('sub_NLO')
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
 
         IF(MPI_id==0) THEN
           iOp = 2
@@ -1053,16 +1053,16 @@
                       para_intensity)
         ENDIF
 
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
         CALL time_perso('sub_NLO')
-        write(out_unitp,*) ' VIB: END sub_NLO'
-        write(out_unitp,*) '================================================'
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END sub_NLO'
+        write(out_unit,*) '================================================'
+        write(out_unit,*)
 
         nullify(para_Dip)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
 !=====================================================================
 !=====================================================================
@@ -1091,22 +1091,22 @@
 
       CALL dealloc_AllBasis(para_AllBasis)
 
-      write(out_unitp,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
-      write(out_unitp,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
-      write(out_unitp,*) '================================================'
+      write(out_unit,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
+      write(out_unit,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
+      write(out_unit,*) '================================================'
       IF(openmpi) THEN
-        write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!', ' from ', MPI_id
+        write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!', ' from ', MPI_id
       ELSE
-        write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!'
+        write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
       ENDIF
-      write(out_unitp,*) '================================================'
+      write(out_unit,*) '================================================'
 
       END SUBROUTINE vib
 !=======================================================================================
 !=======================================================================================
 !=======================================================================================
   SUBROUTINE sub_Opt_CAP_basis()
-    USE mod_system
+    USE EVR_system_m
     USE mod_Constant
     USE mod_Coord_KEO
     USE mod_PrimOp
@@ -1211,22 +1211,22 @@
   
   !---------------------------------------------------------------------------------------
   !=====================================================================
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' VIB: initialization of variables'
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' VIB: initialization of variables'
   
         nullify(para_H)
         nullify(para_S)
         nullify(para_Dip)
   
-        write(out_unitp,*) ' END VIB: initialization of variables'
-        write(out_unitp,*) '================================================='
+        write(out_unit,*) ' END VIB: initialization of variables'
+        write(out_unit,*) '================================================='
   
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' VIB: BEGINNING ini_data'
+        write(out_unit,*)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' VIB: BEGINNING ini_data'
         CALL write_mem_file('ini_data ini')
         CALL time_perso('ini_data ini')
-        write(out_unitp,*)
+        write(out_unit,*)
 
         CALL ini_data(const_phys,para_Tnum,mole,                      &
                       para_AllBasis,para_AllOp,                       &
@@ -1236,18 +1236,18 @@
         !CALL system_mem_usage(memory_RSS,'after ini_data')
         para_H => para_AllOp%tab_Op(1)
   
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL time_perso('ini_data end')
         CALL write_mem_file('ini_data end')
-        write(out_unitp,*)
-        write(out_unitp,*) ' VIB: END ini_data'
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) ' VIB: END ini_data'
+        write(out_unit,*) '================================================='
+        write(out_unit,*)
 
     !---------------------------------------------------------------------------------------
     Lmin = -ONE
     Ene_Col_min = REAL_WU(0.01_Rkind,'eV','E')  ! 0.1 eV
-    read(in_unitp,CRP_Opt)
+    read(in_unit,CRP_Opt)
 
     CALL alloc_NParray(Qact,   [mole%nb_var],'Qact',   name_sub)
     CALL alloc_NParray(Qdyn_TS,[mole%nb_var],'Qdyn_TS',name_sub)
@@ -1258,27 +1258,27 @@
     iOp_CAPR = para_ana%para_CRP%iOp_CAP_Reactif
     iOp_CAPP = para_ana%para_CRP%iOp_CAP_Product
     IF (iOp_CAPR < 1 .OR. iOp_CAPP < 1) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' iOp_CAP_Reactif or iOp_CAP_Product are not defined',iOp_CAPR,iOp_CAPP
-      write(out_unitp,*) ' CRP calculation must be defined and CAPs must but read'
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' iOp_CAP_Reactif or iOp_CAP_Product are not defined',iOp_CAPR,iOp_CAPP
+      write(out_unit,*) ' CRP calculation must be defined and CAPs must but read'
       STOP 'ERROR in sub_Opt_CAP_basis: CAP and CRP are not defined'
     END IF
     IF (para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%ind_Q /=  para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(2)%ind_Q) THEN
-      write(out_unitp,*) ' ERROR in ',name_sub
-      write(out_unitp,*) ' Two different s coordinates:'
-      write(out_unitp,*) 'iQs',para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(:)%ind_Q
-      write(out_unitp,*) '  The feature is not implemented yet!'
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' Two different s coordinates:'
+      write(out_unit,*) 'iQs',para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(:)%ind_Q
+      write(out_unit,*) '  The feature is not implemented yet!'
       STOP 'ERROR in sub_Opt_CAP_basis: Two different s coordinates are not possible'
     END IF
     iqS = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%ind_Q
     iQdyns = mole%liste_QactTOQdyn(iQs)
-    write(out_unitp,*) 'iQs,iQdyns',iqS,iQdyns
-    write(out_unitp,*)
-    write(out_unitp,*)
-    write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '======= TS geometry optimisation ================================='
-    write(out_unitp,*) '=================================================================='
+    write(out_unit,*) 'iQs,iQdyns',iqS,iQdyns
+    write(out_unit,*)
+    write(out_unit,*)
+    write(out_unit,*) '=================================================================='
+    write(out_unit,*) '=================================================================='
+    write(out_unit,*) '======= TS geometry optimisation ================================='
+    write(out_unit,*) '=================================================================='
 
     CALL Read_param_Optimization(para_Optimization,mole,para_AllBasis%BasisnD,read_nml=.TRUE.)
     IF (debug) CALL Write_param_Optimization(para_Optimization)
@@ -1288,32 +1288,32 @@
     CALL Sub_Optimization(para_AllBasis%BasisnD,para_Tnum,mole,para_H%para_ReadOp%PrimOp_t, &
                           QTS,para_Optimization)
 
-    write(out_unitp,*) 'Q_TS',QTS
+    write(out_unit,*) 'Q_TS',QTS
     CALL Init_Tab_OF_dnMatOp(dnMatOp,para_Optimization%nb_Opt,para_H%para_ReadOp%PrimOp_t%nb_elec,nderiv=2)
     CALL alloc_NParray(hess_TS,[para_Optimization%nb_Opt,para_Optimization%nb_Opt],'hess',name_sub)
     CALL alloc_NParray(d0G_TS,[para_Optimization%nb_Opt,para_Optimization%nb_Opt],'d0G_TS',name_sub)
 
     CALL get_Qact0(Qact,mole%ActiveTransfo)
     Qact(1:para_Optimization%nb_Opt) = QTS(:)
-    write(out_unitp,*) 'Qact_TS',Qact
+    write(out_unit,*) 'Qact_TS',Qact
     CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_TS,mole%ActiveTransfo) ! here with mole_100
-    write(out_unitp,*) 'Qdyn_TS',Qdyn_TS
+    write(out_unit,*) 'Qdyn_TS',Qdyn_TS
 
     CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,para_H%para_ReadOp%PrimOp_t)
     CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess_TS,dnMatOp) ! for the ground state
-    CALL Write_Mat(hess_TS, out_unitp, 5, info='hess_TS')
+    CALL Write_Mat(hess_TS, out_unit, 5, info='hess_TS')
     Ene_TS = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
-    write(out_unitp,*) 'Ene_TS',Ene_TS
+    write(out_unit,*) 'Ene_TS',Ene_TS
     CALL get_d0GG(Qact,para_Tnum,mole,d0G_TS,def=.TRUE.)
-    CALL Write_Mat(d0G_TS, out_unitp, 5, info='d0G_TS')
+    CALL Write_Mat(d0G_TS, out_unit, 5, info='d0G_TS')
     CALL dealloc_Tab_OF_dnMatOp(dnMatOp)
 
-    write(out_unitp,*)
-    write(out_unitp,*)
-    write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '======= Reactif geometry optimisation ============================'
-    write(out_unitp,*) '=================================================================='
+    write(out_unit,*)
+    write(out_unit,*)
+    write(out_unit,*) '=================================================================='
+    write(out_unit,*) '=================================================================='
+    write(out_unit,*) '======= Reactif geometry optimisation ============================'
+    write(out_unit,*) '=================================================================='
     ! optimisation for CAP (iOp_CAPR) (without s)
     CALL get_Qact0(Qact,mole%ActiveTransfo)
     CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,mole%ActiveTransfo) ! here with mole
@@ -1337,17 +1337,17 @@
 
       CALL get_Qact0(Qact,mole_100%ActiveTransfo)
       QR = Qact(1:mole_100%nb_act)
-      IF (debug) write(out_unitp,*) 'QR (initial value)',QR
+      IF (debug) write(out_unit,*) 'QR (initial value)',QR
 
       CALL Sub_Optimization(para_AllBasis%BasisnD,para_Tnum,mole_100,para_H%para_ReadOp%PrimOp_t, &
                             QR,para_Optimization)
-      write(out_unitp,*) 'QR (optimized)',QR
+      write(out_unit,*) 'QR (optimized)',QR
       Qact(1:mole_100%nb_act) = QR(:)
       CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,mole_100%ActiveTransfo) ! here with mole_100
     END IF
     CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Qdyn_R,Qact,mole%ActiveTransfo)  !    then with mole
-    write(out_unitp,*) 'Qact_R',Qact
-    write(out_unitp,*) 'Qdyn_R',Qdyn_R
+    write(out_unit,*) 'Qact_R',Qact
+    write(out_unit,*) 'Qdyn_R',Qdyn_R
 
     CALL Init_Tab_OF_dnMatOp(dnMatOp,mole%nb_act,para_H%para_ReadOp%PrimOp_t%nb_elec,nderiv=2)
     CALL alloc_NParray(hess_R,[mole%nb_act,mole%nb_act],'hess_R',name_sub)
@@ -1355,19 +1355,19 @@
 
     CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,para_H%para_ReadOp%PrimOp_t)
     CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess_R,dnMatOp) ! for the ground state
-    CALL Write_Mat(hess_R, out_unitp, 5, info='hess_R')
+    CALL Write_Mat(hess_R, out_unit, 5, info='hess_R')
     Ene_R = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
-    write(out_unitp,*) 'Ene_R',Ene_R
+    write(out_unit,*) 'Ene_R',Ene_R
     CALL get_d0GG(Qact,para_Tnum,mole,d0G_R,def=.TRUE.)
-    CALL Write_Mat(d0G_R, out_unitp, 5, info='d0G_R')
+    CALL Write_Mat(d0G_R, out_unit, 5, info='d0G_R')
     CALL dealloc_Tab_OF_dnMatOp(dnMatOp)
 
-    write(out_unitp,*)
-    write(out_unitp,*)
-    write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '======= Product geometry optimisation ============================'
-    write(out_unitp,*) '=================================================================='
+    write(out_unit,*)
+    write(out_unit,*)
+    write(out_unit,*) '=================================================================='
+    write(out_unit,*) '=================================================================='
+    write(out_unit,*) '======= Product geometry optimisation ============================'
+    write(out_unit,*) '=================================================================='
     CALL get_Qact0(Qact,mole%ActiveTransfo)
     CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,mole%ActiveTransfo) ! here with mole
     Qdyn_P(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(2)%Q0
@@ -1378,18 +1378,18 @@
 
       CALL get_Qact0(Qact,mole_100%ActiveTransfo)
       QP = Qact(1:mole_100%nb_act)
-      IF (debug) write(out_unitp,*) 'QP (initial value)',QP
+      IF (debug) write(out_unit,*) 'QP (initial value)',QP
 
       CALL Sub_Optimization(para_AllBasis%BasisnD,para_Tnum,mole_100,para_H%para_ReadOp%PrimOp_t, &
                             QP,para_Optimization)
-      write(out_unitp,*) 'QP',QP
+      write(out_unit,*) 'QP',QP
       Qact(1:mole_100%nb_act) = QP(:)
       CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,mole_100%ActiveTransfo) ! here with mole_100
     END IF
 
     CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Qdyn_P,Qact,mole%ActiveTransfo)  !    then with mole
-    write(out_unitp,*) 'Qact_P',Qact
-    write(out_unitp,*) 'Qdyn_P',Qdyn_P
+    write(out_unit,*) 'Qact_P',Qact
+    write(out_unit,*) 'Qdyn_P',Qdyn_P
 
     CALL Init_Tab_OF_dnMatOp(dnMatOp,mole%nb_act,para_H%para_ReadOp%PrimOp_t%nb_elec,nderiv=2)
     CALL alloc_NParray(hess_P,[mole%nb_act,mole%nb_act],'hess_P',name_sub)
@@ -1397,34 +1397,34 @@
 
     CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,para_H%para_ReadOp%PrimOp_t)
     CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess_P,dnMatOp) ! for the ground state
-    CALL Write_Mat(hess_P, out_unitp, 5, info='hess_P')
+    CALL Write_Mat(hess_P, out_unit, 5, info='hess_P')
     Ene_P = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
-    write(out_unitp,*) 'Ene_P',Ene_P
+    write(out_unit,*) 'Ene_P',Ene_P
     CALL dealloc_Tab_OF_dnMatOp(dnMatOp)
     CALL get_d0GG(Qact,para_Tnum,mole,d0G_P,def=.TRUE.)
-    CALL Write_Mat(d0G_P, out_unitp, 5, info='d0G_P')
+    CALL Write_Mat(d0G_P, out_unit, 5, info='d0G_P')
 
-    write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '=================================================================='
-    write(out_unitp,*) '======= CAP, basis and other parameters =========================='
-    write(out_unitp,*) '=================================================================='
+    write(out_unit,*) '=================================================================='
+    write(out_unit,*) '=================================================================='
+    write(out_unit,*) '======= CAP, basis and other parameters =========================='
+    write(out_unit,*) '=================================================================='
     Ene_Col    = convRWU_TO_R_WITH_WorkingUnit(Ene_Col_min)
 
     IF (Ene_P < Ene_R) THEN
       Ene_Asymp  = Ene_R
-      write(out_unitp,*) " Higher asymptote (R): ",Qdyn_R(iQdyns),Ene_R
+      write(out_unit,*) " Higher asymptote (R): ",Qdyn_R(iQdyns),Ene_R
     ELSE
       Ene_Asymp  = Ene_P
-      write(out_unitp,*) " Higher asymptote (P): ",Qdyn_P(iQdyns),Ene_P
+      write(out_unit,*) " Higher asymptote (P): ",Qdyn_P(iQdyns),Ene_P
     END IF
-    write(out_unitp,*) " Higher asymptote (au):      ",Ene_Asymp
-    write(out_unitp,*) " Higher asymptote (eV):      ",Ene_Asymp * get_Conv_au_TO_unit('E','eV')
-    write(out_unitp,*) " TS / Higher asymptote (au): ",(Ene_TS-Ene_Asymp)
-    write(out_unitp,*) " TS / Higher asymptote (eV): ",(Ene_TS-Ene_Asymp) * get_Conv_au_TO_unit('E','eV')
-    write(out_unitp,*) '------------------------------------------------------------------'
-    write(out_unitp,*) " New pot0 (&minimum namelist): "
-    write(out_unitp,*) "    pot0=",para_H%pot0+Ene_Asymp
-    write(out_unitp,*) '------------------------------------------------------------------'
+    write(out_unit,*) " Higher asymptote (au):      ",Ene_Asymp
+    write(out_unit,*) " Higher asymptote (eV):      ",Ene_Asymp * get_Conv_au_TO_unit('E','eV')
+    write(out_unit,*) " TS / Higher asymptote (au): ",(Ene_TS-Ene_Asymp)
+    write(out_unit,*) " TS / Higher asymptote (eV): ",(Ene_TS-Ene_Asymp) * get_Conv_au_TO_unit('E','eV')
+    write(out_unit,*) '------------------------------------------------------------------'
+    write(out_unit,*) " New pot0 (&minimum namelist): "
+    write(out_unit,*) "    pot0=",para_H%pot0+Ene_Asymp
+    write(out_unit,*) '------------------------------------------------------------------'
     IF (associated(para_AllBasis%BasisnD%tab_Pbasis)) THEN
       DO ibasis=1,size(para_AllBasis%BasisnD%tab_Pbasis)
         IF (para_AllBasis%BasisnD%tab_Pbasis(ibasis)%Pbasis%iQdyn(1) == iQdyns) THEN
@@ -1434,8 +1434,8 @@
     ELSE
       nq = get_nq_FROM_basis(para_AllBasis%BasisnD)
     END IF
-    write(out_unitp,*) 'nq for s basis',nq
-    write(out_unitp,*) '------------------------------------------------------------------'
+    write(out_unit,*) 'nq for s basis',nq
+    write(out_unit,*) '------------------------------------------------------------------'
 
     ! for the product
     mass = ONE/d0G_P(iQs,iQs)
@@ -1460,10 +1460,10 @@
         END IF
         nq_CAP_P = int((c*LP)/(B-A)*nq)
         nq_CAP_R = int((c*LR)/(B-A)*nq)
-        write(out_unitp,*) 'Numbers of grid points in the CAP regions (R,P)',nq_CAP_R,nq_CAP_P
-        write(out_unitp,'(a,i0,a,f7.2,a,f7.2,a)') "&basis_nD iQdyn=",iQdyn," name='boxAB'  A=",A," B=",B," nb=$nb nq=$nq /"
+        write(out_unit,*) 'Numbers of grid points in the CAP regions (R,P)',nq_CAP_R,nq_CAP_P
+        write(out_unit,'(a,i0,a,f7.2,a,f7.2,a)') "&basis_nD iQdyn=",iQdyn," name='boxAB'  A=",A," B=",B," nb=$nb nq=$nq /"
       ELSE
-        write(out_unitp,'(a,i0,a,3(f10.3,a))') "&basis_nD iQdyn=",iQdyn," name='HO' Q0=",Qdyn_TS(iact), &
+        write(out_unit,'(a,i0,a,3(f10.3,a))') "&basis_nD iQdyn=",iQdyn," name='HO' Q0=",Qdyn_TS(iact), &
                       " k_HO=",hess_TS(iact,iact)," m_HO=",ONE/d0G_TS(iact,iact)," nb=$nb2 nq=$nq2 /"
       END IF
     END DO
@@ -1472,24 +1472,24 @@
     ! for the product
     E = Ene_Asymp-Ene_P + Ene_Col
     IF (Qdyn_P(iQdyns) < 0) THEN
-      !write(out_unitp,*) 'mass (-)',ONE/d0G_P(iQs,iQs)
-      write(out_unitp,'(a,e9.3,a,f7.2,a,f7.2,a,i0,a)') &
+      !write(out_unit,*) 'mass (-)',ONE/d0G_P(iQs,iQs)
+      write(out_unit,'(a,e9.3,a,f7.2,a,f7.2,a,i0,a)') &
         "&CAP Name_Cap='-inv' A=",E,' Q0=',Qdyn_P(iQdyns),' LQ=',LP,' ind_Q=',iQs,' /'
     ELSE
-      !write(out_unitp,*) 'mass (+)',ONE/d0G_P(iQs,iQs)
-      write(out_unitp,'(a,e9.3,a,f7.2,a,f7.2,a,i0,a)') &
+      !write(out_unit,*) 'mass (+)',ONE/d0G_P(iQs,iQs)
+      write(out_unit,'(a,e9.3,a,f7.2,a,f7.2,a,i0,a)') &
         "&CAP Name_Cap='+inv' A=",E,' Q0=',Qdyn_P(iQdyns),' LQ=',LP,' ind_Q=',iQs,' /'
     END IF
     ! for the reactif
     E = Ene_Asymp-Ene_R + Ene_Col
 
     IF (Qdyn_R(iQdyns) < 0) THEN
-      !write(out_unitp,*) 'mass (-)',ONE/d0G_R(iQs,iQs)
-      write(out_unitp,'(a,e9.3,a,f7.2,a,f7.2,a,i0,a)') &
+      !write(out_unit,*) 'mass (-)',ONE/d0G_R(iQs,iQs)
+      write(out_unit,'(a,e9.3,a,f7.2,a,f7.2,a,i0,a)') &
         "&CAP Name_Cap='-inv' A=",E,' Q0=',Qdyn_R(iQdyns),' LQ=',LR,' ind_Q=',iQs,' /'
     ELSE
-      !write(out_unitp,*) 'mass (+)',ONE/d0G_R(iQs,iQs)
-      write(out_unitp,'(a,e9.3,a,f7.2,a,f7.2,a,i0,a)') &
+      !write(out_unit,*) 'mass (+)',ONE/d0G_R(iQs,iQs)
+      write(out_unit,'(a,e9.3,a,f7.2,a,f7.2,a,i0,a)') &
         "&CAP Name_Cap='+inv' A=",E,' Q0=',Qdyn_R(iQdyns),' LQ=',LR,' ind_Q=',iQs,' /'
     END IF
   
@@ -1509,17 +1509,17 @@
   
         CALL dealloc_AllBasis(para_AllBasis)
 
-        write(out_unitp,*) '================================================'
+        write(out_unit,*) '================================================'
         IF(openmpi) THEN
-          write(out_unitp,*) ' sub_Opt_CAP_basis AU REVOIR!!!', ' from ', MPI_id
+          write(out_unit,*) ' sub_Opt_CAP_basis AU REVOIR!!!', ' from ', MPI_id
         ELSE
-          write(out_unitp,*) ' sub_Opt_CAP_basis AU REVOIR!!!'
+          write(out_unit,*) ' sub_Opt_CAP_basis AU REVOIR!!!'
         ENDIF
-        write(out_unitp,*) '================================================'
+        write(out_unit,*) '================================================'
   
   END SUBROUTINE sub_Opt_CAP_basis
       SUBROUTINE sub_GridTOBasis_test(max_mem)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_Coord_KEO
       USE mod_PrimOp
@@ -1582,23 +1582,23 @@
 !=====================================================================
 !=====================================================================
 !=====================================================================
-      write(out_unitp,*)
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' VIB: BEGINNING ini_data'
+      write(out_unit,*)
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' VIB: BEGINNING ini_data'
       CALL time_perso('ini_data')
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
       CALL     ini_data(const_phys,para_Tnum,mole,                      &
                         para_AllBasis,para_AllOp,                       &
                         para_ana,para_intensity,intensity_only,         &
                         para_propa)
 
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
       CALL time_perso('ini_data')
-      write(out_unitp,*) ' VIB: END ini_data'
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*)
+      write(out_unit,*) ' VIB: END ini_data'
+      write(out_unit,*) '================================================='
+      write(out_unit,*)
 !=====================================================================
 
 
@@ -1611,10 +1611,10 @@
 
 para_mem%mem_debug = .FALSE.
 
-      write(out_unitp,*)
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' VIB: BEGINNING GridTOBasis_test'
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' VIB: BEGINNING GridTOBasis_test'
+      write(out_unit,*)
 
 !DO ibb=1,WP0%nb_tot
   ibb=2
@@ -1627,7 +1627,7 @@ para_mem%mem_debug = .FALSE.
       CALL time_perso('B=>G')
 
       DO i=1,nb_it
-        IF (mod(i,100) == 0) write(out_unitp,*) i ; flush(out_unitp)
+        IF (mod(i,100) == 0) write(out_unit,*) i ; flush(out_unit)
         CALL sub_PsiBasisRep_TO_GridRep(WP0)
       END DO
 
@@ -1636,29 +1636,29 @@ para_mem%mem_debug = .FALSE.
       !CALL ecri_psi(psi=WP0)
       WP0%RvecB(:) = ZERO
 
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
       CALL time_perso('G=>B')
       DO i=1,nb_it
-        IF (mod(i,100) == 0) write(out_unitp,*) i ; flush(out_unitp)
+        IF (mod(i,100) == 0) write(out_unit,*) i ; flush(out_unit)
         CALL sub_PsiGridRep_TO_BasisRep(WP0)
       END DO
       CALL time_perso('G=>B')
       !CALL ecri_psi(psi=WP0)
 
-      write(out_unitp,*)
-      write(out_unitp,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
-      write(out_unitp,*)
-      write(out_unitp,*) ' VIB: END GridTOBasis_test'
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
+      write(out_unit,*)
+      write(out_unit,*) ' VIB: END GridTOBasis_test'
+      write(out_unit,*) '================================================='
+      write(out_unit,*)
 
       WP3 = WP1-WP0
-      write(out_unitp,*) 'max diff',maxval(abs(WP3%RvecB))
+      write(out_unit,*) 'max diff',maxval(abs(WP3%RvecB))
 !END DO
-      write(out_unitp,*) '================================================'
-      write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!'
-      write(out_unitp,*) '================================================'
+      write(out_unit,*) '================================================'
+      write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
+      write(out_unit,*) '================================================'
 
 
 para_mem%mem_debug = .FALSE.
@@ -1667,7 +1667,7 @@ para_mem%mem_debug = .FALSE.
       END SUBROUTINE sub_GridTOBasis_test
 
       SUBROUTINE Sub_OpPsi_test(max_mem)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_Coord_KEO
       USE mod_PrimOp
@@ -1757,8 +1757,8 @@ para_mem%mem_debug = .FALSE.
 !=====================================================================
 !=====================================================================
       IF(MPI_id==0) THEN
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' VIB: initialization of variables'
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' VIB: initialization of variables'
       ENDIF
 
       nullify(para_H)
@@ -1766,15 +1766,15 @@ para_mem%mem_debug = .FALSE.
       nullify(para_Dip)
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) ' END VIB: initialization of variables'
-        write(out_unitp,*) '================================================='
+        write(out_unit,*) ' END VIB: initialization of variables'
+        write(out_unit,*) '================================================='
 
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' VIB: BEGINNING ini_data'
+        write(out_unit,*)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' VIB: BEGINNING ini_data'
         CALL time_perso('ini_data ini')
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
       ENDIF
       CALL     ini_data(const_phys,para_Tnum,mole,                      &
                         para_AllBasis,para_AllOp,                       &
@@ -1784,12 +1784,12 @@ para_mem%mem_debug = .FALSE.
       para_H => para_AllOp%tab_Op(1)
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
         CALL time_perso('ini_data end')
-        write(out_unitp,*) ' VIB: END ini_data'
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END ini_data'
+        write(out_unit,*) '================================================='
+        write(out_unit,*)
 !=====================================================================
 
 !=====================================================================
@@ -1797,22 +1797,22 @@ para_mem%mem_debug = .FALSE.
 !=====================================================================
 
 
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' VIB: BEGINNING sub_qa_bhe'
+        write(out_unit,*)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' VIB: BEGINNING sub_qa_bhe'
         CALL time_perso('sub_qa_bhe')
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
       ENDIF  ! for MPI_id=0
 
       IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Read_FileGrid) THEN ! test only for H
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) ' The grid of operators (S V Veff T1 and T2) will be read'
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) ' The grid of operators (S V Veff T1 and T2) will be read'
+          write(out_unit,*)
         ENDIF
         IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid) THEN
-          IF(MPI_id==0) write(out_unitp,*) 'Test_Grid=.TRUE. => STOP in vib'
+          IF(MPI_id==0) write(out_unit,*) 'Test_Grid=.TRUE. => STOP in vib'
           STOP
         END IF
       ELSE
@@ -1830,12 +1830,12 @@ para_mem%mem_debug = .FALSE.
       END IF
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
         CALL time_perso('sub_qa_bhe')
-        write(out_unitp,*) ' VIB: END sub_qa_bhe'
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END sub_qa_bhe'
+        write(out_unit,*) '================================================='
+        write(out_unit,*)
       ENDIF
 
 !=====================================================================
@@ -1844,23 +1844,23 @@ para_mem%mem_debug = .FALSE.
 
       IF (para_H%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC .AND. para_H%nb_bi>1) THEN
 
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' VIB: BEGINNING HADA contraction',          &
+        write(out_unit,*)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' VIB: BEGINNING HADA contraction',          &
                                    para_AllBasis%BasisnD%nb
         CALL time_perso('HADA contraction')
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
 
         CALL sub_MatOp_HADA(para_H,para_ana,para_intensity,para_AllOp,  &
                             const_phys)
 
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
         CALL time_perso('HADA contraction')
-        write(out_unitp,*) ' VIB: END HADA contraction'
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END HADA contraction'
+        write(out_unit,*) '================================================='
+        write(out_unit,*)
 
         para_AllOp%tab_Op(:)%nb_tot     =                               &
                 sum(para_H%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(:)) * &
@@ -1875,13 +1875,13 @@ para_mem%mem_debug = .FALSE.
       IF (para_H%Make_Mat) THEN
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
           CALL time_perso('sub_matOp: H and S')
-          write(out_unitp,*)
-          write(out_unitp,*) 'para_S...%comput_S',para_AllOp%tab_Op(2)%para_ReadOp%comput_S
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) 'para_S...%comput_S',para_AllOp%tab_Op(2)%para_ReadOp%comput_S
+          write(out_unit,*)
         ENDIF
 
         IF (para_AllOp%tab_Op(2)%para_ReadOp%comput_S) THEN
@@ -1900,12 +1900,12 @@ para_mem%mem_debug = .FALSE.
         CALL sub_MatOp(para_H,para_ana%print)
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_matOp: H and S')
-          write(out_unitp,*) ' VIB: END sub_matOp'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END sub_matOp'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         ENDIF
       END IF
 
@@ -1927,15 +1927,15 @@ para_mem%mem_debug = .FALSE.
 
 para_mem%mem_debug = .FALSE.
 
-write(out_unitp,*)
-write(out_unitp,*) '================================================='
-write(out_unitp,*) ' VIB: BEGINNING sub_OpPsi_test'
+write(out_unit,*)
+write(out_unit,*) '================================================='
+write(out_unit,*) ' VIB: BEGINNING sub_OpPsi_test'
 
-      write(out_unitp,*)
-      write(out_unitp,*) ' Number of psi:',nb_it
-      write(out_unitp,*) ' Number of threads (SG4):',SG4_maxth
+      write(out_unit,*)
+      write(out_unit,*) ' Number of psi:',nb_it
+      write(out_unit,*) ' Number of threads (SG4):',SG4_maxth
 
-      write(out_unitp,*)
+      write(out_unit,*)
       CALL time_perso('HPsi')
 
       IF (cplx) THEN
@@ -1945,17 +1945,17 @@ write(out_unitp,*) ' VIB: BEGINNING sub_OpPsi_test'
       END IF
 
       CALL time_perso('HPsi')
-      write(out_unitp,*)
-      write(out_unitp,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
+      write(out_unit,*)
 
-      write(out_unitp,*) 'OpPsi states:'
+      write(out_unit,*) 'OpPsi states:'
       para_propa%file_WP%name = 'file_WP'
       CALL sub_save_psi(Tab_OpPsi,size(Tab_Psi),para_propa%file_WP)
 
-write(out_unitp,*) ' VIB: END sub_OpPsi_test'
-write(out_unitp,*) '================================================='
-write(out_unitp,*)
+write(out_unit,*) ' VIB: END sub_OpPsi_test'
+write(out_unit,*) '================================================='
+write(out_unit,*)
 
 
 CALL Tune_SG4threads_HPsi(cplx,nb_it,para_H)
@@ -1963,9 +1963,9 @@ CALL Tune_SG4threads_HPsi(cplx,nb_it,para_H)
 
       !CALL ecri_psi(psi=OpWP0)
 
-      write(out_unitp,*) '================================================'
-      write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!'
-      write(out_unitp,*) '================================================'
+      write(out_unit,*) '================================================'
+      write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
+      write(out_unit,*) '================================================'
 
 para_mem%mem_debug = .FALSE.
 
@@ -2002,18 +2002,18 @@ para_mem%mem_debug = .FALSE.
 
       CALL dealloc_AllBasis(para_AllBasis)
 
-      write(out_unitp,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
-      write(out_unitp,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
-      write(out_unitp,*) '================================================'
-      write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!'
-      write(out_unitp,*) '================================================'
+      write(out_unit,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
+      write(out_unit,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
+      write(out_unit,*) '================================================'
+      write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
+      write(out_unit,*) '================================================'
 
 
 END SUBROUTINE Sub_OpPsi_test
 
 
 SUBROUTINE Tune_SG4threads_HPsi(cplx,nb_psi,para_H)
-USE mod_system
+USE EVR_system_m
 USE mod_psi,     ONLY : param_psi,alloc_psi,dealloc_NParray,Set_Random_psi
 USE mod_Op
 IMPLICIT NONE
@@ -2075,14 +2075,14 @@ DO i=1,nb_psi_loc
   CALL Set_Random_psi(Tab_Psi(i))
 END DO
 
-write(out_unitp,*) '============================================'
-write(out_unitp,*) '== Tuning the number of OMP threads ========'
+write(out_unit,*) '============================================'
+write(out_unit,*) '== Tuning the number of OMP threads ========'
 
-write(out_unitp,*)
-write(out_unitp,*) ' Number of psi:',size(Tab_Psi)
-write(out_unitp,*) ' cplx?:',cplx
+write(out_unit,*)
+write(out_unit,*) ' Number of psi:',size(Tab_Psi)
+write(out_unit,*) ' cplx?:',cplx
 
-write(out_unitp,*) ' Number of threads (SG4):',SG4_maxth
+write(out_unit,*) ' Number of threads (SG4):',SG4_maxth
 
 RealTime(1) = Delta_RealTime(HPsiTime)
 
@@ -2098,7 +2098,7 @@ DO SG4_maxth=1,PSG4_maxth_save
   END IF
 
   RealTime(SG4_maxth) = Delta_RealTime(HPsiTime)
-  write(out_unitp,*) 'With ',SG4_maxth,'threads, Delta Real Time',RealTime(SG4_maxth)
+  write(out_unit,*) 'With ',SG4_maxth,'threads, Delta Real Time',RealTime(SG4_maxth)
   IF (RealTime(SG4_maxth) < Opt_RealTime) THEN
     IF (RealTime(SG4_maxth) > 0) THEN
       Opt_RealTime   = RealTime(SG4_maxth)
@@ -2112,10 +2112,10 @@ DO SG4_maxth=1,PSG4_maxth_save
 END DO
 
 SG4_maxth = opt_PSG4_maxth
-write(out_unitp,*) 'Optimal threads: ',SG4_maxth,' Delta Real Time',RealTime(SG4_maxth)
-write(out_unitp,*) '    => Speed-up: ',RealTime(1)/RealTime(SG4_maxth)
+write(out_unit,*) 'Optimal threads: ',SG4_maxth,' Delta Real Time',RealTime(SG4_maxth)
+write(out_unit,*) '    => Speed-up: ',RealTime(1)/RealTime(SG4_maxth)
 
-write(out_unitp,*) '============================================'
+write(out_unit,*) '============================================'
 
 para_H%Make_Mat = Make_Mat_save
 
@@ -2125,7 +2125,7 @@ CALL dealloc_NParray(Tab_Psi,  'Tab_Psi',  name_sub)
 END SUBROUTINE Tune_SG4threads_HPsi
 
       SUBROUTINE sub_Analysis_Only(max_mem)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_Coord_KEO
       USE mod_PrimOp
@@ -2198,12 +2198,12 @@ END SUBROUTINE Tune_SG4threads_HPsi
 !=====================================================================
 !=====================================================================
 !=====================================================================
-      write(out_unitp,*)
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' VIB: BEGINNING ini_data'
+      write(out_unit,*)
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' VIB: BEGINNING ini_data'
       CALL time_perso('ini_data')
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
       CALL     ini_data(const_phys,para_Tnum,mole,                      &
                         para_AllBasis,para_AllOp,                       &
                         para_ana,para_intensity,intensity_only,         &
@@ -2214,21 +2214,21 @@ END SUBROUTINE Tune_SG4threads_HPsi
 
       para_ana%intensity    = .FALSE.
       para_H%para_ReadOp%nb_scalar_Op   = 0
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
       CALL time_perso('ini_data')
-      write(out_unitp,*) ' VIB: END ini_data'
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*)
+      write(out_unit,*) ' VIB: END ini_data'
+      write(out_unit,*) '================================================='
+      write(out_unit,*)
 !=====================================================================
 
 
-      write(out_unitp,*)
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*) ' VIB: BEGINNING WP analysis only'
+      write(out_unit,*)
+      write(out_unit,*) '================================================='
+      write(out_unit,*) ' VIB: BEGINNING WP analysis only'
       CALL time_perso('WP analysis only')
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
 
 
       ! first the number of WP
@@ -2259,8 +2259,8 @@ END SUBROUTINE Tune_SG4threads_HPsi
         para_propa%file_WP%name      = para_propa%para_Davidson%name_file_saveWP
         para_WP0%file_WP0%name       = para_propa%para_Davidson%name_file_readWP
       ELSE
-        write(out_unitp,*) ' ERROR in sub_Analysis_Only'
-        write(out_unitp,*) ' Not yet without Davidson'
+        write(out_unit,*) ' ERROR in sub_Analysis_Only'
+        write(out_unit,*) ' Not yet without Davidson'
         STOP
       END IF
 
@@ -2279,12 +2279,12 @@ END SUBROUTINE Tune_SG4threads_HPsi
       IF(keep_MPI) CALL sub_analyse(Tab_WP,para_WP0%nb_WP0,para_H,                   &
                        para_ana,para_intensity,para_AllOp,const_phys)
 
-      write(out_unitp,*)
-      write(out_unitp,*)
+      write(out_unit,*)
+      write(out_unit,*)
       CALL time_perso('WP analysis only')
-      write(out_unitp,*) ' VIB: BEGINNING WP analysis only'
-      write(out_unitp,*) '================================================='
-      write(out_unitp,*)
+      write(out_unit,*) ' VIB: BEGINNING WP analysis only'
+      write(out_unit,*) '================================================='
+      write(out_unit,*)
 
       IF ( allocated(tab_WP) ) THEN
         DO i=1,size(tab_WP)
@@ -2293,8 +2293,8 @@ END SUBROUTINE Tune_SG4threads_HPsi
         CALL dealloc_NParray(tab_WP,"tab_WP","sub_Analysis_Only")
       END IF
 
-      write(out_unitp,*) '================================================'
-      write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!'
-      write(out_unitp,*) '================================================'
+      write(out_unit,*) '================================================'
+      write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
+      write(out_unit,*) '================================================'
 
       END SUBROUTINE sub_Analysis_Only

@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_SimulatedAnnealing
-      USE mod_system
+      USE EVR_system_m
 
       IMPLICIT NONE
 
@@ -134,15 +134,15 @@
 
         Restart_Opt         =  0
 
-        read(in_unitp,SimulatedAnnealing,IOSTAT=err_io)
+        read(in_unit,SimulatedAnnealing,IOSTAT=err_io)
         IF (err_io /= 0) THEN
-           write(out_unitp,*) ' WARNING in Read_param_SimulatedAnnealing'
-           write(out_unitp,*) '  while reading the "SimulatedAnnealing" namelist'
-           write(out_unitp,*) ' end of file or end of record'
-           write(out_unitp,*) ' Check your data !!'
+           write(out_unit,*) ' WARNING in Read_param_SimulatedAnnealing'
+           write(out_unit,*) '  while reading the "SimulatedAnnealing" namelist'
+           write(out_unit,*) ' end of file or end of record'
+           write(out_unit,*) ' Check your data !!'
            STOP
         END IF
-        IF (print_level > 1) write(out_unitp,SimulatedAnnealing)
+        IF (print_level > 1) write(out_unit,SimulatedAnnealing)
 
         para_SimulatedAnnealing%nb_mc_tot           =  nb_mc_tot
         para_SimulatedAnnealing%nb_mc_partial       =  nb_mc_partial
@@ -200,32 +200,32 @@
       SUBROUTINE Write_param_SimulatedAnnealing(para_SimulatedAnnealing)
       TYPE (param_SimulatedAnnealing), intent(in)   :: para_SimulatedAnnealing
 
-      write(out_unitp,*) '  WRITE param_SimulatedAnnealing'
-      write(out_unitp,*)
-      write(out_unitp,*) '  nb_mc_tot          ',para_SimulatedAnnealing%nb_mc_tot
-      write(out_unitp,*) '  nb_mc_partial      ',para_SimulatedAnnealing%nb_mc_partial
-      write(out_unitp,*)
-      write(out_unitp,*) '  TempInit_type      ',para_SimulatedAnnealing%TempInit_type
-      write(out_unitp,*) '  Tmax               ',para_SimulatedAnnealing%Tmax
-      write(out_unitp,*) '  Tmin               ',para_SimulatedAnnealing%Tmin
-      write(out_unitp,*) '  DeltaT             ',para_SimulatedAnnealing%DeltaT
-      write(out_unitp,*)
-      write(out_unitp,*) '  RangeScal          ',para_SimulatedAnnealing%RangeScal
-      write(out_unitp,*) '  RangeScalInit      ',para_SimulatedAnnealing%RangeScalInit
+      write(out_unit,*) '  WRITE param_SimulatedAnnealing'
+      write(out_unit,*)
+      write(out_unit,*) '  nb_mc_tot          ',para_SimulatedAnnealing%nb_mc_tot
+      write(out_unit,*) '  nb_mc_partial      ',para_SimulatedAnnealing%nb_mc_partial
+      write(out_unit,*)
+      write(out_unit,*) '  TempInit_type      ',para_SimulatedAnnealing%TempInit_type
+      write(out_unit,*) '  Tmax               ',para_SimulatedAnnealing%Tmax
+      write(out_unit,*) '  Tmin               ',para_SimulatedAnnealing%Tmin
+      write(out_unit,*) '  DeltaT             ',para_SimulatedAnnealing%DeltaT
+      write(out_unit,*)
+      write(out_unit,*) '  RangeScal          ',para_SimulatedAnnealing%RangeScal
+      write(out_unit,*) '  RangeScalInit      ',para_SimulatedAnnealing%RangeScalInit
 
-      write(out_unitp,*) '  With_RangeInit     ',para_SimulatedAnnealing%With_RangeInit
-      write(out_unitp,*) '  RangeInit          ',para_SimulatedAnnealing%RangeInit
+      write(out_unit,*) '  With_RangeInit     ',para_SimulatedAnnealing%With_RangeInit
+      write(out_unit,*) '  RangeInit          ',para_SimulatedAnnealing%RangeInit
 
-      write(out_unitp,*)
-      write(out_unitp,*) '  TempScheduling_type',para_SimulatedAnnealing%TempScheduling_type
-      write(out_unitp,*) '  ExpCoolParam       ',para_SimulatedAnnealing%ExpCoolParam
-      write(out_unitp,*)
-      write(out_unitp,*) '  ResetTemp          ',para_SimulatedAnnealing%ResetTemp
-      write(out_unitp,*) '  ResetTempScal      ',para_SimulatedAnnealing%ResetTempScal
-      write(out_unitp,*)
-      write(out_unitp,*) '  Restart_Opt        ',para_SimulatedAnnealing%Restart_Opt
-      write(out_unitp,*)
-      write(out_unitp,*) '  END WRITE param_SimulatedAnnealing'
+      write(out_unit,*)
+      write(out_unit,*) '  TempScheduling_type',para_SimulatedAnnealing%TempScheduling_type
+      write(out_unit,*) '  ExpCoolParam       ',para_SimulatedAnnealing%ExpCoolParam
+      write(out_unit,*)
+      write(out_unit,*) '  ResetTemp          ',para_SimulatedAnnealing%ResetTemp
+      write(out_unit,*) '  ResetTempScal      ',para_SimulatedAnnealing%ResetTempScal
+      write(out_unit,*)
+      write(out_unit,*) '  Restart_Opt        ',para_SimulatedAnnealing%Restart_Opt
+      write(out_unit,*)
+      write(out_unit,*) '  END WRITE param_SimulatedAnnealing'
 
       END SUBROUTINE write_param_SimulatedAnnealing
 
@@ -234,7 +234,7 @@
                                         para_Tnum,mole,PrimOp,Qact,     &
                                         para_SimulatedAnnealing)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_PrimOp
       USE mod_basis
@@ -300,9 +300,9 @@
       character (len=*), parameter :: name_sub='Sub_SimulatedAnnealing'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -328,9 +328,9 @@
       CALL Sub_Energ_OF_ParamBasis(Norm_min,xOpt_min,nb_Opt,BasisnD,    &
                                    para_Tnum,mole,PrimOp,Qact)
       IF (size(xOpt_min) > 20) THEN
-        write(out_unitp,*) ' Initial param',xOpt_min(1:10),' ... Energy',Norm_min
+        write(out_unit,*) ' Initial param',xOpt_min(1:10),' ... Energy',Norm_min
       ELSE
-        write(out_unitp,*) ' Initial param',xOpt_min,' Energy',Norm_min
+        write(out_unit,*) ' Initial param',xOpt_min,' Energy',Norm_min
       END IF
 
 
@@ -338,13 +338,13 @@
       QB(:) = xOpt_min(:) + SQ(:)*HALF
       QAv(:)= xOpt_min(:)
       IF (size(QA) > 20) THEN
-        write(out_unitp,*) 'SQ(1:10)',SQ(1:10),' ...'
-        write(out_unitp,*) 'QA(1:10)',QA(1:10),' ...'
-        write(out_unitp,*) 'QB(1:10)',QB(1:10),' ...'
+        write(out_unit,*) 'SQ(1:10)',SQ(1:10),' ...'
+        write(out_unit,*) 'QA(1:10)',QA(1:10),' ...'
+        write(out_unit,*) 'QB(1:10)',QB(1:10),' ...'
       ELSE
-        write(out_unitp,*) 'SQ',SQ
-        write(out_unitp,*) 'QA',QA
-        write(out_unitp,*) 'QB',QB
+        write(out_unit,*) 'SQ',SQ
+        write(out_unit,*) 'QA',QA
+        write(out_unit,*) 'QB',QB
       END IF
 
 
@@ -360,30 +360,30 @@
           CALL Sub_Energ_OF_ParamBasis(NormB,xOpt,nb_Opt,BasisnD,       &
                                        para_Tnum,mole,PrimOp,Qact)
 
-          !write(out_unitp,*) 'NormB',imc,NormB
+          !write(out_unit,*) 'NormB',imc,NormB
           NormA = NormA + NormB
           IF (NormB > Norm_max) Norm_max = NormB
 
           IF (NormB < Norm_min) THEN
             xOpt_min(:) = xOpt(:)
             Norm_min    = NormB
-            write(out_unitp,*) 'NormB',imc,NormB
+            write(out_unit,*) 'NormB',imc,NormB
           END IF
       END DO
       NormA = NormA / real(para_SimulatedAnnealing%nb_mc_tot/10,kind=Rkind)
-      write(out_unitp,*) 'Min, Average, Max Energy',Norm_min,NormA,Norm_max
+      write(out_unit,*) 'Min, Average, Max Energy',Norm_min,NormA,Norm_max
 
       x0(:)  = xOpt_min(:)
       IF (size(xOpt_min) > 20) THEN
-        write(out_unitp,*) ' Energy_min',xOpt_min(1:10),' ...',Norm_min
+        write(out_unit,*) ' Energy_min',xOpt_min(1:10),' ...',Norm_min
       ELSE
-        write(out_unitp,*) ' Energy_min',xOpt_min,Norm_min
+        write(out_unit,*) ' Energy_min',xOpt_min,Norm_min
       END IF
 
       Temp_max = Norm_max-Norm_min
       Temp     = Temp_max
-      write(out_unitp,*) 'Average Energy, Temp',NormA,Temp
-      flush(out_unitp)
+      write(out_unit,*) 'Average Energy, Temp',NormA,Temp
+      flush(out_unit)
 
       DTemp       = Temp_max/real(max(10,para_SimulatedAnnealing%nb_mc_tot),kind=Rkind)
 
@@ -405,16 +405,16 @@
                                      para_Tnum,mole,PrimOp,Qact)
 
         DNorm = NormA - NormB
-        !write(out_unitp,*) 'Norm',imc,xOpt,NormA
-        !write(out_unitp,*) 'Norm',imc,sqrt(sum((xOpt-xOpt_min)**2)),NormA
+        !write(out_unit,*) 'Norm',imc,xOpt,NormA
+        !write(out_unit,*) 'Norm',imc,sqrt(sum((xOpt-xOpt_min)**2)),NormA
 
-        flush(out_unitp)
+        flush(out_unit)
 
         IF ( NormA < Norm_min) THEN
           nb_Norm_min   = nb_Norm_min + 1
           xOpt_min(:)   = xOpt(:)
           Norm_min      = NormA
-          !write(out_unitp,*) ' imc, Temp, nb_Energy_min, Energy_min',imc,Temp,nb_Norm_min,Norm_min
+          !write(out_unit,*) ' imc, Temp, nb_Energy_min, Energy_min',imc,Temp,nb_Norm_min,Norm_min
         END IF
 
 
@@ -426,29 +426,29 @@
           IF ( PTemp < exp(-DNorm/Temp) ) THEN
             x0(:)       = xOpt(:)
             NormB       = NormA
-            !write(out_unitp,*) ' imc, Temp, Norm (propa)',imc,Temp,NormA
-            !write(out_unitp,*) ' accepted, Proba',PTemp,exp(-DNorm/Temp)
+            !write(out_unit,*) ' imc, Temp, Norm (propa)',imc,Temp,NormA
+            !write(out_unit,*) ' accepted, Proba',PTemp,exp(-DNorm/Temp)
           END IF
         END IF
         imc = imc + 1
         SELECT CASE (para_SimulatedAnnealing%TempScheduling_type)
         CASE (1)
-          !write(out_unitp,*) 'LinCoolParam'
+          !write(out_unit,*) 'LinCoolParam'
           Temp = Temp - DTemp
         CASE (2)
-          !write(out_unitp,*) 'ExpCoolParam'
+          !write(out_unit,*) 'ExpCoolParam'
           Temp = para_SimulatedAnnealing%ExpCoolParam * Temp
         CASE DEFAULT
-          !write(out_unitp,*) 'ExpCoolParam'
+          !write(out_unit,*) 'ExpCoolParam'
           Temp = para_SimulatedAnnealing%ExpCoolParam * Temp
         END SELECT
 
         IF (para_SimulatedAnnealing%ResetTemp .AND.                     &
              Temp < para_SimulatedAnnealing%ResetTempScal*Temp_max) THEN
 
-          write(out_unitp,*) 'Temp_max,nb_Energy_min,Energy_min',           &
+          write(out_unit,*) 'Temp_max,nb_Energy_min,Energy_min',           &
                                            Temp_max,nb_Norm_min,Norm_min
-          flush(out_unitp)
+          flush(out_unit)
           SQ(:)       = SQ(:)*para_SimulatedAnnealing%RangeScal
           Temp_max    = (ONE-para_SimulatedAnnealing%ResetTempScal)*Temp_max
           Temp        = Temp_max
@@ -464,17 +464,17 @@
         END IF
 
         IF (nb_block_WithoutMin > 20) THEN
-          write(out_unitp,*) 'restart because, nb_block_WithoutMin > 20'
-          flush(out_unitp)
+          write(out_unit,*) 'restart because, nb_block_WithoutMin > 20'
+          flush(out_unit)
           EXIT
         END IF
 
         IF (Temp < para_SimulatedAnnealing%Tmin .OR. imc > para_SimulatedAnnealing%nb_mc_tot) EXIT
       END DO
       IF (size(xOpt_min) > 20) THEN
-        write(out_unitp,*) ' Optimal param',xOpt_min(1:10),' ... Energy',Norm_min
+        write(out_unit,*) ' Optimal param',xOpt_min(1:10),' ... Energy',Norm_min
       ELSE
-        write(out_unitp,*) ' Optimal param',xOpt_min,' Energy',Norm_min
+        write(out_unit,*) ' Optimal param',xOpt_min,' Energy',Norm_min
       END IF
 
       !deallocation
@@ -486,7 +486,7 @@
       CALL dealloc_array(QAv, 'Qav', name_sub)
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -498,7 +498,7 @@
                                             para_Tnum,mole,PrimOp,Qact, &
                                              para_SimulatedAnnealing)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_PrimOp
       USE mod_basis
@@ -560,9 +560,9 @@
       character (len=*), parameter :: name_sub='Sub_SimulatedAnnealing_cuba'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 
@@ -594,12 +594,12 @@
       CALL Sub_Energ_OF_ParamBasis(Norm_min,xOpt,nb_Opt,BasisnD,        &
                                    para_Tnum,mole,PrimOp,Qact)
 
-      write(out_unitp,*) 'Initial param',xOpt,' Energy',Norm_min
+      write(out_unit,*) 'Initial param',xOpt,' Energy',Norm_min
 
 
-      write(out_unitp,*) 'SQ',SQ
-      write(out_unitp,*) 'QA',QA
-      write(out_unitp,*) 'QB',QB
+      write(out_unit,*) 'SQ',SQ
+      write(out_unit,*) 'QA',QA
+      write(out_unit,*) 'QB',QB
 
 
       Norm_max = Norm_min
@@ -619,7 +619,7 @@
         CALL Sub_Energ_OF_ParamBasis(NormB,xOpt,nb_Opt,BasisnD,         &
                                      para_Tnum,mole,PrimOp,Qact)
 
-        !write(out_unitp,*) 'NormB',imc,NormB
+        !write(out_unit,*) 'NormB',imc,NormB
         NormA = NormA + NormB
         IF (NormB > Norm_max) Norm_max = NormB
 
@@ -629,20 +629,20 @@
         END IF
       END DO
       NormA = NormA / real(para_SimulatedAnnealing%nb_mc_tot/10,kind=Rkind)
-      write(out_unitp,*) 'Min, Average, Max Energy',Norm_min,NormA,Norm_max
+      write(out_unit,*) 'Min, Average, Max Energy',Norm_min,NormA,Norm_max
 
       x0(:)   = xOpt_min(:)
       Xopt(:) = xOpt_min(:)
       CALL Sub_Energ_OF_ParamBasis(NormB,xOpt,nb_Opt,BasisnD,         &
                                    para_Tnum,mole,PrimOp,Qact)
       Norm_min = NormB
-      write(out_unitp,*) ' Energy_min',xOpt_min,Norm_min
+      write(out_unit,*) ' Energy_min',xOpt_min,Norm_min
 
       Temp_max = Norm_max-Norm_min
       Temp_max = NormA
       Temp     = Temp_max
-      write(out_unitp,*) 'Average Energy, Temp',NormA,Temp
-      flush(out_unitp)
+      write(out_unit,*) 'Average Energy, Temp',NormA,Temp
+      flush(out_unit)
 
       DTemp       = Temp_max/real(max(10,para_SimulatedAnnealing%nb_mc_tot),kind=Rkind)
 
@@ -654,7 +654,7 @@
       nb_block_WithoutMin  = 0
       imc_block            = 0
       !SQ(:) = SQ(:)/TEN
-      write(out_unitp,*) 'NormB,SQ(1)',NormB,SQ(1)
+      write(out_unit,*) 'NormB,SQ(1)',NormB,SQ(1)
       DO
         imc       = imc       + 1
         imc_block = imc_block + 1
@@ -672,35 +672,35 @@
         CALL Sub_Energ_OF_ParamBasis(NormA,xOpt,nb_Opt,BasisnD,         &
                                      para_Tnum,mole,PrimOp,Qact)
 
-        !write(out_unitp,*) 'imc,Xopt,NormA,SQ',imc,xOpt,NormA,SQ(1)
+        !write(out_unit,*) 'imc,Xopt,NormA,SQ',imc,xOpt,NormA,SQ(1)
 
         DNorm = NormA - NormB
-        !write(out_unitp,*) 'Norm',imc,xOpt,NormA
-        flush(out_unitp)
+        !write(out_unit,*) 'Norm',imc,xOpt,NormA
+        flush(out_unit)
 
         IF ( NormA < Norm_min) THEN
           nb_Norm_min   = nb_Norm_min + 1
           xOpt_min(:)   = xOpt(:)
           Norm_min      = NormA
-          !write(out_unitp,*) ' imc, Temp, nb_Energy_min, Energy_min',imc,Temp,nb_Norm_min,Norm_min
+          !write(out_unit,*) ' imc, Temp, nb_Energy_min, Energy_min',imc,Temp,nb_Norm_min,Norm_min
         END IF
 
         IF (DNorm < ZERO) THEN
           x0(:)       = xOpt(:)
           NormB       = NormA
-          !write(out_unitp,*) ' accepted, DNorm',imc,DNorm
+          !write(out_unit,*) ' accepted, DNorm',imc,DNorm
           nb_Accepted_DNorm = nb_Accepted_DNorm + 1
         ELSE
           CALL random_number(PTemp)
           IF ( PTemp < exp(-DNorm/Temp) ) THEN
             x0(:)       = xOpt(:)
             NormB       = NormA
-            !write(out_unitp,*) ' imc, Temp, Norm (propa)',imc,Temp,NormA
-            !write(out_unitp,*) ' accepted, Proba',imc,PTemp,exp(-DNorm/Temp)
+            !write(out_unit,*) ' imc, Temp, Norm (propa)',imc,Temp,NormA
+            !write(out_unit,*) ' accepted, Proba',imc,PTemp,exp(-DNorm/Temp)
             nb_Accepted_proba = nb_Accepted_proba + 1
           ELSE
             nb_NotAccepted_proba = nb_NotAccepted_proba + 1
-            !write(out_unitp,*) ' Not accepted, Proba',imc,PTemp,exp(-DNorm/Temp)
+            !write(out_unit,*) ' Not accepted, Proba',imc,PTemp,exp(-DNorm/Temp)
           END IF
         END IF
 
@@ -708,31 +708,31 @@
         IF (imc_block > para_SimulatedAnnealing%nb_mc_partial) THEN
         SELECT CASE (para_SimulatedAnnealing%TempScheduling_type)
         CASE (1)
-          !write(out_unitp,*) 'LinCoolParam'
+          !write(out_unit,*) 'LinCoolParam'
           Temp = Temp - DTemp
         CASE (2)
-          !write(out_unitp,*) 'ExpCoolParam'
+          !write(out_unit,*) 'ExpCoolParam'
           Temp = para_SimulatedAnnealing%ExpCoolParam * Temp
         CASE DEFAULT
-          !write(out_unitp,*) 'ExpCoolParam'
+          !write(out_unit,*) 'ExpCoolParam'
           Temp = para_SimulatedAnnealing%ExpCoolParam * Temp
         END SELECT
         END IF
 
-        !write(out_unitp,*) 'imc,Temp',imc,Temp,Temp_max,para_SimulatedAnnealing%ResetTempScal
-        !write(out_unitp,*) 'imc,Temp',imc,Temp,Temp_max*para_SimulatedAnnealing%ResetTempScal
+        !write(out_unit,*) 'imc,Temp',imc,Temp,Temp_max,para_SimulatedAnnealing%ResetTempScal
+        !write(out_unit,*) 'imc,Temp',imc,Temp,Temp_max*para_SimulatedAnnealing%ResetTempScal
 
-        !write(out_unitp,*) 'test ?',(Temp < para_SimulatedAnnealing%ResetTempScal*Temp_max)
+        !write(out_unit,*) 'test ?',(Temp < para_SimulatedAnnealing%ResetTempScal*Temp_max)
 
 
         IF (para_SimulatedAnnealing%ResetTemp .AND.                     &
              Temp < para_SimulatedAnnealing%ResetTempScal*Temp_max) THEN
 
-          write(out_unitp,*) 'imc,Temp_max,nb_Energy_min,Energy_min',   &
+          write(out_unit,*) 'imc,Temp_max,nb_Energy_min,Energy_min',   &
                                        imc,Temp_max,nb_Norm_min,Norm_min
-          write(out_unitp,*) 'imc,Temp_max,nb_Accepted_...',imc,Temp_max,&
+          write(out_unit,*) 'imc,Temp_max,nb_Accepted_...',imc,Temp_max,&
                 nb_Accepted_DNorm,nb_Accepted_proba,nb_NotAccepted_proba
-          flush(out_unitp)
+          flush(out_unit)
           SQ(:)       = SQ(:)*para_SimulatedAnnealing%RangeScal
           Temp_max    = (ONE-para_SimulatedAnnealing%ResetTempScal)*Temp_max
           DTemp       = Temp_max/real(max(10,para_SimulatedAnnealing%nb_mc_tot-imc),kind=Rkind)
@@ -754,7 +754,7 @@
 
         IF (Temp < para_SimulatedAnnealing%Tmin .OR. imc > para_SimulatedAnnealing%nb_mc_tot) EXIT
       END DO
-      write(out_unitp,*) 'Optimal param',xOpt_min,' Energy',Norm_min
+      write(out_unit,*) 'Optimal param',xOpt_min,' Energy',Norm_min
 
       !deallocation
       CALL dealloc_array(x,   'x',   name_sub)
@@ -763,7 +763,7 @@
       CALL dealloc_array(QAv, 'Qav', name_sub)
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 

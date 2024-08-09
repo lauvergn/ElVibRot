@@ -55,7 +55,7 @@
                                para_intensity,const_phys,               &
                                intensity_only,nio_res_int)
 
-      USE mod_system
+      USE EVR_system_m
       use mod_Constant, only: constant, rwu_write, real_wu, get_conv_au_to_unit
       USE mod_Coord_KEO
       USE mod_basis
@@ -118,24 +118,24 @@
 
       nb_aie = para_H%nb_tot
 
-      write(out_unitp,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'BEGINNING ',name_sub
       IF (debug) THEN
-        write(out_unitp,*) 'nb_aie',nb_aie
-        write(out_unitp,*) 'nb_ana',nb_ana
-        write(out_unitp,*) 'intensity_only,nio_res_int',                        &
+        write(out_unit,*) 'nb_aie',nb_aie
+        write(out_unit,*) 'nb_ana',nb_ana
+        write(out_unit,*) 'intensity_only,nio_res_int',                        &
                     intensity_only,nio_res_int
-        write(out_unitp,*)
-        write(out_unitp,*) ' l_Int,l_IntVR:',                                   &
+        write(out_unit,*)
+        write(out_unit,*) ' l_Int,l_IntVR:',                                   &
                      para_intensity%l_Int,para_intensity%l_IntVR
-        write(out_unitp,*) ' l_Aif,l_Tau:',                                     &
+        write(out_unit,*) ' l_Aif,l_Tau:',                                     &
                      para_intensity%l_Aif,para_intensity%l_Tau
-        write(out_unitp,*)
-        write(out_unitp,*) 'convIDif',const_phys%convIDif
-        write(out_unitp,*) 'convAif',const_phys%convAif
-        write(out_unitp,*)
-        write(out_unitp,*) 'Rvp',shape(para_H%Rvp)
-!       CALL Write_Mat(para_H%Rvp,out_unitp,5)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'convIDif',const_phys%convIDif
+        write(out_unit,*) 'convAif',const_phys%convAif
+        write(out_unit,*)
+        write(out_unit,*) 'Rvp',shape(para_H%Rvp)
+!       CALL Write_Mat(para_H%Rvp,out_unit,5)
+        write(out_unit,*)
       END IF
 !-----------------------------------------------------------
 
@@ -149,27 +149,27 @@
           para_intensity%ABC(:,:) = ZERO
         END IF
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_ana <=0',nb_ana
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_ana <=0',nb_ana
         STOP
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       IF (intensity_only) THEN
 
         read(nio_res_int,*)
         CALL Read_Mat(Mat_Aif,nio_res_int,5,err)
         IF (err /= 0) THEN
-           write(out_unitp,*) 'ERROR in ',name_sub
-           write(out_unitp,*) ' reading the matrix "Mat_Aif"'
+           write(out_unit,*) 'ERROR in ',name_sub
+           write(out_unit,*) ' reading the matrix "Mat_Aif"'
            STOP
         END IF
         IF (allocated(para_intensity%ABC)) THEN
           read(nio_res_int,*)
           CALL Read_Mat(para_intensity%ABC,nio_res_int,5,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR in ',name_sub
-            write(out_unitp,*) ' reading "para_intensity%ABC"'
+            write(out_unit,*) 'ERROR in ',name_sub
+            write(out_unit,*) ' reading "para_intensity%ABC"'
             STOP
           END IF
         END IF
@@ -177,35 +177,35 @@
       ELSE
 
 !       -------------------------------------------
-!       write(out_unitp,*) ' ene (ua): ',nb_ana
+!       write(out_unit,*) ' ene (ua): ',nb_ana
 !       DO i=1,nb_ana
-!         write(out_unitp,*) i,para_H%Rdiag(i)
+!         write(out_unit,*) i,para_H%Rdiag(i)
 !       END DO
-!       write(out_unitp,*) ' END ene',nb_ana
-        write(out_unitp,*)
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) ' Calculation and saving of "Mat_Aif(:,:)": '
+!       write(out_unit,*) ' END ene',nb_ana
+        write(out_unit,*)
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) ' Calculation and saving of "Mat_Aif(:,:)": '
 !       -- initialization -------------------------
         Mat_Aif(:,:) = ZERO
         DO k=1,3
           IF (para_intensity%pola_xyz(k)) THEN
-            write(out_unitp,*) ' sub_intensity: ',trim(para_Dip(k)%name_Op),'+ <psi|dip|psi>'
-            write(out_unitp,*) ' alloc Rmat: ',trim(para_Dip(k)%name_Op),' ',allocated(para_Dip(k)%Rmat)
+            write(out_unit,*) ' sub_intensity: ',trim(para_Dip(k)%name_Op),'+ <psi|dip|psi>'
+            write(out_unit,*) ' alloc Rmat: ',trim(para_Dip(k)%name_Op),' ',allocated(para_Dip(k)%Rmat)
 
             IF (.NOT. para_Dip(k)%spectral .OR. .NOT. para_Dip(k)%mat_done) THEN
-              write(out_unitp,*) ' ERROR in sub_intensity'
-              write(out_unitp,*) ' The Dipolar operator MUST have a spectral representation'
-              write(out_unitp,*) ' or mat_done is NOT .TRUE.'
+              write(out_unit,*) ' ERROR in sub_intensity'
+              write(out_unit,*) ' The Dipolar operator MUST have a spectral representation'
+              write(out_unit,*) ' or mat_done is NOT .TRUE.'
               STOP
             END IF
             Mat_Aif(:,:) = Mat_Aif(:,:) + para_Dip(k)%Rmat(1:nb_ana,1:nb_ana)**2
-            !write(out_unitp,*) 'para_Dip(k)%Rmat',k
-            !CALL Write_Mat(para_Dip(k)%Rmat,out_unitp,5)
+            !write(out_unit,*) 'para_Dip(k)%Rmat',k
+            !CALL Write_Mat(para_Dip(k)%Rmat,out_unit,5)
             CALL dealloc_para_Op(para_Dip(k))
           END IF
 
-          flush(out_unitp)
+          flush(out_unit)
         END DO
         write(nio_res_int,*) 'Mat_Aif'
         CALL Write_Mat(Mat_Aif,nio_res_int,5,Rformat='e30.23')
@@ -213,9 +213,9 @@
           write(nio_res_int,*) 'ABC'
           CALL Write_Mat(para_intensity%ABC,nio_res_int,5,Rformat='e30.23')
         END IF
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) '==================================================='
-        flush(out_unitp)
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) '==================================================='
+        flush(out_unit)
 
       END IF
 
@@ -251,19 +251,19 @@
       END DO
 
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) ' DE(i-f)*S(i-f):'
-        CALL Write_Mat(Mat_Aif,out_unitp,5,Rformat='e15.8')
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) '==================================================='
+        write(out_unit,*)
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) ' DE(i-f)*S(i-f):'
+        CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e15.8')
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) '==================================================='
 
       END IF
 
-      write(out_unitp,*)
-      write(out_unitp,*) '==================================================='
-      write(out_unitp,*) '==================================================='
+      write(out_unit,*)
+      write(out_unit,*) '==================================================='
+      write(out_unit,*) '==================================================='
       IF (para_intensity%l_Tau) THEN
         DO i=1,nb_ana
         DO j=i+1,nb_ana
@@ -271,27 +271,27 @@
           Mat_Aif(j,i) = Mat_Aif(i,j)
         END DO
         END DO
-        write(out_unitp,*) 'Life time (1/Aif) in s'
-        CALL Write_Mat(Mat_Aif,out_unitp,5,Rformat='e15.8')
-        write(out_unitp,*) '==================================================='
+        write(out_unit,*) 'Life time (1/Aif) in s'
+        CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e15.8')
+        write(out_unit,*) '==================================================='
 
       ELSE IF (para_intensity%l_Aif) THEN
-        write(out_unitp,*) 'Einstein coef (Aif) in s-1'
-        CALL Write_Mat(Mat_Aif,out_unitp,5,Rformat='e15.8')
-        write(out_unitp,*) '==================================================='
+        write(out_unit,*) 'Einstein coef (Aif) in s-1'
+        CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e15.8')
+        write(out_unit,*) '==================================================='
 
       ELSE IF (para_intensity%l_Int) THEN
-        write(out_unitp,*) 'intensity (with dipolar moments)'
+        write(out_unit,*) 'intensity (with dipolar moments)'
         ! add temperature
         zpe = minval(para_H%Rdiag)
         Q=part_func(para_H%Rdiag,nb_aie,para_intensity%Temp)
-        write(out_unitp,*)
-        write(out_unitp,*) 'population at Temp,Q',para_intensity%Temp,Q
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'population at Temp,Q',para_intensity%Temp,Q
+        write(out_unit,*)
         DO i=1,nb_ana
           pop(i) = pop2_i(para_H%Rdiag(i),zpe,para_intensity%Temp)/Q
         END DO
-        write(out_unitp,*)
+        write(out_unit,*)
         DO i=1,nb_ana
         DO j=i+1,nb_ana
           Mat_Aif(i,j) = Mat_Aif(i,j)*(pop(i)-pop(j))
@@ -299,10 +299,10 @@
         END DO
         END DO
       ELSE IF (para_intensity%l_IntVR) THEN
-        write(out_unitp,*) 'intensity Vib+Rot (dip)'
-        IF (debug) CALL Write_Mat(Mat_Aif,out_unitp,5,Rformat='e15.8')
+        write(out_unit,*) 'intensity Vib+Rot (dip)'
+        IF (debug) CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e15.8')
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       IF (para_intensity%l_Int .OR. para_intensity%l_CrossSec) THEN
 
@@ -316,14 +316,14 @@
 
         Ewidth = para_intensity%Ewidth
 
-        write(out_unitp,*) 'spectrum Temp:',para_intensity%Temp
-        write(out_unitp,*) 'spectrum Ewidth: ',                         &
+        write(out_unit,*) 'spectrum Temp:',para_intensity%Temp
+        write(out_unit,*) 'spectrum Ewidth: ',                         &
           RWU_Write(REAL_WU(Ewidth,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'spectrum emin: ',                           &
+        write(out_unit,*) 'spectrum emin: ',                           &
           RWU_Write(REAL_WU(emin,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'spectrum emax: ',                      &
+        write(out_unit,*) 'spectrum emax: ',                      &
           RWU_Write(REAL_WU(emax,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
         CALL sub_spectre(Mat_Aif,para_H%Rdiag,nb_ana,                   &
@@ -336,16 +336,16 @@
 !       - calculation of the partition function Q
         Q = ZERO
         Jmax = para_intensity%JJmax
-        write(out_unitp,*) ' Jmax : ',Jmax
-        flush(out_unitp)
+        write(out_unit,*) ' Jmax : ',Jmax
+        flush(out_unit)
 
         IF (.NOT. allocated(para_intensity%ABC)) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' The table of rotational constants (ABC) is not allocated'
-          write(out_unitp,*) ' CHECK the fortran!!'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' The table of rotational constants (ABC) is not allocated'
+          write(out_unit,*) ' CHECK the fortran!!'
           STOP
         END IF
-        flush(out_unitp)
+        flush(out_unit)
 
 !       - calculation of the partition function Q
         DO i=1,nb_ana
@@ -358,10 +358,10 @@
         END DO
 
 !       - population sum over rotational levels
-        write(out_unitp,*) ' Population :'
+        write(out_unit,*) ' Population :'
         DO i=1,nb_ana
           pop(i) = pop(i) /Q
-          write(out_unitp,*) i-1,(para_H%Rdiag(i)-para_H%Rdiag(1)) *            &
+          write(out_unit,*) i-1,(para_H%Rdiag(i)-para_H%Rdiag(1)) *            &
                                     const_phys%auTOenergy,pop(i)
         END DO
 
@@ -372,13 +372,13 @@
         ind_f=0
         DO i=1,nb_ana
           Iif = (para_H%Rdiag(i)-para_H%Rdiag(1))*Mat_Aif(1,i)
-          write(out_unitp,*) 'calc max values i,Aij,Iif',i,Mat_Aif(1,i),Iif
+          write(out_unit,*) 'calc max values i,Aij,Iif',i,Mat_Aif(1,i),Iif
           IF (Iif > Imax) THEN
             Imax = Iif
             ind_f = i
           END IF
         END DO
-        write(out_unitp,*) 'Vibrational max values : Imax,ind_f',Imax,ind_f
+        write(out_unit,*) 'Vibrational max values : Imax,ind_f',Imax,ind_f
 
         Ai= para_intensity%ABC(1,1)
         Bi= para_intensity%ABC(2,1)
@@ -391,8 +391,8 @@
                        Mat_Aif(1,ind_f),para_intensity%Temp,            &
                        Q,Jmax,const_phys)
 
-        write(out_unitp,*) 'Imax',Imax
-        flush(out_unitp)
+        write(out_unit,*) 'Imax',Imax
+        flush(out_unit)
 !       - spectrum : RoVib
         emin = para_intensity%Emin
 
@@ -404,14 +404,14 @@
 
         Ewidth = para_intensity%Ewidth
 
-        write(out_unitp,*) 'spectrum Temp,Q:',para_intensity%Temp,Q
-        write(out_unitp,*) 'spectrum Ewidth: ',                         &
+        write(out_unit,*) 'spectrum Temp,Q:',para_intensity%Temp,Q
+        write(out_unit,*) 'spectrum Ewidth: ',                         &
           RWU_Write(REAL_WU(Ewidth,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'spectrum emin: ',                           &
+        write(out_unit,*) 'spectrum emin: ',                           &
           RWU_Write(REAL_WU(emin,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'spectrum emax: ',                      &
+        write(out_unit,*) 'spectrum emax: ',                      &
           RWU_Write(REAL_WU(emax,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
 
@@ -424,8 +424,8 @@
                            para_intensity%file_intensity)
 
       END IF
-      write(out_unitp,*) '==================================================='
-      write(out_unitp,*) '==================================================='
+      write(out_unit,*) '==================================================='
+      write(out_unit,*) '==================================================='
 
       CALL dealloc_NParray(Mat_Aif,'Mat_Aif','sub_intensity')
 
@@ -435,7 +435,7 @@
 !----------------------------------------------------------
       IF (debug) THEN
       END IF
-      write(out_unitp,*) 'END sub_intensity'
+      write(out_unit,*) 'END sub_intensity'
 !----------------------------------------------------------
 
 
@@ -449,7 +449,7 @@
 !================================================================
       SUBROUTINE sub_AnalysePsy_ScalOp(para_ScalOp,nb_ScalOp,para_H,nb_ana)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_basis
       USE mod_Op
@@ -503,16 +503,16 @@
 
       nb_aie = para_H%nb_tot
 
-      write(out_unitp,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'BEGINNING ',name_sub
       IF (debug) THEN
-        write(out_unitp,*) 'nb_ana',nb_ana
-        write(out_unitp,*) 'nb_ScalOp',nb_ScalOp
-        write(out_unitp,*) 'size(para_ScalOp)',size(para_ScalOp)
+        write(out_unit,*) 'nb_ana',nb_ana
+        write(out_unit,*) 'nb_ScalOp',nb_ScalOp
+        write(out_unit,*) 'size(para_ScalOp)',size(para_ScalOp)
 
-        write(out_unitp,*) 'Rvp',shape(para_H%Rvp)
-        !CALL Write_Mat(para_H%Rvp,out_unitp,5)
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'Rvp',shape(para_H%Rvp)
+        !CALL Write_Mat(para_H%Rvp,out_unit,5)
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -521,49 +521,49 @@
         CALL alloc_NParray(Mat_Aif,[nb_ana,nb_ana],'Mat_Aif',name_sub)
         Mat_Aif(:,:) = ZERO
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_ana <=0',nb_ana
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_ana <=0',nb_ana
         STOP
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       DO k=1,nb_ScalOp
-        write(out_unitp,*)
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) ' Calculation and saving of "Mat_Aif(:,:)": ',k
+        write(out_unit,*)
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) ' Calculation and saving of "Mat_Aif(:,:)": ',k
 
         !para_ScalOp(k)%spectral = .TRUE.
         !CALL sub_MatOp(para_ScalOp(k),.TRUE.)
 
         !Mat_Aif(:,:) = Mat_Aif(:,:) + para_ScalOp(k)%Rmat(1:nb_ana,1:nb_ana)**2
-        !write(out_unitp,*) 'para_ScalOp(k)%Rmat',k
-        !CALL Write_Mat(para_ScalOp(k)%Rmat,out_unitp,5)
-        !write(out_unitp,*) 'Mat_Aif'
-        !CALL Write_Mat(Mat_Aif,out_unitp,5,Rformat='e30.23')
-        !write(out_unitp,*) 'Mat_Aif(:,1)',Mat_Aif(:,1)
+        !write(out_unit,*) 'para_ScalOp(k)%Rmat',k
+        !CALL Write_Mat(para_ScalOp(k)%Rmat,out_unit,5)
+        !write(out_unit,*) 'Mat_Aif'
+        !CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e30.23')
+        !write(out_unit,*) 'Mat_Aif(:,1)',Mat_Aif(:,1)
 
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) '==================================================='
-        flush(out_unitp)
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) '==================================================='
+        flush(out_unit)
       END DO
 
-      write(out_unitp,*)
-      write(out_unitp,*) '==================================================='
-      write(out_unitp,*) '==================================================='
+      write(out_unit,*)
+      write(out_unit,*) '==================================================='
+      write(out_unit,*) '==================================================='
       DO i=1,nb_ana
-        write(out_unitp,'(i0,20(1x,f0.4))') i,(abs(para_ScalOp(k)%Rmat(i,1)),k=1,nb_ScalOp)
+        write(out_unit,'(i0,20(1x,f0.4))') i,(abs(para_ScalOp(k)%Rmat(i,1)),k=1,nb_ScalOp)
       END DO
-      write(out_unitp,*) '==================================================='
-      write(out_unitp,*) '==================================================='
-      write(out_unitp,*)
+      write(out_unit,*) '==================================================='
+      write(out_unit,*) '==================================================='
+      write(out_unit,*)
 
       CALL dealloc_NParray(Mat_Aif,'Mat_Aif','sub_intensity')
 
 !----------------------------------------------------------
       IF (debug) THEN
       END IF
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
 !----------------------------------------------------------
 
 
@@ -578,7 +578,7 @@
                                Temp,Q,Jmax,Imax,const_phys,             &
                                width,emin,emax,                         &
                                file_spectrum,file_intensity)
-      USE mod_system
+      USE EVR_system_m
       use mod_Constant, only: constant, RWU_Write,REAL_WU,get_Conv_au_TO_unit
       IMPLICIT NONE
 
@@ -612,18 +612,18 @@
 !-----------------------------------------------------------
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_ana',nb_ana
-        write(out_unitp,*) 'spectrum Ewidth: ',                         &
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_ana',nb_ana
+        write(out_unit,*) 'spectrum Ewidth: ',                         &
           RWU_Write(REAL_WU(width,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'spectrum emin: ',                           &
+        write(out_unit,*) 'spectrum emin: ',                           &
           RWU_Write(REAL_WU(emin,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'spectrum emax: ',                      &
+        write(out_unit,*) 'spectrum emax: ',                      &
           RWU_Write(REAL_WU(emax,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
         DO i=1,nb_ana
-          write(out_unitp,*) 'ABC (cm-1)',i,ABC(:,i)*get_Conv_au_TO_unit('E','cm-1')
+          write(out_unit,*) 'ABC (cm-1)',i,ABC(:,i)*get_Conv_au_TO_unit('E','cm-1')
         END DO
       END IF
 !-----------------------------------------------------------
@@ -638,7 +638,7 @@
         IF (IntV > ImaxV) ImaxV = IntV
       END DO
       END DO
-      write(out_unitp,*) 'ImaxV',ImaxV
+      write(out_unit,*) 'ImaxV',ImaxV
 !-----------------------------------------------------------
 
 
@@ -664,10 +664,10 @@
 
         e0 = (ene(j)-ene(i))
         IntV = (ene(j)-ene(i)) * (pop(i)-pop(j)) * Mat_Aif(i,j)
-!       write(out_unitp,*) 'i,j,e0,Intv',i,j,e0,Intv,ImaxV
+!       write(out_unit,*) 'i,j,e0,Intv',i,j,e0,Intv,ImaxV
 
         IF (e0 < emax .AND. IntV > ImaxV/TEN**4) THEN
-          write(out_unitp,*) 'sub_spectreRV',i,j,e0
+          write(out_unit,*) 'sub_spectreRV',i,j,e0
           CALL calc_Int(Imax,ene(i),Ai,Bi,Ci,ene(j),Aj,Bj,Cj,           &
                         ene(1),Mat_Aif(i,j),Temp,                       &
                         Q,Jmax,const_phys,                              &
@@ -693,7 +693,7 @@
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
@@ -706,7 +706,7 @@
       SUBROUTINE calc_Int(Imax,Evi,Ai,Bi,Ci,Evf,Af,Bf,Cf,               &
                           E0,Svif,Temp,Q,Jmax,const_phys,               &
                           width,emin,pas,spectre,n,nio_int)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant, only: constant
       IMPLICIT NONE
 
@@ -735,13 +735,13 @@
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING calc_Int'
-        write(out_unitp,*) 'Evi,Ai,Bi,Ci',Evi,Ai,Bi,Ci
-        write(out_unitp,*) 'Evf,Af,Bf,Cf',Evf,Af,Bf,Cf
-        write(out_unitp,*) 'Imax,E0,Svif,Temp,Q',Imax,E0,Svif,Temp,Q
-        write(out_unitp,*) 'Jmax',Jmax
-        write(out_unitp,*) 'width,emin,pas (cm-1)i,n',width,emin,pas,n
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING calc_Int'
+        write(out_unit,*) 'Evi,Ai,Bi,Ci',Evi,Ai,Bi,Ci
+        write(out_unit,*) 'Evf,Af,Bf,Cf',Evf,Af,Bf,Cf
+        write(out_unit,*) 'Imax,E0,Svif,Temp,Q',Imax,E0,Svif,Temp,Q
+        write(out_unit,*) 'Jmax',Jmax
+        write(out_unit,*) 'width,emin,pas (cm-1)i,n',width,emin,pas,n
+        write(out_unit,*)
       END IF
 !-----------------------------------------------------------
 
@@ -752,7 +752,7 @@
 
 
           IF (K <-J .OR. K > J) CYCLE
-!         write(out_unitp,*) 'J,K,Jf',J,K,Jf
+!         write(out_unit,*) 'J,K,Jf',J,K,Jf
 
           Ei = ene_VR(Evi,Ai,Bi,Ci,J ,K)
           Ef = ene_VR(Evf,Af,Bf,Cf,Jf,K)
@@ -778,8 +778,8 @@
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'END calc_Int'
+        write(out_unit,*)
+        write(out_unit,*) 'END calc_Int'
       END IF
 !-----------------------------------------------------------
 
@@ -791,7 +791,7 @@
 !================================================================
       SUBROUTINE calc_Imax(Imax,Evi,Ai,Bi,Ci,Evf,Af,Bf,Cf,              &
                            Svif,Temp,Q,Jmax,const_phys)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant, only: constant
       IMPLICIT NONE
 
@@ -831,7 +831,7 @@
       END DO
 
 
-      write(out_unitp,*) 'Imax,J,K',Imax,Jop,Kop
+      write(out_unit,*) 'Imax,J,K',Imax,Jop,Kop
 
       end subroutine calc_Imax
 !================================================================
@@ -840,7 +840,7 @@
 !
 !================================================================
       FUNCTION ene_VR(Ev,A,B,C,J,K)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       real (kind=Rkind) :: ene_VR
@@ -860,7 +860,7 @@
 !     EVR = Ev + BC * RJ*(RJ+ONE) + (A-BC)*RK*RK
 
 
-!     write(out_unitp,*) 'EVR,Ev,A,BC,RJ,RK',EVR,Ev,A,BC,RJ,RK
+!     write(out_unit,*) 'EVR,Ev,A,BC,RJ,RK',EVR,Ev,A,BC,RJ,RK
       ene_VR = EVR
 
       end function ene_VR
@@ -873,7 +873,7 @@
 !     Q : partial Partition function
 !     P : population sums over rotational levels
       SUBROUTINE calc_Q_VR(Q,P,E0,Ev,A,B,C,Temp,Jmax,const_phys)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant, only: constant
       IMPLICIT NONE
 
@@ -909,7 +909,7 @@
 
       end subroutine calc_Q_VR
       FUNCTION part_func(ene,nb_aie,Temp)
-      USE mod_system
+      USE EVR_system_m
       use mod_Constant, only:real_wu,convRWU_TO_R_WITH_WorkingUnit
       implicit none
 
@@ -933,11 +933,11 @@
 !      logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING part_func'
-        write(out_unitp,*) 'nb_aie',nb_aie
-        write(out_unitp,*) 'ene(1)',ene(1)
-        write(out_unitp,*) 'Temperature (K) :',Temp
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING part_func'
+        write(out_unit,*) 'nb_aie',nb_aie
+        write(out_unit,*) 'ene(1)',ene(1)
+        write(out_unit,*) 'Temperature (K) :',Temp
+        write(out_unit,*)
       END IF
 !-----------------------------------------------------------
       IF (Temp == ZERO) THEN
@@ -959,8 +959,8 @@
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Q,Temp',Q,Temp
-        write(out_unitp,*) 'END part_func'
+        write(out_unit,*) 'Q,Temp',Q,Temp
+        write(out_unit,*) 'END part_func'
       END IF
 !----------------------------------------------------------
 
@@ -972,7 +972,7 @@
 !
 !================================================================
       FUNCTION pop2_i(enei,ene0,Temp)
-      USE mod_system
+      USE EVR_system_m
       use mod_Constant, only: real_wu,convRWU_TO_R_WITH_WorkingUnit
       IMPLICIT NONE
 
@@ -994,8 +994,8 @@
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING pop2_i'
-        write(out_unitp,*) 'Temperature (K) :',Temp
+        write(out_unit,*) 'BEGINNING pop2_i'
+        write(out_unit,*) 'Temperature (K) :',Temp
       END IF
 !-----------------------------------------------------------
       IF (Temp == ZERO) THEN
@@ -1013,8 +1013,8 @@
 
 !----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'pop2_i,Temp',Q,Temp
-        write(out_unitp,*) 'END pop2_i'
+        write(out_unit,*) 'pop2_i,Temp',Q,Temp
+        write(out_unit,*) 'END pop2_i'
       END IF
 !----------------------------------------------------------
       end function pop2_i
@@ -1026,7 +1026,7 @@
 !================================================================
       SUBROUTINE sub_spectre(Mat_Aif,ene,nb_ana,                        &
                              Ewidth,emin,emax,file_spectrum,Min_relativeI0)
-      USE mod_system
+      USE EVR_system_m
       use mod_Constant, only: REAL_WU,get_Conv_au_TO_unit,RWU_Write
       IMPLICIT NONE
 
@@ -1058,18 +1058,18 @@
       limit_I0 = maxval(Mat_Aif)*Min_relativeI0
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING sub_spectre'
-        write(out_unitp,*) 'nb_ana',nb_ana
-        write(out_unitp,*) 'spectrum Ewidth: ',                         &
+        write(out_unit,*) 'BEGINNING sub_spectre'
+        write(out_unit,*) 'nb_ana',nb_ana
+        write(out_unit,*) 'spectrum Ewidth: ',                         &
           RWU_Write(REAL_WU(Ewidth,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'spectrum emin: ',                           &
+        write(out_unit,*) 'spectrum emin: ',                           &
           RWU_Write(REAL_WU(emin,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'spectrum emax: ',                      &
+        write(out_unit,*) 'spectrum emax: ',                      &
           RWU_Write(REAL_WU(emax,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.)
 
-        write(out_unitp,*) 'limit_I0',limit_I0
+        write(out_unit,*) 'limit_I0',limit_I0
       END IF
 !-----------------------------------------------------------
 
@@ -1088,7 +1088,7 @@
           e0 = (ene(j)-ene(i))
           IF (e0 < emax) THEN
             CALL add_transition(e0,I0,Ewidth,emin,pas,spectre,n)
-            write(out_unitp,11) 'i j levels: ',i,j,' Ej-Ei: ',                     &
+            write(out_unit,11) 'i j levels: ',i,j,' Ej-Ei: ',                     &
               RWU_Write(REAL_WU(e0,'au','E'),WithUnit=.TRUE.,WorkingUnit=.FALSE.), &
               ' Intensity:',I0/TEN**3,' (km.mol-1)'
  11         format(a,i0,1x,i0,a,a,a,f20.10,a)
@@ -1113,7 +1113,7 @@
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END sub_spectre'
+        write(out_unit,*) 'END sub_spectre'
       END IF
 !-----------------------------------------------------------
 
@@ -1124,7 +1124,7 @@
 !
 !================================================================
       SUBROUTINE add_transition(e0,I0,a,emin,pas,spectre,n)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 
@@ -1144,9 +1144,9 @@
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING add_transition'
-        write(out_unitp,*) 'e0 I0',e0,I0
-        write(out_unitp,*)
+        write(out_unit,*) 'BEGINNING add_transition'
+        write(out_unit,*) 'e0 I0',e0,I0
+        write(out_unit,*)
       END IF
 !-----------------------------------------------------------
 
@@ -1166,14 +1166,14 @@
 
 !-----------------------------------------------------------
       IF (debug) THEN
-!       write(out_unitp,*)
+!       write(out_unit,*)
 !       e = emin
 !       DO i=1,n
-!         write(out_unitp,*) e,spectre(i)
+!         write(out_unit,*) e,spectre(i)
 !         e = e + pas
 !       END DO
-!       write(out_unitp,*)
-        write(out_unitp,*) 'END add_transition'
+!       write(out_unit,*)
+        write(out_unit,*) 'END add_transition'
       END IF
 !-----------------------------------------------------------
 
@@ -1186,7 +1186,7 @@
 !
 !================================================================
       FUNCTION func_lorentzian(x,x0,a)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 

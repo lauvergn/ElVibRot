@@ -102,14 +102,14 @@
       character (len=*), parameter :: name_sub = 'Auto_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
       With_BGG = .TRUE. ! default
       IF (SGtype == 2) With_BGG = .TRUE.
       IF (SGtype == 1) With_BGG = .FALSE.
-      IF (debug) write(out_unitp,*) 'SGtype,With_BGG',SGtype,With_BGG
+      IF (debug) write(out_unit,*) 'SGtype,With_BGG',SGtype,With_BGG
       CALL Set_dnGGRep(para_AllBasis%BasisnD,With_BGG)
 
       mole_loc = mole
@@ -124,10 +124,10 @@
         END DO
       END IF
       IF (contrac_RVecOnly) THEN
-        write(out_unitp,*) 'Special traitment when contrac_RVecOnly=t'
+        write(out_unit,*) 'Special traitment when contrac_RVecOnly=t'
         IF (allocated(para_AllBasis%BasisnD%nDindB_contracted)) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) 'nDindB_contracted is allocated'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) 'nDindB_contracted is allocated'
           STOP 'ERROR in Auto_basis: nDindB_contracted is allocated'
         END IF
         CALL alloc_NParray(para_AllBasis%BasisnD%nDindB_contracted,'nDindB_contracted',name_sub)
@@ -140,10 +140,10 @@
             tab_nbc(ib) = get_nb_FROM_basis(para_AllBasis%BasisnD%tab_Pbasis(ib)%Pbasis)
           END IF
         END DO
-        write(out_unitp,*) 'tab_nbc(:)',tab_nbc
+        write(out_unit,*) 'tab_nbc(:)',tab_nbc
         IF (product(tab_nbc) <= 0) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) 'Wrong values in tab_nbc(:)',tab_nbc
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) 'Wrong values in tab_nbc(:)',tab_nbc
           STOP 'ERROR in Auto_basis: Wrong values in tab_nbc(:)'
         END IF
         CALL init_nDindexPrim(para_AllBasis%BasisnD%nDindB_contracted,          &
@@ -159,28 +159,28 @@
       nqa = get_nqa_FROM_basis(para_AllBasis%BasisnD)
 
       IF (print_level > -1 .AND. MPI_id==0) THEN
-        write(out_unitp,*) '==================================================='
-        write(out_unitp,*) '=== NEW BASIS ====================================='
-        write(out_unitp,*) 'packed',para_AllBasis%BasisnD%packed
-        write(out_unitp,*) 'nb_ba,nb_qa',para_AllBasis%BasisnD%nb,nqa
-        write(out_unitp,*) 'nb_bi',get_nb_bi_FROM_AllBasis(para_AllBasis)
-        write(out_unitp,*) 'nb_elec',para_ReadOp%nb_elec
-        write(out_unitp,*) 'nb_inact2n',mole%nb_inact2n
-        flush(out_unitp)
+        write(out_unit,*) '==================================================='
+        write(out_unit,*) '=== NEW BASIS ====================================='
+        write(out_unit,*) 'packed',para_AllBasis%BasisnD%packed
+        write(out_unit,*) 'nb_ba,nb_qa',para_AllBasis%BasisnD%nb,nqa
+        write(out_unit,*) 'nb_bi',get_nb_bi_FROM_AllBasis(para_AllBasis)
+        write(out_unit,*) 'nb_elec',para_ReadOp%nb_elec
+        write(out_unit,*) 'nb_inact2n',mole%nb_inact2n
+        flush(out_unit)
       END IF
       IF (nqa < 1) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'The number of grid points is < 1'
-        write(out_unitp,*) ' nb_qa',nqa
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'The number of grid points is < 1'
+        write(out_unit,*) ' nb_qa',nqa
         STOP 'ERROR in Auto_basis: The number of grid points is < 1'
       END IF
       IF(keep_MPI) THEN
         IF (allocated(para_AllBasis%BasisnD%nDindB%nDsize))             &
-          write(out_unitp,*) 'nDindB%nDsize',para_AllBasis%BasisnD%nDindB%nDsize
+          write(out_unit,*) 'nDindB%nDsize',para_AllBasis%BasisnD%nDindB%nDsize
         !CALL Write_nDindex(para_AllBasis%BasisnD%nDindB,"BasisnD%nDinB ")
 
          IF (allocated(para_AllBasis%BasisnD%nDindG%nDsize))             &
-           write(out_unitp,*) 'nDindG%nDsize',para_AllBasis%BasisnD%nDindG%nDsize
+           write(out_unit,*) 'nDindG%nDsize',para_AllBasis%BasisnD%nDindG%nDsize
          !CALL Write_nDindex(para_AllBasis%BasisnD%nDindG,"BasisnD%nDinG ")
       END IF
 
@@ -188,20 +188,20 @@
       IF (nb_TDParam > 0) then
         CALL alloc_NParray(TDParam,[nb_TDParam],'nb_TDParam',name_sub)
         CALL Get_TDParam_FROM_basis(para_AllBasis%BasisnD,TDParam)
-        write(out_unitp,*) 'TDParam ',TDParam(:)
+        write(out_unit,*) 'TDParam ',TDParam(:)
         CALL dealloc_NParray(TDParam,'nb_TDParam',name_sub)
       ELSE
-        write(out_unitp,*) 'no TDParam'
+        write(out_unit,*) 'no TDParam'
       END IF
 
       IF (debug) THEN
-        write(out_unitp,*) '==== NEW BASIS ======================================='
+        write(out_unit,*) '==== NEW BASIS ======================================='
         CALL RecWrite_basis(para_AllBasis%BasisnD,write_all=.TRUE.)
-        write(out_unitp,*) '==== END NEW BASIS ==================================='
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) '==== END NEW BASIS ==================================='
+        write(out_unit,*) 'END ',name_sub
       END IF
-      IF (print_level > 1 ) write(out_unitp,*) 'nrho in ',name_sub,para_AllBasis%BasisnD%nrho(:)
-      IF (print_level > -1) write(out_unitp,*) '==================================================='
+      IF (print_level > 1 ) write(out_unit,*) 'nrho in ',name_sub,para_AllBasis%BasisnD%nrho(:)
+      IF (print_level > -1) write(out_unit,*) '==================================================='
       CALL RecWriteMiniMini_basis(para_AllBasis%BasisnD)
 
       END SUBROUTINE Auto_basis
@@ -212,7 +212,7 @@
 ! Auto contraction
 !=======================================================================================
       RECURSIVE SUBROUTINE RecAuto_basis(para_Tnum,mole,BasisnD,para_ReadOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_PrimOp
       USE mod_basis
       USE BasisMakeGrid
@@ -250,22 +250,22 @@
 !---------------------------------------------------------------------
       rec = rec + 1
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub,rec
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub,rec
       END IF
 !---------------------------------------------------------------------
        Print_basis = BasisnD%print_info_OF_basisDP .AND. print_level > -1 .OR. debug
 
 
       IF (Print_basis .AND. MPI_id==0) THEN
-        write(out_unitp,*) '==============================================='
-        write(out_unitp,*) '= Rec Auto Basis, layer: ',rec
-        write(out_unitp,*) '==============================================='
+        write(out_unit,*) '==============================================='
+        write(out_unit,*) '= Rec Auto Basis, layer: ',rec
+        write(out_unit,*) '==============================================='
 
-        write(out_unitp,*) 'packed_done:                   ',BasisnD%packed_done
-        write(out_unitp,*) 'SparseGrid_type:               ',BasisnD%SparseGrid_type
-        write(out_unitp,*) 'nb_basis:                      ',BasisnD%nb_basis
-        flush(out_unitp)
+        write(out_unit,*) 'packed_done:                   ',BasisnD%packed_done
+        write(out_unit,*) 'SparseGrid_type:               ',BasisnD%SparseGrid_type
+        write(out_unit,*) 'nb_basis:                      ',BasisnD%nb_basis
+        flush(out_unit)
       END IF
 
       IF (BasisnD%nb_basis > 0 .AND. .NOT. BasisnD%packed_done .AND. .NOT. BasisnD%BuildBasis_done) THEN
@@ -280,7 +280,7 @@
           CALL clean_basis(BasisnD)
 
 
-          IF (Print_basis) write(out_unitp,*) 'Sparse Grid type1 done. Layer: ',rec
+          IF (Print_basis) write(out_unit,*) 'Sparse Grid type1 done. Layer: ',rec
 
         ELSE IF (BasisnD%SparseGrid_type == 2) THEN
           CALL RecSparseGrid_ForDP_type2(BasisnD,para_Tnum,mole,para_ReadOp)
@@ -291,7 +291,7 @@
           !CALL clean_basis(BasisnD)
 
           IF (BasisnD%print_info_OF_basisDP .AND. print_level > -1)     &
-                write(out_unitp,*) 'Sparse Grid type2 done. Layer: ',rec
+                write(out_unit,*) 'Sparse Grid type2 done. Layer: ',rec
 
         ELSE IF (BasisnD%SparseGrid_type == 4) THEN
 
@@ -302,12 +302,12 @@
 
           !CALL clean_basis(BasisnD)
 
-          IF (Print_basis .AND. MPI_id==0) write(out_unitp,*) 'Sparse Grid type4 done. Layer: ',rec
+          IF (Print_basis .AND. MPI_id==0) write(out_unit,*) 'Sparse Grid type4 done. Layer: ',rec
 
         ELSE
           ! For direct product basis (recursive)
 
-          IF (Print_basis) write(out_unitp,*) 'direct_product%...%nb:         ',  &
+          IF (Print_basis) write(out_unit,*) 'direct_product%...%nb:         ',  &
                   (BasisnD%tab_Pbasis(i)%Pbasis%nb,i=1,BasisnD%nb_basis)
 
 
@@ -315,7 +315,7 @@
             DO ibasis=1,BasisnD%nb_basis
 
 
-              IF (Print_basis) write(out_unitp,*)                       &
+              IF (Print_basis) write(out_unit,*)                       &
                                 'direct_product%tab_Pbasis%(i): ',ibasis
 
               IF (BasisnD%Type_OF_nDindB == 0)                          &
@@ -345,32 +345,32 @@
                                  BasisnD%tab_Pbasis(ibasis)%Pbasis,     &
                                  para_ReadOp)
 
-              IF (Print_basis) write(out_unitp,*)                       &
+              IF (Print_basis) write(out_unit,*)                       &
                     'direct_product%tab_Pbasis(i): ',ibasis,' done. Layer: ',rec
-              flush(out_unitp)
+              flush(out_unit)
             END DO
           ELSE
-            IF (Print_basis) write(out_unitp,*)                         &
+            IF (Print_basis) write(out_unit,*)                         &
                 'direct_product%tab_basis_done is already done. Layer: ',rec
 
           END IF
           BasisnD%tab_basis_done = .TRUE.
 
-          IF (Print_basis) write(out_unitp,*) 'direct_product%...%nb',  &
+          IF (Print_basis) write(out_unit,*) 'direct_product%...%nb',  &
                  (BasisnD%tab_Pbasis(i)%Pbasis%nb,i=1,BasisnD%nb_basis)
-          IF (Print_basis) write(out_unitp,*) 'direct_product%...%nq',  &
+          IF (Print_basis) write(out_unit,*) 'direct_product%...%nq',  &
            (get_nq_FROM_basis(BasisnD%tab_Pbasis(i)%Pbasis),i=1,BasisnD%nb_basis)
-          flush(out_unitp)
+          flush(out_unit)
 
           ! direct product construction
           CALL sub_DirProd_basis(BasisnD)
-          IF (Print_basis) write(out_unitp,*) 'direct_product done. Layer:',rec
+          IF (Print_basis) write(out_unit,*) 'direct_product done. Layer:',rec
         END IF
       ELSE ! primitive basis
         IF (Print_basis) THEN
-          write(out_unitp,*) 'Active basis:                  ',BasisnD%active
-          write(out_unitp,*) 'check_nq_OF_basis:             ',BasisnD%check_nq_OF_basis
-          flush(out_unitp)
+          write(out_unit,*) 'Active basis:                  ',BasisnD%active
+          write(out_unit,*) 'check_nq_OF_basis:             ',BasisnD%check_nq_OF_basis
+          flush(out_unit)
         END IF
 
         CALL construct_primitive_basis(BasisnD)
@@ -380,19 +380,19 @@
           CALL construct_primitive_basis(BasisnD)
         END IF
 
-        IF (Print_basis) write(out_unitp,*) 'Primitive basis done. Layer:      ',rec
-        flush(out_unitp)
+        IF (Print_basis) write(out_unit,*) 'Primitive basis done. Layer:      ',rec
+        flush(out_unit)
 
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       ! For the recursivity ....
 
       ! To optimize cubature grid (experimental) .....
       IF (BasisnD%make_cubature .OR. BasisnD%Restart_make_cubature) THEN
-        IF (Print_basis) write(out_unitp,*) 'Cubature basis. Layer:         ',rec
+        IF (Print_basis) write(out_unit,*) 'Cubature basis. Layer:         ',rec
         CALL Make_grid_basis(BasisnD)
-        IF (Print_basis) write(out_unitp,*) 'Cubature basis done. Layer:    ',rec
+        IF (Print_basis) write(out_unit,*) 'Cubature basis done. Layer:    ',rec
         STOP
       END IF
 
@@ -407,15 +407,15 @@
 
             CALL Autocontract_basis(BasisnD,para_Tnum,mole,para_ReadOp)
 
-            IF (Print_basis) write(out_unitp,*) 'Autocontract_basis (POGridRep_poly) done. Layer: ',rec
-            flush(out_unitp)
+            IF (Print_basis) write(out_unit,*) 'Autocontract_basis (POGridRep_poly) done. Layer: ',rec
+            flush(out_unit)
 
             BasisnD%nqc =  BasisnD%nbc
             !CALL POGridRep2_basis(BasisnD,nb0)
             CALL POGridRep_basis(BasisnD,nb0)
 
-            IF (Print_basis) write(out_unitp,*) 'POGridRep_basis done. Layer:   ',rec
-            flush(out_unitp)
+            IF (Print_basis) write(out_unit,*) 'POGridRep_basis done. Layer:   ',rec
+            flush(out_unit)
 
             !- d1b => d1BasisRep and  d2b => d2BasisRep ------------
             CALL sub_dnGB_TO_dnBB(BasisnD)
@@ -442,8 +442,8 @@
             CALL Autocontract_basis(BasisnD,para_Tnum,mole,para_ReadOp)
           END IF
 
-          IF (Print_basis) write(out_unitp,*) 'Autocontract_basis done. Layer:',rec
-          flush(out_unitp)
+          IF (Print_basis) write(out_unit,*) 'Autocontract_basis done. Layer:',rec
+          flush(out_unit)
 
         ELSE ! just contraction (not the automatic procedure)
 
@@ -460,7 +460,7 @@
             CALL sub_contraction_basis(BasisnD,.FALSE.)
           END IF
 
-          IF (Print_basis) write(out_unitp,*) 'Contract_basis done. Layer:    ',rec
+          IF (Print_basis) write(out_unit,*) 'Contract_basis done. Layer:    ',rec
 
         END IF
         !- d1b => d1BasisRep and  d2b => d2BasisRep ------------
@@ -472,16 +472,16 @@
       END IF
       BasisnD%BuildBasis_done = .TRUE.
 
-      IF (Print_basis .AND. MPI_id==0) write(out_unitp,*) 'Auto_basis done. Layer:        ',rec
+      IF (Print_basis .AND. MPI_id==0) write(out_unit,*) 'Auto_basis done. Layer:        ',rec
 
       IF (debug) THEN
         CALL RecWrite_basis(BasisnD)
       END IF
       IF (Print_basis .AND. MPI_id==0) THEN
-        write(out_unitp,*) '==============================================='
-        write(out_unitp,*) '= END Rec Auto Basis for Layer:',rec
-        write(out_unitp,*) '==================================================='
-        flush(out_unitp)
+        write(out_unit,*) '==============================================='
+        write(out_unit,*) '= END Rec Auto Basis for Layer:',rec
+        write(out_unit,*) '==================================================='
+        flush(out_unit)
       END IF
       rec = rec - 1
 
@@ -491,7 +491,7 @@
 !=======================================================================================
       RECURSIVE SUBROUTINE RecSet_EneH0(para_Tnum,mole,BasisnD,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_Constant
       USE mod_PrimOp
@@ -522,14 +522,14 @@
 !---------------------------------------------------------------------
       rec = rec + 1
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub,rec
-        IF (allocated(BasisnD%EneH0)) write(out_unitp,*) 'BasisnD%EneH0',BasisnD%EneH0
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub,rec
+        IF (allocated(BasisnD%EneH0)) write(out_unit,*) 'BasisnD%EneH0',BasisnD%EneH0
         DO ib=1,BasisnD%nb_basis
           IF (allocated(BasisnD%tab_Pbasis(ib)%Pbasis%EneH0)) THEN
-            write(out_unitp,*) ib,'tab_Pbasis(i)....%EneH0',BasisnD%tab_Pbasis(ib)%Pbasis%EneH0
+            write(out_unit,*) ib,'tab_Pbasis(i)....%EneH0',BasisnD%tab_Pbasis(ib)%Pbasis%EneH0
           ELSE
-            write(out_unitp,*) ib,'tab_Pbasis(i)....%EneH0: not allocated'
+            write(out_unit,*) ib,'tab_Pbasis(i)....%EneH0: not allocated'
           END IF
         END DO
 
@@ -537,14 +537,14 @@
 !---------------------------------------------------------------------
 
       IF (BasisnD%print_info_OF_basisDP .AND. print_level > -1 .AND. MPI_id==0) THEN
-        write(out_unitp,*) '==============================================='
-        write(out_unitp,*) '= RecSet_EneH0, layer: ',rec
-        write(out_unitp,*) '==============================================='
+        write(out_unit,*) '==============================================='
+        write(out_unit,*) '= RecSet_EneH0, layer: ',rec
+        write(out_unit,*) '==============================================='
 
-        write(out_unitp,*) 'packed_done:                   ',BasisnD%packed_done
-        write(out_unitp,*) 'SparseGrid_type:               ',BasisnD%SparseGrid_type
-        write(out_unitp,*) 'nb_basis:                      ',BasisnD%nb_basis
-        flush(out_unitp)
+        write(out_unit,*) 'packed_done:                   ',BasisnD%packed_done
+        write(out_unit,*) 'SparseGrid_type:               ',BasisnD%SparseGrid_type
+        write(out_unit,*) 'nb_basis:                      ',BasisnD%nb_basis
+        flush(out_unit)
       END IF
 
       IF (BasisnD%nb_basis > 0 .AND. .NOT. BasisnD%packed_done) THEN
@@ -654,44 +654,44 @@
             END DO
 
           CASE DEFAULT
-            write(out_unitp,*) ' ERROR in',name_sub
-            write(out_unitp,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
-            write(out_unitp,*) ' The possibilities are: 0, 1, 2, 4'
+            write(out_unit,*) ' ERROR in',name_sub
+            write(out_unit,*) ' WRONG SparseGrid_type',BasisnD%SparseGrid_type
+            write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
             STOP
           END SELECT
         END IF
 
         IF (debug) THEN
-          write(out_unitp,*) '<d0b(:,ib) I H0 I d0b(:,ib)>'
+          write(out_unit,*) '<d0b(:,ib) I H0 I d0b(:,ib)>'
           DO i=1,size(BasisnD%EneH0)
             RWU_E  = REAL_WU(BasisnD%EneH0(i),'au','E')
-            write(out_unitp,*) i,RWU_Write(RWU_E,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
+            write(out_unit,*) i,RWU_Write(RWU_E,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
           END DO
-          flush(out_unitp)
+          flush(out_unit)
         END IF
 
       ELSE ! packed basis
-        IF (debug) write(out_unitp,*) 'RecSet_EneH0: packed basis'
+        IF (debug) write(out_unit,*) 'RecSet_EneH0: packed basis'
 
         IF (.NOT. BasisnD%auto_contrac) THEN ! Because, it is done with an auto_contracted basis
           CALL Set_EneH0_OF_PackedBasis(BasisnD,para_Tnum,mole,para_ReadOp)
         ELSE
           IF (debug) THEN
-            write(out_unitp,*) 'auto_contrac basis <d0b(:,ib) I H0 I d0b(:,ib)>'
+            write(out_unit,*) 'auto_contrac basis <d0b(:,ib) I H0 I d0b(:,ib)>'
             DO i=1,size(BasisnD%EneH0)
               RWU_E  = REAL_WU(BasisnD%EneH0(i),'au','E')
-              write(out_unitp,*) i,RWU_Write(RWU_E,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
+              write(out_unit,*) i,RWU_Write(RWU_E,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
             END DO
-            flush(out_unitp)
+            flush(out_unit)
           END IF
         END IF
       END IF ! for BasisnD%nb_basis > 0 .AND. .NOT. BasisnD%packed_done
 
       IF (BasisnD%print_info_OF_basisDP .AND. print_level > -1 .AND. MPI_id==0) THEN
-        write(out_unitp,*) '==============================================='
-        write(out_unitp,*) '= END RecSet_EneH0 for Layer:',rec
-        write(out_unitp,*) '==================================================='
-        flush(out_unitp)
+        write(out_unit,*) '==============================================='
+        write(out_unit,*) '= END RecSet_EneH0 for Layer:',rec
+        write(out_unit,*) '==================================================='
+        flush(out_unit)
       END IF
       rec = rec - 1
 
@@ -701,7 +701,7 @@
 !=======================================================================================
       SUBROUTINE Set_EneH0_OF_PackedBasis(basis_Set,para_Tnum,mole,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_Coord_KEO
       USE mod_PrimOp
@@ -733,9 +733,9 @@
       character (len=*), parameter :: name_sub = 'Set_EneH0_OF_PackedBasis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.TRUE.)
       END IF
 !---------------------------------------------------------------------
@@ -756,12 +756,12 @@
       END DO
 
       IF (print_level > -1 .OR. debug) THEN
-        IF(MPI_id==0) write(out_unitp,*) '<d0b(:,ib) I H0 I d0b(:,ib)>'
+        IF(MPI_id==0) write(out_unit,*) '<d0b(:,ib) I H0 I d0b(:,ib)>'
         DO i=1,size(basis_set%EneH0)
           RWU_E  = REAL_WU(basis_set%EneH0(i),'au','E')
-          IF(MPI_id==0) write(out_unitp,*) i,RWU_Write(RWU_E,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
+          IF(MPI_id==0) write(out_unit,*) i,RWU_Write(RWU_E,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
       !-----------------------------------------------------------------
@@ -770,17 +770,17 @@
       !-----------------------------------------------------------------
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.TRUE.)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
   END SUBROUTINE Set_EneH0_OF_PackedBasis
   SUBROUTINE Set_EneH0_OF_ContracBasis(basis_Set,para_Tnum,mole,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_Coord_KEO
       USE mod_PrimOp
@@ -810,9 +810,9 @@
       character (len=*), parameter :: name_sub = 'Set_EneH0_OF_ContracBasis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.TRUE.)
       END IF
 !---------------------------------------------------------------------
@@ -821,9 +821,9 @@
       CALL Get_Hmat_FROM_basis(Hmat,basis_Set,para_Tnum,mole,para_ReadOp,pot_Qref)
 
       IF (.NOT. allocated(basis_set%Rvec)) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' basis_set%Rvec is not allocated!'
-        write(out_unitp,*) ' CHECK the source!!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' basis_set%Rvec is not allocated!'
+        write(out_unit,*) ' CHECK the source!!'
         STOP
       END IF
 
@@ -841,12 +841,12 @@
       END DO
 
       IF (print_level > -1 .OR. debug) THEN
-        IF(MPI_id==0) write(out_unitp,*) '<d0b(:,ib) I H0 I d0b(:,ib)>'
+        IF(MPI_id==0) write(out_unit,*) '<d0b(:,ib) I H0 I d0b(:,ib)>'
         DO i=1,size(basis_set%EneH0)
           RWU_E  = REAL_WU(basis_set%EneH0(i),'au','E')
-          IF(MPI_id==0) write(out_unitp,*) i,RWU_Write(RWU_E,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
+          IF(MPI_id==0) write(out_unit,*) i,RWU_Write(RWU_E,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
       !-----------------------------------------------------------------
@@ -855,19 +855,19 @@
       !-----------------------------------------------------------------
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.TRUE.)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
   END SUBROUTINE Set_EneH0_OF_ContracBasis
 
   ! basis parameters: for HO basis set (scaleQ)
   SUBROUTINE AutoParam_basis(basis_Set,para_Tnum,mole,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_PrimOp
       USE mod_basis
@@ -903,9 +903,9 @@
 
       ! test for HO basis
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         CALL RecWrite_basis(basis_Set,write_all=.FALSE.)
       END IF
 !---------------------------------------------------------------------
@@ -929,12 +929,12 @@
       CALL construct_primitive_basis(basis_temp)
 
 
-      !write(out_unitp,*) 'In ',name_sub,' basis_temp%type',basis_temp%type,HObasis
+      !write(out_unit,*) 'In ',name_sub,' basis_temp%type',basis_temp%type,HObasis
       HObasis = (basis_temp%type == 20 .OR. basis_temp%type == 21 .OR.     &
                  basis_temp%type == 200 .OR. basis_temp%type == 201)
 
       IF (HObasis .AND. basis_temp%auto_basis) THEN
-        write(out_unitp,*) 'Initial Q0 and scaleQ',basis_Set%Q0(1),basis_Set%scaleQ(1)
+        write(out_unit,*) 'Initial Q0 and scaleQ',basis_Set%Q0(1),basis_Set%scaleQ(1)
         CALL AutoParam_basis_scaleQ(basis_temp,para_Tnum,mole,para_ReadOp)
         CALL AutoParam_basis_Q0(basis_temp,para_Tnum,mole,para_ReadOp)
         CALL AutoParam_basis_scaleQ(basis_temp,para_Tnum,mole,para_ReadOp)
@@ -949,18 +949,18 @@
       CALL dealloc_basis(basis_temp)
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.TRUE.)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       END SUBROUTINE AutoParam_basis
       ! basis parameters: for HO basis set (scaleQ)
       SUBROUTINE AutoParam_basis_scaleQ(basis_temp,para_Tnum,mole,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_PrimOp
       USE mod_basis
@@ -1003,9 +1003,9 @@
 
       ! test for HO basis
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_temp,write_all=.FALSE.)
       END IF
 !---------------------------------------------------------------------
@@ -1026,8 +1026,8 @@
         CALL construct_primitive_basis(basis_temp)
 
         E = Ene_FROM_basis(basis_temp,para_Tnum,mole,para_ReadOp)
-        IF (debug) write(out_unitp,*) 'SQ,E',basis_temp%scaleQ(1),E*auTOcm_inv
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'SQ,E',basis_temp%scaleQ(1),E*auTOcm_inv
+        flush(out_unit)
 
         IF (E < Emin) THEN
           Emin  = E
@@ -1054,7 +1054,7 @@
         CALL construct_primitive_basis(basis_temp)
 
         E = Ene_FROM_basis(basis_temp,para_Tnum,mole,para_ReadOp)
-        IF (debug) write(out_unitp,*) 'SQ,E',basis_temp%scaleQ(1),E*auTOcm_inv
+        IF (debug) write(out_unit,*) 'SQ,E',basis_temp%scaleQ(1),E*auTOcm_inv
 
         IF (E < Emin) THEN
           Emin  = E
@@ -1076,7 +1076,7 @@
         CALL construct_primitive_basis(basis_temp)
 
         E = Ene_FROM_basis(basis_temp,para_Tnum,mole,para_ReadOp)
-        IF (debug) write(out_unitp,*) 'SQ,E',basis_temp%scaleQ(1),E*auTOcm_inv
+        IF (debug) write(out_unit,*) 'SQ,E',basis_temp%scaleQ(1),E*auTOcm_inv
 
         IF (E < Emin) THEN
           Emin  = E
@@ -1101,7 +1101,7 @@
           CALL construct_primitive_basis(basis_temp)
 
           E = Ene_FROM_basis(basis_temp,para_Tnum,mole,para_ReadOp)
-          IF (debug) write(out_unitp,*) 'SQ,E',basis_temp%scaleQ(1),E*auTOcm_inv
+          IF (debug) write(out_unit,*) 'SQ,E',basis_temp%scaleQ(1),E*auTOcm_inv
 
           IF (E < Emin) THEN
             Emin  = E
@@ -1115,24 +1115,24 @@
 
 
       END IF
-      write(out_unitp,*) 'Optimal scaleQ, E(cm-1)',SQMin,Emin*auTOcm_inv
+      write(out_unit,*) 'Optimal scaleQ, E(cm-1)',SQMin,Emin*auTOcm_inv
 
 
       basis_temp%scaleQ(1)  = SQMin
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_temp,write_all=.TRUE.)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       END SUBROUTINE AutoParam_basis_scaleQ
       SUBROUTINE AutoParam_basis_Q0(basis_temp,para_Tnum,mole,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_PrimOp
       USE mod_basis
@@ -1171,18 +1171,18 @@
 
       ! test for HO basis
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_temp,write_all=.FALSE.)
       END IF
 !---------------------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 
 
-      !write(out_unitp,*) 'type_Qin',mole%tab_Qtransfo(mole%nb_Qtransfo)%type_Qin(:)
-      !write(out_unitp,*) 'iQdyn',basis_temp%iQdyn(1)
-      !write(out_unitp,*) 'type_Qin',mole%tab_Qtransfo(mole%nb_Qtransfo)%type_Qin(basis_temp%iQdyn(1))
+      !write(out_unit,*) 'type_Qin',mole%tab_Qtransfo(mole%nb_Qtransfo)%type_Qin(:)
+      !write(out_unit,*) 'iQdyn',basis_temp%iQdyn(1)
+      !write(out_unit,*) 'type_Qin',mole%tab_Qtransfo(mole%nb_Qtransfo)%type_Qin(basis_temp%iQdyn(1))
       type_Q = mole%tab_Qtransfo(mole%nb_Qtransfo)%type_Qin(basis_temp%iQdyn(1))
 
 
@@ -1196,7 +1196,7 @@
       Q0Min = Q0ini
       Emin  = Ene_FROM_basis(basis_temp,para_Tnum,mole,para_ReadOp)
 
-      !write(out_unitp,*) 'Initial Q0,E',Q0ini,Emin*auTOcm_inv
+      !write(out_unit,*) 'Initial Q0,E',Q0ini,Emin*auTOcm_inv
 
       basis_temp%Q0(1) = Q0ini - basis_temp%scaleQ(1)
       IF (check_OutOfRange(basis_temp%Q0(1),type_Q) .OR. (type_Q==2 .AND. basis_temp%Q0(1) < Q0ini/TWO)) THEN
@@ -1213,8 +1213,8 @@
         CALL construct_primitive_basis(basis_temp)
 
         E = Ene_FROM_basis(basis_temp,para_Tnum,mole,para_ReadOp)
-        IF (debug) write(out_unitp,*) 'Q0,E',basis_temp%Q0(1),E*auTOcm_inv
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'Q0,E',basis_temp%Q0(1),E*auTOcm_inv
+        flush(out_unit)
 
         IF (E < Emin) THEN
           Emin  = E
@@ -1244,8 +1244,8 @@
         CALL construct_primitive_basis(basis_temp)
 
         E = Ene_FROM_basis(basis_temp,para_Tnum,mole,para_ReadOp)
-        IF (debug) write(out_unitp,*) 'Q0,E',basis_temp%Q0(1),E*auTOcm_inv
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'Q0,E',basis_temp%Q0(1),E*auTOcm_inv
+        flush(out_unit)
 
         IF (E < Emin) THEN
           Emin  = E
@@ -1275,8 +1275,8 @@
         CALL construct_primitive_basis(basis_temp)
 
         E = Ene_FROM_basis(basis_temp,para_Tnum,mole,para_ReadOp)
-        IF (debug) write(out_unitp,*) 'Q0,E',basis_temp%Q0(1),E*auTOcm_inv
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'Q0,E',basis_temp%Q0(1),E*auTOcm_inv
+        flush(out_unit)
 
         IF (E < Emin) THEN
           Emin  = E
@@ -1291,23 +1291,23 @@
 
       END DO
 
-      write(out_unitp,*) 'Optimal Q0, E (cm-1)',Q0Min,Emin*auTOcm_inv
+      write(out_unit,*) 'Optimal Q0, E (cm-1)',Q0Min,Emin*auTOcm_inv
 
 
       basis_temp%Q0(1)  = Q0Min
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_temp,write_all=.TRUE.)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       END SUBROUTINE AutoParam_basis_Q0
       FUNCTION check_OutOfRange(Q,type_Q)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       logical                          :: check_OutOfRange
@@ -1323,7 +1323,7 @@
 
       END FUNCTION check_OutOfRange
       SUBROUTINE Set_InitRange(Q,type_Q)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer,           intent(in)    :: type_Q
@@ -1341,7 +1341,7 @@
       END SUBROUTINE Set_InitRange
   FUNCTION Ene_FROM_basis(basis_Set,para_Tnum,mole,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_PrimOp
       USE mod_basis
@@ -1371,9 +1371,9 @@
       character (len=*), parameter :: name_sub = 'Ene_FROM_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.FALSE.)
       END IF
 !---------------------------------------------------------------------
@@ -1398,18 +1398,18 @@
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.TRUE.)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
   END FUNCTION Ene_FROM_basis
 
   SUBROUTINE Get_Hmat_FROM_basis(Hmat,basis_Set,para_Tnum,mole,para_ReadOp,pot_Qref)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_PrimOp
       USE mod_basis
@@ -1451,9 +1451,9 @@
       character (len=*), parameter :: name_sub = 'Get_Hmat_FROM_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.FALSE.)
       END IF
 !---------------------------------------------------------------------
@@ -1528,18 +1528,18 @@
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         !CALL RecWrite_basis(basis_Set,write_all=.TRUE.)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
   END SUBROUTINE Get_Hmat_FROM_basis
 
   SUBROUTINE Autocontract_basis(basis_AutoContract,para_Tnum,mole,para_ReadOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_PrimOp
       USE mod_basis
@@ -1571,13 +1571,13 @@
       !logical, parameter :: debug = .TRUE.
       character (len=*), parameter :: name_sub = 'Autocontract_basis'
 !---------------------------------------------------------------------
-      IF (print_level > -1) write(out_unitp,*) 'BEGINNING ',name_sub
+      IF (print_level > -1) write(out_unit,*) 'BEGINNING ',name_sub
       IF (debug) THEN
-        write(out_unitp,*)
-        !write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        !write(out_unit,*) 'BEGINNING ',name_sub
         !CALL Write_CoordType(mole_loc)
-        write(out_unitp,*) 'basis before contraction'
-        write(out_unitp,*)
+        write(out_unit,*) 'basis before contraction'
+        write(out_unit,*)
         CALL RecWrite_basis(basis_AutoContract)
       END IF
 !---------------------------------------------------------------------
@@ -1588,7 +1588,7 @@
                 basis_AutoContract%min_nbc = basis_AutoContract%max_nbc
 
       IF (print_level > -1) THEN
-        write(out_unitp,*) 'min_nbc,max_nbc,max_ene_contrac (ua)',      &
+        write(out_unit,*) 'min_nbc,max_nbc,max_ene_contrac (ua)',      &
                  basis_AutoContract%min_nbc,basis_AutoContract%max_nbc, &
                                     basis_AutoContract%max_ene_contrac
       END IF
@@ -1603,10 +1603,10 @@
       CALL sub_diago_H(Hmat,Rdiag,Rvp, basis_AutoContract%nb,.TRUE.)
 
       IF (debug) THEN
-        write(out_unitp,*) 'Eigenvalues for the contraction'
-        CALL Write_VecMat(Rdiag,out_unitp,5)
-        write(out_unitp,*) 'Eigenvectors for the contraction'
-        CALL Write_Mat(Rvp,out_unitp,5)
+        write(out_unit,*) 'Eigenvalues for the contraction'
+        CALL Write_VecMat(Rdiag,out_unit,5)
+        write(out_unit,*) 'Eigenvectors for the contraction'
+        CALL Write_Mat(Rvp,out_unit,5)
       END IF
       !---------------------------------------------------------------
       ! Energy levels + the new nbc
@@ -1627,16 +1627,16 @@
       basis_AutoContract%nqPLUSnbc_TO_nqc = 0
 
       IF (print_level > -1) THEN
-        write(out_unitp,*) 'nb levels:',nbc
+        write(out_unit,*) 'nb levels:',nbc
 
-        write(out_unitp,*) 'levels: '
+        write(out_unit,*) 'levels: '
         DO i=1,nbc
           RWU_E  = REAL_WU(Rdiag(i),     'au','E')
           RWU_DE = REAL_WU(Rdiag(i)-ene0,'au','E')
-          write(out_unitp,*) i,RWU_Write(RWU_E ,WithUnit=.FALSE.,WorkingUnit=.FALSE.),&
+          write(out_unit,*) i,RWU_Write(RWU_E ,WithUnit=.FALSE.,WorkingUnit=.FALSE.),&
                            " ",RWU_Write(RWU_DE,WithUnit=.TRUE. ,WorkingUnit=.FALSE.)
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
       basis_AutoContract%nbc = nbc
 
@@ -1650,7 +1650,7 @@
 
       !---------------------------------------------------------------
       ! contraction => nb=nbc
-      IF (print_level > -1) write(out_unitp,*) 'alloc Rvec',allocated(basis_AutoContract%Rvec)
+      IF (print_level > -1) write(out_unit,*) 'alloc Rvec',allocated(basis_AutoContract%Rvec)
       IF (allocated(basis_AutoContract%Rvec))  THEN
         CALL dealloc_NParray(basis_AutoContract%Rvec,                     &
                             "basis_AutoContract%Rvec",name_sub)
@@ -1667,11 +1667,11 @@
       END IF
       !basis_AutoContract%POGridRep_polyortho = .FALSE.
       IF (debug) THEN
-        write(out_unitp,*) 'Eigenvectors on the grid'
+        write(out_unit,*) 'Eigenvectors on the grid'
         DO i=1,get_nq_FROM_basis(basis_AutoContract)
-          write(out_unitp,*) i,basis_AutoContract%x(:,i),basis_AutoContract%dnRGB%d0(i,:)
+          write(out_unit,*) i,basis_AutoContract%x(:,i),basis_AutoContract%dnRGB%d0(i,:)
         END DO
-        flush(out_unitp)
+        flush(out_unit)
       END IF
 
       !-----------------------------------------------------------------
@@ -1683,14 +1683,14 @@
 
       !-----------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'basis after contraction'
-        write(out_unitp,*)
+        write(out_unit,*) 'basis after contraction'
+        write(out_unit,*)
         CALL RecWrite_basis(basis_AutoContract)
-        write(out_unitp,*)
-        !write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        !write(out_unit,*) 'END ',name_sub
       END IF
-      IF (print_level > -1) write(out_unitp,*) 'END ',name_sub
-      flush(out_unitp)
+      IF (print_level > -1) write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
 
   END SUBROUTINE Autocontract_basis
   SUBROUTINE basis_TO_AllBasis(basis_temp,Allbasis,mole)
@@ -1716,11 +1716,11 @@
       character (len=*), parameter :: name_sub = 'basis_TO_Allbasis'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
 
-        write(out_unitp,*) 'basis'
-        write(out_unitp,*)
+        write(out_unit,*) 'basis'
+        write(out_unit,*)
         CALL RecWrite_basis(basis_temp)
 
       END IF
@@ -1745,7 +1745,7 @@
         CALL type_var_analysis_OF_CoordType(mole)
 
         IF (debug) THEN
-          write(out_unitp,*) 'mole:'
+          write(out_unit,*) 'mole:'
           CALL Write_CoordType(mole)
         END IF
         !---------------------------------------------------------------
@@ -1758,14 +1758,14 @@
         CALL basis2TObasis1(AllBasis%BasisnD,basis_temp)
 
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'param of Allbasis '
-        write(out_unitp,*)
-        write(out_unitp,*) 'nb_ba,nb_qa',AllBasis%BasisnD%nb,           &
+        write(out_unit,*)
+        write(out_unit,*) 'param of Allbasis '
+        write(out_unit,*)
+        write(out_unit,*) 'nb_ba,nb_qa',AllBasis%BasisnD%nb,           &
                                      get_nq_FROM_basis(AllBasis%BasisnD)
-        write(out_unitp,*) 'nDindB%nDsize',AllBasis%BasisnD%nDindB%nDsize
-        write(out_unitp,*) 'nDindG%nDsize',AllBasis%BasisnD%nDindG%nDsize
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'nDindB%nDsize',AllBasis%BasisnD%nDindB%nDsize
+        write(out_unit,*) 'nDindG%nDsize',AllBasis%BasisnD%nDindG%nDsize
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -1773,7 +1773,7 @@
 
   SUBROUTINE All_param_TO_para_H(para_Tnum,mole,para_AllBasis,para_ReadOp,para_H)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_PrimOp
       USE mod_basis
       USE mod_Op
@@ -1802,7 +1802,7 @@
       character (len=*), parameter :: name_sub = 'All_param_TO_para_H'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 
 
@@ -1894,7 +1894,7 @@
 
       IF (debug) THEN
         CALL write_param_Op(para_H)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 
   END SUBROUTINE All_param_TO_para_H
@@ -1903,7 +1903,7 @@
 !     adiabatic contraction
 !=======================================================================================
   SUBROUTINE sub_MatOp_HADA(para_H,para_ana,para_intensity,para_AllOp,const_phys)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant
       USE mod_nDindex
       USE mod_Op
@@ -1970,12 +1970,12 @@
 !-----------------------------------------------------------
 
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,para_H%n_Op
-        write(out_unitp,*) 'nb_act1,nb_var',para_H%mole%nb_act1,               &
+        write(out_unit,*) 'BEGINNING ',name_sub,para_H%n_Op
+        write(out_unit,*) 'nb_act1,nb_var',para_H%mole%nb_act1,               &
                                    para_H%mole%nb_var
-        write(out_unitp,*) 'nb_ba,nb_bie',para_H%nb_ba,para_H%nb_bie
-        write(out_unitp,*) 'max_nb_ba_ON_HAC',para_H%para_AllBasis%basis_ext2n%max_nb_ba_ON_HAC
-        write(out_unitp,*) 'max_ene_ON_HAC  ',para_H%para_AllBasis%basis_ext2n%max_ene_ON_HAC
+        write(out_unit,*) 'nb_ba,nb_bie',para_H%nb_ba,para_H%nb_bie
+        write(out_unit,*) 'max_nb_ba_ON_HAC',para_H%para_AllBasis%basis_ext2n%max_nb_ba_ON_HAC
+        write(out_unit,*) 'max_ene_ON_HAC  ',para_H%para_AllBasis%basis_ext2n%max_ene_ON_HAC
         CALL write_param_Op(para_H)
       END IF
 !-----------------------------------------------------------
@@ -1983,10 +1983,10 @@
 !     ----------------------------------------------------------------
 !     - test on nb_bi : nb_bi>0
       IF (para_H%nb_bi <= 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' nb_bi MUST be >0'
-        write(out_unitp,*) ' nb_bi',para_H%nb_bi
-        write(out_unitp,*)
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' nb_bi MUST be >0'
+        write(out_unit,*) ' nb_bi',para_H%nb_bi
+        write(out_unit,*)
         CALL write_param_Op(para_H)
         STOP
       END IF
@@ -1999,10 +1999,10 @@
       nb_bie  = para_H%nb_bie
       type_Op = para_H%para_ReadOp%Type_HamilOp ! H
       IF (type_Op /= 1) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '    Type_HamilOp',type_Op
-        write(out_unitp,*) '    Type_HamilOp MUST be equal to 1 for HADA or cHAC'
-        write(out_unitp,*) '    CHECK your data!!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '    Type_HamilOp',type_Op
+        write(out_unit,*) '    Type_HamilOp MUST be equal to 1 for HADA or cHAC'
+        write(out_unit,*) '    CHECK your data!!'
         STOP
       END IF
 
@@ -2027,7 +2027,7 @@
 
       nb_blocks = para_H%nb_qa/kmem
       IF (mod(para_H%nb_qa,kmem) /= 0) nb_blocks = nb_blocks + 1
-      IF (print_level>0) write(out_unitp,*) 'number of blocks',nb_blocks
+      IF (print_level>0) write(out_unit,*) 'number of blocks',nb_blocks
 
       CALL alloc_NParray(td0b,[nb_ba,kmem],'td0b',name_sub)
 
@@ -2046,8 +2046,8 @@
 
  98   CONTINUE
 
-      IF (print_level>-1) write(out_unitp,'(a)',ADVANCE='no') 'Block of ReMatOp(:,:) (%): '
-      flush(out_unitp)
+      IF (print_level>-1) write(out_unit,'(a)',ADVANCE='no') 'Block of ReMatOp(:,:) (%): '
+      flush(out_unit)
 
       nplus = min(kmem,nreste)
       DO k=1,nplus
@@ -2055,9 +2055,9 @@
         nDGridI = nDGridI + 1
         IF (mod(nDGridI,max(1,int(para_H%nb_qa/10))) == 0 .AND.         &
             print_level>-1) THEN
-           write(out_unitp,'(a,i3)',ADVANCE='no') ' -',                 &
+           write(out_unit,'(a,i3)',ADVANCE='no') ' -',                 &
                       int(real(nDGridI,kind=Rkind)*HUNDRED/para_H%nb_qa)
-           flush(out_unitp)
+           flush(out_unit)
         END IF
 
         CALL sub_reading_Op(nDGridI,para_H%nb_qa,d0MatOp,para_H%n_Op,   &
@@ -2097,8 +2097,8 @@
       IF (nreste > 0) GOTO 98
 !     - END of loop of kmem block ----------------------------
 !     --------------------------------------------------------
-      IF (print_level>-1) write(out_unitp,'(a)',ADVANCE='yes') ' - End'
-      flush(out_unitp)
+      IF (print_level>-1) write(out_unit,'(a)',ADVANCE='yes') ' - End'
+      flush(out_unit)
 
       CALL dealloc_NParray(td0b,     'td0b',     name_sub)
 
@@ -2177,7 +2177,7 @@
         para_H%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(i1_h) =           &
             min(para_ana%max_ana,para_H%para_AllBasis%basis_ext2n%max_nb_ba_ON_HAC)
 
-        write(out_unitp,*) 'Number of level(s) on the HAC channel: ',   &
+        write(out_unit,*) 'Number of level(s) on the HAC channel: ',   &
                 i1_h,para_H%para_AllBasis%basis_ext2n%nb_ba_ON_HAC(i1_h)
 
         CALL sub_analyse(Tab_Psi,nb_ba,para_H_HADA,                     &
@@ -2189,11 +2189,11 @@
 
 !---------------------------------------------------------------
       IF (sum(para_H%para_AllBasis%basis_ext2n%nb_ba_ON_HAC) == 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' Sum of nb_ba_ON_HAC(:) == 0 !!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' Sum of nb_ba_ON_HAC(:) == 0 !!'
         STOP
       END IF
-      write(out_unitp,*) ' Sum of levels on HAC channels: ',            &
+      write(out_unit,*) ' Sum of levels on HAC channels: ',            &
                      sum(para_H%para_AllBasis%basis_ext2n%nb_ba_ON_HAC)
 
       para_ana%print_psi = print_psi_save
@@ -2213,9 +2213,9 @@
 
 !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*)
-         write(out_unitp,*)
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*)
+         write(out_unit,*)
+         write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
 

@@ -58,7 +58,7 @@ CONTAINS
 !===============================================================================
       SUBROUTINE sub_propagation_Davidson(psi,Ene,nb_diago,max_diago,   &
                                           para_H,para_Davidson,para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,alloc_psi,dealloc_psi,norm2_psi, &
                              alloc_NParray,dealloc_NParray,ecri_psi,    &
                              sub_LCpsi_TO_psi,sub_save_psi
@@ -148,15 +148,15 @@ CONTAINS
       Hmin_OR_Hmax = para_Davidson%Hmax_propa .OR.           &
                      para_Davidson%Hmin_propa
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' propagation Davidson'
-        write(out_unitp,*) ' nb_diago',nb_diago
-        write(out_unitp,*) ' max_diago',max_diago
-        write(out_unitp,*) ' Hmin_OR_Hmax',Hmin_OR_Hmax
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' propagation Davidson'
+        write(out_unit,*) ' nb_diago',nb_diago
+        write(out_unit,*) ' max_diago',max_diago
+        write(out_unit,*) ' Hmin_OR_Hmax',Hmin_OR_Hmax
 
-        write(out_unitp,*) ' para_Davidson',para_Davidson
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) ' para_Davidson',para_Davidson
+        write(out_unit,*)
+        flush(out_unit)
       END IF
       !-----------------------------------------------------------
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
@@ -164,11 +164,11 @@ CONTAINS
       sym_Hamil  = (Forced_sym_Hamil .OR. para_H%sym_Hamil)
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) 'all_lower_states',para_Davidson%all_lower_states
-        write(out_unitp,*) 'lower_states    ',para_Davidson%lower_states
-        write(out_unitp,*) 'project_WP0     ',para_Davidson%project_WP0
-        write(out_unitp,*) 'NewVec_type     ',para_Davidson%NewVec_type
-        write(out_unitp,*) 'sym_Hamil       ',sym_Hamil
+        write(out_unit,*) 'all_lower_states',para_Davidson%all_lower_states
+        write(out_unit,*) 'lower_states    ',para_Davidson%lower_states
+        write(out_unit,*) 'project_WP0     ',para_Davidson%project_WP0
+        write(out_unit,*) 'NewVec_type     ',para_Davidson%NewVec_type
+        write(out_unit,*) 'sym_Hamil       ',sym_Hamil
       ENDIF
 
 
@@ -176,10 +176,10 @@ CONTAINS
 
         DE = para_Davidson%max_ene
         IF(MPI_id==0) THEN
-          write(out_unitp,*) 'DE:             ',DE
-          write(out_unitp,*) 'degree_Transfo: ',para_H%para_ReadOp%degree_Transfo
-          write(out_unitp,*) 'alloc Poly_Transfo:   ',allocated(para_H%para_ReadOp%Poly_Transfo)
-          write(out_unitp,*) 'Poly_Transfo:   ',para_H%para_ReadOp%Poly_Transfo
+          write(out_unit,*) 'DE:             ',DE
+          write(out_unit,*) 'degree_Transfo: ',para_H%para_ReadOp%degree_Transfo
+          write(out_unit,*) 'alloc Poly_Transfo:   ',allocated(para_H%para_ReadOp%Poly_Transfo)
+          write(out_unit,*) 'Poly_Transfo:   ',para_H%para_ReadOp%Poly_Transfo
         ENDIF
 
         para_Davidson%max_ene = para_H%para_ReadOp%Poly_Transfo(0)
@@ -227,10 +227,10 @@ CONTAINS
       ENDIF
       ! save the nb_diago wp
       IF(MPI_id==0) CALL sub_save_psi(psi,nb_diago,para_propa%file_WP)
-      write(out_unitp,*) '  sub_save_psi: psi done'
+      write(out_unit,*) '  sub_save_psi: psi done'
       RealTime = Delta_RealTime(DavidsonTime)
 
-      flush(out_unitp)
+      flush(out_unit)
       IF(openmpi .AND. MPI_scheme/=1) THEN
         CALL MPI_Bcast_(nb_diago,size1_MPI,root_MPI)
         CALL MPI_Bcast_param_Davidson(para_Davidson)
@@ -265,9 +265,9 @@ CONTAINS
         nb_thread = MatOp_maxth
       END IF
 
-      write(out_unitp,*) 'nb_thread in ',name_sub,' : ',nb_thread
-      write(out_unitp,*) 'Beginning Davidson iteration'
-      flush(out_unitp)
+      write(out_unit,*) 'nb_thread in ',name_sub,' : ',nb_thread
+      write(out_unit,*) 'Beginning Davidson iteration'
+      flush(out_unit)
 
       IF(MPI_id==0) THEN
         write(iunit,*) 'Beginning Davidson iteration' ; flush(iunit)
@@ -279,7 +279,7 @@ CONTAINS
       DO it=0,para_Davidson%max_it
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*) '--------------------------------------------------'
+          write(out_unit,*) '--------------------------------------------------'
           write(iunit,*) 'Davidson iteration',it ; flush(iunit)
         ENDIF
 
@@ -287,22 +287,22 @@ CONTAINS
 
         !---------------------------------------------------------------
         !- Hpsi(:) -----------------------------------------------------
-        IF (debug) write(out_unitp,*) 'Hpsi(:)',it,ndim,ndim0
-        IF (debug) flush(out_unitp)
+        IF (debug) write(out_unit,*) 'Hpsi(:)',it,ndim,ndim0
+        IF (debug) flush(out_unit)
         CALL sub_MakeHPsi_Davidson(it,psi(1:ndim),Hpsi(1:ndim),Ene,ndim0,para_H,       &
                                    para_Davidson,iunit,H_overlap,S_overlap,save_WP)
         save_WP = .FALSE.
         !CALL time_perso('MakeHPsi done') 
 
-        IF (debug) write(out_unitp,*) 'Hpsi(:) done',it,ndim,ndim0
-        IF (debug) flush(out_unitp)
+        IF (debug) write(out_unit,*) 'Hpsi(:) done',it,ndim,ndim0
+        IF (debug) flush(out_unit)
         !- Hpsi(:) -----------------------------------------------------
         !---------------------------------------------------------------
 
         !---------------------------------------------------------------
         !- build H
-        IF (debug) write(out_unitp,*) 'H mat',it,ndim,ndim0
-        IF (debug) flush(out_unitp)
+        IF (debug) write(out_unit,*) 'H mat',it,ndim,ndim0
+        IF (debug) flush(out_unit)
 
         ! H built from psi and Hpsi
         ! MPI: H is now assigned from H_overlap directly on all the threads
@@ -313,15 +313,15 @@ CONTAINS
 
         ! if symmetric
         CALL sub_hermitic_H(H,ndim,non_hermitic,sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unitp,5)
-        IF (debug) write(out_unitp,*) 'shape H',shape(H)
+        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        IF (debug) write(out_unit,*) 'shape H',shape(H)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
-          write(out_unitp,*) 'WARNING: non_hermitic is BIG'
-          write(out_unitp,31) non_hermitic
+          write(out_unit,*) 'WARNING: non_hermitic is BIG'
+          write(out_unit,31) non_hermitic
 31          format(' Hamiltonien: ',f16.12,' au')
         ELSE
-          write(out_unitp,51) non_hermitic*auTOcm_inv
+          write(out_unit,51) non_hermitic*auTOcm_inv
 51          format(' Hamiltonien: ',f16.12,' cm-1')
         END IF
 
@@ -334,22 +334,22 @@ CONTAINS
         END IF
         !CALL time_perso('MakeH done')
 
-        IF (debug) write(out_unitp,*) 'H mat',it,ndim,ndim0
-        flush(out_unitp)
+        IF (debug) write(out_unit,*) 'H mat',it,ndim,ndim0
+        flush(out_unit)
         !- build H
         !----------------------------------------------------------
 
         !----------------------------------------------------------
         !- diagonalization
-        IF (debug) write(out_unitp,*) 'diago',it,ndim,ndim0
-        IF (debug) flush(out_unitp)
+        IF (debug) write(out_unit,*) 'diago',it,ndim,ndim0
+        IF (debug) flush(out_unit)
 
         CALL dealloc_NParray(vec,"vec",name_sub)
         CALL alloc_NParray(vec,[ndim,ndim],"vec",name_sub)
         Ene(:) = ZERO
 
-        ! write(out_unitp,*) 'ndim',ndim
-        ! write(out_unitp,*) 'shape ..',shape(H),shape(Vec),shape(Ene),shape(trav)
+        ! write(out_unit,*) 'ndim',ndim
+        ! write(out_unit,*) 'shape ..',shape(H),shape(Vec),shape(Ene),shape(trav)
         IF (sym_Hamil) THEN
           ! CALL diagonalization(H,Ene(1:ndim),Vec,ndim,3,1,.FALSE.)
           ! consider the MPI of diagonalization
@@ -359,7 +359,7 @@ CONTAINS
           ! CALL diagonalization(H,Ene(1:ndim),Vec,ndim,4,1,.FALSE.)
           CALL diagonalization(H,Ene(1:ndim),Vec,ndim,4,1,.True.)
         END IF
-        IF (debug) write(out_unitp,*) 'Ene',Ene(1:ndim)
+        IF (debug) write(out_unit,*) 'Ene',Ene(1:ndim)
 
         IF (it == 0 .OR. (it > 1 .AND.                                    &
               mod(it-1,para_Davidson%num_resetH) == 0) ) THEN
@@ -368,15 +368,15 @@ CONTAINS
 
         IF (it == 0) Ene0(:) = Ene(:) + conv_Ene
         !CALL time_perso('diago done')
-        IF (debug) write(out_unitp,*) 'diago',it,ndim,ndim0
-        IF (debug) flush(out_unitp)
+        IF (debug) write(out_unit,*) 'diago',it,ndim,ndim0
+        IF (debug) flush(out_unit)
         !- diagonalization
         !----------------------------------------------------------
 
         !----------------------------------------------------------
         ! Save vec(:) on vec0(:)
-        IF (debug) write(out_unitp,*) 'selec',it,ndim,ndim0
-        IF (debug) flush(out_unitp)
+        IF (debug) write(out_unit,*) 'selec',it,ndim,ndim0
+        IF (debug) flush(out_unit)
         ! find the physical min_ene (to avoid holes)
         IF (para_H%para_ReadOp%min_pot == huge(ONE)) THEN
           min_Ene = -huge(ONE)
@@ -390,15 +390,15 @@ CONTAINS
           CALL Set_ZPE_OF_Op(para_H,Ene(1:ndim),Ene_min=min_Ene,forced=.TRUE.)
         END IF
         ZPE     = para_H%ZPE
-        IF (debug) write(out_unitp,*) 'ZPE',it,ZPE
-        !write(out_unitp,*) 'min_Ene,min_pot,ZPE',it,min_Ene,para_H%para_ReadOp%min_pot,ZPE
+        IF (debug) write(out_unit,*) 'ZPE',it,ZPE
+        !write(out_unit,*) 'min_Ene,min_pot,ZPE',it,min_Ene,para_H%para_ReadOp%min_pot,ZPE
         CALL sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,min_Ene,  &
                                  para_H%para_ReadOp%min_pot,ZPE,        &
                                  psi,psi0,Vec,Vec0,para_Davidson,it,.TRUE.)
         !CALL time_perso('projec done')
-          IF (debug) write(out_unitp,*) 'selec',it,ndim,ndim0
-          IF (debug) flush(out_unitp)
-          ! CALL Write_Mat(Vec,out_unitp,5)
+          IF (debug) write(out_unit,*) 'selec',it,ndim,ndim0
+          IF (debug) flush(out_unit)
+          ! CALL Write_Mat(Vec,out_unit,5)
           ! Save vec(:) on vec0(:)
           !----------------------------------------------------------
 
@@ -408,29 +408,29 @@ CONTAINS
             VecToBeIncluded(1:nb_diago) = .TRUE.
           END IF
 
-          IF (debug) write(out_unitp,*) 'nb_diago,ZPE,min_Ene',nb_diago,ZPE,min_Ene
-          IF (debug) write(out_unitp,*) 'it,Ene(:)',it,Ene(1:ndim)*auTOene
+          IF (debug) write(out_unit,*) 'nb_diago,ZPE,min_Ene',nb_diago,ZPE,min_Ene
+          IF (debug) write(out_unit,*) 'it,Ene(:)',it,Ene(1:ndim)*auTOene
 
           DEne(1:nb_diago) = Ene(1:nb_diago)-Ene0(1:nb_diago)
           conv_Ene = maxval(abs(DEne(1:nb_diago)))
-          write(out_unitp,41) 'convergence (it, norm2g/epsi, conv_Ene): ',&
+          write(out_unit,41) 'convergence (it, norm2g/epsi, conv_Ene): ',&
                                                    it,norm2g/epsi,conv_Ene
           IF (para_Davidson%Hmax_propa) THEN
-            write(out_unitp,21) it,ndim,norm2g/epsi,iresidu,              &
+            write(out_unit,21) it,ndim,norm2g/epsi,iresidu,              &
                              -Ene(1:nb_diago)*auTOene
           ELSE
-            write(out_unitp,21) it,ndim,norm2g/epsi,iresidu,              &
+            write(out_unit,21) it,ndim,norm2g/epsi,iresidu,              &
                               Ene(1:nb_diago)*auTOene
           END IF
 
           DO j=1,nb_diago
             convergeEne(j) = abs(DEne(j)) < para_Davidson%conv_Ene
           END DO
-          write(out_unitp,41) 'it Diff Ene (' // trim(WriteUnit) // '):    ',it, &
+          write(out_unit,41) 'it Diff Ene (' // trim(WriteUnit) // '):    ',it, &
                            DEne(1:nb_diago) * auTOene
-          write(out_unitp,42) 'it convergenceEne(:):  ',it,               &
+          write(out_unit,42) 'it convergenceEne(:):  ',it,               &
                                                     convergeEne(1:nb_diago)
-          flush(out_unitp)
+          flush(out_unit)
           IF(MPI_id==0) THEN
             write(iunit,21) it,ndim,norm2g/epsi,iresidu,Ene(1:ndim)*auTOene
             flush(iunit)
@@ -438,8 +438,8 @@ CONTAINS
           !----------------------------------------------------------
           !- residual vector ---------------------------
           !-  and convergence --------------------------
-          IF (debug) write(out_unitp,*) 'residual',it,ndim,ndim0
-          IF (debug) flush(out_unitp)
+          IF (debug) write(out_unit,*) 'residual',it,ndim,ndim0
+          IF (debug) flush(out_unit)
           norm2g    = -ONE
           fresidu   = 0
 
@@ -473,15 +473,15 @@ CONTAINS
 !#endif
 
           Ene0(1:nb_diago) = Ene(1:nb_diago)
-          write(out_unitp,41) 'it tab_norm2g          ',it,tab_norm2g(1:nb_diago)
-          write(out_unitp,42) 'it convergenceResi(:): ',it,convergeResi(1:nb_diago)
+          write(out_unit,41) 'it tab_norm2g          ',it,tab_norm2g(1:nb_diago)
+          write(out_unit,42) 'it convergenceResi(:): ',it,convergeResi(1:nb_diago)
 41        format(a,i3,100(1x,e9.2))
 42        format(a,i3,100(1x,l9))
 
           !CALL time_perso('residual done')
 
-          IF (debug) write(out_unitp,*) 'residual',it,ndim,ndim0
-          IF (debug) flush(out_unitp)
+          IF (debug) write(out_unit,*) 'residual',it,ndim,ndim0
+          IF (debug) flush(out_unit)
           !- residual vector and convergence ------------------------
           !----------------------------------------------------------
 
@@ -489,10 +489,10 @@ CONTAINS
           !- convergence ? ------------------------------------------
           nb_conv_states   = count( converge(1:nb_diago) )
           nb_unconv_states = nb_diago-nb_conv_states
-          write(out_unitp,*) 'it, conv',it,conv
-          write(out_unitp,*) 'it, nb   converged state(s)',it,nb_conv_states
-          write(out_unitp,*) 'it, nb unconverged state(s)',it,nb_unconv_states
-          flush(out_unitp)
+          write(out_unit,*) 'it, conv',it,conv
+          write(out_unit,*) 'it, nb   converged state(s)',it,nb_conv_states
+          write(out_unit,*) 'it, nb unconverged state(s)',it,nb_unconv_states
+          flush(out_unit)
           !- convergence ? ------------------------------------------
           !----------------------------------------------------------
 
@@ -505,7 +505,7 @@ CONTAINS
           nb_added_states = ndim-ndim0
           IF (nb_added_states == 0) THEN
             conv = .TRUE.
-            write(out_unitp,*) ' WARNING: The conv is forced to true, because nb_added_states=0.'
+            write(out_unit,*) ' WARNING: The conv is forced to true, because nb_added_states=0.'
           END IF
           save_WP = (ndim == max_diago) .OR. conv .OR.                  &
                      it == para_Davidson%max_it .OR.                    &
@@ -520,15 +520,15 @@ CONTAINS
             CALL MPI_BCAST_(save_WP,size1_MPI,root_MPI)
           ENDIF 
 
-          write(out_unitp,*) 'ndim,max_diago',ndim,max_diago
-          write(out_unitp,*) 'save_WP,conv',save_WP,conv
+          write(out_unit,*) 'ndim,max_diago',ndim,max_diago
+          write(out_unit,*) 'save_WP,conv',save_WP,conv
           IF (debug) THEN
-            write(out_unitp,*) 'it,max_it',it,para_Davidson%max_it, &
+            write(out_unit,*) 'it,max_it',it,para_Davidson%max_it, &
                                      (it == para_Davidson%max_it)
-            write(out_unitp,*) 'mod(it,para_Davidson%num_resetH)',  &
+            write(out_unit,*) 'mod(it,para_Davidson%num_resetH)',  &
                                 mod(it,para_Davidson%num_resetH)
           END IF
-          flush(out_unitp)
+          flush(out_unit)
 
           !----------------------------------------------------------
           !- save psi(:) on file
@@ -545,8 +545,8 @@ CONTAINS
 
             !CALL time_perso('projec done')
 
-            write(out_unitp,*) 'save psi(:)',it,ndim,ndim0
-            flush(out_unitp)
+            write(out_unit,*) 'save psi(:)',it,ndim,ndim0
+            flush(out_unit)
 
             !- check the orthogonality ------------------------
             CALL sub_MakeS_Davidson(it,psi(1:ndim),With_Grid,debug,S_overlap)
@@ -557,46 +557,46 @@ CONTAINS
             ELSE
               CALL sub_LCpsi_TO_psi(psi,Vec,ndim0,nb_diago)
             ENDIF
-            write(out_unitp,*) '  sub_LCpsi_TO_psi: psi done',ndim0,nb_diago
-            flush(out_unitp)
+            write(out_unit,*) '  sub_LCpsi_TO_psi: psi done',ndim0,nb_diago
+            flush(out_unit)
 
             IF(keep_MPI) THEN
             ! move the new vectors (nb_added_states), after the nb_diago ones
             DO i=1,nb_added_states
               psi(nb_diago+i) = psi(ndim0+i)
             END DO
-            write(out_unitp,*) '  move psi done'
-            flush(out_unitp)
+            write(out_unit,*) '  move psi done'
+            flush(out_unit)
             ENDIF ! for keep_MPI
 
             ! deallocation
             DO i=nb_diago+nb_added_states+1,ndim
-              !write(out_unitp,*) 'dealloc psi(i), Hpsi(i)',i
+              !write(out_unit,*) 'dealloc psi(i), Hpsi(i)',i
               CALL dealloc_psi(psi(i))
             END DO
-            write(out_unitp,*) '  deallocation psi done'
-            flush(out_unitp)
+            write(out_unit,*) '  deallocation psi done'
+            flush(out_unit)
 
             ! save the nb_diago wp
             IF(MPI_id==0) CALL sub_save_psi(psi,nb_diago,para_propa%file_WP)
-            write(out_unitp,*) '  sub_save_psi: psi done'
-            flush(out_unitp)
+            write(out_unit,*) '  sub_save_psi: psi done'
+            flush(out_unit)
 
             IF(openmpi) THEN
               CALL sub_LCpsi_TO_psi_MPI(Hpsi,Vec,ndim0,nb_diago)
             ELSE
               CALL sub_LCpsi_TO_psi(Hpsi,Vec,ndim0,nb_diago)
             ENDIF
-            write(out_unitp,*) '  sub_LCpsi_TO_psi: Hpsi done',ndim0,nb_diago
-            flush(out_unitp)
+            write(out_unit,*) '  sub_LCpsi_TO_psi: Hpsi done',ndim0,nb_diago
+            flush(out_unit)
 
             DO i=nb_diago+1,ndim
-              !write(out_unitp,*) 'dealloc psi(i), Hpsi(i)',i
+              !write(out_unit,*) 'dealloc psi(i), Hpsi(i)',i
               CALL dealloc_psi(Hpsi(i))
             END DO
 
-            write(out_unitp,*) '  deallocation Hpsi done'
-            flush(out_unitp)
+            write(out_unit,*) '  deallocation Hpsi done'
+            flush(out_unit)
 
             Vec = Identity_Mat(ndim0)
 
@@ -618,11 +618,11 @@ CONTAINS
 
           RealTime = Delta_RealTime(DavidsonTime)
           IF (RealTime < TEN) THEN
-            write(out_unitp,'(a,i0,a,i0)') 'At Davidson iteration: ',it,', Delta Real time (ms): ',int(10**3*RealTime)
+            write(out_unit,'(a,i0,a,i0)') 'At Davidson iteration: ',it,', Delta Real time (ms): ',int(10**3*RealTime)
           ELSE
-            write(out_unitp,'(a,i0,a,i0)') 'At Davidson iteration: ',it,', Delta Real time (s): ',int(RealTime)
+            write(out_unit,'(a,i0,a,i0)') 'At Davidson iteration: ',it,', Delta Real time (s): ',int(RealTime)
           END IF
-          flush(out_unitp)
+          flush(out_unit)
 
         IF (conv) EXIT
 
@@ -641,7 +641,7 @@ CONTAINS
         ENDIF
 
       END DO ! for it=0,para_Davidson%max_it
-      write(out_unitp,*) '--------------------------------------------------'
+      write(out_unit,*) '--------------------------------------------------'
 
       !===================================================================
       !===================================================================
@@ -654,15 +654,15 @@ CONTAINS
 
  21   format(' Davidson: ',2(i5,1x),e10.3,i5,1x,50(1x,f18.4))
 
-      write(out_unitp,*)
-      write(out_unitp,*) '==========================================='
-      write(out_unitp,*) '==========================================='
+      write(out_unit,*)
+      write(out_unit,*) '==========================================='
+      write(out_unit,*) '==========================================='
       IF (conv) THEN
-        IF(MPI_id==0) write(out_unitp,*) ' Davidson has converged after ',it,' iterations'
+        IF(MPI_id==0) write(out_unit,*) ' Davidson has converged after ',it,' iterations'
       ELSE
-        write(out_unitp,*) ' WARNNING: Davidson has NOT converged after',it,' iterations'
+        write(out_unit,*) ' WARNNING: Davidson has NOT converged after',it,' iterations'
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       IF (para_H%para_ReadOp%Op_Transfo) THEN
         ! The energies have to be recalculated without T(Op)
@@ -673,7 +673,7 @@ CONTAINS
           g = Hpsi(j) - psi(j) * Ene(j)
           CALL norm2_psi(g)
           tab_norm2g(j) = sqrt(g%norm2)
-          write(out_unitp,*) 'lev:',j,Ene(j)*auTOene,tab_norm2g(j)
+          write(out_unit,*) 'lev:',j,Ene(j)*auTOene,tab_norm2g(j)
         END DO
       END IF
       IF(MPI_id==0) CALL file_close(Log_file)
@@ -691,28 +691,28 @@ CONTAINS
       END DO
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'Number of Hamiltonian operations (H I psi >)',para_H%nb_OpPsi
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*) 'Number of Hamiltonian operations (H I psi >)',para_H%nb_OpPsi
+        write(out_unit,*)
       ENDIF
 
       IF (para_Davidson%Hmax_propa) THEN
         para_propa%Hmax = -Ene(1)
         para_H%Hmax     = -Ene(1)
-        write(out_unitp,*) 'Hmax (ua)  : ',para_propa%Hmax
-        write(out_unitp,*) 'Hmax (cm-1): ',para_propa%Hmax*auTOene
+        write(out_unit,*) 'Hmax (ua)  : ',para_propa%Hmax
+        write(out_unit,*) 'Hmax (cm-1): ',para_propa%Hmax*auTOene
       END IF
       IF (para_Davidson%Hmin_propa) THEN
         para_propa%Hmin = Ene(1)
         para_H%Hmin     = Ene(1)
-        write(out_unitp,*) 'Hmin (ua)  : ',para_propa%Hmin
-        write(out_unitp,*) 'Hmin (cm-1): ',para_propa%Hmin*auTOene
+        write(out_unit,*) 'Hmin (ua)  : ',para_propa%Hmin
+        write(out_unit,*) 'Hmin (cm-1): ',para_propa%Hmin*auTOene
       END IF
 
-      write(out_unitp,*)
-      write(out_unitp,*) '==========================================='
-      write(out_unitp,*) '==========================================='
-      flush(out_unitp)
+      write(out_unit,*)
+      write(out_unit,*) '==========================================='
+      write(out_unit,*) '==========================================='
+      flush(out_unit)
 
       !----------------------------------------------------------
       IF (allocated(Vec))  THEN
@@ -741,16 +741,16 @@ CONTAINS
         CALL dealloc_NParray(psi0,'psi0',name_sub)
         CALL dealloc_NParray(Hpsi,'Hpsi',name_sub)
 
-        write(out_unitp,*) 'total memory',para_mem%mem_tot
+        write(out_unit,*) 'total memory',para_mem%mem_tot
       ENDIF
 
       !----------------------------------------------------------
       IF (debug) THEN
         DO i=1,nb_diago
-          write(out_unitp,*) 'psi(i), i:',i
+          write(out_unit,*) 'psi(i), i:',i
           CALL ecri_psi(psi=psi(i))
         END DO
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
       !----------------------------------------------------------
 
@@ -760,7 +760,7 @@ CONTAINS
 !=======================================================================================
  SUBROUTINE ReadWP0_Davidson(psi,psi0,Vec0,nb_diago,max_diago,          &
                              para_Davidson,cplx)
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,     ONLY : param_psi,alloc_psi,norm2_psi,renorm_psi,      &
                    Set_symab_OF_psiBasisRep,sub_PsiBasisRep_TO_GridRep, &
                    param_WP0,Set_Random_psi,ecri_init_psi
@@ -791,13 +791,13 @@ CONTAINS
  !-----------------------------------------------------------
 
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) ' nb_diago',nb_diago
-   write(out_unitp,*) ' max_diago',max_diago
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) ' nb_diago',nb_diago
+   write(out_unit,*) ' max_diago',max_diago
 
-   write(out_unitp,*) ' para_Davidson',para_Davidson
-   write(out_unitp,*)
-   flush(out_unitp)
+   write(out_unit,*) ' para_Davidson',para_Davidson
+   write(out_unit,*)
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
 
@@ -821,19 +821,19 @@ CONTAINS
    para_Davidson%nb_WP0 = para_WP0%nb_WP0
 
    IF (nb_diago < 1) THEN
-     write(out_unitp,*) ' ERROR while reading the vector(s)'
-     write(out_unitp,*) ' ... the number is 0'
-     write(out_unitp,*) ' Probably, in the namelist (davidson)...'
-     write(out_unitp,*) '   ... you select a wrong symmetry',para_Davidson%symab
+     write(out_unit,*) ' ERROR while reading the vector(s)'
+     write(out_unit,*) ' ... the number is 0'
+     write(out_unit,*) ' Probably, in the namelist (davidson)...'
+     write(out_unit,*) '   ... you select a wrong symmetry',para_Davidson%symab
      STOP
    END IF
 
    DO i=1,nb_diago
      CALL norm2_psi(psi(i))
-     IF (debug) write(out_unitp,*) '   norm^2 of psi(i)',i,psi(i)%norm2
+     IF (debug) write(out_unit,*) '   norm^2 of psi(i)',i,psi(i)%norm2
      IF ( abs(psi(i)%norm2-ONE) > ONETENTH**8) THEN
-       write(out_unitp,*) ' ERROR while reading the vector(s)'
-       write(out_unitp,*) ' ... the norm^2 of psi(i) is /= 1',i,psi(i)%norm2
+       write(out_unit,*) ' ERROR while reading the vector(s)'
+       write(out_unit,*) ' ... the norm^2 of psi(i) is /= 1',i,psi(i)%norm2
        STOP
      END IF
    END DO
@@ -852,7 +852,7 @@ CONTAINS
      CALL sub_PsiBasisRep_TO_GridRep(psi(i))
      CALL alloc_psi(psi(i),BasisRep=.FALSE.,GridRep=.TRUE.)
      !CALL Overlap_psi1_psi2(Overlap,psi(i),psi(i),With_Grid=.TRUE.)
-     !write(out_unitp,*) 'Norm DVR',Overlap
+     !write(out_unit,*) 'Norm DVR',Overlap
    END DO
    DO i=max(1,nb_diago),max_diago
      psi(i)%BasisRep  = .FALSE.
@@ -864,22 +864,22 @@ CONTAINS
    CALL alloc_NParray(vec0,[nb_diago,nb_diago],"vec0",name_sub)
    vec0 = Identity_Mat(nb_diago)
 
-   write(out_unitp,*) ' copy psi(:) to psi0(:)',para_Davidson%nb_WP0
+   write(out_unit,*) ' copy psi(:) to psi0(:)',para_Davidson%nb_WP0
    DO i=1,nb_diago
      psi0(i) = psi(i)
-     !write(out_unitp,*) ' psi0(i)',i
+     !write(out_unit,*) ' psi0(i)',i
      !CALL ecri_init_psi(psi0(i))
    END DO
  END IF
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'psi(:), nb_diago',nb_diago
+   write(out_unit,*) 'psi(:), nb_diago',nb_diago
    DO i=1,nb_diago
-     write(out_unitp,*) ' psi(i)',i
+     write(out_unit,*) ' psi(i)',i
      CALL ecri_init_psi(psi(i))
    END DO
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 
@@ -890,7 +890,7 @@ CONTAINS
  SUBROUTINE sub_MakeHPsi_Davidson(it,psi,Hpsi,Ene,ndim0,                &
                                   para_H,para_Davidson,iunit,           &
                                   H_overlap,S_overlap,save_WP)
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,         ONLY : param_psi,Overlap_psi1_psi2
  USE mod_psi_Op_MPI,  ONLY : Overlap_HS_matrix_MPI3,Overlap_H_matrix_MPI4
 
@@ -929,12 +929,12 @@ CONTAINS
  !logical, parameter :: debug=.TRUE.
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   !write(out_unitp,*) ' para_Davidson',para_Davidson
-   write(out_unitp,*) 'para_Davidson%With_Grid',para_Davidson%With_Grid
-   write(out_unitp,*) 'para_Davidson%Op_Transfo',para_Davidson%Op_Transfo
-   write(out_unitp,*) 'MatOp_omp',MatOp_omp
-   flush(out_unitp)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   !write(out_unit,*) ' para_Davidson',para_Davidson
+   write(out_unit,*) 'para_Davidson%With_Grid',para_Davidson%With_Grid
+   write(out_unit,*) 'para_Davidson%Op_Transfo',para_Davidson%Op_Transfo
+   write(out_unit,*) 'MatOp_omp',MatOp_omp
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
 
@@ -958,8 +958,8 @@ CONTAINS
 
  !----------------------------------------------------------
  !- Hpsi(:) ------------------------------------------
- IF (debug) write(out_unitp,*) 'Hpsi(:)',it,ndim,ndim0
- IF (debug) flush(out_unitp)
+ IF (debug) write(out_unit,*) 'Hpsi(:)',it,ndim,ndim0
+ IF (debug) flush(out_unit)
 
  CALL sub_TabOpPsi(psi(ndim0+1:ndim),Hpsi(ndim0+1:ndim),para_H,With_Grid=With_Grid,TransfoOp=Op_Transfo)
 
@@ -995,7 +995,7 @@ CONTAINS
      Ene(i) = real(Overlap,kind=Rkind)
    ENDIF
 
-   IF (debug) write(out_unitp,*) 'Davidson Hpsi done',i,                &
+   IF (debug) write(out_unit,*) 'Davidson Hpsi done',i,                &
                     Ene(i)*auTOene,(Ene(i)-Ene(1))*auTOene
    IF(MPI_id==0) THEN
      write(iunit,*) 'Davidson Hpsi done',i,                               &
@@ -1020,14 +1020,14 @@ CONTAINS
 !   END DO
 ! END IF
 
- IF (debug) write(out_unitp,*) 'Hpsi(:) done ',it,ndim,ndim0
- IF (debug) flush(out_unitp)
+ IF (debug) write(out_unit,*) 'Hpsi(:) done ',it,ndim,ndim0
+ IF (debug) flush(out_unit)
  !- Hpsi(:) ------------------------------------------
  !----------------------------------------------------------
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 
@@ -1036,7 +1036,7 @@ CONTAINS
 
 !=======================================================================================
  SUBROUTINE sub_MakeH_Davidson(it,psi,Hpsi,H,H_overlap,S_overlap,para_Davidson)
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,    ONLY : param_psi,Overlap_psi1_psi2
  USE mod_propa,  ONLY : param_Davidson
  USE mod_MPI_aux
@@ -1066,15 +1066,15 @@ CONTAINS
  !logical, parameter :: debug=.TRUE.
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
+   write(out_unit,*) 'BEGINNING ',name_sub
    CALL sub_MakeS_Davidson(it,psi,para_Davidson%With_Grid,.FALSE.,S_overlap)
-   flush(out_unitp)
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
 
  IF ( size(psi) /= size(Hpsi) .AND. MPI_id==0) THEN
-   write(out_unitp,*) 'ERROR in ',name_sub
-   write(out_unitp,*) 'size(psi) /= size(Hpsi)',size(psi),size(Hpsi)
+   write(out_unit,*) 'ERROR in ',name_sub
+   write(out_unit,*) 'size(psi) /= size(Hpsi)',size(psi),size(Hpsi)
    STOP
  END IF
  ndim = size(psi)
@@ -1102,10 +1102,10 @@ CONTAINS
 
  !----------------------------------------------------------
  !- First save H in H0
- IF (debug) write(out_unitp,*) 'H mat',it,ndim,ndim0
- IF (debug) write(out_unitp,*) 'shape H mat',it,shape(H)
+ IF (debug) write(out_unit,*) 'H mat',it,ndim,ndim0
+ IF (debug) write(out_unit,*) 'shape H mat',it,shape(H)
 
- IF (debug) flush(out_unitp)
+ IF (debug) flush(out_unit)
 
  !block 1,1: ndim0*ndim0
  IF (ndim0 > 0) THEN
@@ -1137,7 +1137,7 @@ CONTAINS
  DO i=ndim0+1,ndim
  DO j=1,ndim
    CALL Overlap_psi1_psi2(Overlap,psi(j),Hpsi(i),With_Grid=para_Davidson%With_Grid)
-   !write(out_unitp,*) 'H,i,j',i,j,Overlap
+   !write(out_unit,*) 'H,i,j',i,j,Overlap
    H(j,i) = real(Overlap,kind=Rkind)
  END DO
  END DO
@@ -1146,7 +1146,7 @@ CONTAINS
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 
@@ -1155,7 +1155,7 @@ CONTAINS
 
  SUBROUTINE sub_MakeS_Davidson(it,psi,With_Grid,Print_Mat,S_overlap)
 
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,         ONLY : param_psi,Overlap_psi1_psi2
  USE mod_propa,       ONLY : param_Davidson
  IMPLICIT NONE
@@ -1181,9 +1181,9 @@ CONTAINS
  !logical, parameter :: debug=.TRUE.
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*)
-   flush(out_unitp)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*)
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
 ndim = size(psi)
@@ -1192,8 +1192,8 @@ ndim = size(psi)
 
 IF(openmpi) THEN
   CALL sub_ana_S(S_overlap(1:ndim,1:ndim),ndim,max_Sii,max_Sij,.TRUE.)
-  IF (Print_Mat ) CALL Write_Mat(S_overlap(1:ndim,1:ndim),out_unitp,5)
-  flush(out_unitp)
+  IF (Print_Mat ) CALL Write_Mat(S_overlap(1:ndim,1:ndim),out_unit,5)
+  flush(out_unit)
 ELSE
  CALL alloc_NParray(S,[ndim,ndim],"S",name_sub)
 
@@ -1205,8 +1205,8 @@ ELSE
  END DO
 
  CALL sub_ana_S(S,ndim,max_Sii,max_Sij,.TRUE.)
- IF (Print_Mat) CALL Write_Mat(S,out_unitp,5)
- flush(out_unitp)
+ IF (Print_Mat) CALL Write_Mat(S,out_unit,5)
+ flush(out_unit)
  CALL dealloc_NParray(S,"S",name_sub)
 ENDIF ! openmpi
 
@@ -1214,15 +1214,15 @@ ENDIF ! openmpi
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
-   flush(out_unitp)
+   write(out_unit,*) 'END ',name_sub
+   flush(out_unit)
  END IF
  !----------------------------------------------------------
 
  END SUBROUTINE sub_MakeS_Davidson
 
  SUBROUTINE MakeResidual_Davidson(j,g,psi,Hpsi,Ene,Vec)
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,    ONLY : param_psi,Set_symab_OF_psiBasisRep,             &
                         Overlap_psi1_psi2,dealloc_psi
  USE mod_propa,  ONLY : param_Davidson
@@ -1247,9 +1247,9 @@ ENDIF ! openmpi
  !logical, parameter :: debug=.TRUE.
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) '  ndim',size(Vec,dim=1)
-   flush(out_unitp)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) '  ndim',size(Vec,dim=1)
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
 
@@ -1291,7 +1291,7 @@ ENDIF ! openmpi
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 
@@ -1302,7 +1302,7 @@ END SUBROUTINE MakeResidual_Davidson
                                 nb_diago,max_diago,                &
                                 para_Davidson,fresidu,ndim,        &
                                 Op_Transfo,E0_Transfo,S_overlap)
- USE mod_system
+ USE EVR_system_m
  USE mod_basis
  USE mod_ana_psi_MPI, ONLY:norm_psi_MPI
  USE mod_Davidson_MPI,ONLY:Schmidt_process_MPI,MakeResidual_Davidson_j_MPI3
@@ -1351,24 +1351,24 @@ END SUBROUTINE MakeResidual_Davidson
  !logical, parameter :: debug=.TRUE.
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) '  nb_diago   ',nb_diago
-   write(out_unitp,*) '  max_diago  ',max_diago
-   write(out_unitp,*) '  NewVec_type',para_Davidson%NewVec_type
-   write(out_unitp,*) '  VecToBeIncluded',VecToBeIncluded(1:ndim)
-   flush(out_unitp)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) '  nb_diago   ',nb_diago
+   write(out_unit,*) '  max_diago  ',max_diago
+   write(out_unit,*) '  NewVec_type',para_Davidson%NewVec_type
+   write(out_unit,*) '  VecToBeIncluded',VecToBeIncluded(1:ndim)
+   flush(out_unit)
  END IF
  !-----------------------------------------------------------
 
  ndim0 = size(Vec(:,1))
 
- !write(out_unitp,*) ' symab: psi(:)',psi(1:ndim0)%symab
+ !write(out_unit,*) ' symab: psi(:)',psi(1:ndim0)%symab
 
 
  !----------------------------------------------------------
  !- new vectors ------------------------------
- IF (debug) write(out_unitp,*) '  new psi',it,ndim,ndim0
- IF (debug) flush(out_unitp)
+ IF (debug) write(out_unit,*) '  new psi',it,ndim,ndim0
+ IF (debug) flush(out_unit)
  IF (para_Davidson%residual_max_nb == 1) THEN
    j_ini = fresidu
    j_end = fresidu
@@ -1376,7 +1376,7 @@ END SUBROUTINE MakeResidual_Davidson
    j_ini = 1
    j_end = ndim
  END IF
- IF (debug) write(out_unitp,*) '  j_ini,j_end',it,j_ini,j_end
+ IF (debug) write(out_unit,*) '  j_ini,j_end',it,j_ini,j_end
  iresidual = 0
  DO j=j_ini,j_end
    IF (ndim == max_diago) EXIT
@@ -1400,8 +1400,8 @@ END SUBROUTINE MakeResidual_Davidson
 
      !CASE 2 default
      CASE (2) ! Davidson
-       !write(out_unitp,*) ' symab: psi(isym)',isym,psi(isym)%symab
-       !write(out_unitp,*) ' vec(:,j)',j,Vec(:,j)
+       !write(out_unit,*) ' symab: psi(isym)',isym,psi(isym)%symab
+       !write(out_unit,*) ' vec(:,j)',j,Vec(:,j)
 
        DO i=1,ndim0
          Di = EneRef(i)
@@ -1411,12 +1411,12 @@ END SUBROUTINE MakeResidual_Davidson
          ELSE
            a = a / (Di - 0.999_Rkind*Ene0(j))
          END IF
-         !write(out_unitp,*) 'i,j',i,j,a
+         !write(out_unit,*) 'i,j',i,j,a
          IF (abs(a) > ONETENTH**10) THEN
-           !write(out_unitp,*) ' symab: psi(i)',i,psi(i)%symab
+           !write(out_unit,*) ' symab: psi(i)',i,psi(i)%symab
 
            IF(keep_MPI) psiTemp = Hpsi(i) - psi(i) * Ene(j)
-           !write(out_unitp,*) ' symab: psiTemp',psi(i)%symab
+           !write(out_unit,*) ' symab: psiTemp',psi(i)%symab
 
            IF(keep_MPI) psi(ndim+1) = psi(ndim+1) + psiTemp * a
          END IF
@@ -1432,7 +1432,7 @@ END SUBROUTINE MakeResidual_Davidson
          ELSE
            a = ZERO
          END IF
-         !write(out_unitp,*) 'i,j',i,j,a
+         !write(out_unit,*) 'i,j',i,j,a
          IF (abs(a) > ONETENTH**10) THEN
           IF(keep_MPI) psiTemp = Hpsi(i) - psi(i) * Ene(j)
           IF(keep_MPI) psi(ndim+1) = psi(ndim+1) + psiTemp * a
@@ -1468,19 +1468,19 @@ END SUBROUTINE MakeResidual_Davidson
        END DO
 
      CASE DEFAULT
-       write(out_unitp,*) ' ERROR in ',name_sub
-       write(out_unitp,*) ' This NewVec_type is unknown: ',para_Davidson%NewVec_type
+       write(out_unit,*) ' ERROR in ',name_sub
+       write(out_unit,*) ' This NewVec_type is unknown: ',para_Davidson%NewVec_type
        STOP 'Unkonwn NewVec_type!'
      END SELECT
-     !write(out_unitp,*) ' symab: psi(isym), new vec',psi(isym)%symab,psi(ndim+1)%symab
+     !write(out_unit,*) ' symab: psi(isym), new vec',psi(isym)%symab,psi(ndim+1)%symab
 
      ! use Set_symab_OF_psiBasisRep_MPI later
      IF(keep_MPI) CALL Set_symab_OF_psiBasisRep(psi(ndim+1),psi(isym)%symab)
-     !write(out_unitp,*) ' symab: psi(isym), new vec set sym',psi(isym)%symab,psi(ndim+1)%symab
+     !write(out_unit,*) ' symab: psi(isym), new vec set sym',psi(isym)%symab,psi(ndim+1)%symab
 
      !- new vectors -------------------------------
      !- Schmidt ortho ------------------------------------
-     !write(out_unitp,*) 'Schmidt ortho',it
+     !write(out_unit,*) 'Schmidt ortho',it
      IF(openmpi) THEN
        CALL Schmidt_process_MPI(S_overlap_add(:,ndim+1-ndim0),psi,ndim,isym,           &
                                 With_Grid=para_Davidson%With_Grid) 
@@ -1543,34 +1543,34 @@ END SUBROUTINE MakeResidual_Davidson
        CALL norm2_psi(psi(ndim+1))
        IF (psi(ndim+1)%norm2 < ONETENTH**10) CYCLE ! otherwise dependent vector
        
-       !write(out_unitp,*) ' symab: psi(isym), new vec ortho',psi(isym)%symab,psi(ndim+1)%symab
+       !write(out_unit,*) ' symab: psi(isym), new vec ortho',psi(isym)%symab,psi(ndim+1)%symab
 
        IF (debug) THEN
-          write(out_unitp,*) '  symab new vectors',psi(ndim+1)%symab
+          write(out_unit,*) '  symab new vectors',psi(ndim+1)%symab
           CALL norm2_psi(psi(ndim+1))
-          write(out_unitp,*) '  norm^2 of new vectors',psi(ndim+1)%norm2
+          write(out_unit,*) '  norm^2 of new vectors',psi(ndim+1)%norm2
        END IF
 
        CALL Set_symab_OF_psiBasisRep(psi(ndim+1),psi(isym)%symab)
-       !write(out_unitp,*) ' symab: psi(isym), new vec set sym ',psi(isym)%symab,psi(ndim+1)%symab
+       !write(out_unit,*) ' symab: psi(isym), new vec set sym ',psi(isym)%symab,psi(ndim+1)%symab
 
        CALL renorm_psi(psi(ndim+1))
-       !write(out_unitp,*) ' symab: psi(isym), new renormalized vector ',psi(isym)%symab,psi(ndim+1)%symab
+       !write(out_unit,*) ' symab: psi(isym), new renormalized vector ',psi(isym)%symab,psi(ndim+1)%symab
 
        !- Schmidt ortho ------------------------------------
-       !write(out_unitp,*) 'n+1, vec',ndim+1,psi(ndim+1)%RvecB
-       !write(out_unitp,*) ' new vec symab, bits(symab)',WriteTOstring_symab(psi(ndim+1)%symab)
+       !write(out_unit,*) 'n+1, vec',ndim+1,psi(ndim+1)%RvecB
+       !write(out_unit,*) ' new vec symab, bits(symab)',WriteTOstring_symab(psi(ndim+1)%symab)
      ENDIF
      ndim = ndim + 1
 
    END IF
 
-   IF (debug) write(out_unitp,*) '  new psi',it,ndim,ndim0
-   IF (debug) flush(out_unitp)
+   IF (debug) write(out_unit,*) '  new psi',it,ndim,ndim0
+   IF (debug) flush(out_unit)
  END DO
 
  nb_added_states = ndim-ndim0
- write(out_unitp,*) 'it, nb         new state(s)',it,nb_added_states
+ write(out_unit,*) 'it, nb         new state(s)',it,nb_added_states
  !- new vectors -------------------------------
  !----------------------------------------------------------
 
@@ -1591,14 +1591,14 @@ END SUBROUTINE MakeResidual_Davidson
  IF (debug) THEN
    CALL sub_MakeS_Davidson(it,psi(1:ndim),With_Grid=para_Davidson%With_Grid,           &
                            Print_Mat=.TRUE.,S_overlap=S_overlap)
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 
 END SUBROUTINE sub_NewVec_Davidson
 
  SUBROUTINE Sort_VecToBeIncluded_Davidson(Ene,Vec,VecToBeIncluded)
- USE mod_system
+ USE EVR_system_m
  IMPLICIT NONE
 
  real (kind=Rkind), intent(inout) :: Vec(:,:)
@@ -1644,7 +1644,7 @@ END SUBROUTINE sub_NewVec_Davidson
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 
@@ -1655,7 +1655,7 @@ END SUBROUTINE sub_NewVec_Davidson
 !=======================================================================================
  SUBROUTINE sub_projec_Davidson(Ene,VecToBeIncluded,nb_diago,min_Ene,min_pot,ZPE,  &
                                 psi,psi0,Vec,Vec0,para_Davidson,it,print_project)
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,     ONLY : param_psi,Overlap_psi1_psi2
  USE mod_propa,   ONLY : param_Davidson
  USE mod_MPI_aux
@@ -1685,28 +1685,28 @@ END SUBROUTINE sub_NewVec_Davidson
  !logical, parameter :: debug=.TRUE.
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) ' lower_states',para_Davidson%lower_states
-   write(out_unitp,*) ' ndim ',size(Vec,dim=1)
-   IF (allocated(Vec0)) write(out_unitp,*) ' ndim0',size(Vec0,dim=1)
-   write(out_unitp,*) ' nb_diago',nb_diago
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) ' lower_states',para_Davidson%lower_states
+   write(out_unit,*) ' ndim ',size(Vec,dim=1)
+   IF (allocated(Vec0)) write(out_unit,*) ' ndim0',size(Vec0,dim=1)
+   write(out_unit,*) ' nb_diago',nb_diago
    IF (allocated(Vec)) THEN
-     write(out_unitp,*) 'Vec',shape(Vec)
-     !CALL Write_Mat(Vec,out_unitp,5)
+     write(out_unit,*) 'Vec',shape(Vec)
+     !CALL Write_Mat(Vec,out_unit,5)
    END IF
    IF (allocated(Vec0)) THEN
-     write(out_unitp,*) 'Vec0',shape(Vec0)
-     !CALL Write_Mat(Vec0,out_unitp,5)
+     write(out_unit,*) 'Vec0',shape(Vec0)
+     !CALL Write_Mat(Vec0,out_unit,5)
    END IF
-   write(out_unitp,*) 'Ene',Ene(1:ndim)
-   write(out_unitp,*) 'min_Ene',min_Ene
-   write(out_unitp,*) 'min_pot',min_pot
-   write(out_unitp,*) 'ZPE',ZPE
-   write(out_unitp,*) 'Max_ene',para_Davidson%Max_ene
+   write(out_unit,*) 'Ene',Ene(1:ndim)
+   write(out_unit,*) 'min_Ene',min_Ene
+   write(out_unit,*) 'min_pot',min_pot
+   write(out_unit,*) 'ZPE',ZPE
+   write(out_unit,*) 'Max_ene',para_Davidson%Max_ene
  END IF
 
  ndim  = size(Vec,dim=1)
- IF (debug .OR. print_project) write(out_unitp,*) 'Vector projections'
+ IF (debug .OR. print_project) write(out_unit,*) 'Vector projections'
 
  ! find the physical min_ene (to avoid holes)
  IF (min_pot == huge(ONE)) THEN
@@ -1782,13 +1782,13 @@ END SUBROUTINE sub_NewVec_Davidson
         VecToBeIncluded(i) =(Ene(i) >= min_Ene .AND. count(VecToBeIncluded) < nb_diago )
       END DO
       IF (count(VecToBeIncluded) /= nb_diago) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub,' from ', MPI_id
-        write(out_unitp,*) 'nb_diago ',nb_diago
-        write(out_unitp,*) 'VecToBeIncluded ',VecToBeIncluded
-        write(out_unitp,*) 'Ene(:) ',Ene
-        write(out_unitp,*) 'min_Ene ',min_Ene
+        write(out_unit,*) ' ERROR in ',name_sub,' from ', MPI_id
+        write(out_unit,*) 'nb_diago ',nb_diago
+        write(out_unit,*) 'VecToBeIncluded ',VecToBeIncluded
+        write(out_unit,*) 'Ene(:) ',Ene
+        write(out_unit,*) 'min_Ene ',min_Ene
  
-        write(out_unitp,*) ' number of VecToBeIncluded /= nb_diago'
+        write(out_unit,*) ' number of VecToBeIncluded /= nb_diago'
         STOP
       END IF
      END IF
@@ -1819,15 +1819,15 @@ END SUBROUTINE sub_NewVec_Davidson
 
  IF(MPI_id==0) Then
   IF (debug .OR. print_project) THEN 
-     write(out_unitp,*) 'number of VecToBeIncluded',it,count(VecToBeIncluded)
-     write(out_unitp,*) 'VecToBeIncluded',it,VecToBeIncluded(1:ndim)
-     write(out_unitp,*) 'End Vector projections'
+     write(out_unit,*) 'number of VecToBeIncluded',it,count(VecToBeIncluded)
+     write(out_unit,*) 'VecToBeIncluded',it,VecToBeIncluded(1:ndim)
+     write(out_unit,*) 'End Vector projections'
   END IF
  ENDIF
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 
@@ -1835,7 +1835,7 @@ END SUBROUTINE sub_NewVec_Davidson
 !=======================================================================================
 
  SUBROUTINE sub_projec2_Davidson(Vec,Vec0,VecToBeIncluded,thresh,Ene,min_Ene,print_project)
- USE mod_system
+ USE EVR_system_m
  USE mod_MPI_aux
  IMPLICIT NONE
 
@@ -1862,22 +1862,22 @@ END SUBROUTINE sub_NewVec_Davidson
  auTOene = get_Conv_au_TO_WriteUnit('E')
 
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) ' ndim,ndim0',ndim,ndim0
-   write(out_unitp,*) ' shape Vec,Vec0',shape(Vec),shape(Vec0)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) ' ndim,ndim0',ndim,ndim0
+   write(out_unit,*) ' shape Vec,Vec0',shape(Vec),shape(Vec0)
 
-   write(out_unitp,21) Ene(1:ndim)*auTOene
+   write(out_unit,21) Ene(1:ndim)*auTOene
  21     format(' Ene: ',50(1x,f18.4))
 
-   !write(out_unitp,*)
-   !write(out_unitp,*) 'Vec',ndim
-   !CALL Write_Mat(Vec,out_unitp,5)
-   !write(out_unitp,*) 'Vec0',ndim0
-   !CALL Write_Mat(Vec0,out_unitp,5)
+   !write(out_unit,*)
+   !write(out_unit,*) 'Vec',ndim
+   !CALL Write_Mat(Vec,out_unit,5)
+   !write(out_unit,*) 'Vec0',ndim0
+   !CALL Write_Mat(Vec0,out_unit,5)
  END IF
 
 
- IF (debug .OR. print_project) write(out_unitp,*) 'Projection <psi|psi0>'
+ IF (debug .OR. print_project) write(out_unit,*) 'Projection <psi|psi0>'
  VecToBeIncluded(:) = .FALSE.
  
  IF(keep_MPI) THEN
@@ -1887,15 +1887,15 @@ END SUBROUTINE sub_NewVec_Davidson
       p = abs(dot_product(Vec(1:ndim0,i),Vec0(:,j)))
       max_p = max(p,max_p)
    END DO
-   IF (debug .OR. print_project) write(out_unitp,*) ' New j of Vec0',j,'max_p',max_p
+   IF (debug .OR. print_project) write(out_unit,*) ' New j of Vec0',j,'max_p',max_p
    DO i=1,ndim
-      !write(out_unitp,*) i,Vec(1:nb_Vec0,i)
+      !write(out_unit,*) i,Vec(1:nb_Vec0,i)
       p = abs(dot_product(Vec(1:ndim0,i),Vec0(:,j)))
       IF (p >= thresh*max_p) THEN
         VecToBeIncluded(i) = .TRUE.
-        IF (debug .OR. print_project) write(out_unitp,*) 'i of Vec, p,Ene',i,p,Ene(i)*auTOene
+        IF (debug .OR. print_project) write(out_unit,*) 'i of Vec, p,Ene',i,p,Ene(i)*auTOene
       ELSE
-        IF (debug) write(out_unitp,*) 'i of Vec, p,Ene',i,p,Ene(i)*auTOene
+        IF (debug) write(out_unit,*) 'i of Vec, p,Ene',i,p,Ene(i)*auTOene
       END IF
    END DO
  END DO
@@ -1913,12 +1913,12 @@ END SUBROUTINE sub_NewVec_Davidson
 
  CALL Sort_VecToBeIncluded_Davidson(Ene,Vec,VecToBeIncluded)
 
- IF (debug .OR. print_project) write(out_unitp,*) 'End projection <psi|psi0>'
+ IF (debug .OR. print_project) write(out_unit,*) 'End projection <psi|psi0>'
 
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 
@@ -1926,7 +1926,7 @@ END SUBROUTINE sub_NewVec_Davidson
 
  SUBROUTINE sub_projec3_Davidson(Vec,psi,psi0,VecToBeIncluded,thresh,   &
                                  Ene,min_Ene,print_project)
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,     ONLY : param_psi,Overlap_psi1_psi2
  USE mod_MPI_aux
  IMPLICIT NONE
@@ -1963,35 +1963,35 @@ END SUBROUTINE sub_NewVec_Davidson
  auTOene = get_Conv_au_TO_WriteUnit('E')
 
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) ' ndim,ndim0',ndim,ndim0
-   write(out_unitp,*) ' shape(vec)',shape(vec)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) ' ndim,ndim0',ndim,ndim0
+   write(out_unit,*) ' shape(vec)',shape(vec)
 
-   write(out_unitp,21) Ene(1:ndim)*auTOene
+   write(out_unit,21) Ene(1:ndim)*auTOene
  21     format(' Ene: ',50(1x,f18.4))
 
-!   write(out_unitp,*) '================================='
-!   write(out_unitp,*) '================================='
-!   write(out_unitp,*) '================================='
-!   write(out_unitp,*) ' psi0',ndim0
+!   write(out_unit,*) '================================='
+!   write(out_unit,*) '================================='
+!   write(out_unit,*) '================================='
+!   write(out_unit,*) ' psi0',ndim0
 !   DO i=1,ndim0
 !     CALL ecri_psi(ZERO,psi0(i))
-!     write(out_unitp,*) '================================='
+!     write(out_unit,*) '================================='
 !   END DO
-!   write(out_unitp,*) '================================='
-!   write(out_unitp,*) '================================='
-!   write(out_unitp,*) '================================='
-!   write(out_unitp,*) ' psi',ndim
+!   write(out_unit,*) '================================='
+!   write(out_unit,*) '================================='
+!   write(out_unit,*) '================================='
+!   write(out_unit,*) ' psi',ndim
 !   DO i=1,ndim
 !     CALL ecri_psi(ZERO,psi(i))
-!     write(out_unitp,*) '================================='
+!     write(out_unit,*) '================================='
 !   END DO
-!   write(out_unitp,*) '================================='
-!   write(out_unitp,*) '================================='
+!   write(out_unit,*) '================================='
+!   write(out_unit,*) '================================='
  END IF
 
 
- IF (debug .OR. print_project) write(out_unitp,*) 'Projection <psi|psi0>'
+ IF (debug .OR. print_project) write(out_unit,*) 'Projection <psi|psi0>'
  VecToBeIncluded(:) = .FALSE.
 
  IF(keep_MPI) THEN
@@ -2007,14 +2007,14 @@ END SUBROUTINE sub_NewVec_Davidson
      Spsi_psi0_j(i) = abs(dot_product(Vec(:,i),Spsi_psi0(:,j)))
    END DO
    max_p = maxval(Spsi_psi0_j)
-   IF (debug .OR. print_project) write(out_unitp,*) ' New j of psi0',j,'max_p',max_p
+   IF (debug .OR. print_project) write(out_unit,*) ' New j of psi0',j,'max_p',max_p
    DO i=1,ndim
-      !write(out_unitp,*) i,Vec(1:nb_Vec0,i)
+      !write(out_unit,*) i,Vec(1:nb_Vec0,i)
       IF (Spsi_psi0_j(i) >= thresh*max_p) THEN
         VecToBeIncluded(i) = .TRUE.
-        IF (debug .OR. print_project) write(out_unitp,*) 'i of psi, p,Ene',i,Spsi_psi0_j(i),Ene(i)*auTOene
+        IF (debug .OR. print_project) write(out_unit,*) 'i of psi, p,Ene',i,Spsi_psi0_j(i),Ene(i)*auTOene
       ELSE
-        IF (debug) write(out_unitp,*) 'i of psi, p,Ene',i,Spsi_psi0_j(i),Ene(i)*auTOene
+        IF (debug) write(out_unit,*) 'i of psi, p,Ene',i,Spsi_psi0_j(i),Ene(i)*auTOene
       END IF
    END DO
  END DO
@@ -2033,12 +2033,12 @@ END SUBROUTINE sub_NewVec_Davidson
  CALL Sort_VecToBeIncluded_Davidson(Ene,Vec,VecToBeIncluded)
 
 
- IF (debug .OR. print_project) write(out_unitp,*) 'End projection <psi|psi0>'
+ IF (debug .OR. print_project) write(out_unit,*) 'End projection <psi|psi0>'
 
 
  !----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'END ',name_sub
  END IF
  !----------------------------------------------------------
 

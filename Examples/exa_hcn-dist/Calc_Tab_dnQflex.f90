@@ -3,7 +3,7 @@
 !    for the variable iq
 !================================================================
   SUBROUTINE calc_Tab_dnQflex(Tab_dnQflex,nb_var,Qact,nb_act,nderiv,it)
-  USE mod_system
+  USE EVR_system_m
   USE mod_dnSVM      
   IMPLICIT NONE
 
@@ -39,8 +39,8 @@
 
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_act',nb_act
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_act',nb_act
       END IF
 !---------------------------------------------------------------------
 
@@ -48,9 +48,9 @@
 !      Qact value. Rq: only ONE active variable is possible
 !---------------------------------------------------------------------
        IF (nb_act /= 1) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) ' the number of Active variable'
-         write(out_unitp,*) ' should be 1. But nb_act =',nb_act
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) ' the number of Active variable'
+         write(out_unit,*) ' should be 1. But nb_act =',nb_act
          STOP
        END IF
 
@@ -63,20 +63,20 @@
 !      initialization (only once)
 !$OMP    CRITICAL (dnQflex_CRIT)
        IF (begin) THEN
-         write(out_unitp,*) ' INITIALIZATION of ',name_sub
+         write(out_unit,*) ' INITIALIZATION of ',name_sub
          begin=.FALSE.
          nn(:) = 0
          F(:,:) = ZERO
          DO vi=2,3
            nom=nom_i('inter12___',vi)
-           write(out_unitp,*) 'read file :',nom,vi
+           write(out_unit,*) 'read file :',nom,vi
 
            CALL read_para0d(F(1,vi),nn(vi),max_points,nom,exist)
            IF ( .NOT. exist ) STOP
 
-           !write(out_unitp,*) vi,(F(k,vi),k=1,nn(vi))
+           !write(out_unit,*) vi,(F(k,vi),k=1,nn(vi))
          END DO
-         write(out_unitp,*) ' END INITIALIZATION of ',name_sub
+         write(out_unit,*) ' END INITIALIZATION of ',name_sub
 
        END IF
 !$OMP    END CRITICAL (dnQflex_CRIT)
@@ -115,10 +115,10 @@
 !---------------------------------------------------------------------
     IF (debug) THEN
       DO iQ=1,nb_var
-        write(out_unitp,*) 'tab_dnQflex : ',iQ,Qact
+        write(out_unit,*) 'tab_dnQflex : ',iQ,Qact
         CALL write_dnS(tab_dnQflex(iQ),nderiv)
       END DO
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
     END IF
 !---------------------------------------------------------------------
 

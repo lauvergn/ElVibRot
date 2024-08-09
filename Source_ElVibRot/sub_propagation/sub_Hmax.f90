@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       SUBROUTINE sub_Hmax(para_propa,para_H)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Op
       USE mod_psi,      ONLY : param_psi,Set_psi_With_index,renorm_psi, &
                        alloc_psi,dealloc_psi,alloc_array,dealloc_array, &
@@ -101,9 +101,9 @@
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub,' ',para_H%nb_tot
-        write(out_unitp,*) 'Hmin,Hmax',para_H%Hmin,para_H%Hmax
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub,' ',para_H%nb_tot
+        write(out_unit,*) 'Hmin,Hmax',para_H%Hmin,para_H%Hmax
+        flush(out_unit)
         CALL Write_ana_psi(para_propa%ana_psi)
       END IF
 !-----------------------------------------------------------
@@ -139,9 +139,9 @@
         IF (para_H%para_ReadOp%para_FileGrid%Type_FileGrid == 0) THEN
           type_Op = para_H%para_ReadOp%Type_HamilOp ! H
           IF (type_Op /= 1) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) '    Type_HamilOp MUST be equal to 1 for the usual SHADA file'
-            write(out_unitp,*) '    CHECK your data!!'
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) '    Type_HamilOp MUST be equal to 1 for the usual SHADA file'
+            write(out_unit,*) '    CHECK your data!!'
             STOP
           END IF
 
@@ -195,8 +195,8 @@
 
 !       --------------------------------------------------------
       END IF ! for para_H%para_ReadOp%para_FileGrid%Save_MemGrid_done
-      IF (debug) write(out_unitp,*) 'Hmin: ',para_H%Hmin
-      flush(out_unitp)
+      IF (debug) write(out_unit,*) 'Hmin: ',para_H%Hmin
+      flush(out_unit)
 
 !     --------------------------------------------------------
 !     -  Hmax ------------------------------------------------
@@ -204,7 +204,7 @@
       para_H%Hmax = -huge(ONE)
 
       CALL init_psi(psi,para_H,para_H%cplx)
-      IF (debug) write(out_unitp,*) 'nb_tot',psi%nb_tot
+      IF (debug) write(out_unit,*) 'nb_tot',psi%nb_tot
       CALL alloc_psi(psi,BasisRep =.TRUE.)
 
       IF(keep_MPI) psi = ZERO
@@ -213,7 +213,7 @@
 
       IF(keep_MPI) CALL renorm_psi(psi,BasisRep=.TRUE.)
 
-      IF (debug) write(out_unitp,*) 'psi%symab',psi%symab
+      IF (debug) write(out_unit,*) 'psi%symab',psi%symab
 
       IF(keep_MPI) Hpsi = psi
 
@@ -223,16 +223,16 @@
 
       IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(para_H%Hmax,size1_MPI,root_MPI)
 
-      IF (debug) write(out_unitp,*) 'Hmax: ',para_H%Hmax
-      flush(out_unitp)
+      IF (debug) write(out_unit,*) 'Hmax: ',para_H%Hmax
+      flush(out_unit)
 
       CALL dealloc_psi(psi)
       CALL dealloc_psi(Hpsi)
 !       --------------------------------------------------------
 
-      write(out_unitp,*) 'non-auto : Hmin,Hmax',para_H%Hmin,para_H%Hmax
-      write(out_unitp,*) 'nb_tot',para_H%nb_tot
-      flush(out_unitp)
+      write(out_unit,*) 'non-auto : Hmin,Hmax',para_H%Hmin,para_H%Hmax
+      write(out_unit,*) 'nb_tot',para_H%nb_tot
+      flush(out_unit)
 
       IF (para_H%read_Op) THEN
         IF (para_H%cplx) THEN
@@ -244,7 +244,7 @@
         END IF
         para_propa%Hmax = para_H%Hmax
         para_propa%Hmin = para_H%Hmin
-        write(out_unitp,*) 'read_Op : Hmin,Hmax',para_H%Hmin,para_H%Hmax
+        write(out_unit,*) 'read_Op : Hmin,Hmax',para_H%Hmin,para_H%Hmax
         RETURN
       END IF
 
@@ -258,7 +258,7 @@
         END IF
         para_propa%Hmax = para_H%Hmax
         para_propa%Hmin = para_H%Hmin
-        write(out_unitp,*) 'spectral : Hmin,Hmax',para_H%Hmin,para_H%Hmax
+        write(out_unit,*) 'spectral : Hmin,Hmax',para_H%Hmin,para_H%Hmax
         RETURN
       END IF
 
@@ -271,7 +271,7 @@ relax = .TRUE.
         IF (relax) THEN
           CALL sub_Auto_HmaxHmin_relax(para_propa,para_H)
         ELSE
-          write(out_unitp,*) 'Davidson Hmin Hmax' ; flush(out_unitp)
+          write(out_unit,*) 'Davidson Hmin Hmax' ; flush(out_unit)
           para_propa%para_Davidson%nb_WP            = 0
           para_propa%para_Davidson%lower_states     = .TRUE.
           para_propa%para_Davidson%project_WP0      = .FALSE.
@@ -312,7 +312,7 @@ relax = .TRUE.
           CALL dealloc_NParray(Ene0,"Ene0",name_sub)
           nullify(Tab_Psi)
 
-          write(out_unitp,*) 'END Davidson Hmin Hmax' ; flush(out_unitp)
+          write(out_unit,*) 'END Davidson Hmin Hmax' ; flush(out_unit)
 
 
         END IF
@@ -322,9 +322,9 @@ relax = .TRUE.
       para_propa%Hmin = para_H%Hmin
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_Hmax
@@ -332,7 +332,7 @@ relax = .TRUE.
 
 !=======================================================================================
       SUBROUTINE sub_Auto_HmaxHmin_relax(para_propa,para_H)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,      ONLY : param_psi,renorm_psi,alloc_psi,dealloc_psi,&
                                Set_psi_With_index,Write_ana_psi
       USE mod_Op
@@ -360,8 +360,8 @@ relax = .TRUE.
       logical,parameter :: debug=.FALSE.
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      write(out_unitp,*) 'BEGINNING ',name_sub,' ',para_H%nb_tot
-      write(out_unitp,*) 'Hmin,Hmax',para_H%Hmin,para_H%Hmax
+      write(out_unit,*) 'BEGINNING ',name_sub,' ',para_H%nb_tot
+      write(out_unit,*) 'Hmin,Hmax',para_H%Hmin,para_H%Hmax
       IF (debug) THEN
         CALL Write_ana_psi(para_propa%ana_psi)
       END IF
@@ -443,13 +443,13 @@ relax = .TRUE.
 
         para_propa%para_poly%DHmax        = ZERO
 
-        write(out_unitp,*) 'auto : Hmin,Hmax',para_H%Hmin,para_H%Hmax
+        write(out_unit,*) 'auto : Hmin,Hmax',para_H%Hmin,para_H%Hmax
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_Auto_HmaxHmin_relax
@@ -457,7 +457,7 @@ relax = .TRUE.
 !=======================================================================================
       ! we are using the fact that chebychev propagation is very sensitive to the spectral range
       SUBROUTINE sub_Auto_Hmax_cheby(para_propa,para_H)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,      ONLY : param_psi,renorm_psi,alloc_psi,dealloc_psi,&
                                Set_Random_psi,Write_ana_psi
       USE mod_Op
@@ -487,8 +487,8 @@ relax = .TRUE.
       logical,parameter :: debug=.FALSE.
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      write(out_unitp,*) 'BEGINNING ',name_sub,' ',para_H%nb_tot
-      write(out_unitp,*) 'Hmin,Hmax',para_H%Hmin,para_H%Hmax
+      write(out_unit,*) 'BEGINNING ',name_sub,' ',para_H%nb_tot
+      write(out_unit,*) 'Hmin,Hmax',para_H%Hmin,para_H%Hmax
       IF (debug) THEN
 
       END IF
@@ -525,16 +525,16 @@ relax = .TRUE.
 
         CALL march_gene(T,WP,WP0,1,.FALSE.,para_H,para_propa)
 
-        write(out_unitp,*) 'March_cheby with WPdeltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'Opt npoly',para_propa%para_poly%npoly_Opt
+        write(out_unit,*) 'March_cheby with WPdeltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'Opt npoly',para_propa%para_poly%npoly_Opt
 
         nb_HPsi = para_propa%para_poly%npoly_Opt*(ONE+para_propa%WPTmax/para_propa%WPdeltaT)
         IF (nb_HPsi < nb_HPsi_opt) THEN
           nb_HPsi_opt = nb_HPsi
           DeltaT_opt  = para_propa%WPdeltaT
         END IF
-        write(out_unitp,*) '# HPsi',nb_HPsi
-        write(out_unitp,*) 'opt nb_HPsi,DeltaT_opt',nb_HPsi_opt,DeltaT_opt
+        write(out_unit,*) '# HPsi',nb_HPsi
+        write(out_unit,*) 'opt nb_HPsi,DeltaT_opt',nb_HPsi_opt,DeltaT_opt
 
 
         IF (para_propa%WPdeltaT == WPdeltaT) EXIT
@@ -545,8 +545,8 @@ relax = .TRUE.
      END DO
      para_propa%WPdeltaT     = WPdeltaT
 
-      write(out_unitp,*) 'Optimal WPdeltaT',DeltaT_opt
-      write(out_unitp,*) '# HPsi (for the whole propagation)',nb_HPsi_opt
+      write(out_unit,*) 'Optimal WPdeltaT',DeltaT_opt
+      write(out_unit,*) '# HPsi (for the whole propagation)',nb_HPsi_opt
       para_propa%WPdeltaT     = DeltaT_opt
 
 
@@ -567,13 +567,13 @@ relax = .TRUE.
 
      para_H%Hmax = para_propa%para_poly%Hmax
      para_H%Hmin = para_propa%para_poly%Hmin
-      write(out_unitp,*) 'auto : Hmin,Hmax',para_H%Hmin,para_H%Hmax
+      write(out_unit,*) 'auto : Hmin,Hmax',para_H%Hmin,para_H%Hmax
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
       END IF
-      write(out_unitp,*) 'END ',name_sub
+      write(out_unit,*) 'END ',name_sub
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_Auto_Hmax_cheby

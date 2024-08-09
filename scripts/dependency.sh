@@ -18,15 +18,6 @@ do
      echo $ff " \\" >> $SRCFile
      awk -f scripts/mod2file.awk $ff90 >> $name_dep
    fi
-
-   #awk -f scripts/mod2file.awk $ff90 >> $name_dep
-   #echo $ff90 | awk '{name=$1
-   #n=split(name,tab,"/")
-  #if (n > 0) {
-  #  l=length(tab[n])
-  #  print tab[n] " \\"
-  #}
-  #}' >> $SRCFile
 done
 echo "#===============================================" >> $name_dep
 for ff90 in $list
@@ -35,5 +26,4 @@ do
    if grep -vq $ff <<< $ExcludeList;  then
      awk -f scripts/dep2.awk $ff90 >> $name_dep
    fi
-   #awk -f scripts/dep2.awk $ff90 >> $name_dep
 done

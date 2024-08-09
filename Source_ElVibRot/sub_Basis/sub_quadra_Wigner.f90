@@ -52,7 +52,7 @@
 !
 !=============================================================
       SUBROUTINE sub_quadra_Wigner(base)
-      USE mod_system
+      USE EVR_system_m
       USE mod_nDindex
       USE mod_basis
       IMPLICIT NONE
@@ -93,10 +93,10 @@
        nq = get_nq_FROM_basis(base)
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'nb,nq',base%nb,nq
-         write(out_unitp,*) 'L_SparseBasis',base%L_SparseBasis
-         write(out_unitp,*) 'L_SparseGrid',base%L_SparseGrid
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'nb,nq',base%nb,nq
+         write(out_unit,*) 'L_SparseBasis',base%L_SparseBasis
+         write(out_unit,*) 'L_SparseGrid',base%L_SparseGrid
        END IF
 !-----------------------------------------------------------
       base%packed            = .TRUE.
@@ -110,13 +110,13 @@
 !      nb and nq
 !----------------------------------------------------------------------------
       nb = base%nb
-      write(out_unitp,*) '    Basis: Wigner (3D-rotation)'
-      write(out_unitp,*) '      old nb_Wigner',nb
+      write(out_unit,*) '    Basis: Wigner (3D-rotation)'
+      write(out_unit,*) '      old nb_Wigner',nb
 
       IF (base%xPOGridRep_done) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) 'xPOGridRep_done=t and a 3D-basis is impossible'
-        write(out_unitp,*) 'CHECK the source'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'xPOGridRep_done=t and a 3D-basis is impossible'
+        write(out_unit,*) 'CHECK the source'
         STOP
       END IF
 
@@ -131,8 +131,8 @@
       max_m = 2*max_j+1
       max_k = 2*max_j+1
 
-      write(out_unitp,*) '      new nb_Wigner (without symmetry): ',nb
-      write(out_unitp,*) '      max_j,max_k,max_m',max_j,max_k,max_m
+      write(out_unit,*) '      new nb_Wigner (without symmetry): ',nb
+      write(out_unit,*) '      max_j,max_k,max_m',max_j,max_k,max_m
 
       IF (base%L_SparseGrid > -1) THEN
          max_qj = Get_nq_FROM_l_OF_PrimBasis(base%L_SparseGrid,base)-1
@@ -141,10 +141,10 @@
          max_qj = -1
          max_qj = max_j
       END IF
-      write(out_unitp,*) 'max_qj',max_qj
+      write(out_unit,*) 'max_qj',max_qj
 
 
-      write(out_unitp,*) '      old nb_quadra',nq
+      write(out_unit,*) '      old nb_quadra',nq
 
       max_qj = int(sqrt(real(nq,kind=Rkind)))
       IF (max_qj <= max_j) max_qj = max_j+1
@@ -153,8 +153,8 @@
 
       nq = max_qj*max_qm*max_qk
 
-      write(out_unitp,*) '      new nb_quadra',nq
-      write(out_unitp,*) '      max_qj,max_qk,max_qm',max_qj,max_qk,max_qm
+      write(out_unit,*) '      new nb_quadra',nq
+      write(out_unit,*) '      max_qj,max_qk,max_qm',max_qj,max_qk,max_qm
 
       CALL Set_nq_OF_basis(base,nq)
 
@@ -194,9 +194,9 @@
       END DO
 
       IF (debug) THEN
-        write(out_unitp,*) 'grid for the Ylm. nq:',nq
+        write(out_unit,*) 'grid for the Ylm. nq:',nq
         DO iq=1,nq
-          write(out_unitp,*) base%x(:,iq)
+          write(out_unit,*) base%x(:,iq)
         END DO
       END IF
 
@@ -252,7 +252,7 @@
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(base)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 

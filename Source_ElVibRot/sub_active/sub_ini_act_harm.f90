@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       SUBROUTINE sub_qa_bhe(para_AllOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Op
       USE mod_PrimOp
       IMPLICIT NONE
@@ -84,19 +84,19 @@
       nb_act1    = para_AllOp%tab_Op(1)%mole%nb_act1
       nb_inact2n = para_AllOp%tab_Op(1)%mole%nb_inact2n
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'nb_Op',size(para_AllOp%tab_Op)
-        write(out_unitp,*) 'nb_qa',para_AllOp%tab_Op(1)%nb_qa
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'nb_Op',size(para_AllOp%tab_Op)
+        write(out_unit,*) 'nb_qa',para_AllOp%tab_Op(1)%nb_qa
 
         CALL RecWrite_basis(para_AllOp%tab_Op(1)%para_AllBasis%BasisnD)
 
-        write(out_unitp,*) 'HarD,pot_cplx',                             &
+        write(out_unit,*) 'HarD,pot_cplx',                             &
                  para_AllOp%tab_Op(1)%para_ReadOp%HarD,                 &
                  para_AllOp%tab_Op(1)%para_ReadOp%pot_cplx
 
-        write(out_unitp,*) 'nb_act1',nb_act1
-        write(out_unitp,*) 'nb_inact2n',nb_inact2n
-        write(out_unitp,*) 'nb_inact',para_AllOp%tab_Op(1)%mole%nb_inact
+        write(out_unit,*) 'nb_act1',nb_act1
+        write(out_unit,*) 'nb_inact2n',nb_inact2n
+        write(out_unit,*) 'nb_inact',para_AllOp%tab_Op(1)%mole%nb_inact
       END IF
 !-----------------------------------------------------------
 
@@ -210,9 +210,9 @@
       END IF
 
       IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid) THEN
-        write(out_unitp,*) ' TEST:  Operators at Qdyn0'
+        write(out_unit,*) ' TEST:  Operators at Qdyn0'
       ELSE
-        IF (print_level > 0) write(out_unitp,*) 'Grid qact Veff T1 T2'
+        IF (print_level > 0) write(out_unit,*) 'Grid qact Veff T1 T2'
       END IF
 
       IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Type_FileGrid /= 0) THEN
@@ -235,12 +235,12 @@
 
         CALL dealloc_OldParam(OldPara)
 
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
         CALL time_perso('sub_qa_bhe')
-        write(out_unitp,*) ' VIB: END ',name_sub
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END ',name_sub
+        write(out_unit,*) '================================================='
+        write(out_unit,*)
         STOP 'test ini_act'
       END IF
 
@@ -263,17 +263,17 @@
       IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Save_FileGrid) THEN
         IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Type_FileGrid == 0) THEN
           IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Restart_Grid) THEN
-            write(out_unitp,*) '----------------------------------------'
-            write(out_unitp,*) 'Restart_Grid=t'
+            write(out_unit,*) '----------------------------------------'
+            write(out_unit,*) 'Restart_Grid=t'
             CALL check_HADA(iqf,para_AllOp%tab_Op(1)%file_grid)
             IF (iqf > para_AllOp%tab_Op(1)%nb_qa) iqf = 0
             iqf = max(para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%First_GridPoint,iqf+1)
-            write(out_unitp,*) 'First new grid point:',iqf
-            write(out_unitp,*) '----------------------------------------'
+            write(out_unit,*) 'First new grid point:',iqf
+            write(out_unit,*) '----------------------------------------'
           ELSE
             iqf = para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%First_GridPoint
             lformatted = para_AllOp%tab_Op(1)%file_grid%formatted
-            IF (print_level > 1) write(out_unitp,*) 'file_HADA%formatted',lformatted
+            IF (print_level > 1) write(out_unit,*) 'file_HADA%formatted',lformatted
             para_AllOp%tab_Op(1)%file_grid%nb_thread = Grid_maxth
             CALL file_delete(para_AllOp%tab_Op(1)%file_grid)
             para_AllOp%tab_Op(1)%file_grid%formatted = lformatted
@@ -285,10 +285,10 @@
       END IF
 
       IF (print_level > 1) THEN
-         write(out_unitp,*) 'num_grid',                                  &
+         write(out_unit,*) 'num_grid',                                  &
          para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%First_GridPoint,&
          para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Last_GridPoint
-         write(out_unitp,*) 'num_grid iqf',iqf
+         write(out_unit,*) 'num_grid iqf',iqf
       END IF
 
       IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Save_MemGrid_done .AND.    &
@@ -296,16 +296,16 @@
 
       !-----------------------------------------------------
       !-- Multidimensional loop ----------------------------
-      IF (print_level > 1) write(out_unitp,*) 'nb_thread in ',name_sub,' : ',Grid_maxth
+      IF (print_level > 1) write(out_unit,*) 'nb_thread in ',name_sub,' : ',Grid_maxth
 
       CALL Tune_grid(para_AllOp)
 
 
       IF (.NOT. para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid .AND.    &
          print_level > 0 .AND. para_AllOp%tab_Op(1)%nb_qa > max_nb_G_FOR_print) THEN
-        write(out_unitp,'(a)') 'Grid (%): [--0-10-20-30-40-50-60-70-80-90-100]'
-        write(out_unitp,'(a)',ADVANCE='no') 'Grid (%): ['
-        flush(out_unitp)
+        write(out_unit,'(a)') 'Grid (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+        write(out_unit,'(a)',ADVANCE='no') 'Grid (%): ['
+        flush(out_unit)
       END IF
 
       max_Sii = ZERO
@@ -314,7 +314,7 @@
 !$OMP   PARALLEL &
 !$OMP   DEFAULT(NONE) &
 !$OMP   SHARED(para_AllOp,max_Sii,max_Sij,iqf) &
-!$OMP   PRIVATE(iq,out_unitp,freq_only,OldPara) &
+!$OMP   PRIVATE(iq,out_unit,freq_only,OldPara) &
 !$OMP   NUM_THREADS(Grid_maxth)
         CALL dealloc_OldParam(OldPara)
 !$OMP   BARRIER
@@ -346,7 +346,7 @@
 
         IF (.NOT. para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid .AND.  &
          print_level > 0 .AND. para_AllOp%tab_Op(1)%nb_qa > max_nb_G_FOR_print) THEN
-         IF(MPI_id==0) write(out_unitp,'(a)',ADVANCE='yes') '----]'
+         IF(MPI_id==0) write(out_unit,'(a)',ADVANCE='yes') '----]'
       END IF
 
       DO iOp=1,para_AllOp%nb_Op
@@ -362,12 +362,12 @@
         END IF
       END DO
 
-      flush(out_unitp)
+      flush(out_unit)
       !- END multidimentional loop ---------------------------------------
       !-------------------------------------------------------------------
 
  999  CONTINUE
-      flush(out_unitp)
+      flush(out_unit)
 
       !-------------------------------------------------------------------
       !- Analysis of the grid (zero or constant terms)
@@ -388,7 +388,7 @@
       ! write dnTError
       IF (associated(para_AllOp%tab_Op(1)%mole%tab_Cart_transfo)) THEN
       IF (para_AllOp%tab_Op(1)%mole%tab_Cart_transfo(1)%CartesianTransfo%check_dnT) THEN
-        IF(MPI_id==0) write(out_unitp,*) ' Error det(dnT-1) ?',                        &
+        IF(MPI_id==0) write(out_unit,*) ' Error det(dnT-1) ?',                        &
                 para_AllOp%tab_Op(1)%mole%tab_Cart_transfo(1)%CartesianTransfo%dnTErr(:)
       END IF
       END IF
@@ -397,16 +397,16 @@
       !-------------------------------------------------------------------
       ! test the number of elements for the RPH transfo
       IF (associated(para_AllOp%tab_Op(1)%mole%RPHTransfo) .AND. MPI_id==0) THEN
-        write(out_unitp,*) '------------------------------'
-        write(out_unitp,*) 'Number of RPH points (active coordinates)', &
+        write(out_unit,*) '------------------------------'
+        write(out_unit,*) 'Number of RPH points (active coordinates)', &
           size(para_AllOp%tab_Op(1)%mole%RPHTransfo%tab_RPHpara_AT_Qact1)
-        write(out_unitp,*) '------------------------------'
+        write(out_unit,*) '------------------------------'
       END IF
       !-------------------------------------------------------------------
 
       !-------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
       !-------------------------------------------------------------------
 
@@ -415,23 +415,23 @@
       IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Last_GridPoint <       &
           para_AllOp%tab_Op(1)%nb_qa .OR.                                       &
           para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%First_GridPoint > 1) THEN
-        write(out_unitp,*) 'WARNING : the grid is incomplete'
-        write(out_unitp,*) para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%First_GridPoint, &
+        write(out_unit,*) 'WARNING : the grid is incomplete'
+        write(out_unit,*) para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%First_GridPoint, &
                            para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Last_GridPoint
-        write(out_unitp,*)
-        write(out_unitp,*)
+        write(out_unit,*)
+        write(out_unit,*)
         CALL time_perso('sub_qa_bhe')
-        write(out_unitp,*) ' VIB: END ',name_sub
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*)
-        write(out_unitp,*) 'STOP in ',name_sub
+        write(out_unit,*) ' VIB: END ',name_sub
+        write(out_unit,*) '================================================='
+        write(out_unit,*)
+        write(out_unit,*) 'STOP in ',name_sub
         STOP
       END IF
       END IF
 
   END SUBROUTINE sub_qa_bhe
   SUBROUTINE Tune_grid(para_AllOp)
-  USE mod_system
+  USE EVR_system_m
   USE mod_Op
   USE mod_PrimOp
   IMPLICIT NONE
@@ -456,17 +456,17 @@
   !logical, parameter :: debug = .TRUE.
   !-----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'BEGINNING ',name_sub
   END IF
   !-----------------------------------------------------------
 
   IF (.NOT. Tune_Grid_omp .OR. Grid_maxth < 2) RETURN
   IF (para_AllOp%tab_Op(1)%mole%nb_inact2n > 0) RETURN ! we don't tune for HADA or cHAC
 
-  write(out_unitp,*) '============================================'
-  write(out_unitp,*) '== Tuning the number of OMP threads ========'
+  write(out_unit,*) '============================================'
+  write(out_unit,*) '== Tuning the number of OMP threads ========'
 
-  write(out_unitp,*) ' Number of threads (grid):',Grid_maxth
+  write(out_unit,*) ' Number of threads (grid):',Grid_maxth
 
 !-----------------------------------------------------
 !!! How many points do we tests ???
@@ -478,9 +478,9 @@
   CALL set_print_level(-1,force=.TRUE.)
 
   IF (para_AllOp%tab_Op(1)%nb_qa < 8*Grid_maxth) THEN
-    write(out_unitp,*) 'The number of grid points is too small, no Tunning'
-    write(out_unitp,*) 'Optimal threads: ',Grid_maxth
-    write(out_unitp,*) '============================================'
+    write(out_unit,*) 'The number of grid points is too small, no Tunning'
+    write(out_unit,*) 'Optimal threads: ',Grid_maxth
+    write(out_unit,*) '============================================'
     RETURN
   END IF
 
@@ -491,7 +491,7 @@
   RealTime(1)      = Delta_RealTime(GridTime)
   DO   ! loop to increase max_nq
 
-    IF (debug) write(out_unitp,*) '  max_nq ',max_nq
+    IF (debug) write(out_unit,*) '  max_nq ',max_nq
 
     DO iq=1,max_nq
 
@@ -499,15 +499,15 @@
         para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid,OldPara)
     END DO
     RealTime(1) = Delta_RealTime(GridTime)
-    IF (debug) write(out_unitp,*) '  RealTime(1) ',RealTime(1)
+    IF (debug) write(out_unit,*) '  RealTime(1) ',RealTime(1)
 
     IF (RealTime(1) > TEN) exit ! 10 seconds ???
     IF (8*max_nq*Grid_maxth > para_AllOp%tab_Op(1)%nb_qa) EXIT
     max_nq = max_nq * 2
 
   END DO
-  write(out_unitp,*) '   Tuning with ',max_nq,' grid points'
-  flush(out_unitp)
+  write(out_unit,*) '   Tuning with ',max_nq,' grid points'
+  flush(out_unit)
   CALL dealloc_OldParam(OldPara)
   !now we have an optimal max_nq (about 10 seconds of calculation)
 !-----------------------------------------------------
@@ -519,13 +519,13 @@
   opt_Grid_maxth  = Grid_maxth
   DO i_maxth=1,Grid_maxth
 
-    IF (debug) write(out_unitp,*) '   i_maxth ',i_maxth
-    flush(out_unitp)
+    IF (debug) write(out_unit,*) '   i_maxth ',i_maxth
+    flush(out_unit)
 
     !$OMP   PARALLEL                                  &
     !$OMP   DEFAULT(NONE)                             &
     !$OMP   SHARED(para_AllOp,max_Sii,max_Sij,max_nq) &
-    !$OMP   PRIVATE(iq,out_unitp,freq_only,OldPara)   &
+    !$OMP   PRIVATE(iq,out_unit,freq_only,OldPara)   &
     !$OMP   NUM_THREADS(i_maxth)
 
     CALL dealloc_OldParam(OldPara)
@@ -542,8 +542,8 @@
     !$OMP   END PARALLEL
 
     RealTime(i_maxth) = Delta_RealTime(GridTime)
-    write(out_unitp,*) 'With ',i_maxth,'threads, Delta Real Time',RealTime(i_maxth)
-    flush(out_unitp)
+    write(out_unit,*) 'With ',i_maxth,'threads, Delta Real Time',RealTime(i_maxth)
+    flush(out_unit)
     IF (RealTime(i_maxth) < Opt_RealTime) THEN
       IF (RealTime(i_maxth) > 0) THEN
         Opt_RealTime   = RealTime(i_maxth)
@@ -558,13 +558,13 @@
   CALL set_print_level(print_level_save,force=.TRUE.)
 
   Grid_maxth = opt_Grid_maxth
-  write(out_unitp,*) 'Optimal threads: ',Grid_maxth,' Delta Real Time',RealTime(Grid_maxth)
-  write(out_unitp,*) '    => Speed-up: ',RealTime(1)/RealTime(Grid_maxth)
-  write(out_unitp,*) '============================================'
+  write(out_unit,*) 'Optimal threads: ',Grid_maxth,' Delta Real Time',RealTime(Grid_maxth)
+  write(out_unit,*) '    => Speed-up: ',RealTime(1)/RealTime(Grid_maxth)
+  write(out_unit,*) '============================================'
 
   !-------------------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
   !-------------------------------------------------------------------
   

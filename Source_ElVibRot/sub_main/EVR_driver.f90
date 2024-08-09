@@ -132,7 +132,7 @@ SUBROUTINE init_EVR_new()
 
         ! version and copyright statement
         CALL versionEVRT(.TRUE.)
-        write(out_unitp,*)
+        write(out_unit,*)
         IF(Popenmpi) THEN
           CALL time_perso('MPI start, initial time')
           CALL MPI_ini_messaage()
@@ -141,37 +141,37 @@ SUBROUTINE init_EVR_new()
         !> automatically decide the reading of namelist, from file or shell
         !> NOTE: remember to use vib to ensure "rm namelist" to prevent the
         !> reading of old namelist
-        CALL file_open2('namelist',in_unitp,old=.TRUE.,err_file=err)
+        CALL file_open2('namelist',in_unit,old=.TRUE.,err_file=err)
         IF(err/=0) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) '   "namelist" file does not exist.'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) '   "namelist" file does not exist.'
           STOP 'ERROR: namelist file does not exist'
         END IF
-        read(in_unitp,system,IOSTAT=err)
+        read(in_unit,system,IOSTAT=err)
 
         IF (err < 0) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' End-of-file or End-of-record'
-          write(out_unitp,*) ' The namelist "system" is probably absent'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' End-of-file or End-of-record'
+          write(out_unit,*) ' The namelist "system" is probably absent'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
         ELSE IF (err > 0) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' Some parameter names of the namelist "system" are probaly wrong'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' Some parameter names of the namelist "system" are probaly wrong'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
         END IF
 
         IF (base_FileName /= "" .AND. File_path /= "") THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' base_FileName and File_path are both set!!'
-          write(out_unitp,*) ' You MUST define only File_path.'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' base_FileName and File_path are both set!!'
+          write(out_unit,*) ' You MUST define only File_path.'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
         ELSE IF (base_FileName /= "") THEN
           File_path = base_FileName
@@ -185,22 +185,22 @@ SUBROUTINE init_EVR_new()
                      nDGrid .OR. optimization /= 0 .OR. analysis_only)
 
        IF (.NOT. EVR) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' This subroutine is used only to initialized ElVibRot dynamics'
-          write(out_unitp,*) ' => EVR=T'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' This subroutine is used only to initialized ElVibRot dynamics'
+          write(out_unit,*) ' => EVR=T'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
        END IF
        IF (intensity_only) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' This subroutine is used only to initialized ElVibRot dynamics'
-          write(out_unitp,*) ' intensity_only CANNOT be true'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' This subroutine is used only to initialized ElVibRot dynamics'
+          write(out_unit,*) ' intensity_only CANNOT be true'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
        END IF
-        IF (printlevel > 1) write(out_unitp,system)
+        IF (printlevel > 1) write(out_unit,system)
 
         para_EVRT_calc%optimization     = optimization
         para_EVRT_calc%EVR              = EVR
@@ -213,7 +213,7 @@ SUBROUTINE init_EVR_new()
         para_EVRT_calc%nDGrid           = nDGrid
         para_EVRT_calc%main_test        = main_test
 
-        CALL set_print_level(printlevel,force=.TRUE.) ! print_level = printlevel ! print_level is in mod_system.mod
+        CALL set_print_level(printlevel,force=.TRUE.) ! print_level = printlevel ! print_level is in EVR_system_m.mod
 
         EneIO_format  = EneFormat
         RMatIO_format = RMatFormat
@@ -221,7 +221,7 @@ SUBROUTINE init_EVR_new()
                     ",' +i'," // trim(adjustl(CMatFormat)) // ",')'"
 
 
-        openmp              = Popenmp ! openmp is in mod_system.mod
+        openmp              = Popenmp ! openmp is in EVR_system_m.mod
         openmpi             = Popenmpi
 
         IF (.NOT. openmp) THEN
@@ -276,45 +276,45 @@ SUBROUTINE init_EVR_new()
         END IF
 
         IF(MPI_id==0 .AND. .NOT. openmpi) THEN
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) 'OpenMP parameters:'
-          write(out_unitp,*) 'Max number of threads:           ',maxth
-          write(out_unitp,*) 'MatOp_omp,      MatOp_maxth      ',MatOp_omp,MatOp_maxth
-          write(out_unitp,*) 'OpPsi_omp,      OpPsi_maxth      ',OpPsi_omp,OpPsi_maxth
-          write(out_unitp,*) 'BasisTOGrid_omp,BasisTOGrid_maxth',BasisTOGrid_omp,BasisTOGrid_maxth
-          write(out_unitp,*) 'Grid_omp,       Grid_maxth       ',Grid_omp,Grid_maxth
-          write(out_unitp,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
-          write(out_unitp,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) 'OpenMP parameters:'
+          write(out_unit,*) 'Max number of threads:           ',maxth
+          write(out_unit,*) 'MatOp_omp,      MatOp_maxth      ',MatOp_omp,MatOp_maxth
+          write(out_unit,*) 'OpPsi_omp,      OpPsi_maxth      ',OpPsi_omp,OpPsi_maxth
+          write(out_unit,*) 'BasisTOGrid_omp,BasisTOGrid_maxth',BasisTOGrid_omp,BasisTOGrid_maxth
+          write(out_unit,*) 'Grid_omp,       Grid_maxth       ',Grid_omp,Grid_maxth
+          write(out_unit,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
+          write(out_unit,*) '========================================='
 
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) 'File_path: ',trim(adjustl(File_path))
-          write(out_unitp,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) 'File_path: ',trim(adjustl(File_path))
+          write(out_unit,*) '========================================='
         ENDIF ! for MPI_id=0
 
         para_mem%max_mem    = max_mem/Rkind
 
-        close(in_unitp)  ! CALL file_close cannot be used
+        close(in_unit)  ! CALL file_close cannot be used
 
   allocate(tab_EVRT(maxth))
   DO ith=1,maxth
-    CALL file_open2('namelist',in_unitp,old=.TRUE.,err_file=err)
+    CALL file_open2('namelist',in_unit,old=.TRUE.,err_file=err)
 
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) ' ElVibRot calculation',ith
-          write(out_unitp,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) ' ElVibRot calculation',ith
+          write(out_unit,*) '========================================='
         ENDIF ! for MPI_id=0
 
         ! from vib.f90 file
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING ini_data'
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING ini_data'
           CALL time_perso('ini_data ini')
-          write(out_unitp,*)
+          write(out_unit,*)
         ENDIF
         !CALL system_mem_usage(memory_RSS,'before ini_data')
 
@@ -328,22 +328,22 @@ SUBROUTINE init_EVR_new()
         !CALL system_mem_usage(memory_RSS,'after ini_data')
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
+          write(out_unit,*)
           CALL time_perso('ini_data end')
-          write(out_unitp,*)
-          write(out_unitp,*) ' VIB: END ini_data'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) ' VIB: END ini_data'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         ENDIF
 
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) ith
-          write(out_unitp,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) ith
+          write(out_unit,*) '========================================='
         ENDIF ! for MPI_id=0
-     close(in_unitp)   ! CALL file_close cannot be used
-     flush(out_unitp)
+     close(in_unit)   ! CALL file_close cannot be used
+     flush(out_unit)
   END DO
 
 END SUBROUTINE init_EVR_new
@@ -382,10 +382,10 @@ SUBROUTINE get_TnumRefGeom_Q0_new(Q0,nb_Q0,Qdyn0)
   !$ ith=OMP_GET_THREAD_NUM()+1
 
   IF (nb_Q0 /= tab_EVRT(ith)%mole%nb_var) THEN
-    write(out_unitp,*) ' ERROR in get_TnumRefGeom_Q0'
-    write(out_unitp,*) ' The size of Q0 is different from mole%nb_var'
-    write(out_unitp,*) '   nb_Q0 ',nb_Q0
-    write(out_unitp,*) '   nb_var',tab_EVRT(ith)%mole%nb_var
+    write(out_unit,*) ' ERROR in get_TnumRefGeom_Q0'
+    write(out_unit,*) ' The size of Q0 is different from mole%nb_var'
+    write(out_unit,*) '   nb_Q0 ',nb_Q0
+    write(out_unit,*) '   nb_var',tab_EVRT(ith)%mole%nb_var
     STOP 'ERROR in get_TnumRefGeom_Q0'
   END IF
 
@@ -415,10 +415,10 @@ SUBROUTINE Modify_TnumRefGeom_Q0_new(Q0,nb_Q0,Qdyn0)
   !$ ith=OMP_GET_THREAD_NUM()+1
 
   IF (nb_Q0 /= tab_EVRT(ith)%mole%nb_var) THEN
-    write(out_unitp,*) ' ERROR in Modify_TnumRefGeom_Q0_new'
-    write(out_unitp,*) ' The size of Q0 is different from mole%nb_var'
-    write(out_unitp,*) '   nb_Q0 ',nb_Q0
-    write(out_unitp,*) '   nb_var',tab_EVRT(ith)%mole%nb_var
+    write(out_unit,*) ' ERROR in Modify_TnumRefGeom_Q0_new'
+    write(out_unit,*) ' The size of Q0 is different from mole%nb_var'
+    write(out_unit,*) '   nb_Q0 ',nb_Q0
+    write(out_unit,*) '   nb_var',tab_EVRT(ith)%mole%nb_var
     STOP 'ERROR in Modify_TnumRefGeom_Q0'
   END IF
 
@@ -508,7 +508,7 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 
   ith=1
   !$ ith=OMP_GET_THREAD_NUM()+1
-  write(out_unitp,*) 'ith',ith ; flush(out_unitp)
+  write(out_unit,*) 'ith',ith ; flush(out_unit)
 
       para_H => tab_EVRT(ith)%para_AllOp%tab_Op(1)
 
@@ -521,21 +521,21 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 !      Grid_allco=.FALSE.
 !#endif
       IF(MPI_id==0 .AND. print_level > -1) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' VIB: BEGINNING sub_qa_bhe'
+        write(out_unit,*)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' VIB: BEGINNING sub_qa_bhe'
         CALL time_perso('sub_qa_bhe ini')
-        write(out_unitp,*)
+        write(out_unit,*)
       ENDIF
 
       IF (tab_EVRT(ith)%para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Read_FileGrid) THEN ! test only for H
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) ' The grid of operators (S V Veff T1 and T2) will be read'
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) ' The grid of operators (S V Veff T1 and T2) will be read'
+          write(out_unit,*)
         ENDIF
         IF (tab_EVRT(ith)%para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Test_Grid) THEN
-          IF(MPI_id==0) write(out_unitp,*) 'Test_Grid=.TRUE. => STOP in vib'
+          IF(MPI_id==0) write(out_unit,*) 'Test_Grid=.TRUE. => STOP in vib'
           STOP
         END IF
       END IF
@@ -554,11 +554,11 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
       END IF
 
       IF(MPI_id==0 .AND. print_level > -1) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL time_perso('sub_qa_bhe end')
-        write(out_unitp,*) ' VIB: END sub_qa_bhe'
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END sub_qa_bhe'
+        write(out_unit,*) '================================================='
+        write(out_unit,*)
       ENDIF
 
 !#if(run_MPI)
@@ -569,13 +569,13 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 !---------------------------------------------------------------------------------------
       IF (para_H%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC .AND. para_H%nb_bi>1) THEN
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING HADA contraction',          &
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING HADA contraction',          &
                                    tab_EVRT(ith)%para_AllBasis%BasisnD%nb
           CALL time_perso('HADA contraction')
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
         ENDIF
 
         CALL sub_MatOp_HADA(para_H,tab_EVRT(ith)%para_ana,                  &
@@ -583,12 +583,12 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
                                                    tab_EVRT(ith)%const_phys)
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('HADA contraction')
-          write(out_unitp,*) ' VIB: END HADA contraction'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END HADA contraction'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         ENDIF
 
         tab_EVRT(ith)%para_AllOp%tab_Op(:)%nb_tot     =                 &
@@ -615,13 +615,13 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         !================================================================
         IF (para_H%Make_Mat) THEN
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
             CALL time_perso('sub_matOp: H and S')
-            write(out_unitp,*)
-            write(out_unitp,*) 'para_S...%comput_S',tab_EVRT(ith)%para_AllOp%tab_Op(2)%para_ReadOp%comput_S
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*) 'para_S...%comput_S',tab_EVRT(ith)%para_AllOp%tab_Op(2)%para_ReadOp%comput_S
+            write(out_unit,*)
           ENDIF
 
           IF (tab_EVRT(ith)%para_AllOp%tab_Op(2)%para_ReadOp%comput_S) THEN
@@ -639,12 +639,12 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
           CALL sub_MatOp(para_H,tab_EVRT(ith)%para_ana%print)
 
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_matOp: H and S')
-            write(out_unitp,*) ' VIB: END sub_matOp'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END sub_matOp'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
         END IF ! for para_H%Make_Mat
         !================================================================
@@ -655,23 +655,23 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         !================================================================
         IF (tab_EVRT(ith)%para_ana%filter .AND. tab_EVRT(ith)%para_propa%auto_Hmax) THEN
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*) ' VIB: Hmax and Hmin calculation'
+            write(out_unit,*)
+            write(out_unit,*) '================================================'
+            write(out_unit,*) ' VIB: Hmax and Hmin calculation'
             CALL time_perso('sub_Hmax ini2')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
         IF(.NOT. openmpi) CALL sub_Hmax(tab_EVRT(ith)%para_propa,para_H)
 
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_Hmax end2')
-            write(out_unitp,*) ' VIB: END Hmax and Hmin calculation'
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END Hmax and Hmin calculation'
+            write(out_unit,*) '================================================'
+            write(out_unit,*)
           ENDIF
         END IF ! for para_ana%filter .AND. para_propa%auto_Hmax
 
@@ -680,11 +680,11 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         !================================================================
         IF (tab_EVRT(ith)%para_ana%davidson .OR. tab_EVRT(ith)%para_ana%arpack .OR. tab_EVRT(ith)%para_ana%filter) THEN
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING ITERATIVE DIAGONALIZATION'
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING ITERATIVE DIAGONALIZATION'
             CALL time_perso('sub_Iterative_Diago')
-            write(out_unitp,*)
+            write(out_unit,*)
           ENDIF
 
           IF (tab_EVRT(ith)%para_propa%para_Davidson%max_WP == 0) THEN
@@ -740,22 +740,22 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
           para_H%spectral = .TRUE.
 
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_Iterative_Diago')
-            write(out_unitp,*) ' VIB: END ITERATIVE DIAGONALIZATION'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END ITERATIVE DIAGONALIZATION'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
 
         ELSE ! for para_ana%davidson .OR. para_ana%arpack .OR. para_ana%filter
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING DIAGONALIZATION'
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING DIAGONALIZATION'
             CALL time_perso('sub_diago_H')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
           nb_diago  = para_H%nb_tot
@@ -795,8 +795,8 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
                                para_H%nb_tot,para_H%sym_Hamil)
 
               IF(print_level > -1) THEN
-                write(out_unitp,*) 'HMin,HMax (ua)  : ',[minval(para_H%Rdiag),maxval(para_H%Rdiag)]
-                write(out_unitp,*) 'HMin,HMax (cm-1): ',   &
+                write(out_unit,*) 'HMin,HMax (ua)  : ',[minval(para_H%Rdiag),maxval(para_H%Rdiag)]
+                write(out_unit,*) 'HMin,HMax (cm-1): ',   &
                   [minval(para_H%Rdiag),maxval(para_H%Rdiag)]*get_Conv_au_TO_unit('E','cm-1')
               END IF
 
@@ -834,25 +834,25 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
           tab_EVRT(ith)%para_ana%max_ana = nb_diago
 
           IF(print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_diago_H')
-            write(out_unitp,*) ' VIB: END DIAGONALIZATION'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END DIAGONALIZATION'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
         END IF ! for para_ana%davidson .OR. para_ana%arpack .OR. para_ana%filter
-        flush(out_unitp)
+        flush(out_unit)
         !===============================================================
         !===============================================================
 
          IF (nb /= get_nb_FROM_basis(tab_EVRT(ith)%para_AllBasis%BasisnD) .OR.        &
              nq /= get_nq_FROM_basis(tab_EVRT(ith)%para_AllBasis%BasisnD)) THEN
 
-           write(out_unitp,*) ' ERROR in levels_EVR_new'
-           write(out_unitp,*) ' inconsistant nb values',nb,get_nb_FROM_basis(tab_EVRT(ith)%para_AllBasis%BasisnD)
-           write(out_unitp,*) '   or'
-           write(out_unitp,*) ' inconsistant nq values',nq,get_nq_FROM_basis(tab_EVRT(ith)%para_AllBasis%BasisnD)
+           write(out_unit,*) ' ERROR in levels_EVR_new'
+           write(out_unit,*) ' inconsistant nb values',nb,get_nb_FROM_basis(tab_EVRT(ith)%para_AllBasis%BasisnD)
+           write(out_unit,*) '   or'
+           write(out_unit,*) ' inconsistant nq values',nq,get_nq_FROM_basis(tab_EVRT(ith)%para_AllBasis%BasisnD)
            STOP 'ERROR in levels_EVR'
 
          END IF
@@ -877,22 +877,22 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         !===============================================================
         !===============================================================
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING WAVE FUNCTION ANALYSIS'
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING WAVE FUNCTION ANALYSIS'
           CALL time_perso('sub_analyse ini')
-          write(out_unitp,*)
+          write(out_unit,*)
         ENDIF
 
         IF(keep_MPI) CALL sub_analyse(Tab_Psi,nb_diago,para_H,         &
                            tab_EVRT(ith)%para_ana,tab_EVRT(ith)%para_intensity, &
                                tab_EVRT(ith)%para_AllOp,tab_EVRT(ith)%const_phys)
-        flush(out_unitp)
+        flush(out_unit)
 
         IF (.NOT. para_H%cplx .AND. tab_EVRT(ith)%para_ana%VibRot) THEN
           CALL sub_VibRot(Tab_Psi,tab_EVRT(ith)%para_ana%max_ana,para_H,tab_EVRT(ith)%para_ana)
         END IF
-        flush(out_unitp)
+        flush(out_unit)
 
         !===============================================================
         ! Spectral representation of operator
@@ -903,26 +903,26 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 
             IF (tab_EVRT(ith)%para_AllOp%tab_Op(iOp)%n_Op == -1) CYCLE ! S
             IF (tab_EVRT(ith)%para_AllOp%tab_Op(iOp)%spectral) THEN
-              write(out_unitp,*) '==========================================='
-              write(out_unitp,*) ' Spectral representation of: ',        &
+              write(out_unit,*) '==========================================='
+              write(out_unit,*) ' Spectral representation of: ',        &
                                  trim(tab_EVRT(ith)%para_AllOp%tab_Op(iOp)%name_Op)
 
               CALL sub_build_MatOp(Tab_Psi,nb_diago,                     &
                                    tab_EVRT(ith)%para_AllOp%tab_Op(iOp),.TRUE.,print_mat)
 
-              write(out_unitp,*) '==========================================='
-              flush(out_unitp)
+              write(out_unit,*) '==========================================='
+              flush(out_unit)
             END IF
           END DO
         END IF
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_analyse end')
-          write(out_unitp,*) ' VIB: END WAVE FUNCTION ANALYSIS'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END WAVE FUNCTION ANALYSIS'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         ENDIF
 
         !===============================================================
@@ -948,12 +948,12 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 
       IF (.NOT. para_H%cplx .AND. tab_EVRT(ith)%para_ana%intensity) THEN
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*) ' VIB: BEGINNING sub_intensity',para_H%nb_tot,tab_EVRT(ith)%para_ana%max_ana
+          write(out_unit,*)
+          write(out_unit,*) '================================================'
+          write(out_unit,*) ' VIB: BEGINNING sub_intensity',para_H%nb_tot,tab_EVRT(ith)%para_ana%max_ana
           CALL time_perso('sub_intensity')
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
         ENDIF
 !         ----- file for restart or for changed the temprature --------------
         CALL file_open(tab_EVRT(ith)%para_intensity%file_resart_int,tab_EVRT(ith)%nio_res_int)
@@ -967,21 +967,21 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 
           CALL Read_Vec(para_H%Rdiag,tab_EVRT(ith)%nio_res_int,5,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR in levels_EVR_new'
-            write(out_unitp,*) ' reading the vector "para_H%Rdiag"'
+            write(out_unit,*) 'ERROR in levels_EVR_new'
+            write(out_unit,*) ' reading the vector "para_H%Rdiag"'
             STOP
           END IF
 
           IF (tab_EVRT(ith)%intensity_only) THEN
-            write(out_unitp,*)
+            write(out_unit,*)
             Q =  part_func(para_H%Rdiag,size(para_H%Rdiag),tab_EVRT(ith)%para_ana%Temp,tab_EVRT(ith)%const_phys)
             fac = tab_EVRT(ith)%const_phys%Eh / (tab_EVRT(ith)%const_phys%k * tab_EVRT(ith)%para_ana%Temp)
             zpe = minval(para_H%Rdiag(:))
-            write(out_unitp,*) 'population at T, Q',tab_EVRT(ith)%para_ana%Temp,Q
-            write(out_unitp,*) 'Energy level (',tab_EVRT(ith)%const_phys%ene_unit,') pop:'
+            write(out_unit,*) 'population at T, Q',tab_EVRT(ith)%para_ana%Temp,Q
+            write(out_unit,*) 'Energy level (',tab_EVRT(ith)%const_phys%ene_unit,') pop:'
             DO i=1,size(para_H%Rdiag)
               pop = exp(-(para_H%Rdiag(i)-zpe)*fac)
-              write(out_unitp,10) i,para_H%Rdiag(i) * tab_EVRT(ith)%const_phys%auTOenergy,&
+              write(out_unit,10) i,para_H%Rdiag(i) * tab_EVRT(ith)%const_phys%auTOenergy,&
                     (para_H%Rdiag(i) - zpe) * tab_EVRT(ith)%const_phys%auTOenergy,pop/Q
 10             format(i4,x,3f20.5)
             END DO
@@ -991,23 +991,23 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 
           CALL Read_Mat(para_H%Rvp,tab_EVRT(ith)%nio_res_int,5,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR in levels_EVR_new'
-            write(out_unitp,*) ' reading the matrix "para_H%Rvp"'
+            write(out_unit,*) 'ERROR in levels_EVR_new'
+            write(out_unit,*) ' reading the matrix "para_H%Rvp"'
             STOP
           END IF
         ELSE ! for intensity_only
-          write(out_unitp,*) 'write restart file for intensity: ',      &
+          write(out_unit,*) 'write restart file for intensity: ',      &
                           tab_EVRT(ith)%para_intensity%file_resart_int%name
-          flush(out_unitp)
+          flush(out_unit)
           write(tab_EVRT(ith)%nio_res_int,*) para_H%nb_tot,tab_EVRT(ith)%para_ana%max_ana
           write(tab_EVRT(ith)%nio_res_int,*) 'ene'
           CALL Write_Vec(para_H%Rdiag,tab_EVRT(ith)%nio_res_int,5,Rformat='e30.23')
           write(tab_EVRT(ith)%nio_res_int,*) 'psi'
-          flush(out_unitp)
+          flush(out_unit)
           CALL Write_Mat(para_H%Rvp,tab_EVRT(ith)%nio_res_int,5,Rformat='e30.23')
           flush(tab_EVRT(ith)%nio_res_int)
         END IF ! for intensity_only
-        flush(out_unitp)
+        flush(out_unit)
 !         -------------------------------------------------------------------
 
         iOp = 2
@@ -1018,26 +1018,26 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
                           tab_EVRT(ith)%intensity_only,tab_EVRT(ith)%nio_res_int)
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_intensity')
-          write(out_unitp,*) ' VIB: END sub_intensity'
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END sub_intensity'
+          write(out_unit,*) '================================================'
+          write(out_unit,*)
         ENDIF
         CALL file_close(tab_EVRT(ith)%para_intensity%file_resart_int)
         nullify(para_Dip)
       END IF !for .NOT. para_H%cplx .AND. para_ana%intensity
-      flush(out_unitp)
+      flush(out_unit)
 
       IF (.NOT. para_H%cplx .AND. tab_EVRT(ith)%para_ana%Psi_ScalOp) THEN
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*) ' VIB: BEGINNING sub_AnalysePsy_ScalOp',para_H%nb_tot,tab_EVRT(ith)%para_ana%max_ana
+          write(out_unit,*)
+          write(out_unit,*) '================================================'
+          write(out_unit,*) ' VIB: BEGINNING sub_AnalysePsy_ScalOp',para_H%nb_tot,tab_EVRT(ith)%para_ana%max_ana
           CALL time_perso('sub_AnalysePsy_ScalOp')
-          write(out_unitp,*)
-          write(out_unitp,*) 'nb_scalar_Op',para_H%para_ReadOp%nb_scalar_Op
+          write(out_unit,*)
+          write(out_unit,*) 'nb_scalar_Op',para_H%para_ReadOp%nb_scalar_Op
         ENDIF
 
         iOp = 2
@@ -1046,25 +1046,25 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         CALL sub_AnalysePsy_ScalOp(para_Dip,nb_ScalOp,para_H,tab_EVRT(ith)%para_ana%max_ana)
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_AnalysePsy_ScalOp')
-          write(out_unitp,*) ' VIB: END sub_AnalysePsy_ScalOp'
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END sub_AnalysePsy_ScalOp'
+          write(out_unit,*) '================================================'
+          write(out_unit,*)
         ENDIF
         nullify(para_Dip)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       IF (.NOT. para_H%cplx .AND. tab_EVRT(ith)%para_ana%NLO) THEN
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*) ' VIB: BEGINNING sub_NLO',para_H%nb_tot,tab_EVRT(ith)%para_ana%max_ana
+          write(out_unit,*)
+          write(out_unit,*) '================================================'
+          write(out_unit,*) ' VIB: BEGINNING sub_NLO',para_H%nb_tot,tab_EVRT(ith)%para_ana%max_ana
           CALL time_perso('sub_NLO')
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
         ENDIF
 
         iOp = 2
@@ -1073,16 +1073,16 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
                      tab_EVRT(ith)%para_intensity)
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_NLO')
-          write(out_unitp,*) ' VIB: END sub_NLO'
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END sub_NLO'
+          write(out_unit,*) '================================================'
+          write(out_unit,*)
         ENDIF
         nullify(para_Dip)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
 !=====================================================================
 !=====================================================================
@@ -1104,15 +1104,15 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
       END IF
 
       IF(print_level > -1) THEN
-        write(out_unitp,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
-        write(out_unitp,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
-        write(out_unitp,*) '================================================'
+        write(out_unit,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
+        write(out_unit,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
+        write(out_unit,*) '================================================'
         IF(openmpi) THEN
-          write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!', ' from ', MPI_id
+          write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!', ' from ', MPI_id
         ELSE
-          write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!'
+          write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
         ENDIF
-        write(out_unitp,*) '================================================'
+        write(out_unit,*) '================================================'
       END IF
 
    END SUBROUTINE levels_EVR_new
@@ -1205,7 +1205,7 @@ SUBROUTINE init_EVR()
 
         ! version and copyright statement
         CALL versionEVRT(.TRUE.)
-        write(out_unitp,*)
+        write(out_unit,*)
         IF(Popenmpi) THEN
           CALL time_perso('MPI start, initial time')
           CALL MPI_ini_messaage()
@@ -1214,39 +1214,39 @@ SUBROUTINE init_EVR()
         !> automatically decide the reading of namelist, from file or shell
         !> NOTE: remember to use vib to ensure "rm namelist" to prevent the
         !> reading of old namelist
-        CALL file_open2('namelist',in_unitp,old=.TRUE.,err_file=err)
-        !in_unitp=10
-        !open(in_unitp,file='namelist',STATUS='OLD',IOSTAT=err)
+        CALL file_open2('namelist',in_unit,old=.TRUE.,err_file=err)
+        !in_unit=10
+        !open(in_unit,file='namelist',STATUS='OLD',IOSTAT=err)
         IF(err/=0) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) '   "namelist" file does not exist.'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) '   "namelist" file does not exist.'
           STOP 'ERROR: namelist file does not exist'
         END IF
-        read(in_unitp,system,IOSTAT=err)
+        read(in_unit,system,IOSTAT=err)
 
         IF (err < 0) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' End-of-file or End-of-record'
-          write(out_unitp,*) ' The namelist "system" is probably absent'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' End-of-file or End-of-record'
+          write(out_unit,*) ' The namelist "system" is probably absent'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
         ELSE IF (err > 0) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' Some parameter names of the namelist "system" are probaly wrong'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' Some parameter names of the namelist "system" are probaly wrong'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
         END IF
 
         IF (base_FileName /= "" .AND. File_path /= "") THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' base_FileName and File_path are both set!!'
-          write(out_unitp,*) ' You MUST define only File_path.'
-          write(out_unitp,*) ' check your data!'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' base_FileName and File_path are both set!!'
+          write(out_unit,*) ' You MUST define only File_path.'
+          write(out_unit,*) ' check your data!'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
         ELSE IF (base_FileName /= "") THEN
           File_path = base_FileName
@@ -1260,22 +1260,22 @@ SUBROUTINE init_EVR()
                      nDGrid .OR. optimization /= 0 .OR. analysis_only)
 
        IF (.NOT. EVR) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' This subroutine is used only to initialized ElVibRot dynamics'
-          write(out_unitp,*) ' => EVR=T'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' This subroutine is used only to initialized ElVibRot dynamics'
+          write(out_unit,*) ' => EVR=T'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
        END IF
        IF (intensity_only) THEN
-          write(out_unitp,*) ' ERROR in init_EVR'
-          write(out_unitp,*) ' This subroutine is used only to initialized ElVibRot dynamics'
-          write(out_unitp,*) ' intensity_only CANNOT be true'
-          write(out_unitp,system)
-          write(out_unitp,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' ERROR in init_EVR'
+          write(out_unit,*) ' This subroutine is used only to initialized ElVibRot dynamics'
+          write(out_unit,*) ' intensity_only CANNOT be true'
+          write(out_unit,system)
+          write(out_unit,*) ' ERROR in init_EVR'
           STOP 'ERROR in init_EVR'
        END IF
-        IF (printlevel > 1) write(out_unitp,system)
+        IF (printlevel > 1) write(out_unit,system)
 
         para_EVRT_calc%optimization     = optimization
         para_EVRT_calc%EVR              = EVR
@@ -1288,7 +1288,7 @@ SUBROUTINE init_EVR()
         para_EVRT_calc%nDGrid           = nDGrid
         para_EVRT_calc%main_test        = main_test
 
-        CALL set_print_level(printlevel,force=.TRUE.) ! print_level = printlevel ! print_level is in mod_system.mod
+        CALL set_print_level(printlevel,force=.TRUE.) ! print_level = printlevel ! print_level is in EVR_system_m.mod
 
         EneIO_format  = EneFormat
         RMatIO_format = RMatFormat
@@ -1351,38 +1351,38 @@ SUBROUTINE init_EVR()
         END IF
 
         IF(MPI_id==0 .AND. .NOT. openmpi) THEN
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) 'OpenMP parameters:'
-          write(out_unitp,*) 'Max number of threads:           ',maxth
-          write(out_unitp,*) 'MatOp_omp,      MatOp_maxth      ',MatOp_omp,MatOp_maxth
-          write(out_unitp,*) 'OpPsi_omp,      OpPsi_maxth      ',OpPsi_omp,OpPsi_maxth
-          write(out_unitp,*) 'BasisTOGrid_omp,BasisTOGrid_maxth',BasisTOGrid_omp,BasisTOGrid_maxth
-          write(out_unitp,*) 'Grid_omp,       Grid_maxth       ',Grid_omp,Grid_maxth
-          write(out_unitp,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
-          write(out_unitp,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) 'OpenMP parameters:'
+          write(out_unit,*) 'Max number of threads:           ',maxth
+          write(out_unit,*) 'MatOp_omp,      MatOp_maxth      ',MatOp_omp,MatOp_maxth
+          write(out_unit,*) 'OpPsi_omp,      OpPsi_maxth      ',OpPsi_omp,OpPsi_maxth
+          write(out_unit,*) 'BasisTOGrid_omp,BasisTOGrid_maxth',BasisTOGrid_omp,BasisTOGrid_maxth
+          write(out_unit,*) 'Grid_omp,       Grid_maxth       ',Grid_omp,Grid_maxth
+          write(out_unit,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
+          write(out_unit,*) '========================================='
 
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) 'File_path: ',trim(adjustl(File_path))
-          write(out_unitp,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) 'File_path: ',trim(adjustl(File_path))
+          write(out_unit,*) '========================================='
         ENDIF ! for MPI_id=0
 
         para_mem%max_mem    = max_mem/Rkind
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) ' ElVibRot calculation'
-          write(out_unitp,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) ' ElVibRot calculation'
+          write(out_unit,*) '========================================='
         ENDIF ! for MPI_id=0
 
         ! from vib.f90 file
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING ini_data'
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING ini_data'
           CALL time_perso('ini_data ini')
-          write(out_unitp,*)
+          write(out_unit,*)
         ENDIF
         !CALL system_mem_usage(memory_RSS,'before ini_data')
 
@@ -1396,18 +1396,18 @@ SUBROUTINE init_EVR()
         !CALL system_mem_usage(memory_RSS,'after ini_data')
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*)
+          write(out_unit,*)
           CALL time_perso('ini_data end')
-          write(out_unitp,*)
-          write(out_unitp,*) ' VIB: END ini_data'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) ' VIB: END ini_data'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         ENDIF
 
 
         IF(MPI_id==0) THEN
-          write(out_unitp,*) '========================================='
-          write(out_unitp,*) '========================================='
+          write(out_unit,*) '========================================='
+          write(out_unit,*) '========================================='
         ENDIF ! for MPI_id=0
 
 END SUBROUTINE init_EVR
@@ -1430,10 +1430,10 @@ SUBROUTINE get_TnumRefGeom_Q0(Q0,nb_Q0,Qdyn0)
 
 
   IF (nb_Q0 /= para_EVRT%mole%nb_var) THEN
-    write(out_unitp,*) ' ERROR in get_TnumRefGeom_Q0'
-    write(out_unitp,*) ' The size of Q0 is different from mole%nb_var'
-    write(out_unitp,*) '   nb_Q0 ',nb_Q0
-    write(out_unitp,*) '   nb_var',para_EVRT%mole%nb_var
+    write(out_unit,*) ' ERROR in get_TnumRefGeom_Q0'
+    write(out_unit,*) ' The size of Q0 is different from mole%nb_var'
+    write(out_unit,*) '   nb_Q0 ',nb_Q0
+    write(out_unit,*) '   nb_var',para_EVRT%mole%nb_var
     STOP 'ERROR in get_TnumRefGeom_Q0'
   END IF
 
@@ -1458,10 +1458,10 @@ SUBROUTINE Modify_TnumRefGeom_Q0(Q0,nb_Q0,Qdyn0)
 
 
   IF (nb_Q0 /= para_EVRT%mole%nb_var) THEN
-    write(out_unitp,*) ' ERROR in Modify_TnumRefGeom_Q0'
-    write(out_unitp,*) ' The size of Q0 is different from mole%nb_var'
-    write(out_unitp,*) '   nb_Q0 ',nb_Q0
-    write(out_unitp,*) '   nb_var',para_EVRT%mole%nb_var
+    write(out_unit,*) ' ERROR in Modify_TnumRefGeom_Q0'
+    write(out_unit,*) ' The size of Q0 is different from mole%nb_var'
+    write(out_unit,*) '   nb_Q0 ',nb_Q0
+    write(out_unit,*) '   nb_var',para_EVRT%mole%nb_var
     STOP 'ERROR in Modify_TnumRefGeom_Q0'
   END IF
 
@@ -1557,21 +1557,21 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 !      Grid_allco=.FALSE.
 !#endif
       IF(MPI_id==0 .AND. print_level > -1) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*) ' VIB: BEGINNING sub_qa_bhe'
+        write(out_unit,*)
+        write(out_unit,*) '================================================='
+        write(out_unit,*) ' VIB: BEGINNING sub_qa_bhe'
         CALL time_perso('sub_qa_bhe ini')
-        write(out_unitp,*)
+        write(out_unit,*)
       ENDIF
 
       IF (para_H%para_ReadOp%para_FileGrid%Read_FileGrid) THEN ! test only for H
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) ' The grid of operators (S V Veff T1 and T2) will be read'
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*) ' The grid of operators (S V Veff T1 and T2) will be read'
+          write(out_unit,*)
         ENDIF
         IF (para_H%para_ReadOp%para_FileGrid%Test_Grid) THEN
-          IF(MPI_id==0) write(out_unitp,*) 'Test_Grid=.TRUE. => STOP in vib'
+          IF(MPI_id==0) write(out_unit,*) 'Test_Grid=.TRUE. => STOP in vib'
           STOP
         END IF
       END IF
@@ -1590,11 +1590,11 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
       END IF
 
       IF(MPI_id==0 .AND. print_level > -1) THEN
-        write(out_unitp,*)
+        write(out_unit,*)
         CALL time_perso('sub_qa_bhe end')
-        write(out_unitp,*) ' VIB: END sub_qa_bhe'
-        write(out_unitp,*) '================================================='
-        write(out_unitp,*)
+        write(out_unit,*) ' VIB: END sub_qa_bhe'
+        write(out_unit,*) '================================================='
+        write(out_unit,*)
       ENDIF
 
 !#if(run_MPI)
@@ -1605,25 +1605,25 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 !---------------------------------------------------------------------------------------
       IF (para_H%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC .AND. para_H%nb_bi>1) THEN
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING HADA contraction',          &
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING HADA contraction',          &
                                    para_AllBasis%BasisnD%nb
           CALL time_perso('HADA contraction')
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
         ENDIF
 
         CALL sub_MatOp_HADA(para_H,para_EVRT%para_ana,para_EVRT%para_intensity,para_EVRT%para_AllOp,  &
                             para_EVRT%const_phys)
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('HADA contraction')
-          write(out_unitp,*) ' VIB: END HADA contraction'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END HADA contraction'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         ENDIF
 
         para_EVRT%para_AllOp%tab_Op(:)%nb_tot     =                     &
@@ -1650,13 +1650,13 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         !================================================================
         IF (para_H%Make_Mat) THEN
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING sub_matOp',para_H%nb_tot
             CALL time_perso('sub_matOp: H and S')
-            write(out_unitp,*)
-            write(out_unitp,*) 'para_S...%comput_S',para_EVRT%para_AllOp%tab_Op(2)%para_ReadOp%comput_S
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*) 'para_S...%comput_S',para_EVRT%para_AllOp%tab_Op(2)%para_ReadOp%comput_S
+            write(out_unit,*)
           ENDIF
 
           IF (para_EVRT%para_AllOp%tab_Op(2)%para_ReadOp%comput_S) THEN
@@ -1675,12 +1675,12 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 
 
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_matOp: H and S')
-            write(out_unitp,*) ' VIB: END sub_matOp'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END sub_matOp'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
         END IF ! for para_H%Make_Mat
         !================================================================
@@ -1691,23 +1691,23 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         !================================================================
         IF (para_EVRT%para_ana%filter .AND. para_EVRT%para_propa%auto_Hmax) THEN
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*) ' VIB: Hmax and Hmin calculation'
+            write(out_unit,*)
+            write(out_unit,*) '================================================'
+            write(out_unit,*) ' VIB: Hmax and Hmin calculation'
             CALL time_perso('sub_Hmax ini2')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
           IF(.NOT. openmpi) CALL sub_Hmax(para_EVRT%para_propa,para_H)
 
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_Hmax end2')
-            write(out_unitp,*) ' VIB: END Hmax and Hmin calculation'
-            write(out_unitp,*) '================================================'
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END Hmax and Hmin calculation'
+            write(out_unit,*) '================================================'
+            write(out_unit,*)
           ENDIF
         END IF ! for para_EVRT%para_ana%filter .AND. para_EVRT%para_propa%auto_Hmax
 
@@ -1716,11 +1716,11 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         !================================================================
         IF (para_EVRT%para_ana%davidson .OR. para_EVRT%para_ana%arpack .OR. para_EVRT%para_ana%filter) THEN
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING ITERATIVE DIAGONALIZATION'
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING ITERATIVE DIAGONALIZATION'
             CALL time_perso('sub_Iterative_Diago')
-            write(out_unitp,*)
+            write(out_unit,*)
           ENDIF
 
           IF (para_EVRT%para_propa%para_Davidson%max_WP == 0) THEN
@@ -1777,22 +1777,22 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
           para_H%spectral = .TRUE.
 
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_Iterative_Diago')
-            write(out_unitp,*) ' VIB: END ITERATIVE DIAGONALIZATION'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END ITERATIVE DIAGONALIZATION'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
 
         ELSE ! for para_EVRT%para_ana%davidson .OR. para_EVRT%para_ana%arpack .OR. para_EVRT%para_ana%filter
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*) ' VIB: BEGINNING DIAGONALIZATION'
+            write(out_unit,*)
+            write(out_unit,*) '================================================='
+            write(out_unit,*) ' VIB: BEGINNING DIAGONALIZATION'
             CALL time_perso('sub_diago_H')
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
           ENDIF
 
           nb_diago  = para_H%nb_tot
@@ -1833,8 +1833,8 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
                                para_H%nb_tot,para_H%sym_Hamil)
 
               IF(print_level > -1) THEN
-                write(out_unitp,*) 'HMin,HMax (ua)  : ',[minval(para_H%Rdiag),maxval(para_H%Rdiag)]
-                write(out_unitp,*) 'HMin,HMax (cm-1): ',   &
+                write(out_unit,*) 'HMin,HMax (ua)  : ',[minval(para_H%Rdiag),maxval(para_H%Rdiag)]
+                write(out_unit,*) 'HMin,HMax (cm-1): ',   &
                   [minval(para_H%Rdiag),maxval(para_H%Rdiag)]*get_Conv_au_TO_unit('E','cm-1')
               END IF
 
@@ -1872,25 +1872,25 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
           para_EVRT%para_ana%max_ana = nb_diago
 
           IF(MPI_id==0 .AND. print_level > -1) THEN
-            write(out_unitp,*)
-            write(out_unitp,*)
+            write(out_unit,*)
+            write(out_unit,*)
             CALL time_perso('sub_diago_H')
-            write(out_unitp,*) ' VIB: END DIAGONALIZATION'
-            write(out_unitp,*) '================================================='
-            write(out_unitp,*)
+            write(out_unit,*) ' VIB: END DIAGONALIZATION'
+            write(out_unit,*) '================================================='
+            write(out_unit,*)
           ENDIF
         END IF ! for para_EVRT%para_ana%davidson .OR. para_EVRT%para_ana%arpack .OR. para_EVRT%para_ana%filter
-        flush(out_unitp)
+        flush(out_unit)
         !===============================================================
         !===============================================================
 
          IF (nb /= get_nb_FROM_basis(para_AllBasis%BasisnD) .OR.        &
              nq /= get_nq_FROM_basis(para_AllBasis%BasisnD)) THEN
 
-           write(out_unitp,*) ' ERROR in levels_EVR'
-           write(out_unitp,*) ' inconsistant nb values',nb,get_nb_FROM_basis(para_AllBasis%BasisnD)
-           write(out_unitp,*) '   or'
-           write(out_unitp,*) ' inconsistant nq values',nq,get_nq_FROM_basis(para_AllBasis%BasisnD)
+           write(out_unit,*) ' ERROR in levels_EVR'
+           write(out_unit,*) ' inconsistant nb values',nb,get_nb_FROM_basis(para_AllBasis%BasisnD)
+           write(out_unit,*) '   or'
+           write(out_unit,*) ' inconsistant nq values',nq,get_nq_FROM_basis(para_AllBasis%BasisnD)
            STOP 'ERROR in levels_EVR'
 
          END IF
@@ -1915,23 +1915,23 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
         !===============================================================
         !===============================================================
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*) ' VIB: BEGINNING WAVE FUNCTION ANALYSIS'
+          write(out_unit,*)
+          write(out_unit,*) '================================================='
+          write(out_unit,*) ' VIB: BEGINNING WAVE FUNCTION ANALYSIS'
           CALL time_perso('sub_analyse ini')
-          write(out_unitp,*)
+          write(out_unit,*)
         ENDIF
 
         IF(keep_MPI) CALL sub_analyse(Tab_Psi,nb_diago,para_H,         &
                            para_EVRT%para_ana,para_EVRT%para_intensity, &
                                para_EVRT%para_AllOp,para_EVRT%const_phys)
 
-        flush(out_unitp)
+        flush(out_unit)
 
         IF (.NOT. para_H%cplx .AND. para_EVRT%para_ana%VibRot) THEN
           CALL sub_VibRot(Tab_Psi,para_EVRT%para_ana%max_ana,para_H,para_EVRT%para_ana)
         END IF
-        flush(out_unitp)
+        flush(out_unit)
 
         !===============================================================
         ! Spectral representation of operator
@@ -1942,26 +1942,26 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 
             IF (para_EVRT%para_AllOp%tab_Op(iOp)%n_Op == -1) CYCLE ! S
             IF (para_EVRT%para_AllOp%tab_Op(iOp)%spectral) THEN
-              write(out_unitp,*) '==========================================='
-              write(out_unitp,*) ' Spectral representation of: ',        &
+              write(out_unit,*) '==========================================='
+              write(out_unit,*) ' Spectral representation of: ',        &
                                  trim(para_EVRT%para_AllOp%tab_Op(iOp)%name_Op)
 
               CALL sub_build_MatOp(Tab_Psi,nb_diago,                     &
                                    para_EVRT%para_AllOp%tab_Op(iOp),.TRUE.,print_mat)
 
-              write(out_unitp,*) '==========================================='
-              flush(out_unitp)
+              write(out_unit,*) '==========================================='
+              flush(out_unit)
             END IF
           END DO
         END IF
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_analyse end')
-          write(out_unitp,*) ' VIB: END WAVE FUNCTION ANALYSIS'
-          write(out_unitp,*) '================================================='
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END WAVE FUNCTION ANALYSIS'
+          write(out_unit,*) '================================================='
+          write(out_unit,*)
         ENDIF
 
         !===============================================================
@@ -1985,16 +1985,16 @@ SUBROUTINE levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
 !=====================================================================
 !=====================================================================
 !RETURN
-write(out_unitp,*) 'intensity',para_EVRT%para_ana%intensity ; flush(out_unitp)
+write(out_unit,*) 'intensity',para_EVRT%para_ana%intensity ; flush(out_unit)
 
       IF (.NOT. para_H%cplx .AND. para_EVRT%para_ana%intensity) THEN
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*) ' VIB: BEGINNING sub_intensity',para_H%nb_tot,para_EVRT%para_ana%max_ana
+          write(out_unit,*)
+          write(out_unit,*) '================================================'
+          write(out_unit,*) ' VIB: BEGINNING sub_intensity',para_H%nb_tot,para_EVRT%para_ana%max_ana
           CALL time_perso('sub_intensity')
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
         ENDIF
         !----- file for restart or for changed the temprature --------------
         CALL file_open(para_EVRT%para_intensity%file_resart_int,nio_res_int)
@@ -2008,21 +2008,21 @@ write(out_unitp,*) 'intensity',para_EVRT%para_ana%intensity ; flush(out_unitp)
 
           CALL Read_Vec(para_H%Rdiag,nio_res_int,5,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR in vib'
-            write(out_unitp,*) ' reading the vector "para_H%Rdiag"'
+            write(out_unit,*) 'ERROR in vib'
+            write(out_unit,*) ' reading the vector "para_H%Rdiag"'
             STOP
           END IF
 
           IF (para_EVRT_calc%intensity_only) THEN
-            write(out_unitp,*)
+            write(out_unit,*)
             Q =  part_func(para_H%Rdiag,size(para_H%Rdiag),para_EVRT%para_ana%Temp,para_EVRT%const_phys)
             fac = para_EVRT%const_phys%Eh / (para_EVRT%const_phys%k * para_EVRT%para_ana%Temp)
             zpe = minval(para_H%Rdiag(:))
-            write(out_unitp,*) 'population at T, Q',para_EVRT%para_ana%Temp,Q
-            write(out_unitp,*) 'Energy level (',para_EVRT%const_phys%ene_unit,') pop:'
+            write(out_unit,*) 'population at T, Q',para_EVRT%para_ana%Temp,Q
+            write(out_unit,*) 'Energy level (',para_EVRT%const_phys%ene_unit,') pop:'
             DO i=1,size(para_H%Rdiag)
               pop = exp(-(para_H%Rdiag(i)-zpe)*fac)
-              write(out_unitp,10) i,para_H%Rdiag(i) * para_EVRT%const_phys%auTOenergy,&
+              write(out_unit,10) i,para_H%Rdiag(i) * para_EVRT%const_phys%auTOenergy,&
                     (para_H%Rdiag(i) - zpe) * para_EVRT%const_phys%auTOenergy,pop/Q
 10             format(i4,x,3f20.5)
             END DO
@@ -2032,23 +2032,23 @@ write(out_unitp,*) 'intensity',para_EVRT%para_ana%intensity ; flush(out_unitp)
 
           CALL Read_Mat(para_H%Rvp,nio_res_int,5,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR in vib'
-            write(out_unitp,*) ' reading the matrix "para_H%Rvp"'
+            write(out_unit,*) 'ERROR in vib'
+            write(out_unit,*) ' reading the matrix "para_H%Rvp"'
             STOP
           END IF
         ELSE ! for intensity_only
-          write(out_unitp,*) 'write restart file for intensity: ',      &
+          write(out_unit,*) 'write restart file for intensity: ',      &
                            para_EVRT%para_intensity%file_resart_int%name
-          flush(out_unitp)
+          flush(out_unit)
           write(nio_res_int,*) para_H%nb_tot,para_EVRT%para_ana%max_ana
           write(nio_res_int,*) 'ene'
           CALL Write_Vec(para_H%Rdiag,nio_res_int,5,Rformat='e30.23')
           write(nio_res_int,*) 'psi'
-          flush(out_unitp)
+          flush(out_unit)
           CALL Write_Mat(para_H%Rvp,nio_res_int,5,Rformat='e30.23')
           flush(nio_res_int)
         END IF ! for intensity_only
-        flush(out_unitp)
+        flush(out_unit)
         !-------------------------------------------------------------------
 
         iOp = 2
@@ -2058,26 +2058,26 @@ write(out_unitp,*) 'intensity',para_EVRT%para_ana%intensity ; flush(out_unitp)
                            para_EVRT%para_intensity,para_EVRT%const_phys,para_EVRT_calc%intensity_only,nio_res_int)
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_intensity')
-          write(out_unitp,*) ' VIB: END sub_intensity'
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END sub_intensity'
+          write(out_unit,*) '================================================'
+          write(out_unit,*)
         ENDIF
         CALL file_close(para_EVRT%para_intensity%file_resart_int)
         nullify(para_Dip)
       END IF !for .NOT. para_H%cplx .AND. para_EVRT%para_ana%intensity
-      flush(out_unitp)
+      flush(out_unit)
 RETURN
       IF (.NOT. para_H%cplx .AND. para_EVRT%para_ana%Psi_ScalOp) THEN
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*) ' VIB: BEGINNING sub_AnalysePsy_ScalOp',para_H%nb_tot,para_EVRT%para_ana%max_ana
+          write(out_unit,*)
+          write(out_unit,*) '================================================'
+          write(out_unit,*) ' VIB: BEGINNING sub_AnalysePsy_ScalOp',para_H%nb_tot,para_EVRT%para_ana%max_ana
           CALL time_perso('sub_AnalysePsy_ScalOp')
-          write(out_unitp,*)
-          write(out_unitp,*) 'nb_scalar_Op',para_H%para_ReadOp%nb_scalar_Op
+          write(out_unit,*)
+          write(out_unit,*) 'nb_scalar_Op',para_H%para_ReadOp%nb_scalar_Op
         ENDIF
 
         iOp = 2
@@ -2086,25 +2086,25 @@ RETURN
         CALL sub_AnalysePsy_ScalOp(para_Dip,nb_ScalOp,para_H,para_EVRT%para_ana%max_ana)
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_AnalysePsy_ScalOp')
-          write(out_unitp,*) ' VIB: END sub_AnalysePsy_ScalOp'
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END sub_AnalysePsy_ScalOp'
+          write(out_unit,*) '================================================'
+          write(out_unit,*)
         ENDIF
         nullify(para_Dip)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       IF (.NOT. para_H%cplx .AND. para_EVRT%para_ana%NLO) THEN
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*) ' VIB: BEGINNING sub_NLO',para_H%nb_tot,para_EVRT%para_ana%max_ana
+          write(out_unit,*)
+          write(out_unit,*) '================================================'
+          write(out_unit,*) ' VIB: BEGINNING sub_NLO',para_H%nb_tot,para_EVRT%para_ana%max_ana
           CALL time_perso('sub_NLO')
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
         ENDIF
 
         iOp = 2
@@ -2113,16 +2113,16 @@ RETURN
                      para_EVRT%para_intensity)
 
         IF(MPI_id==0 .AND. print_level > -1) THEN
-          write(out_unitp,*)
-          write(out_unitp,*)
+          write(out_unit,*)
+          write(out_unit,*)
           CALL time_perso('sub_NLO')
-          write(out_unitp,*) ' VIB: END sub_NLO'
-          write(out_unitp,*) '================================================'
-          write(out_unitp,*)
+          write(out_unit,*) ' VIB: END sub_NLO'
+          write(out_unit,*) '================================================'
+          write(out_unit,*)
         ENDIF
         nullify(para_Dip)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
 !=====================================================================
 !=====================================================================
@@ -2144,15 +2144,15 @@ RETURN
       END IF
 
       IF(print_level > -1) THEN
-        write(out_unitp,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
-        write(out_unitp,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
-        write(out_unitp,*) '================================================'
+        write(out_unit,*) 'mem_tot,max_mem_used',para_mem%mem_tot,para_mem%max_mem_used
+        write(out_unit,*) 'nb_alloc,nb_dealloc',para_mem%nb_alloc,para_mem%nb_dealloc
+        write(out_unit,*) '================================================'
         IF(openmpi) THEN
-          write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!', ' from ', MPI_id
+          write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!', ' from ', MPI_id
         ELSE
-          write(out_unitp,*) ' ElVibRot-Tnum AU REVOIR!!!'
+          write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
         ENDIF
-        write(out_unitp,*) '================================================'
+        write(out_unit,*) '================================================'
       END IF
 
    END SUBROUTINE levels_EVR
@@ -2180,6 +2180,6 @@ SUBROUTINE Finalize_EVR()
         CALL end_MPI()
         CALL time_perso('MPI closed')
       ENDIF
-      close(in_unitp) ! CALL file_close cannot be used
+      close(in_unit) ! CALL file_close cannot be used
 
 END SUBROUTINE Finalize_EVR

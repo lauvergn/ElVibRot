@@ -56,7 +56,7 @@
                                          para_AllOp,w)
 
 
-      USE mod_system
+      USE EVR_system_m
 !$    USE omp_lib, only : OMP_GET_THREAD_NUM
 
       USE mod_PrimOp
@@ -96,12 +96,12 @@
        IF (para_AllOp%tab_Op(1)%para_ReadOp%para_FileGrid%Type_FileGrid == 5) RETURN
 
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'iq',iq
-         write(out_unitp,*) 'w',w
-         write(out_unitp,*) 'nb_Op',para_AllOp%nb_Op
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'iq',iq
+         write(out_unit,*) 'w',w
+         write(out_unit,*) 'nb_Op',para_AllOp%nb_Op
          DO iOp=1,para_AllOp%nb_Op
-           write(out_unitp,*) 'iOp,n_Op,nb_term',                              &
+           write(out_unit,*) 'iOp,n_Op,nb_term',                              &
                 iOp,para_AllOp%tab_Op(iOp)%n_Op,para_AllOp%tab_Op(iOp)%nb_term
          END DO
        END IF
@@ -186,7 +186,7 @@
               ELSE
                 nb_thread = Grid_maxth
               END IF
-              !write(out_unitp,*) 'nb_thread in sub_saving5_Op_all: ',nb_thread
+              !write(out_unit,*) 'nb_thread in sub_saving5_Op_all: ',nb_thread
 
               IF (nb_thread > 1) THEN
                 nio = para_AllOp%tab_Op(iOp)%imOpGrid(1)%file_Grid%tab_unit(ithread)
@@ -277,7 +277,7 @@
 
             name_Op = '-' // trim(para_AllOp%tab_Op(iOp)%name_Op) // '-----'
 
-            !write(out_unitp,*) 'para_AllOp%tab_Op(iOp)%nb_term',iOp,para_AllOp%tab_Op(iOp)%nb_term
+            !write(out_unit,*) 'para_AllOp%tab_Op(iOp)%nb_term',iOp,para_AllOp%tab_Op(iOp)%nb_term
             DO k_term=1,para_AllOp%tab_Op(iOp)%nb_term
               para_AllOp%tab_Op(iOp)%OpGrid(k_term)%para_FileGrid%Save_FileGrid_done = .TRUE.
 
@@ -362,14 +362,14 @@
 
 
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 
 
       END SUBROUTINE sub_Save_GridFile_AllOp
       SUBROUTINE sub_Save_GridMem_AllOp(iq,d0MatOp,nb_Op,para_AllOp)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_PrimOp
       USE mod_Op
       IMPLICIT NONE
@@ -392,15 +392,15 @@
       !logical, parameter :: debug = .TRUE.
 !---------------------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'iq',iq
-         write(out_unitp,*) 'nb_Op',para_AllOp%nb_Op
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'iq',iq
+         write(out_unit,*) 'nb_Op',para_AllOp%nb_Op
          DO iOp=1,para_AllOp%nb_Op
-           write(out_unitp,*) 'iOp,n_Op,nb_term',                       &
+           write(out_unit,*) 'iOp,n_Op,nb_term',                       &
                 iOp,para_AllOp%tab_Op(iOp)%n_Op,para_AllOp%tab_Op(iOp)%nb_term
-           write(out_unitp,*) 'asso OpGrid',iOp, &
+           write(out_unit,*) 'asso OpGrid',iOp, &
                                associated(para_AllOp%tab_Op(iOp)%OpGrid)
-           write(out_unitp,*) 'para_ReadOp%para_FileGrid%Save_MemGrid', &
+           write(out_unit,*) 'para_ReadOp%para_FileGrid%Save_MemGrid', &
                  para_AllOp%tab_Op(iOp)%para_ReadOp%para_FileGrid%Save_MemGrid
          END DO
        END IF
@@ -418,9 +418,9 @@
            CALL alloc_para_Op(para_AllOp%tab_Op(iOp),Mat=.FALSE.,Grid=.TRUE.)
 
 !           DO k_term=1,para_AllOp%tab_Op(iOp)%nb_term
-!             write(out_unitp,*) 'para_AllOp%tab_Op(iOp)%OpGrid(k_term)%para_FileGrid',iOp,k_term
+!             write(out_unit,*) 'para_AllOp%tab_Op(iOp)%OpGrid(k_term)%para_FileGrid',iOp,k_term
 !             CALL Write_FileGrid(para_AllOp%tab_Op(iOp)%OpGrid(k_term)%para_FileGrid)
-!             write(out_unitp,*) 'asso para_AllOp%tab_Op(iOp)%OpGrid(k_term)%Grid',iOp,k_term, &
+!             write(out_unit,*) 'asso para_AllOp%tab_Op(iOp)%OpGrid(k_term)%Grid',iOp,k_term, &
 !                      associated(para_AllOp%tab_Op(iOp)%OpGrid(k_term)%Grid)
 !           END DO
          END IF
@@ -494,7 +494,7 @@
         END DO
 
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
+         write(out_unit,*) 'END ',name_sub
        END IF
 
       END SUBROUTINE sub_Save_GridMem_AllOp
@@ -507,7 +507,7 @@
 
       SUBROUTINE sub_reading_Op(iq,nb_qa,d0MatOp,n_Op,Qdyn,nb_var,      &
                                 nb_act1,Qact,w,file_HADA)
-      USE mod_system
+      USE EVR_system_m
       USE mod_PrimOp, only: Write_d0MatOp
       USE mod_Op
       IMPLICIT NONE
@@ -546,39 +546,39 @@
       !logical, parameter :: debug = .TRUE.
 !---------------------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING ',name_sub
-         write(out_unitp,*) 'iq     ',iq
-        !write(out_unitp,*) 'nb_bi  ',d0MatOp%nb_bi
-         write(out_unitp,*) 'nb_var ',nb_var
-         write(out_unitp,*) 'nb_act1',nb_act1
-         write(out_unitp,*) 'nb_bie ',d0MatOp%nb_bie
-         write(out_unitp,*) 'formatted_HADA',file_HADA%formatted
-         write(out_unitp,*)
+         write(out_unit,*) 'BEGINNING ',name_sub
+         write(out_unit,*) 'iq     ',iq
+        !write(out_unit,*) 'nb_bi  ',d0MatOp%nb_bi
+         write(out_unit,*) 'nb_var ',nb_var
+         write(out_unit,*) 'nb_act1',nb_act1
+         write(out_unit,*) 'nb_bie ',d0MatOp%nb_bie
+         write(out_unit,*) 'formatted_HADA',file_HADA%formatted
+         write(out_unit,*)
        END IF
 !-----------------------------------------------------------
 
       IF (iq == 1) THEN
-        !write(out_unitp,*) 'read SH_HADA file: ',file_HADA%name
+        !write(out_unit,*) 'read SH_HADA file: ',file_HADA%name
         file_HADA%nb_thread = 0
         CALL file_open(file_HADA,nio,lformatted=file_HADA%formatted)
 
         IF (file_HADA%formatted) THEN
           read(nio,*) name1,name2
 
-          IF (debug) write(out_unitp,*) 'init,name2: ',name2
+          IF (debug) write(out_unit,*) 'init,name2: ',name2
 
           CALL file_close(file_HADA)
 
           ! for parallel calculation of SH_HADA file (the file is split in SH_HADA.0, SH_HADA.1 ...)
           IF (trim(name2) == 'Beginning_th') THEN
-            !write(out_unitp,*) ' OMP calc of HADA file'
+            !write(out_unit,*) ' OMP calc of HADA file'
             ithread      = 0
             file_is_para = .TRUE.
             CALL file_open(file_HADA,nio,lformatted=file_HADA%formatted)
             read(nio,*) name1,name2,nb_thread_file
             CALL file_close(file_HADA)
 
-            IF (debug) write(out_unitp,*) 'file_is_para,nb_thread_file',file_is_para,nb_thread_file
+            IF (debug) write(out_unit,*) 'file_is_para,nb_thread_file',file_is_para,nb_thread_file
 
             file_HADA%nb_thread = nb_thread_file
           ELSE
@@ -596,17 +596,17 @@
 
         ELSE  ! unformatted file
           read(nio) nb_thread_file
-          IF (debug) write(out_unitp,*) 'init,nb_thread_file: ',nb_thread_file
+          IF (debug) write(out_unit,*) 'init,nb_thread_file: ',nb_thread_file
 
           CALL file_close(file_HADA)
 
           ! for parallel calculation of SH_HADA file (the file is split in SH_HADA.0, SH_HADA.1 ...)
           IF (nb_thread_file > 1) THEN
-            !write(out_unitp,*) ' OMP calc of HADA file'
+            !write(out_unit,*) ' OMP calc of HADA file'
             ithread      = 0
             file_is_para = .TRUE.
 
-            IF (debug) write(out_unitp,*) 'file_is_para,nb_thread_file',file_is_para,nb_thread_file
+            IF (debug) write(out_unit,*) 'file_is_para,nb_thread_file',file_is_para,nb_thread_file
             file_HADA%nb_thread = nb_thread_file
           ELSE
             file_HADA%nb_thread = 0
@@ -631,12 +631,12 @@
 
 !       - read parameters at iq --------------------------------
         read(nio,*,iostat=iocond) name1,name2
-        IF (debug) write(out_unitp,*) 'iq,iocond,name2',iq,iocond,name2
-        IF (debug) write(out_unitp,*) 'iq,ithread,nio',iq,ithread,nio
+        IF (debug) write(out_unit,*) 'iq,iocond,name2',iq,iocond,name2
+        IF (debug) write(out_unit,*) 'iq,ithread,nio',iq,ithread,nio
 
         IF (iocond > 0 .OR. iocond < 0 .AND. .NOT. file_is_para) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Problem with the SH_HADA file'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Problem with the SH_HADA file'
           STOP
         ELSE IF (iocond < 0 .AND. file_is_para) THEN
           ithread = ithread + 1
@@ -645,37 +645,37 @@
         END IF
 
         IF (trim(name2) /= 'Beginning') THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' The beginning of the record is not correct'
-          write(out_unitp,*)  trim(name2),' instead of "Beginning"'
-          write(out_unitp,*) ' Probably, you should restart with Read_Grid=f'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' The beginning of the record is not correct'
+          write(out_unit,*)  trim(name2),' instead of "Beginning"'
+          write(out_unit,*) ' Probably, you should restart with Read_Grid=f'
           STOP
         END IF
 
         read(nio,*) name1,iqr
-        !write(out_unitp,*) 'name1,iqr',name1,iqr
+        !write(out_unit,*) 'name1,iqr',name1,iqr
         IF (iqr /= iq) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' iq of HADA file .NE. iq prog',iqr,iq
-          write(out_unitp,*) ' Check restart parameter: restart and num_grid'
-          write(out_unitp,*) '  OR'
-          write(out_unitp,*) ' Restart the calculation with Read_Grid=f'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' iq of HADA file .NE. iq prog',iqr,iq
+          write(out_unit,*) ' Check restart parameter: restart and num_grid'
+          write(out_unit,*) '  OR'
+          write(out_unit,*) ' Restart the calculation with Read_Grid=f'
           STOP
         END IF
         read(nio,*) name1,n3
-!       write(out_unitp,*) name1,n3
+!       write(out_unit,*) name1,n3
         IF (n3 < d0MatOp%nb_bie) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' iq=',iq
-          write(out_unitp,*) ' nb_bie(file) < nb_bie(data)',n3,d0MatOp%nb_bie
-          write(out_unitp,*) ' Restart the calculation with Read_Grid=f'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' iq=',iq
+          write(out_unit,*) ' nb_bie(file) < nb_bie(data)',n3,d0MatOp%nb_bie
+          write(out_unit,*) ' Restart the calculation with Read_Grid=f'
           STOP
         END IF
         IF (n3 > d0MatOp%nb_bie) THEN
-          write(out_unitp,*) ' WARNING in ',name_sub
-          write(out_unitp,*) ' iq=',iq
-          write(out_unitp,*) ' nb_bie(file) > nb_bie(data)',n3,d0MatOp%nb_bie
-          write(out_unitp,*) ' Restart the calculation with Read_Grid=f ?'
+          write(out_unit,*) ' WARNING in ',name_sub
+          write(out_unit,*) ' iq=',iq
+          write(out_unit,*) ' nb_bie(file) > nb_bie(data)',n3,d0MatOp%nb_bie
+          write(out_unit,*) ' Restart the calculation with Read_Grid=f ?'
         END IF
         nb_bie = d0MatOp%nb_bie
 
@@ -683,63 +683,63 @@
         work_bhe(:,:) = ZERO
 
         read(nio,*) name1,w
-!       write(out_unitp,*) name1,w
+!       write(out_unit,*) name1,w
 
         read(nio,*) name1,n1
-!       write(out_unitp,*) name1,n1
+!       write(out_unit,*) name1,n1
         IF (n1 /= nb_var) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' nb_var of HADA file .NE. nb_var of data',        &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' nb_var of HADA file .NE. nb_var of data',        &
                       n1,nb_var
-          write(out_unitp,*) ' Check the HADA file'
+          write(out_unit,*) ' Check the HADA file'
           STOP
         END IF
         CALL Read_Vec(Qdyn,nio,5,err)
         IF (err /= 0) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' reading the vector "Qdyn"'
-          write(out_unitp,*) ' grid point, iq:',iq
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' reading the vector "Qdyn"'
+          write(out_unit,*) ' grid point, iq:',iq
           STOP
         END IF
 
         read(nio,*) name1,n2
         IF (n2 /= nb_act1) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' nb_act1 of HADA file .NE. nb_act1 of data',      &
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' nb_act1 of HADA file .NE. nb_act1 of data',      &
                        n2,nb_act1
-          write(out_unitp,*) ' Check the HADA file'
+          write(out_unit,*) ' Check the HADA file'
           STOP
         END IF
         CALL Read_Vec(Qact,nio,5,err)
         IF (err /= 0) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) ' reading the vector "Qact"'
-          write(out_unitp,*) ' grid point, iq:',iq
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) ' reading the vector "Qact"'
+          write(out_unit,*) ' grid point, iq:',iq
           STOP
         END IF
-        !write(out_unitp,*) 'Qact',Qact
+        !write(out_unit,*) 'Qact',Qact
 
         read(nio,*) name1,JJ
         read(nio,*) name1,pot_cplx
         read(nio,*) name1,calc_scalar_Op
         read(nio,*) name1,nb_Op
-!       write(out_unitp,*) name1,nb_Op
+!       write(out_unit,*) name1,nb_Op
 !       ---------------------------------------------------------
 
 
         DO i=1,nb_Op
 
-          !write(out_unitp,*) name_sub,',iqr,i,nb_Op,i_term',iqr,i,nb_Op,i_term
-          !flush(out_unitp)
+          !write(out_unit,*) name_sub,',iqr,i,nb_Op,i_term',iqr,i,nb_Op,i_term
+          !flush(out_unit)
           read(nio,*) name1,n_OP_lect,id1,id2,cplx
-          !write(out_unitp,*) name_sub,name1,n_OP_lect,derive_lect(:),cplx
-          !flush(out_unitp)
+          !write(out_unit,*) name_sub,name1,n_OP_lect,derive_lect(:),cplx
+          !flush(out_unit)
 
           CALL Read_Mat(work_bhe,nio,5,err)
           IF (err /= 0) THEN
-            write(out_unitp,*) 'ERROR in ',name_sub
-            write(out_unitp,*) ' reading the matrix "work_bhe"'
-            write(out_unitp,*) ' grid point, iq:',iq
+            write(out_unit,*) 'ERROR in ',name_sub
+            write(out_unit,*) ' reading the matrix "work_bhe"'
+            write(out_unit,*) ' grid point, iq:',iq
             STOP
           END IF
 
@@ -752,7 +752,7 @@
               d0MatOp%ReVal(:,:,i_term) = work_bhe(1:nb_bie,1:nb_bie)
             END IF
           END IF
-!         write(out_unitp,*) name_sub,', i_term',i_term
+!         write(out_unit,*) name_sub,', i_term',i_term
 
 
 !IF (i_term == 1) write(777,*) Qact,min(work_bhe(1,1),0.05_Rkind)
@@ -762,10 +762,10 @@
 
         read(nio,*) name1,name2
         IF (trim(name2) /= 'End') THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' The end of the record is not correct'
-          write(out_unitp,*)  trim(name2),' instead of "End"'
-          write(out_unitp,*) ' Probably, you should restart with Read_Grid=f'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' The end of the record is not correct'
+          write(out_unit,*)  trim(name2),' instead of "End"'
+          write(out_unit,*) ' Probably, you should restart with Read_Grid=f'
           STOP
         END IF
 
@@ -773,16 +773,16 @@
 
 !       - read parameters at iq --------------------------------
         read(nio,iostat=iocond) n3
-!        write(out_unitp,*) 'iq,iocond,nb_thread',iq,iocond,n3
+!        write(out_unit,*) 'iq,iocond,nb_thread',iq,iocond,n3
 !        IF (n3 > 1) THEN
-!          write(out_unitp,*) 'name_SHADA',file_HADA%tab_name_th(ithread)
+!          write(out_unit,*) 'name_SHADA',file_HADA%tab_name_th(ithread)
 !        ELSE
-!          write(out_unitp,*) 'name_SHADA',file_HADA%name
+!          write(out_unit,*) 'name_SHADA',file_HADA%name
 !        END IF
-!        flush(out_unitp)
+!        flush(out_unit)
         IF (iocond > 0 .OR. iocond < 0 .AND. .NOT. file_is_para) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Problem with the SH_HADA file'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Problem with the SH_HADA file'
           STOP
         ELSE IF (iocond < 0 .AND. file_is_para) THEN
           ithread = ithread + 1
@@ -791,29 +791,29 @@
         END IF
 
         read(nio) iqr
-!       write(out_unitp,*) iqr,iq
+!       write(out_unit,*) iqr,iq
         IF (iqr /= iq) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' iq of HADA file .NE. iq prog',iqr,iq
-          write(out_unitp,*) ' Check restart parameter: restart and num_grid'
-          write(out_unitp,*) '  OR'
-          write(out_unitp,*) ' Restart the calculation with Read_Grid=f'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' iq of HADA file .NE. iq prog',iqr,iq
+          write(out_unit,*) ' Check restart parameter: restart and num_grid'
+          write(out_unit,*) '  OR'
+          write(out_unit,*) ' Restart the calculation with Read_Grid=f'
           STOP
         END IF
         read(nio) n3
-!       write(out_unitp,*) n3,nb_bie
+!       write(out_unit,*) n3,nb_bie
         IF (n3 < d0MatOp%nb_bie) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' iq=',iq
-          write(out_unitp,*) ' nb_bie(file) < nb_bie(data)',n3,d0MatOp%nb_bie
-          write(out_unitp,*) ' Restart the calculation with Read_Grid=f'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' iq=',iq
+          write(out_unit,*) ' nb_bie(file) < nb_bie(data)',n3,d0MatOp%nb_bie
+          write(out_unit,*) ' Restart the calculation with Read_Grid=f'
           STOP
         END IF
         IF (n3 > d0MatOp%nb_bie) THEN
-          write(out_unitp,*) ' WARNING in ',name_sub
-          write(out_unitp,*) ' iq=',iq
-          write(out_unitp,*) ' nb_bie(file) > nb_bie(data)',n3,d0MatOp%nb_bie
-          write(out_unitp,*) ' Restart the calculation with Read_Grid=f ?'
+          write(out_unit,*) ' WARNING in ',name_sub
+          write(out_unit,*) ' iq=',iq
+          write(out_unit,*) ' nb_bie(file) > nb_bie(data)',n3,d0MatOp%nb_bie
+          write(out_unit,*) ' Restart the calculation with Read_Grid=f ?'
         END IF
         nb_bie = d0MatOp%nb_bie
 
@@ -821,44 +821,44 @@
         work_bhe(:,:) = ZERO
 
         read(nio) w
-!       write(out_unitp,*) w
+!       write(out_unit,*) w
 
         read(nio) n1
-!       write(out_unitp,*) n1,nb_var
+!       write(out_unit,*) n1,nb_var
         IF (n1 /= nb_var) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' nb_var of HADA file .NE. nb_var of data',n1,nb_var
-          write(out_unitp,*) ' Check the HADA file'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' nb_var of HADA file .NE. nb_var of data',n1,nb_var
+          write(out_unit,*) ' Check the HADA file'
           STOP
         END IF
         read(nio) Qdyn
-!       write(out_unitp,*) Qdyn
+!       write(out_unit,*) Qdyn
         read(nio) n2
-!       write(out_unitp,*) n2,nb_act1
+!       write(out_unit,*) n2,nb_act1
         IF (n2 /= nb_act1) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' nb_act1 of HADA file .NE. nb_act1 of data',n2,nb_act1
-          write(out_unitp,*) ' Check the HADA file'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' nb_act1 of HADA file .NE. nb_act1 of data',n2,nb_act1
+          write(out_unit,*) ' Check the HADA file'
           STOP
         END IF
         read(nio) Qact
-!       write(out_unitp,*) Qact
+!       write(out_unit,*) Qact
 
 
         read(nio) JJ
-!       write(out_unitp,*) JJ
+!       write(out_unit,*) JJ
         read(nio) pot_cplx
-!       write(out_unitp,*) pot_cplx
+!       write(out_unit,*) pot_cplx
         read(nio) calc_scalar_Op
-!       write(out_unitp,*) calc_scalar_Op
+!       write(out_unit,*) calc_scalar_Op
         read(nio) nb_Op
-!       write(out_unitp,*) nb_Op
+!       write(out_unit,*) nb_Op
 !       ---------------------------------------------------------
 
         DO i=1,nb_Op
 
           read(nio) n_OP_lect,id1,id2,cplx
-!         write(out_unitp,*) name_sub,n_OP_lect,id1,id2,cplx
+!         write(out_unit,*) name_sub,n_OP_lect,id1,id2,cplx
 
           read(nio) work_bhe
 
@@ -883,18 +883,18 @@
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'Qact,w',Qact,w
-        write(out_unitp,*) 'Op',n_Op
+        write(out_unit,*) 'Qact,w',Qact,w
+        write(out_unit,*) 'Op',n_Op
         CALL Write_d0MatOp(d0MatOp)
-        write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+        write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
       END SUBROUTINE sub_reading_Op
 
       SUBROUTINE sub_ReadDir_TO_SaveSeq_Grid(para_AllOp)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Op
       IMPLICIT NONE
 
@@ -932,8 +932,8 @@
             read(nio,REC=i_qa,iostat=error) Grid(i_qa,:,:)
 
             IF (error /= 0) THEN
-              write(out_unitp,*) ' ERROR in sub_ReadDir_TO_SaveSeq_Grid'
-              write(out_unitp,*) ' Impossible to read the file: ',      &
+              write(out_unit,*) ' ERROR in sub_ReadDir_TO_SaveSeq_Grid'
+              write(out_unit,*) ' Impossible to read the file: ',      &
                      para_AllOp%tab_Op(iOp)%OpGrid(iterm)%file_Grid%name
               STOP
             END IF
@@ -950,8 +950,8 @@
           DO i_qa=1,nb_qa
             write(nio,iostat=error) Grid(i_qa,:,:)
             IF (error /= 0) THEN
-              write(out_unitp,*) ' ERROR in sub_ReadDir_TO_SaveSeq_Grid'
-              write(out_unitp,*) ' Impossible to write the file: ',     &
+              write(out_unit,*) ' ERROR in sub_ReadDir_TO_SaveSeq_Grid'
+              write(out_unit,*) ' Impossible to write the file: ',     &
                     para_AllOp%tab_Op(iOp)%OpGrid(iterm)%file_Grid%name
               STOP
             END IF
@@ -974,7 +974,7 @@
 !
 !=====================================================================
       SUBROUTINE d0d1d2bnDQact(d0b,d1b,d2b,BasisnD,iq,ib,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Coord_KEO
       USE mod_basis
       implicit none
@@ -1002,8 +1002,8 @@
        !logical, parameter :: debug = .TRUE.
        !-----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'BEGINNING d0d1d2bnDQact'
-         write(out_unitp,*) 'iq,ib',iq,ib
+         write(out_unit,*) 'BEGINNING d0d1d2bnDQact'
+         write(out_unit,*) 'iq,ib',iq,ib
        END IF
        !-----------------------------------------------------------
 
@@ -1031,12 +1031,12 @@
 
       !-------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) ' d0b',d0b
-        write(out_unitp,*) ' d1b',d1b
-        write(out_unitp,*) ' d2b',d2b
-        write(out_unitp,*)
-        write(out_unitp,*) 'END d0d1d2bnDQact'
+        write(out_unit,*)
+        write(out_unit,*) ' d0b',d0b
+        write(out_unit,*) ' d1b',d1b
+        write(out_unit,*) ' d2b',d2b
+        write(out_unit,*)
+        write(out_unit,*) 'END d0d1d2bnDQact'
       END IF
       !-------------------------------------------------------
 
@@ -1049,7 +1049,7 @@
 !
 !=====================================================================
       SUBROUTINE check_HADA(iqf,file_HADA)
-      USE mod_system
+      USE EVR_system_m
       USE mod_Op
       IMPLICIT NONE
 
@@ -1075,12 +1075,12 @@
 
         read(nio,11,END=20) name
  11     format(A132)
-!       write(out_unitp,*) name
+!       write(out_unit,*) name
         read(name,*,IOSTAT=ios) name3,iq
         IF (ios /= 0) GOTO 10
 
         IF (name3 == "iq:") iqf=iq
-!       write(out_unitp,*) name3,iqf
+!       write(out_unit,*) name3,iqf
 
         GOTO 10
 
@@ -1096,7 +1096,7 @@
         read(nio,END=60,ERR=50) name3,iq
 
         IF (name3 == nameA20) iqf=iq
-!       write(out_unitp,*) name3,iq,iqf
+!       write(out_unit,*) name3,iq,iqf
 
         GOTO 50
 
@@ -1106,6 +1106,6 @@
 
       CALL file_close(file_HADA)
 
-      IF(MPI_id==0) write(out_unitp,*) 'check_HADA: last grid point, iqf=',iqf
+      IF(MPI_id==0) write(out_unit,*) 'check_HADA: last grid point, iqf=',iqf
 
       end subroutine check_HADA

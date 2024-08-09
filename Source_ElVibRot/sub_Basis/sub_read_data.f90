@@ -52,7 +52,7 @@
 !       type_basis_set,n_contrac,A,B ...
 !================================================================
       SUBROUTINE read_basis5(BasisnD,mole)
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       use mod_Coord_KEO, only: CoordType
       IMPLICIT NONE
@@ -77,8 +77,8 @@
       character (len=*), parameter :: name_sub = 'read_basis5'
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
       CALL alloc_array(BasisnD_loc%tab_Pbasis,[mole%nb_act1+1],     &
@@ -89,10 +89,10 @@
       END DO
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) '---------------------------------------'
-        write(out_unitp,*) '----------- BasisnD -------------------'
-        write(out_unitp,*) '---------------------------------------'
-        write(out_unitp,*)
+        write(out_unit,*) '---------------------------------------'
+        write(out_unit,*) '----------- BasisnD -------------------'
+        write(out_unit,*) '---------------------------------------'
+        write(out_unit,*)
       ENDIF
 
       ! parameter for BasisnD
@@ -102,10 +102,10 @@
 
 !---------------------------------------------------------------
 !    - read the parameters of all basis set --------------------
-      !read(in_unitp,*) name
+      !read(in_unit,*) name
       name='basisnd'
       CALL string_uppercase_TO_lowercase(name)
-      !write(out_unitp,*) 'name ',name
+      !write(out_unit,*) 'name ',name
 
       IF (name .EQ. "nd" .OR. name .EQ. "basisnd") THEN
 !        - read the parameters of all nD-basis set ---------------
@@ -124,18 +124,18 @@
              nb_act1_test = nb_act1_test + BasisnD_loc%tab_Pbasis(i)%Pbasis%ndim
              i = i + 1
            END IF
-           !write(out_unitp,*) ' nb_act1_test: ',nb_act1_test,mole%nb_act1
+           !write(out_unit,*) ' nb_act1_test: ',nb_act1_test,mole%nb_act1
          END DO
          BasisnD_loc%nb_basis = i-1
 
          IF (nb_act1_test /= mole%nb_act1) THEN
-           write(out_unitp,*) ' ERROR in ',name_sub
-           write(out_unitp,*) 'nb_act1_test /= nb_act1 !!',nb_act1_test,mole%nb_act1
+           write(out_unit,*) ' ERROR in ',name_sub
+           write(out_unit,*) 'nb_act1_test /= nb_act1 !!',nb_act1_test,mole%nb_act1
            STOP
          END IF
       ELSE
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '   The old way to define the basis-set is not possible'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '   The old way to define the basis-set is not possible'
         STOP
       END IF
 
@@ -145,10 +145,10 @@
         DO i_Qbasis=1,BasisnD_loc%tab_Pbasis(i)%Pbasis%ndim
           i_Qdyn = BasisnD_loc%tab_Pbasis(i)%Pbasis%iQdyn(i_Qbasis)
           IF (liste_var_basis(i_Qdyn) == 1) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' The coordinate (iQdyn',i_Qdyn,                 &
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' The coordinate (iQdyn',i_Qdyn,                 &
                         ') is associated with TWO basis sets !!!'
-            write(out_unitp,*) ' CHECK your DATA'
+            write(out_unit,*) ' CHECK your DATA'
             STOP
           END IF
           liste_var_basis(i_Qdyn) = 1
@@ -160,11 +160,11 @@
         IF (mole%ActiveTransfo%list_act_OF_Qdyn(i) == 1 .AND.           &
                                            liste_var_basis(i) /= 1) THEN
           check_ba = .FALSE.
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' NO basis set for the ACTIVE coordinate',i
-          write(out_unitp,*) '   list_act_OF_Qdyn',mole%ActiveTransfo%list_act_OF_Qdyn(:)
-          write(out_unitp,*) '   liste_var_basis',liste_var_basis
-          write(out_unitp,*) ' CHECK your DATA'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' NO basis set for the ACTIVE coordinate',i
+          write(out_unit,*) '   list_act_OF_Qdyn',mole%ActiveTransfo%list_act_OF_Qdyn(:)
+          write(out_unit,*) '   liste_var_basis',liste_var_basis
+          write(out_unit,*) ' CHECK your DATA'
         END IF
       END DO
       IF (.NOT. check_ba) STOP
@@ -199,13 +199,13 @@
 
       BasisnD_loc%active            = .TRUE.
       IF(MPI_id==0) THEN
-        write(out_unitp,*)
-        write(out_unitp,*)
-        write(out_unitp,*) 'Number of active basis sets:',BasisnD_loc%nb_basis
+        write(out_unit,*)
+        write(out_unit,*)
+        write(out_unit,*) 'Number of active basis sets:',BasisnD_loc%nb_basis
       ENDIF
 
       IF (BasisnD_loc%nb_basis == 1) THEN
-        IF(MPI_id==0) write(out_unitp,*) 'WARNING: ONE layer of basis has been removed!!'
+        IF(MPI_id==0) write(out_unit,*) 'WARNING: ONE layer of basis has been removed!!'
         CALL basis2TObasis1(BasisnD,BasisnD_loc%tab_Pbasis(1)%Pbasis)
       ELSE
         CALL basis2TObasis1(BasisnD,BasisnD_loc)
@@ -214,31 +214,31 @@
       IF (BasisnD%MaxCoupling_OF_nDindB < 1) BasisnD%MaxCoupling_OF_nDindB = BasisnD%nb_basis
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) 'Tabder_Qdyn_TO_Qbasis',BasisnD%Tabder_Qdyn_TO_Qbasis(1:mole%nb_var)
-        write(out_unitp,*)
-        write(out_unitp,*) 'BasisnD%opt_param',BasisnD%opt_param
-        write(out_unitp,*)
+        write(out_unit,*) 'Tabder_Qdyn_TO_Qbasis',BasisnD%Tabder_Qdyn_TO_Qbasis(1:mole%nb_var)
+        write(out_unit,*)
+        write(out_unit,*) 'BasisnD%opt_param',BasisnD%opt_param
+        write(out_unit,*)
       ENDIF
 
       CALL dealloc_basis(BasisnD_loc)
       !CALL RecWriteMini_basis(BasisnD)
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) '---------------------------------------'
-        write(out_unitp,*) '---------------------------------------'
+        write(out_unit,*) '---------------------------------------'
+        write(out_unit,*) '---------------------------------------'
       ENDIF
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BasisnD'
+        write(out_unit,*) 'BasisnD'
         CALL RecWrite_basis(BasisnD,.TRUE.)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
       end subroutine read_basis5
 
       RECURSIVE SUBROUTINE RecRead5_Basis(basis_temp,mole)
 
-      USE mod_system
+      USE EVR_system_m
       USE mod_basis
       USE mod_Coord_KEO, only: CoordType
       IMPLICIT NONE
@@ -258,8 +258,8 @@
 !      logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-      write(out_unitp,*)
-      write(out_unitp,*) 'BEGINNING ',name_sub
+      write(out_unit,*)
+      write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -317,7 +317,7 @@
         DO i=1,basis_temp%ndim
           basis_temp%Tabder_Qdyn_TO_Qbasis(basis_temp%iQdyn(i)) = i
         END DO
-        IF (print_level > 1) write(out_unitp,*) 'Tabder_Qdyn_TO_Qbasis',&
+        IF (print_level > 1) write(out_unit,*) 'Tabder_Qdyn_TO_Qbasis',&
                         basis_temp%Tabder_Qdyn_TO_Qbasis(1:mole%nb_var)
 
       ELSE
@@ -327,7 +327,7 @@
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -339,7 +339,7 @@
 !
 !================================================================
       SUBROUTINE read5_basis_nD(basis_temp,mole)
-      USE mod_system
+      USE EVR_system_m
       use mod_Constant
       use mod_Coord_KEO, only: CoordType
       USE mod_basis
@@ -437,8 +437,8 @@
 !     logical, parameter :: debug = .TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*)
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
 
@@ -533,36 +533,36 @@
       MaxCoupling_OF_nDindB    = -1
       contrac_WITH_nDindB      = .FALSE.
 
-      read(in_unitp,basis_nD,IOSTAT=err_io)
+      read(in_unit,basis_nD,IOSTAT=err_io)
       IF (err_io < 0) THEN
-        write(out_unitp,basis_nD)
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '  while reading the namelist "basis_nD"'
-        write(out_unitp,*) ' end of file or end of record'
-        write(out_unitp,*) ' Probably, you forget a basis set ...'
-        write(out_unitp,*) ' Check your data !!'
+        write(out_unit,basis_nD)
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '  while reading the namelist "basis_nD"'
+        write(out_unit,*) ' end of file or end of record'
+        write(out_unit,*) ' Probably, you forget a basis set ...'
+        write(out_unit,*) ' Check your data !!'
         STOP
       END IF
       IF (err_io > 0) THEN
-        write(out_unitp,basis_nD)
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '  while reading the namelist "basis_nD"'
-        write(out_unitp,*) ' Probably, some arguments of namelist are wrong.'
-        write(out_unitp,*) ' Check your data !!'
+        write(out_unit,basis_nD)
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '  while reading the namelist "basis_nD"'
+        write(out_unit,*) ' Probably, some arguments of namelist are wrong.'
+        write(out_unit,*) ' Check your data !!'
         STOP
       END IF
 
       IF (print_level > 1 .OR. debug) THEN
-         IF(MPI_id==0) write(out_unitp,basis_nD)
+         IF(MPI_id==0) write(out_unit,basis_nD)
       ELSE
-         IF(MPI_id==0) write(out_unitp,*) 'Basis name : ',name
+         IF(MPI_id==0) write(out_unit,*) 'Basis name : ',name
       END IF
 
       IF (count(cte /= ZERO) > 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' Do not use cte(:,:) to define the scaling or the range parameters'
-        write(out_unitp,*) ' Instead, use A and B or Q0 and scaleQ'
-        write(out_unitp,*) ' CHECK your data'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' Do not use cte(:,:) to define the scaling or the range parameters'
+        write(out_unit,*) ' Instead, use A and B or Q0 and scaleQ'
+        write(out_unit,*) ' CHECK your data'
         STOP
       END IF
       packed = packed .OR. basis_temp%packed .OR. (nb_basis < 1)
@@ -570,8 +570,8 @@
 
       ! Here only iQact(:) will be set-up, although iQdyn are read from the data
       IF ( count(iQsym(:) > 0) > 0 ) THEN
-        write(out_unitp,*) ' WARNNING in ',name_sub
-        write(out_unitp,*) '  You sould use iQdyn instead of iQsym in your basis'
+        write(out_unit,*) ' WARNNING in ',name_sub
+        write(out_unit,*) '  You sould use iQdyn instead of iQsym in your basis'
       END IF
       ndim = count(iQact(:) > 0)
       IF (ndim == 0) THEN
@@ -604,28 +604,28 @@
 
 
       IF (ndim <= 0 .AND. nb_basis == 0 .AND. .NOT. BasisEl) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' The primitive basis has no coordinates !'
-        write(out_unitp,*) ' Specified the active coordinates with iQact(:) or iQdyn(:)'
-        write(out_unitp,*) ' or "nb_basis" for direct-product basis'
-        write(out_unitp,*) ' STOP in ',name_sub
-        write(out_unitp,basis_nD)
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' The primitive basis has no coordinates !'
+        write(out_unit,*) ' Specified the active coordinates with iQact(:) or iQdyn(:)'
+        write(out_unit,*) ' or "nb_basis" for direct-product basis'
+        write(out_unit,*) ' STOP in ',name_sub
+        write(out_unit,basis_nD)
         STOP
       END IF
 
       IF (auto_contrac_type1_TO /= 0 .AND. auto_contrac_type1_TO /= 100) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) ' The possible values for "auto_contrac_type1_TO" are: '
-         write(out_unitp,*) ' "0" or "100"'
-         write(out_unitp,*) ' Your value is:',auto_contrac_type1_TO
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) ' The possible values for "auto_contrac_type1_TO" are: '
+         write(out_unit,*) ' "0" or "100"'
+         write(out_unit,*) ' Your value is:',auto_contrac_type1_TO
          STOP
       END IF
       IF (auto_contrac_type21_TO /= 0 .AND. auto_contrac_type21_TO /= 100 .AND. &
           auto_contrac_type21_TO /= 20 .AND. auto_contrac_type21_TO /= 200) THEN
-         write(out_unitp,*) ' ERROR in ',name_sub
-         write(out_unitp,*) ' the possible values for "auto_contrac_type21_TO" are:'
-         write(out_unitp,*) ' "0", "100", "20" or "200"'
-         write(out_unitp,*) ' Your value is:',auto_contrac_type21_TO
+         write(out_unit,*) ' ERROR in ',name_sub
+         write(out_unit,*) ' the possible values for "auto_contrac_type21_TO" are:'
+         write(out_unit,*) ' "0", "100", "20" or "200"'
+         write(out_unit,*) ' Your value is:',auto_contrac_type21_TO
          STOP
       END IF
 
@@ -655,11 +655,11 @@
       IF (SparseGrid .AND. SparseGrid_type == -1) THEN
         SparseGrid_type = 1 !with SG (old way)
       ELSE IF (SparseGrid .AND. SparseGrid_type == 0) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) '  SparseGrid=T (with SG) and SparseGrid_type=0 (without SG)'
-        write(out_unitp,*) '  Do not use the "SparseGrid" variable, ...'
-        write(out_unitp,*) '  ... use only the "SparseGrid_type"'
-        write(out_unitp,*) '  Check your data!!'
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) '  SparseGrid=T (with SG) and SparseGrid_type=0 (without SG)'
+        write(out_unit,*) '  Do not use the "SparseGrid" variable, ...'
+        write(out_unit,*) '  ... use only the "SparseGrid_type"'
+        write(out_unit,*) '  Check your data!!'
         STOP
       ELSE IF (.NOT. SparseGrid .AND. SparseGrid_type == -1) THEN
         SparseGrid_type = 0 ! without SG
@@ -677,9 +677,9 @@
       IF (L1_SparseGrid  == huge(1) .AND. L1_SparseBasis < huge(1)) L1_SparseGrid  = L1_SparseBasis
       IF (L1_SparseBasis == huge(1) .AND. L1_SparseGrid  < huge(1)) L1_SparseBasis = L1_SparseGrid
       IF (L1_SparseBasis > L1_SparseGrid) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) '  L1_SparseBasis > L1_SparseGrid : it is impossible'
-          write(out_unitp,*) '  L1_SparseBasis,L1_SparseGrid',L1_SparseBasis,L1_SparseGrid
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) '  L1_SparseBasis > L1_SparseGrid : it is impossible'
+          write(out_unit,*) '  L1_SparseBasis,L1_SparseGrid',L1_SparseBasis,L1_SparseGrid
           STOP
       END IF
       basis_temp%para_SGType2%L1_SparseGrid  = L1_SparseGrid
@@ -688,18 +688,18 @@
       IF (L2_SparseGrid  == huge(1) .AND. L2_SparseBasis < huge(1)) L2_SparseGrid  = L2_SparseBasis
       IF (L2_SparseBasis == huge(1) .AND. L2_SparseGrid  < huge(1)) L2_SparseBasis = L2_SparseGrid
       IF (L2_SparseBasis > L2_SparseGrid) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) '  L2_SparseBasis > L2_SparseGrid : it is impossible'
-          write(out_unitp,*) '  L2_SparseBasis,L2_SparseGrid',L2_SparseBasis,L2_SparseGrid
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) '  L2_SparseBasis > L2_SparseGrid : it is impossible'
+          write(out_unit,*) '  L2_SparseBasis,L2_SparseGrid',L2_SparseBasis,L2_SparseGrid
           STOP
       END IF
       basis_temp%para_SGType2%L2_SparseGrid  = L2_SparseGrid
       basis_temp%para_SGType2%L2_SparseBasis = L2_SparseBasis
 
       IF (max_nb > max_nq ) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) '  max_nb MUST be <= max_nq'
-          write(out_unitp,*) '  max_nb, max_nq',max_nb, max_nq
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) '  max_nb MUST be <= max_nq'
+          write(out_unit,*) '  max_nb, max_nq',max_nb, max_nq
           STOP
       END IF
 
@@ -707,32 +707,32 @@
         IF (read_L_TO_n) THEN
           CALL alloc_NParray(Tab_L_TO_n,[10],"Tab_L_TO_n",name_sub,[0])
 
-          read(in_unitp,*,IOSTAT=err_io) dummy_name,Tab_L_TO_n
+          read(in_unit,*,IOSTAT=err_io) dummy_name,Tab_L_TO_n
           IF (err_io /= 0) THEN
-            write(out_unitp,basis_nD)
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) '  while reading  "Tab_L_TO_n" for L_TO_nb'
-            write(out_unitp,*) ' Probably, you some integers are missing ...'
-            write(out_unitp,*) ' => The line has to be like that (with 11 integers):'
-            write(out_unitp,*) ' l_to_nb 1 2 3 4 5 6   6 6 6 6 6'
-            write(out_unitp,*) ' Check your data !!'
+            write(out_unit,basis_nD)
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) '  while reading  "Tab_L_TO_n" for L_TO_nb'
+            write(out_unit,*) ' Probably, you some integers are missing ...'
+            write(out_unit,*) ' => The line has to be like that (with 11 integers):'
+            write(out_unit,*) ' l_to_nb 1 2 3 4 5 6   6 6 6 6 6'
+            write(out_unit,*) ' Check your data !!'
             STOP
           END IF
-          write(out_unitp,'(2a,11(1x,i0))') 'dummy_name ',dummy_name,Tab_L_TO_n
+          write(out_unit,'(2a,11(1x,i0))') 'dummy_name ',dummy_name,Tab_L_TO_n
           CALL Set_Basis_L_TO_n(basis_temp%L_TO_nb,max_n=max_nb,Tab_L_TO_n=Tab_L_TO_n)
 
-          read(in_unitp,*,IOSTAT=err_io) dummy_name,Tab_L_TO_n
+          read(in_unit,*,IOSTAT=err_io) dummy_name,Tab_L_TO_n
           IF (err_io /= 0) THEN
-            write(out_unitp,basis_nD)
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) '  while reading "Tab_L_TO_n" for L_TO_nq'
-            write(out_unitp,*) ' Probably, you some integers are missing ...'
-            write(out_unitp,*) ' => The line has to like that (with 11 integers):'
-            write(out_unitp,*) ' l_to_nq 1 2 3 4 5 6   6 6 6 6 6'
-            write(out_unitp,*) ' Check your data !!'
+            write(out_unit,basis_nD)
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) '  while reading "Tab_L_TO_n" for L_TO_nq'
+            write(out_unit,*) ' Probably, you some integers are missing ...'
+            write(out_unit,*) ' => The line has to like that (with 11 integers):'
+            write(out_unit,*) ' l_to_nq 1 2 3 4 5 6   6 6 6 6 6'
+            write(out_unit,*) ' Check your data !!'
             STOP
           END IF
-          write(out_unitp,'(2a,11(1x,i0))') 'dummy_name ',dummy_name,Tab_L_TO_n
+          write(out_unit,'(2a,11(1x,i0))') 'dummy_name ',dummy_name,Tab_L_TO_n
           CALL Set_Basis_L_TO_n(basis_temp%L_TO_nq,max_n=max_nq,Tab_L_TO_n=Tab_L_TO_n)
 
           CALL dealloc_NParray(Tab_L_TO_n,"Tab_L_TO_n",name_sub)
@@ -743,19 +743,19 @@
           IF (Lexpo_TO_nb == -1) Lexpo_TO_nb = Lexpo_TO_nq
 
           IF (L_TO_nb_B > L_TO_nq_B .OR. L_TO_nb_A > L_TO_nq_A .OR. Lexpo_TO_nb > Lexpo_TO_nq) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) '  L_TO_nb_B MUST be <= L_TO_nq_B'
-            write(out_unitp,*) '  L_TO_nb_B,L_TO_nq_B',L_TO_nb_B,L_TO_nq_B
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) '  L_TO_nb_B MUST be <= L_TO_nq_B'
+            write(out_unit,*) '  L_TO_nb_B,L_TO_nq_B',L_TO_nb_B,L_TO_nq_B
 
-            write(out_unitp,*) '       and'
+            write(out_unit,*) '       and'
 
-            write(out_unitp,*) '  L_TO_nb_A MUST be <= L_TO_nq_A'
-            write(out_unitp,*) '  L_TO_nb_A,L_TO_nq_A',L_TO_nb_A,L_TO_nq_A
+            write(out_unit,*) '  L_TO_nb_A MUST be <= L_TO_nq_A'
+            write(out_unit,*) '  L_TO_nb_A,L_TO_nq_A',L_TO_nb_A,L_TO_nq_A
 
-            write(out_unitp,*) '       and'
+            write(out_unit,*) '       and'
 
-            write(out_unitp,*) '  Lexpo_TO_nb MUST be <= Lexpo_TO_nq'
-            write(out_unitp,*) '  Lexpo_TO_nb,Lexpo_TO_nq',Lexpo_TO_nb,Lexpo_TO_nq
+            write(out_unit,*) '  Lexpo_TO_nb MUST be <= Lexpo_TO_nq'
+            write(out_unit,*) '  Lexpo_TO_nb,Lexpo_TO_nq',Lexpo_TO_nb,Lexpo_TO_nq
 
             STOP
           END IF
@@ -781,9 +781,9 @@
 
 
         IF (print_level > 1) THEN
-          write(out_unitp,*) ' Parameters: nq(L) = A + B * L**expo'
+          write(out_unit,*) ' Parameters: nq(L) = A + B * L**expo'
           CALL Write_Basis_L_TO_n(basis_temp%L_TO_nq)
-          write(out_unitp,*) ' Parameters: nb(L) = A + B * L**expo'
+          write(out_unit,*) ' Parameters: nb(L) = A + B * L**expo'
           CALL Write_Basis_L_TO_n(basis_temp%L_TO_nb)
         END IF
 
@@ -832,17 +832,17 @@
         DO i=1,ndim
           basis_temp%iQdyn(i) = mole%ActiveTransfo%list_QactTOQdyn(iQact(i))
           IF (basis_temp%iQdyn(i) > mole%nb_var) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' iQdyn(i) is larger than nb_var',               &
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' iQdyn(i) is larger than nb_var',               &
                                     i,basis_temp%iQdyn(i),mole%nb_var
             STOP
           END IF
         END DO
 
         IF (print_level > 1) THEN
-          write(out_unitp,*) 'auto_basis:    ',auto_basis
-          write(out_unitp,*) 'A,B,Q0,scaleQ: ',A(1:ndim),B(1:ndim),Q0(1:ndim),scaleQ(1:ndim)
-          write(out_unitp,*) 'opt of A,B,Q0,scaleQ: ',opt_A(1:ndim),opt_B(1:ndim),opt_Q0(1:ndim),opt_scaleQ(1:ndim)
+          write(out_unit,*) 'auto_basis:    ',auto_basis
+          write(out_unit,*) 'A,B,Q0,scaleQ: ',A(1:ndim),B(1:ndim),Q0(1:ndim),scaleQ(1:ndim)
+          write(out_unit,*) 'opt of A,B,Q0,scaleQ: ',opt_A(1:ndim),opt_B(1:ndim),opt_Q0(1:ndim),opt_scaleQ(1:ndim)
         END IF
         basis_temp%A(:)      = ZERO
         basis_temp%B(:)      = ZERO
@@ -854,23 +854,23 @@
               (m_HO(i) > ZERO .OR. G_HO(i) > ZERO)) THEN
             IF (m_HO(i) > ZERO) scaleQ(i) = sqrt(sqrt(k_HO(i)*m_HO(i)))
             IF (G_HO(i) > ZERO) scaleQ(i) = sqrt(sqrt(k_HO(i)/G_HO(i)))
-            write(out_unitp,*) ' scaleQ(i)',i,scaleQ(i)
+            write(out_unit,*) ' scaleQ(i)',i,scaleQ(i)
           END IF
 
           IF (A(i) /= B(i) .AND. scaleQ(i) > ZERO) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' You give the range ("A" and "B"):',A(i),B(i)
-            write(out_unitp,*) '   and also the scaling factors ("scaleQ" and "Q0"):',scaleQ(i),Q0(i)
-            write(out_unitp,*) ' You have to chose the range or the scaling factors'
-            write(out_unitp,*) ' CHECK your data'
-            write(out_unitp,basis_nD)
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' You give the range ("A" and "B"):',A(i),B(i)
+            write(out_unit,*) '   and also the scaling factors ("scaleQ" and "Q0"):',scaleQ(i),Q0(i)
+            write(out_unit,*) ' You have to chose the range or the scaling factors'
+            write(out_unit,*) ' CHECK your data'
+            write(out_unit,basis_nD)
             STOP
           ELSE IF (A(i) > B(i) .AND. scaleQ(i) == ZERO) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' The range ("A" and "B") is :',A(i),B(i)
-            write(out_unitp,*) '   "A" MUST be < "B" '
-            write(out_unitp,*) ' CHECK your data'
-            write(out_unitp,basis_nD)
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' The range ("A" and "B") is :',A(i),B(i)
+            write(out_unit,*) '   "A" MUST be < "B" '
+            write(out_unit,*) ' CHECK your data'
+            write(out_unit,basis_nD)
             STOP
           ELSE IF (A(i) /= B(i) .AND. scaleQ(i) == ZERO) THEN
             basis_temp%A(i)      = A(i)
@@ -910,23 +910,23 @@
 
             basis_temp%Q0(1)     = mole%NMTransfo%Q0_HObasis(basis_temp%iQdyn(1))
             basis_temp%scaleQ(1) = mole%NMTransfo%scaleQ_HObasis(basis_temp%iQdyn(1))
-            write(out_unitp,*) 'Q0,scaleQ (from auto_basis): ',basis_temp%Q0,basis_temp%scaleQ
+            write(out_unit,*) 'Q0,scaleQ (from auto_basis): ',basis_temp%Q0,basis_temp%scaleQ
             basis_temp%auto_basis = .FALSE.
           ELSE
-            write(out_unitp,*) ' WARNING in ',name_sub
-            write(out_unitp,*) '  auto_basis=t and ...'
-            write(out_unitp,*) '   NMTransfo%Q0_HObasis or NMTransfo%scaleQ_HObasis are not associated'
-            write(out_unitp,*) '      The Q0 and scaleQ are not modified !!'
-            write(out_unitp,*) ' CHECK your data'
-            !write(out_unitp,basis_nD)
+            write(out_unit,*) ' WARNING in ',name_sub
+            write(out_unit,*) '  auto_basis=t and ...'
+            write(out_unit,*) '   NMTransfo%Q0_HObasis or NMTransfo%scaleQ_HObasis are not associated'
+            write(out_unit,*) '      The Q0 and scaleQ are not modified !!'
+            write(out_unit,*) ' CHECK your data'
+            !write(out_unit,basis_nD)
             !STOP
           END IF
           END IF
         ELSE IF (auto_basis .AND. ndim == 1 .AND. .NOT. associated(mole%NMTransfo)) THEN
-          write(out_unitp,*) ' WARNING in ',name_sub
-          write(out_unitp,*) '  auto_basis=t and mole%NMTransfo is not associated'
-          write(out_unitp,*) ' CHECK your data'
-          !write(out_unitp,basis_nD)
+          write(out_unit,*) ' WARNING in ',name_sub
+          write(out_unit,*) '  auto_basis=t and mole%NMTransfo is not associated'
+          write(out_unit,*) ' CHECK your data'
+          !write(out_unit,basis_nD)
           !STOP
         END IF
 
@@ -934,7 +934,7 @@
           count(basis_temp%opt_B /= 0) + count(basis_temp%opt_Q0 /= 0) +&
                                        count(basis_temp%opt_scaleQ /= 0)
         IF (print_level > 1)                                            &
-                  write(out_unitp,*) 'Parameter(s) to be optimized?: ', &
+                  write(out_unit,*) 'Parameter(s) to be optimized?: ', &
                                                    basis_temp%opt_param
 
       END IF
@@ -942,21 +942,21 @@
 
       basis_temp%nq_extra = nq_extra
       IF (basis_temp%nq_extra > 0 .AND. ndim > 0) THEN
-        write(out_unitp,*) 'Read nq_extra (',basis_temp%nq_extra,') grid points'
+        write(out_unit,*) 'Read nq_extra (',basis_temp%nq_extra,') grid points'
         CALL alloc_NParray(basis_temp%x_extra,[ndim,basis_temp%nq_extra],      &
                           'basis_temp%x_extra',name_sub)
         DO i=1,basis_temp%nq_extra
-          read(in_unitp,*)  dummy_name,basis_temp%x_extra(:,i)
+          read(in_unit,*)  dummy_name,basis_temp%x_extra(:,i)
         END DO
       END IF
 
 !---------------------------------------------------------------------
       IF (debug) THEN
         CALL RecWrite_basis(basis_temp)
-        write(out_unitp,*)
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*)
+        write(out_unit,*) 'END ',name_sub
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 !---------------------------------------------------------------------
       end subroutine read5_basis_nD
 !================================================================
@@ -964,7 +964,7 @@
 !       output : nb_word,word (the i th word of name)
 !================================================================
       SUBROUTINE analysis_name(name,word,i,nb_word)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 
@@ -979,7 +979,7 @@
       iw = 0
       icw = 0
       blank = .TRUE.
-!     write(out_unitp,*) 'analysis_name: ',name,len(name)
+!     write(out_unit,*) 'analysis_name: ',name,len(name)
       DO ic=1,len(name)
         ch = name(ic:ic)
         IF (ch .EQ. " ") THEN
@@ -994,12 +994,12 @@
           END IF
           blank = .FALSE.
         END IF
-!       write(out_unitp,*) 'analysis_name: ',ic,ch,blank,iw
+!       write(out_unit,*) 'analysis_name: ',ic,ch,blank,iw
       END DO
 
       nb_word = iw
-!     write(out_unitp,*) 'analysis_name: ',name,':',nb_word
-!     write(out_unitp,*) 'analysis_name: ',i,word
+!     write(out_unit,*) 'analysis_name: ',name,':',nb_word
+!     write(out_unit,*) 'analysis_name: ',i,word
 
 
       end subroutine analysis_name

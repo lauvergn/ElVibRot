@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
       MODULE mod_propa
-      USE mod_system
+      USE EVR_system_m
       USE mod_Constant,  ONLY : get_conv_au_to_unit,real_wu,            &
                                 convRWU_TO_R_WITH_WorkingUnit,          &
                                 convRWU_TO_R_WITH_WritingUnit,RWU_WriteUnit
@@ -359,7 +359,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 !
 !================================================================
       SUBROUTINE dealloc_param_propa(para_propa)
-      USE mod_system
+      USE EVR_system_m
       USE mod_field, ONLY : dealloc_param_field
       USE mod_psi,   ONLY : param_WP0,dealloc_param_WP0,dealloc_ana_psi,&
                             dealloc_psi,dealloc_array
@@ -377,7 +377,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
       END SUBROUTINE dealloc_param_propa
 
       SUBROUTINE SaveWP_restart(T,WP,file_restart)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi
       IMPLICIT NONE
 
@@ -398,11 +398,11 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' T=',T
-        write(out_unitp,*) ' nb_WP,size WP',size(WP),size(WP(1)%CvecB)
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' T=',T
+        write(out_unit,*) ' nb_WP,size WP',size(WP),size(WP(1)%CvecB)
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -419,14 +419,14 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+         write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
        END IF
 !----------------------------------------------------------
 
       END SUBROUTINE SaveWP_restart
       SUBROUTINE ReadWP_restart(T,WP,file_restart)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi
       IMPLICIT NONE
 
@@ -445,10 +445,10 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 !     logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) ' nb_psi',size(WP)
-        write(out_unitp,*)
-        flush(out_unitp)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) ' nb_psi',size(WP)
+        write(out_unit,*)
+        flush(out_unit)
       END IF
 !-----------------------------------------------------------
 
@@ -458,19 +458,19 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
       !err_read = 0
       read(no_restart,*,IOSTAT=err_read) T,nb_WP_file,size_WP_file
       IF (err_read /= 0) THEN
-        write(out_unitp,*) ' WARNING in ',name_sub
-        write(out_unitp,*) ' T (time) is not present in the restart file'
-        write(out_unitp,*) ' file name:',trim(file_restart%name)
-        write(out_unitp,*) ' => No restart, T0=0'
+        write(out_unit,*) ' WARNING in ',name_sub
+        write(out_unit,*) ' T (time) is not present in the restart file'
+        write(out_unit,*) ' file name:',trim(file_restart%name)
+        write(out_unit,*) ' => No restart, T0=0'
         T = ZERO
       ELSE
-        write(out_unitp,*) 'T0 for the restart:',T
-        write(out_unitp,*) 'ReadWP_restart: nb_WP,size WP            ',size(WP),size(WP(1)%CvecB)
-        write(out_unitp,*) 'ReadWP_restart: nb_WP,size WP (from file)',nb_WP_file,size_WP_file
+        write(out_unit,*) 'T0 for the restart:',T
+        write(out_unit,*) 'ReadWP_restart: nb_WP,size WP            ',size(WP),size(WP(1)%CvecB)
+        write(out_unit,*) 'ReadWP_restart: nb_WP,size WP (from file)',nb_WP_file,size_WP_file
 
         IF (nb_WP_file /= size(WP) .OR. size_WP_file /= size(WP(1)%CvecB)) THEN
-          write(out_unitp,*) ' ERROR in ',name_sub
-          write(out_unitp,*) ' Inconsistent WP size values!'
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' Inconsistent WP size values!'
           STOP ' ERROR in ReadWP_restart:  Inconsistent WP size values.'
         END IF
 
@@ -483,8 +483,8 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 
 !----------------------------------------------------------
        IF (debug) THEN
-         write(out_unitp,*) 'END ',name_sub
-        flush(out_unitp)
+         write(out_unit,*) 'END ',name_sub
+        flush(out_unit)
        END IF
 !----------------------------------------------------------
 
@@ -496,7 +496,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 !==============================================================
 
       FUNCTION Calc_AutoCorr(psi0,psi,para_propa,T,Write_AC)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,    ONLY : param_psi,ecri_psi,Overlap_psi1_psi2,      &
                              sub_PsiBasisRep_TO_GridRep
       IMPLICIT NONE
@@ -549,7 +549,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 !
 !==============================================================
       SUBROUTINE Write_AutoCorr(no,T,cdot)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer              :: no
@@ -560,7 +560,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
 
       END SUBROUTINE Write_AutoCorr
       SUBROUTINE Read_AutoCorr(no,T,cdot)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
       integer                :: no,err_io
@@ -576,14 +576,14 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
       ELSE
        cdot = czero
       END IF
-!     write(out_unitp,*) name,T,cdot
+!     write(out_unit,*) name,T,cdot
 
       END SUBROUTINE Read_AutoCorr
 
 
 !=======================================================================================
 SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
-  USE mod_system
+  USE EVR_system_m
   USE mod_Op,              ONLY : param_Op,sub_PsiOpPsi,sub_psiHitermPsi, &
                                   sub_PsiDia_TO_PsiAdia_WITH_MemGrid
   USE mod_field,           ONLY : param_field,sub_dnE
@@ -633,23 +633,23 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
   para_H => tab_Op(1)
 
   IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*)
-   write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-   write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-   write(out_unitp,*)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*)
+   write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+   write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+   write(out_unit,*)
    CALL Write_ana_psi(para_propa%ana_psi)
-   write(out_unitp,*) 'symab of para_H ',para_H%symab
+   write(out_unit,*) 'symab of para_H ',para_H%symab
 
    DO i=1,nb_WP
      CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-     write(out_unitp,*) 'norm2psi0 BasisRep',i,WP(i)%norm2
+     write(out_unit,*) 'norm2psi0 BasisRep',i,WP(i)%norm2
 
-     write(out_unitp,*) 'WP(i)%BasisRep',i
-     write(out_unitp,*) 'WP(i)%BasisRep',i,'symab',WP(i)%symab
+     write(out_unit,*) 'WP(i)%BasisRep',i
+     write(out_unit,*) 'WP(i)%BasisRep',i,'symab',WP(i)%symab
      CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                    ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-     write(out_unitp,*) 'WP(i)%GridRep',i
+     write(out_unit,*) 'WP(i)%GridRep',i
      CALL ecri_psi(T=ZERO,psi=WP(i),                               &
                    ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
    END DO
@@ -754,7 +754,7 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
 
       IF (para_propa%ana_psi%ExactFact > 0) THEN
         w1 = WP(i)
-        write(out_unitp,*) 'WP',TO_string(i),': Exact Factorization analysis at ',T, ' ua'
+        write(out_unit,*) 'WP',TO_string(i),': Exact Factorization analysis at ',T, ' ua'
         IF (present(para_field)) THEN
           CALL sub_ExactFact_analysis(T,w1,para_propa%ana_psi,para_H,   &
                        para_propa%WPTmax,para_propa%WPdeltaT,para_field)
@@ -768,7 +768,7 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
         w1   = WP(i)
         info = TO_string(T,Rformat='f12.2')
         CALL sub_psiHitermPsi(w1,i,info,para_H,lines)
-        write(out_unitp,*) lines
+        write(out_unit,*) lines
         deallocate(lines)
       END IF
 
@@ -776,8 +776,8 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
         DO iOp=3,size(tab_Op)
           w1   = WP(i)
           CALL sub_PsiOpPsi(ET,w1,w2,tab_Op(iOp))
-          !write(out_unitp,*) 'WP',TO_string(i),': <tab_Op(',TO_string(iOp),')=',trim(tab_Op(iOp)%name_Op),'> at ',T,' ua: ',ET
-          write(out_unitp,'(7a,f18.6,a,2f18.6)') 'WP',TO_string(i),': <tab_Op(',TO_string(iOp),')=',  &
+          !write(out_unit,*) 'WP',TO_string(i),': <tab_Op(',TO_string(iOp),')=',trim(tab_Op(iOp)%name_Op),'> at ',T,' ua: ',ET
+          write(out_unit,'(7a,f18.6,a,2f18.6)') 'WP',TO_string(i),': <tab_Op(',TO_string(iOp),')=',  &
               trim(tab_Op(iOp)%name_Op),'> at ',T,' ua: ',ET
 
         END DO
@@ -790,7 +790,7 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
         para_propa%ana_psi%GridDone = .TRUE.
         CALL sub_analyze_psi(w1,para_propa%ana_psi,adia=.TRUE.)
       END IF
-      flush(out_unitp)
+      flush(out_unit)
 
       CALL alloc_psi(WP(i),BasisRep=BasisRep,GridRep=GridRep)
     ENDIF ! for keep_MPI
@@ -808,14 +808,14 @@ SUBROUTINE sub_analyze_WP_OpWP(T,WP,nb_WP,tab_Op,para_propa,adia,para_field)
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
 !-------------------------------------------------------
 END SUBROUTINE sub_analyze_WP_OpWP
 !=======================================================================================
 
 SUBROUTINE sub_analyze_mini_WP_OpWP(T,WP,nb_WP,para_H,ana_psi,adia,para_field)
-  USE mod_system
+  USE EVR_system_m
   USE mod_RealWithUnit
   USE mod_Op,    ONLY : param_Op,sub_PsiOpPsi,sub_PsiDia_TO_PsiAdia_WITH_MemGrid
   USE mod_field, ONLY : param_field,sub_dnE
@@ -868,20 +868,20 @@ SUBROUTINE sub_analyze_mini_WP_OpWP(T,WP,nb_WP,para_H,ana_psi,adia,para_field)
   !logical, parameter :: debug=.TRUE.
 !-------------------------------------------------------
   IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*)
-   write(out_unitp,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
-   write(out_unitp,*) 'nb_bi',WP(1)%nb_bi
-   write(out_unitp,*)
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*)
+   write(out_unit,*) 'nb_ba,nb_qa',WP(1)%nb_ba,WP(1)%nb_qa
+   write(out_unit,*) 'nb_bi',WP(1)%nb_bi
+   write(out_unit,*)
 
    DO i=1,nb_WP
      CALL norm2_psi(WP(i),.FALSE.,.TRUE.,.FALSE.)
-     write(out_unitp,*) 'norm2psi0 BasisRep',i,WP(1)%norm2
+     write(out_unit,*) 'norm2psi0 BasisRep',i,WP(1)%norm2
 
-     write(out_unitp,*) 'WP(i)%BasisRep',i
+     write(out_unit,*) 'WP(i)%BasisRep',i
      CALL ecri_psi(T=ZERO,psi=WP(1),                               &
                    ecri_GridRep=.FALSE.,ecri_BasisRep=.TRUE.)
-     write(out_unitp,*) 'WP(i)%GridRep',i
+     write(out_unit,*) 'WP(i)%GridRep',i
      CALL ecri_psi(T=ZERO,psi=WP(1),                               &
                    ecri_GridRep=.TRUE.,ecri_BasisRep=.FALSE.)
    END DO
@@ -944,7 +944,7 @@ SUBROUTINE sub_analyze_mini_WP_OpWP(T,WP,nb_WP,para_H,ana_psi,adia,para_field)
       CALL ADD_TO_string(psi_line,' ',TO_string(tab_WeightChannels(:,i_be),Rformat='f10.7'))
     END DO
 
-    IF(MPI_id==0) write(out_unitp,*) psi_line
+    IF(MPI_id==0) write(out_unit,*) psi_line
 
 
   END DO
@@ -957,7 +957,7 @@ SUBROUTINE sub_analyze_mini_WP_OpWP(T,WP,nb_WP,para_H,ana_psi,adia,para_field)
 
 !----------------------------------------------------------
   IF (debug) THEN
-    write(out_unitp,*) 'END ',name_sub
+    write(out_unit,*) 'END ',name_sub
   END IF
 !-------------------------------------------------------
 END SUBROUTINE sub_analyze_mini_WP_OpWP
@@ -983,7 +983,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 !
 !================================================================
       SUBROUTINE read_propagation(para_propa,mole,nb_bi,nb_elec,nb_vp_spec_out)
-      USE mod_system
+      USE EVR_system_m
       USE mod_psi,     ONLY : alloc_param_WP0,Read_tab_GWP
       USE mod_Coord_KEO
       IMPLICIT NONE
@@ -1088,7 +1088,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 !     logical, parameter :: debug = .TRUE.
 !-----------------------------------------------------------
 
-      write(out_unitp,*) ' PROPAGATION PARAMETERS: propa, defWP0, control'
+      write(out_unit,*) ' PROPAGATION PARAMETERS: propa, defWP0, control'
       auTOcm_inv = get_Conv_au_TO_unit('E','cm-1')
 
 !------- read the namelist -----------------------------
@@ -1152,36 +1152,36 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
         Op_corr             = 0
         channel_ie_corr     = 0
 
-        read(in_unitp,propa)
+        read(in_unit,propa)
 
         IF (n_WPecri > 0 .AND. WriteWP_nDeltaT > 0) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  n_WPecri and WriteWP_nDeltaT are defined (> 0).'
-          write(out_unitp,*) '  n_WPecri:        ',n_WPecri
-          write(out_unitp,*) '  WriteWP_nDeltaT: ',WriteWP_nDeltaT
-          write(out_unitp,*) '  You MUST define only WriteWP_nDeltaT paramter'
-          write(out_unitp,*) '  => check your data!!'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  n_WPecri and WriteWP_nDeltaT are defined (> 0).'
+          write(out_unit,*) '  n_WPecri:        ',n_WPecri
+          write(out_unit,*) '  WriteWP_nDeltaT: ',WriteWP_nDeltaT
+          write(out_unit,*) '  You MUST define only WriteWP_nDeltaT paramter'
+          write(out_unit,*) '  => check your data!!'
           STOP 'ERROR in read_propagation: n_WPecri and WriteWP_nDeltaT are defined'
         END IF
         IF (n_WPecri > 0) WriteWP_nDeltaT = n_WPecri
         IF (WriteWP_nDeltaT < 0) THEN
-          write(out_unitp,*) ' WARNING ',name_sub,': WriteWP_nDeltaT should be > 0'
-          write(out_unitp,*) '   => WriteWP_nDeltaT=1'
+          write(out_unit,*) ' WARNING ',name_sub,': WriteWP_nDeltaT should be > 0'
+          write(out_unit,*) '   => WriteWP_nDeltaT=1'
           WriteWP_nDeltaT      = 1
         END IF
 
-        IF (print_level > 0) write(out_unitp,propa)
+        IF (print_level > 0) write(out_unit,propa)
 
         para_propa%with_field    = .FALSE.
 
 
   IF (type_WPpropa > 0 .AND. name_WPpropa /= '') THEN
-    write(out_unitp,*) 'ERROR in ',name_sub
-    write(out_unitp,*) '  type_WPpropa and name_WPpropa are defined.'
-    write(out_unitp,*) '  type_WPpropa: ',type_WPpropa
-    write(out_unitp,*) '  name_WPpropa: ',trim(name_WPpropa)
-    write(out_unitp,*) '  You have to chose only one.'
-    write(out_unitp,*) '  => check your data!!'
+    write(out_unit,*) 'ERROR in ',name_sub
+    write(out_unit,*) '  type_WPpropa and name_WPpropa are defined.'
+    write(out_unit,*) '  type_WPpropa: ',type_WPpropa
+    write(out_unit,*) '  name_WPpropa: ',trim(name_WPpropa)
+    write(out_unit,*) '  You have to chose only one.'
+    write(out_unit,*) '  => check your data!!'
     STOP
   END IF
   IF (type_WPpropa == 0) THEN
@@ -1322,9 +1322,9 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
           name_WPpropa  = 'test'
           para_propa%with_field    = .TRUE.
   CASE Default
-           write(out_unitp,*) 'ERROR in ',name_sub
-           write(out_unitp,*) ' type of propagation(',type_WPpropa,')'
-           write(out_unitp,*) ' is not possible'
+           write(out_unit,*) 'ERROR in ',name_sub
+           write(out_unit,*) ' type of propagation(',type_WPpropa,')'
+           write(out_unit,*) ' is not possible'
            STOP
   END SELECT
 
@@ -1359,34 +1359,34 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 
         para_propa%file_autocorr%name    = make_EVRTFileName(file_autocorr)
         IF (err_FileName(para_propa%file_autocorr%name,name_sub='read_propagation') /= 0) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  the file_autocorr file name is empty'
-          write(out_unitp,*) '  => check your data!!'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  the file_autocorr file name is empty'
+          write(out_unit,*) '  => check your data!!'
           STOP
         END IF
 
         para_propa%file_spectrum%name    = make_EVRTFileName(file_spectrum)
         IF (err_FileName(para_propa%file_spectrum%name,name_sub='read_propagation') /= 0) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  the file_spectrum file name is empty'
-          write(out_unitp,*) '  => check your data!!'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  the file_spectrum file name is empty'
+          write(out_unit,*) '  => check your data!!'
           STOP
         END IF
 
         para_propa%file_WP%name          = make_EVRTFileName(file_WP)
         IF (err_FileName(para_propa%file_WP%name,name_sub='read_propagation') /= 0) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  the file_WP file name is empty'
-          write(out_unitp,*) '  => check your data!!'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  the file_WP file name is empty'
+          write(out_unit,*) '  => check your data!!'
           STOP
         END IF
 
         para_propa%file_WP_restart%name  = make_EVRTFileName(file_restart)
         IF (restart .AND. .NOT. check_file_exist_WITH_FileName(para_propa%file_WP_restart%name)) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  the restart file does not exist or its file name is empty'
-          write(out_unitp,*) '  file_restart: ',file_restart
-          write(out_unitp,*) '  => check your data!!'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  the restart file does not exist or its file name is empty'
+          write(out_unit,*) '  file_restart: ',file_restart
+          write(out_unit,*) '  => check your data!!'
           STOP
         END IF
 
@@ -1409,35 +1409,35 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
         para_propa%para_WP0%file_WP0%name       = make_EVRTFileName(file_WP0)
         IF (read_file .AND. .NOT.                                       &
             check_file_exist_WITH_FileName(para_propa%para_WP0%file_WP0%name)) THEN
-          write(out_unitp,*) 'ERROR in ',name_sub
-          write(out_unitp,*) '  the file_WP0 file does not exist or its file name is empty'
-          write(out_unitp,*) '  file_WP0: ',file_WP0
-          write(out_unitp,*) '  => check your data!!'
+          write(out_unit,*) 'ERROR in ',name_sub
+          write(out_unit,*) '  the file_WP0 file does not exist or its file name is empty'
+          write(out_unit,*) '  file_WP0: ',file_WP0
+          write(out_unit,*) '  => check your data!!'
           STOP
         END IF
         para_propa%para_WP0%WP0_nb_CleanChannel = WP0_nb_CleanChannel
         IF (WP0_nb_CleanChannel > 0) THEN
-          write(out_unitp,*)
-          write(out_unitp,*) "===================================="
-          write(out_unitp,*) "== WP0_CleanChannel ================"
+          write(out_unit,*)
+          write(out_unit,*) "===================================="
+          write(out_unit,*) "== WP0_CleanChannel ================"
           CALL alloc_param_WP0(para_propa%para_WP0,                     &
                         WP0Grid_Gaussian=.FALSE.,WP0_CleanChannel=.TRUE.)
-          read(in_unitp,*) para_propa%para_WP0%WP0_CleanChannellist
-          write(out_unitp,*) " list: ",para_propa%para_WP0%WP0_CleanChannellist
-          write(out_unitp,*)
-          write(out_unitp,*) "===================================="
+          read(in_unit,*) para_propa%para_WP0%WP0_CleanChannellist
+          write(out_unit,*) " list: ",para_propa%para_WP0%WP0_CleanChannellist
+          write(out_unit,*)
+          write(out_unit,*) "===================================="
         END IF
 
         IF (type_corr < 0 .AND. type_corr > 2) THEN
-          write(out_unitp,*) ' ERROR in read_propa'
-          write(out_unitp,*) ' type_corr < 0 and type_corr >2'
+          write(out_unit,*) ' ERROR in read_propa'
+          write(out_unit,*) ' type_corr < 0 and type_corr >2'
           STOP
         END IF
         IF (type_corr == 1 .AND. (i_qa_corr <1 .OR. channel_ie_corr<1)) THEN
-          write(out_unitp,*) ' ERROR in read_propa'
-          write(out_unitp,*) ' type_corr == 1 and ',                             &
+          write(out_unit,*) ' ERROR in read_propa'
+          write(out_unit,*) ' type_corr == 1 and ',                             &
                       'wrong i_qa_corr or channel_ie_corr'
-          write(out_unitp,*) 'type_corr,i_qa_corr,channel_ie_corr',             &
+          write(out_unit,*) 'type_corr,i_qa_corr,channel_ie_corr',             &
                       type_corr,i_qa_corr,channel_ie_corr
           STOP
         END IF
@@ -1471,14 +1471,14 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
           post_control = .TRUE.
           gate         = .FALSE.
           cplx_gate    = .FALSE.
-          read(in_unitp,control)
+          read(in_unit,control)
 
           IF (Tenvelopp == ZERO) Tenvelopp = convRWU_TO_R_WITH_WorkingUnit(WPTmax)
-          IF (print_level > 0) write(out_unitp,control)
+          IF (print_level > 0) write(out_unit,control)
 
           IF (nb_WP < 1) THEN
-            write(out_unitp,*) ' ERROR in ',name_sub
-            write(out_unitp,*) ' nb_WP < 1 !!!',nb_WP
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' nb_WP < 1 !!!',nb_WP
             STOP
           END IF
           IF (nb_WPba < 1) nb_WPba = nb_WP
@@ -1510,25 +1510,25 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
             CALL alloc_array(para_propa%para_control%Mgatet,            &
                                                    [nb_WP,nb_WPba],   &
                             "para_propa%para_control%Mgatet",name_sub)
-            read(in_unitp,*) para_propa%para_control%tab_WP0
-            write(out_unitp,*) 'tab_WP0',para_propa%para_control%tab_WP0
+            read(in_unit,*) para_propa%para_control%tab_WP0
+            write(out_unit,*) 'tab_WP0',para_propa%para_control%tab_WP0
 
             IF (cplx_gate) THEN
               nullify(MCgate)
               CALL alloc_array(MCgate,[nb_WP,nb_WPba],"MCgate",name_sub)
 
-              CALL Read_Mat(MCgate,in_unitp,nb_WPba,err)
+              CALL Read_Mat(MCgate,in_unit,nb_WPba,err)
               IF (err /= 0) THEN
-                write(out_unitp,*) 'ERROR in ',name_sub
-                write(out_unitp,*) ' reading the matrix "Mgate0"'
+                write(out_unit,*) 'ERROR in ',name_sub
+                write(out_unit,*) ' reading the matrix "Mgate0"'
                 STOP
               END IF
               para_propa%para_control%Mgate0(:,:) = MCgate(:,:)
 
-              CALL Read_Mat(MCgate,in_unitp,nb_WPba,err)
+              CALL Read_Mat(MCgate,in_unit,nb_WPba,err)
               IF (err /= 0) THEN
-                write(out_unitp,*) 'ERROR in ',name_sub
-                write(out_unitp,*) ' reading the matrix "Mgatet"'
+                write(out_unit,*) 'ERROR in ',name_sub
+                write(out_unit,*) ' reading the matrix "Mgatet"'
                 STOP
               END IF
               para_propa%para_control%Mgatet(:,:) = MCgate(:,:)
@@ -1538,18 +1538,18 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
               nullify(MRgate)
               CALL alloc_array(MRgate,[nb_WP,nb_WPba],"MRgate",name_sub)
 
-              CALL Read_Mat(MRgate,in_unitp,nb_WPba,err)
+              CALL Read_Mat(MRgate,in_unit,nb_WPba,err)
               IF (err /= 0) THEN
-                write(out_unitp,*) 'ERROR in ',name_sub
-                write(out_unitp,*) ' reading the matrix "Mgate0"'
+                write(out_unit,*) 'ERROR in ',name_sub
+                write(out_unit,*) ' reading the matrix "Mgate0"'
                 STOP
               END IF
               para_propa%para_control%Mgate0(:,:) = MRgate(:,:)
 
-              CALL Read_Mat(MRgate,in_unitp,nb_WPba,err)
+              CALL Read_Mat(MRgate,in_unit,nb_WPba,err)
               IF (err /= 0) THEN
-                write(out_unitp,*) 'ERROR in ',name_sub
-                write(out_unitp,*) ' reading the matrix "Mgatet"'
+                write(out_unit,*) 'ERROR in ',name_sub
+                write(out_unit,*) ' reading the matrix "Mgatet"'
                 STOP
               END IF
               para_propa%para_control%Mgatet(:,:) = MRgate(:,:)
@@ -1558,17 +1558,17 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
             END IF
 
             IF (debug) THEN
-              write(out_unitp,*) 'Gate Matrix (WP0)',nb_WP
-              CALL Write_Mat(para_propa%para_control%Mgate0,out_unitp,4)
-              write(out_unitp,*) 'Gate Matrix (WPt)',nb_WP
-              CALL Write_Mat(para_propa%para_control%Mgatet,out_unitp,4)
+              write(out_unit,*) 'Gate Matrix (WP0)',nb_WP
+              CALL Write_Mat(para_propa%para_control%Mgate0,out_unit,4)
+              write(out_unit,*) 'Gate Matrix (WPt)',nb_WP
+              CALL Write_Mat(para_propa%para_control%Mgatet,out_unit,4)
             END IF
 
             DO i=1,nb_WP
               CALL Write_Vec(para_propa%para_control%Mgate0(i,:),       &
-                             out_unitp,4,info="#WP0 " // TO_string(i) )
+                             out_unit,4,info="#WP0 " // TO_string(i) )
               CALL Write_Vec(para_propa%para_control%Mgatet(i,:),       &
-                             out_unitp,4,info="#WPt " // TO_string(i))
+                             out_unit,4,info="#WPt " // TO_string(i))
             END DO
           ELSE
             CALL alloc_array(para_propa%para_control%tab_WP0,[nb_WP], &
@@ -1576,47 +1576,47 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
             CALL alloc_array(para_propa%para_control%tab_WPt,[nb_WP], &
                             "para_propa%para_control%tab_WPt",name_sub)
 
-            read(in_unitp,*) para_propa%para_control%tab_WP0
-            read(in_unitp,*) para_propa%para_control%tab_WPt
-            write(out_unitp,*) 'tab_WP0',para_propa%para_control%tab_WP0
-            write(out_unitp,*) 'tab_WPt',para_propa%para_control%tab_WPt
+            read(in_unit,*) para_propa%para_control%tab_WP0
+            read(in_unit,*) para_propa%para_control%tab_WPt
+            write(out_unit,*) 'tab_WP0',para_propa%para_control%tab_WP0
+            write(out_unit,*) 'tab_WPt',para_propa%para_control%tab_WPt
           END IF
 
         ELSE
           IF (lect_WP0DVR) THEN
-            write(out_unitp,*) ' read the WP0 in GridRep'
+            write(out_unit,*) ' read the WP0 in GridRep'
           ELSE IF (lect_WP0FBR) THEN
-            write(out_unitp,*) ' read the WP0 in BasisRep (old way)'
+            write(out_unit,*) ' read the WP0 in BasisRep (old way)'
           ELSE IF (New_Read_WP0) THEN
-            write(out_unitp,*) ' read the WP0 in BasisRep (new way)'
+            write(out_unit,*) ' read the WP0 in BasisRep (new way)'
           ELSE IF (new_GWP0) THEN
-            write(out_unitp,*) ' sum of Gaussian WPs (new way)'
+            write(out_unit,*) ' sum of Gaussian WPs (new way)'
             CALL Read_tab_GWP(para_propa%para_WP0%tab_GWP0,                     &
                               para_propa%para_WP0%nb_WP0,mole,nb_bi,nb_elec)
           ELSE
-            write(out_unitp,*) ' One Gaussian WP (old way)'
+            write(out_unit,*) ' One Gaussian WP (old way)'
 
             para_propa%para_WP0%nb_act1 = mole%nb_act1
 
             CALL alloc_param_WP0(para_propa%para_WP0,                           &
                                  WP0Grid_Gaussian=.TRUE.,WP0_CleanChannel=.FALSE.)
 
-            write(out_unitp,*)
+            write(out_unit,*)
             IF (print_level > 0)                                        &
-             write(out_unitp,*) 'WP0(Q)=exp[-((Q-Qeq)/sigma)^2+i*imp_k*(Q-Qeq)+i*phase]'
-            IF (print_level > 0) write(out_unitp,*) 'WP0sigma WP0Qeq WP0imp_k WP0phase'
+             write(out_unit,*) 'WP0(Q)=exp[-((Q-Qeq)/sigma)^2+i*imp_k*(Q-Qeq)+i*phase]'
+            IF (print_level > 0) write(out_unit,*) 'WP0sigma WP0Qeq WP0imp_k WP0phase'
             DO i=1,mole%nb_act1
               sigma    = ONETENTH
               Qeq      = ZERO
               imp_k    = ZERO
               phase    = ZERO
-              read(in_unitp,defWP0)
+              read(in_unit,defWP0)
               para_propa%para_WP0%WP0sigma(i) = sigma
               para_propa%para_WP0%WP0Qeq(i)   = Qeq
               para_propa%para_WP0%WP0imp_k(i) = imp_k
               para_propa%para_WP0%WP0phase(i) = phase
 
-              IF (print_level > 0) write(out_unitp,*) i,sigma,Qeq,imp_k,phase
+              IF (print_level > 0) write(out_unit,*) i,sigma,Qeq,imp_k,phase
             END DO
 
           END IF
@@ -1629,7 +1629,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 !
 !=======================================================
       SUBROUTINE read_davidson(para_Davidson,para_propa)
-      USE mod_system
+      USE EVR_system_m
       IMPLICIT NONE
 
 !----- variables for the WP propagation ----------------------------
@@ -1695,9 +1695,9 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
       logical, parameter :: debug =.FALSE.
 !      logical, parameter :: debug =.TRUE.
 !-----------------------------------------------------------
-      write(out_unitp,*) ' DAVIDSON PARAMETERS'
+      write(out_unit,*) ' DAVIDSON PARAMETERS'
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !-----------------------------------------------------------
       num_resetH            = -1 ! no reset for Davidson ortherwise restart davidson with nb_diago WP
@@ -1759,8 +1759,8 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
       poly_tol          = ZERO
       Op_Transfo        = .FALSE.
 
-      read(in_unitp,davidson)
-      IF (print_level > 0) write(out_unitp,davidson)
+      read(in_unit,davidson)
+      IF (print_level > 0) write(out_unit,davidson)
 
       IF (.NOT. lower_states .AND. .NOT. all_lower_states .AND. &
           .NOT. project_WP0) lower_states = .TRUE.
@@ -1805,11 +1805,11 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 
 
       IF (project_WP0 .EQV. (lower_states .OR. all_lower_states)) THEN
-        write(out_unitp,*) ' ERROR in ',name_sub
-        write(out_unitp,*) ' You have to chose between ',                       &
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' You have to chose between ',                       &
              '"lower_states" or "all_lower_states" or "project_WP0"',   &
                             lower_states,all_lower_states,project_WP0
-        write(out_unitp,*) ' CHECK your data'
+        write(out_unit,*) ' CHECK your data'
         STOP
       END IF
 
@@ -1834,10 +1834,10 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
       MPI_S%num_resetH                    = num_resetH
 
       IF (read_WP .AND. .NOT. check_file_exist_WITH_FileName(para_Davidson%name_file_readWP)) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) '  the name_file_readWP does not exist or its file name is empty'
-        write(out_unitp,*) '  name_file_readWP: ',name_file_readWP
-        write(out_unitp,*) '  => check your data!!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) '  the name_file_readWP does not exist or its file name is empty'
+        write(out_unit,*) '  name_file_readWP: ',name_file_readWP
+        write(out_unit,*) '  => check your data!!'
         STOP
       END IF
 
@@ -1869,22 +1869,22 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
       para_Davidson%name_file_saveWP  = make_EVRTFileName(name_file_saveWP)
 
       IF (err_FileName(para_Davidson%name_file_saveWP,name_sub='read_davidson') /= 0) THEN
-        write(out_unitp,*) 'ERROR in ',name_sub
-        write(out_unitp,*) '  the name_file_saveWP file name is empty'
-        write(out_unitp,*) '  => check your data!!'
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) '  the name_file_saveWP file name is empty'
+        write(out_unit,*) '  => check your data!!'
         STOP
       END IF
 
       IF(MPI_id==0) THEN
-        write(out_unitp,*) 'para_Davidson%Max_ene       ',para_Davidson%Max_ene
-        write(out_unitp,*) 'para_Davidson%scaled_max_ene',para_Davidson%scaled_max_ene
-        write(out_unitp,*) 'para_Davidson%conv_ene      ',para_Davidson%conv_ene
-        write(out_unitp,*) 'para_Davidson%conv_resi     ',para_Davidson%conv_resi
+        write(out_unit,*) 'para_Davidson%Max_ene       ',para_Davidson%Max_ene
+        write(out_unit,*) 'para_Davidson%scaled_max_ene',para_Davidson%scaled_max_ene
+        write(out_unit,*) 'para_Davidson%conv_ene      ',para_Davidson%conv_ene
+        write(out_unit,*) 'para_Davidson%conv_resi     ',para_Davidson%conv_resi
       ENDIF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 

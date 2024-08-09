@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
  MODULE mod_march_SG4
- USE mod_system
+ USE EVR_system_m
  USE mod_psi,    ONLY : param_psi
  USE mod_propa,  ONLY : param_propa,Calc_AutoCorr,Write_AutoCorr
  IMPLICIT NONE
@@ -64,7 +64,7 @@
 
 
  SUBROUTINE march_noD_SG4_BasisRep_v2(T,no,psi,psi0,para_H,para_propa)
- USE mod_system
+ USE EVR_system_m
 !$ USE omp_lib, only : OMP_GET_THREAD_NUM
  USE mod_nDindex
  USE mod_Coord_KEO,                ONLY : CoordType
@@ -115,10 +115,10 @@
   character (len=*), parameter :: name_sub='march_noD_SG4_BasisRep_v2'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'nOD',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'nOD',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
@@ -149,9 +149,9 @@
   !IPsi0%RvecB(:) = Aimag(Psi0%CvecB(:))
 
  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**5 ) THEN
-   write(out_unitp,'(a)')              'OpPsi SG4 (%): [--0-10-20-30-40-50-60-70-80-90-100]'
-   write(out_unitp,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
-   flush(out_unitp)
+   write(out_unit,'(a)')              'OpPsi SG4 (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+   write(out_unit,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
+   flush(out_unit)
  END IF
 
  !to be sure to have the correct number of threads, we use
@@ -159,7 +159,7 @@
  !$OMP parallel                                                  &
  !$OMP default(none)                                             &
  !$OMP shared(RPsi,IPsi,MarchRpsi,MarchIpsi)                     &
- !$OMP shared(T,para_H,BasisnD,para_propa,print_level,out_unitp) &
+ !$OMP shared(T,para_H,BasisnD,para_propa,print_level,out_unit) &
  !$OMP shared(MPI_id)                                            &
  !$OMP private(itab,iG,tab_l,ith,err_sub,PsiRvec,PsiIvec)        &
  !$OMP num_threads(BasisnD%para_SGType2%nb_threads)
@@ -178,7 +178,7 @@
 
    CALL ADD_ONE_TO_nDindex(BasisnD%para_SGType2%nDind_SmolyakRep,tab_l,iG=iG,err_sub=err_sub)
 
-   !write(out_unitp,*) 'iG',iG
+   !write(out_unit,*) 'iG',iG
    !transfert part of the psi%RvecB(:) to PsiRvec%R and psi0%RvecB(:) to Psi0Rvec%R
    ! the real and imaginary part are splited
 
@@ -202,11 +202,11 @@
 
    IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**5 .AND. &
        mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
-     write(out_unitp,'(a)',ADVANCE='no') '---'
-     flush(out_unitp)
+     write(out_unit,'(a)',ADVANCE='no') '---'
+     flush(out_unit)
    END IF
 
-   !write(out_unitp,*) 'iG done:',iG ; flush(out_unitp)
+   !write(out_unit,*) 'iG done:',iG ; flush(out_unit)
  END DO
  CALL dealloc_NParray(tab_l,'tabl_l',name_sub)
  !$OMP   END PARALLEL
@@ -223,20 +223,20 @@
   ENDIF ! for if(openmpi)
 
  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**5) THEN
-   IF(MPI_id==0) write(out_unitp,'(a)',ADVANCE='yes') '----]'
+   IF(MPI_id==0) write(out_unit,'(a)',ADVANCE='yes') '----]'
  END IF
- flush(out_unitp)
+ flush(out_unit)
 
  !- check norm ------------------
  IF(keep_MPI) CALL norm2_psi(psi,GridRep=.FALSE.,BasisRep=.TRUE.)
  IF(openmpi .AND. MPI_scheme/=1)  CALL MPI_Bcast_(psi%norm2,size1_MPI,root_MPI)
 
- IF (debug) write(out_unitp,*) 'norm^2',psi%norm2
+ IF (debug) write(out_unit,*) 'norm^2',psi%norm2
 
  IF ( psi%norm2 > para_propa%max_norm2) THEN
    T  = T + para_propa%WPdeltaT
-   write(out_unitp,*) ' ERROR in ',name_sub
-   write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+   write(out_unit,*) ' ERROR in ',name_sub
+   write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
    para_propa%march_error   = .TRUE.
    para_propa%test_max_norm = .TRUE.
    STOP
@@ -252,15 +252,15 @@
 !-----------------------------------------------------------
  IF (debug) THEN
    CALL norm2_psi(psi)
-   write(out_unitp,*) 'norm psi',psi%norm2
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'norm psi',psi%norm2
+   write(out_unit,*) 'END ',name_sub
  END IF
 !-----------------------------------------------------------
 
  END SUBROUTINE march_noD_SG4_BasisRep_v2
 
  SUBROUTINE march_noD_ONE_DP_SG4(T,PsiRVec,PsiIVec,iG,tab_l,para_H,para_propa)
- USE mod_system
+ USE EVR_system_m
  USE mod_basis_set_alloc,          ONLY : basis
  USE mod_basis_BtoG_GtoB_SGType4,  ONLY : TypeRVec,alloc_TypeRVec,dealloc_TypeRVec
  USE mod_OpPsi_SG4,                ONLY : sub_TabOpPsi_OF_ONEDP_FOR_SGtype4
@@ -294,10 +294,10 @@
  character (len=*), parameter :: name_sub='march_noD_ONE_DP_SG4'
 !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'BEGINNING ',name_sub
-   write(out_unitp,*) 'T',T
-   write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-   write(out_unitp,*) 'nOD',para_propa%para_poly%npoly
+   write(out_unit,*) 'BEGINNING ',name_sub
+   write(out_unit,*) 'T',T
+   write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+   write(out_unit,*) 'nOD',para_propa%para_poly%npoly
  END IF
 !-----------------------------------------------------------
 
@@ -314,7 +314,7 @@
    RIw1(1)%V(:)     = PsiRvec%V
    RIw1(2)%V(:)     = PsiIvec%V
    norm2_AT_iG = dot_product(PsiRvec%V,PsiRvec%V) + dot_product(PsiIvec%V,PsiIvec%V)
-   IF (debug) write(out_unitp,*) 'norm2_AT_iG',norm2_AT_iG
+   IF (debug) write(out_unit,*) 'norm2_AT_iG',norm2_AT_iG
 
 
    ! initial energy of the given DP
@@ -354,12 +354,12 @@
      norm2_w2 = (dot_product(RIw2(1)%V,RIw2(1)%V) + dot_product(RIw2(2)%V,RIw2(2)%V)) / norm2_AT_iG
 
 
-     IF (debug) write(out_unitp,*) 'iG,j,norm2_w2/norm2_AT_iG',iG,j,norm2_w2
+     IF (debug) write(out_unit,*) 'iG,j,norm2_w2/norm2_AT_iG',iG,j,norm2_w2
 
      IF (norm2_w2 > TEN**15) THEN
-       write(out_unitp,*) ' ERROR in ',name_sub
-       write(out_unitp,*) ' Norm^2 of the vector is TOO large (> 10^15)',j,norm2_w2
-       write(out_unitp,*) ' => Reduce the time step !!'
+       write(out_unit,*) ' ERROR in ',name_sub
+       write(out_unit,*) ' Norm^2 of the vector is TOO large (> 10^15)',j,norm2_w2
+       write(out_unit,*) ' => Reduce the time step !!'
        STOP
      END IF
      j_exit = j
@@ -383,14 +383,14 @@
 
  !-----------------------------------------------------------
  IF (debug) THEN
-   write(out_unitp,*) 'iG,j_exit,norm2_w2',iG,j_exit,norm2_w2
-   write(out_unitp,*) 'END ',name_sub
+   write(out_unit,*) 'iG,j_exit,norm2_w2',iG,j_exit,norm2_w2
+   write(out_unit,*) 'END ',name_sub
  END IF
  !-----------------------------------------------------------
 
 END SUBROUTINE march_noD_ONE_DP_SG4
  SUBROUTINE march_noD_SG4_BasisRep_v1(T,no,psi,psi0,para_H,para_propa)
- USE mod_system
+ USE EVR_system_m
 !$ USE omp_lib, only : OMP_GET_THREAD_NUM
  USE mod_nDindex
  USE mod_Coord_KEO,                ONLY : CoordType
@@ -447,10 +447,10 @@ END SUBROUTINE march_noD_ONE_DP_SG4
   character (len=*), parameter :: name_sub='march_noD_SG4_BasisRep_v1'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'nOD',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'nOD',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
@@ -480,9 +480,9 @@ END SUBROUTINE march_noD_ONE_DP_SG4
   IPsi0%RvecB(:) = Aimag(Psi0%CvecB(:))
 
  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**5 ) THEN
-   write(out_unitp,'(a)')              'OpPsi SG4 (%): [--0-10-20-30-40-50-60-70-80-90-100]'
-   write(out_unitp,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
-   flush(out_unitp)
+   write(out_unit,'(a)')              'OpPsi SG4 (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+   write(out_unit,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
+   flush(out_unit)
  END IF
  psi0Hkpsi0(:) = CZERO
  E0            = para_H%E0
@@ -509,7 +509,7 @@ nb_thread = 1
    tab_nq(:) = getbis_tab_nq(tab_l,BasisnD%tab_basisPrimSG)
    tab_nb(:) = getbis_tab_nb(tab_l,BasisnD%tab_basisPrimSG)
 
-   !write(out_unitp,*) 'iG',iG
+   !write(out_unit,*) 'iG',iG
    !transfert part of the psi%RvecB(:) to PsiRvec%R and psi0%RvecB(:) to Psi0Rvec%R
    ! the real and imaginary part are splited
    CALL tabPackedBasis_TO_tabR_AT_iG(PsiRvec%V, RPsi%RvecB, iG,BasisnD%para_SGType2)
@@ -534,7 +534,7 @@ nb_thread = 1
    Rw1%V(:)     = PsiRvec%V
    Iw1%V(:)     = PsiIvec%V
    norm2_AT_iG = dot_product(PsiRvec%V,PsiRvec%V) + dot_product(PsiIvec%V,PsiIvec%V)
-   IF (debug) write(out_unitp,*) 'norm2_AT_iG',norm2_AT_iG
+   IF (debug) write(out_unit,*) 'norm2_AT_iG',norm2_AT_iG
 
 
    ! initial energy of the given DP
@@ -579,13 +579,13 @@ nb_thread = 1
      norm2_w2 = (dot_product(RIw2(1)%V,RIw2(1)%V) + dot_product(RIw2(2)%V,RIw2(2)%V)) / norm2_AT_iG
 
 
-     IF (debug) write(out_unitp,*) 'iG,j,norm2_w2/norm2_AT_iG',iG,j,norm2_w2
+     IF (debug) write(out_unit,*) 'iG,j,norm2_w2/norm2_AT_iG',iG,j,norm2_w2
 
      IF (norm2_w2 > TEN**15) THEN
-       write(out_unitp,*) ' ERROR in ',name_sub
-       write(out_unitp,*) ' Norm of the vector is TOO large (> 10^15)',j,    &
+       write(out_unit,*) ' ERROR in ',name_sub
+       write(out_unit,*) ' Norm of the vector is TOO large (> 10^15)',j,    &
                                              norm2_w2
-       write(out_unitp,*) ' => Reduce the time step !!'
+       write(out_unit,*) ' => Reduce the time step !!'
        STOP
      END IF
      j_exit = j
@@ -605,7 +605,7 @@ nb_thread = 1
                    iG,BasisnD%para_SGType2,BasisnD%WeightSG(iG))
 
 
-   IF (debug)  write(out_unitp,*) 'iG,j,norm2_w2',iG,j,norm2_w2
+   IF (debug)  write(out_unit,*) 'iG,j,norm2_w2',iG,j,norm2_w2
    !deallocate PsiRvec, Psi0Rvec
    CALL dealloc_TypeRVec(PsiRvec)
    CALL dealloc_TypeRVec(PsiIvec)
@@ -618,11 +618,11 @@ nb_thread = 1
 
    IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**5 .AND. &
        mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
-     write(out_unitp,'(a)',ADVANCE='no') '---'
-     flush(out_unitp)
+     write(out_unit,'(a)',ADVANCE='no') '---'
+     flush(out_unit)
    END IF
 
-   !write(out_unitp,*) 'iG done:',iG ; flush(out_unitp)
+   !write(out_unit,*) 'iG done:',iG ; flush(out_unit)
  END DO
 
  Psi%CvecB(:) = cmplx(MarchRPsi%RvecB,MarchIPsi%RvecB,kind=Rkind)
@@ -639,27 +639,27 @@ nb_thread = 1
  CALL dealloc_NParray(tab_nq,'tab_nq',name_sub)
 
  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**5) THEN
-   IF(MPI_id==0) write(out_unitp,'(a)',ADVANCE='yes') '----]'
+   IF(MPI_id==0) write(out_unit,'(a)',ADVANCE='yes') '----]'
  END IF
- flush(out_unitp)
+ flush(out_unit)
 
  IF (abs(norm2_w2) > para_propa%para_poly%poly_tol) THEN
-   write(out_unitp,*) ' ERROR in ',name_sub
-   write(out_unitp,*) ' Norm of the last vector is TOO large',norm2_w2
-   write(out_unitp,*) ' poly_tol: ',para_propa%para_poly%poly_tol
-   write(out_unitp,*) ' => npoly or max_poly are TOO small',               &
+   write(out_unit,*) ' ERROR in ',name_sub
+   write(out_unit,*) ' Norm of the last vector is TOO large',norm2_w2
+   write(out_unit,*) ' poly_tol: ',para_propa%para_poly%poly_tol
+   write(out_unit,*) ' => npoly or max_poly are TOO small',               &
                  para_propa%para_poly%npoly
    STOP
  END IF
 
  !- check norm ------------------
  CALL norm2_psi(psi,GridRep=.FALSE.,BasisRep=.TRUE.)
- IF (debug) write(out_unitp,*) 'norm^2',psi%norm2
+ IF (debug) write(out_unit,*) 'norm^2',psi%norm2
 
  IF ( psi%norm2 > para_propa%max_norm2) THEN
    T  = T + para_propa%WPdeltaT
-   write(out_unitp,*) ' ERROR in ',name_sub
-   write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+   write(out_unit,*) ' ERROR in ',name_sub
+   write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
    para_propa%march_error   = .TRUE.
    para_propa%test_max_norm = .TRUE.
    STOP
@@ -676,14 +676,14 @@ nb_thread = 1
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
  END SUBROUTINE march_noD_SG4_BasisRep_v1
  SUBROUTINE march_noD_SG4_BasisRep_v0(T,no,psi,psi0,para_H,para_propa)
- USE mod_system
+ USE EVR_system_m
 !$ USE omp_lib, only : OMP_GET_THREAD_NUM
  USE mod_nDindex
  USE mod_Coord_KEO,                ONLY : CoordType
@@ -739,10 +739,10 @@ nb_thread = 1
   character (len=*), parameter :: name_sub='march_noD_SG4_BasisRep_v0'
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unitp,*) 'BEGINNING ',name_sub
-        write(out_unitp,*) 'deltaT',para_propa%WPdeltaT
-        write(out_unitp,*) 'E0,Esc',para_H%E0,para_H%Esc
-        write(out_unitp,*) 'nOD',para_propa%para_poly%npoly
+        write(out_unit,*) 'BEGINNING ',name_sub
+        write(out_unit,*) 'deltaT',para_propa%WPdeltaT
+        write(out_unit,*) 'E0,Esc',para_H%E0,para_H%Esc
+        write(out_unit,*) 'nOD',para_propa%para_poly%npoly
       END IF
 !-----------------------------------------------------------
 
@@ -772,9 +772,9 @@ nb_thread = 1
   IPsi0%RvecB(:) = Aimag(Psi0%CvecB(:))
 
  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**5 ) THEN
-   write(out_unitp,'(a)')              'OpPsi SG4 (%): [--0-10-20-30-40-50-60-70-80-90-100]'
-   write(out_unitp,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
-   flush(out_unitp)
+   write(out_unit,'(a)')              'OpPsi SG4 (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+   write(out_unit,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
+   flush(out_unit)
  END IF
  psi0Hkpsi0(:) = CZERO
  E0            = para_H%E0
@@ -801,7 +801,7 @@ nb_thread = 1
    tab_nq(:) = getbis_tab_nq(tab_l,BasisnD%tab_basisPrimSG)
    tab_nb(:) = getbis_tab_nb(tab_l,BasisnD%tab_basisPrimSG)
 
-   !write(out_unitp,*) 'iG',iG
+   !write(out_unit,*) 'iG',iG
    !transfert part of the psi%RvecB(:) to PsiRvec%R and psi0%RvecB(:) to Psi0Rvec%R
    ! the real and imaginary part are splited
    CALL tabPackedBasis_TO_tabR_AT_iG(PsiRvec%V, RPsi%RvecB, iG,BasisnD%para_SGType2)
@@ -827,7 +827,7 @@ nb_thread = 1
    Rw1%V(:)     = PsiRvec%V
    Iw1%V(:)     = PsiIvec%V
    norm2_AT_iG = dot_product(PsiRvec%V,PsiRvec%V) + dot_product(PsiIvec%V,PsiIvec%V)
-   IF (debug) write(out_unitp,*) 'norm2_AT_iG',norm2_AT_iG
+   IF (debug) write(out_unit,*) 'norm2_AT_iG',norm2_AT_iG
 
 
    ! initial energy of the given DP
@@ -839,8 +839,8 @@ nb_thread = 1
 
    E0 = (dot_product(Rw1%V,Rw2(1)%V)+dot_product(Iw1%V,Iw2(1)%V))/norm2_AT_iG
 
-       !write(out_unitp,21) 'Rw1',Rw1%V
-       !write(out_unitp,21) 'Iw1',Iw1%V
+       !write(out_unit,21) 'Rw1',Rw1%V
+       !write(out_unit,21) 'Iw1',Iw1%V
 
    rtj          = CONE
 
@@ -853,16 +853,16 @@ nb_thread = 1
      CALL sub_TabOpPsi_OF_ONEDP_FOR_SGtype4(Rw2,iG,tab_l,para_H) ! in w2, we have H.Rw1
      CALL sub_TabOpPsi_OF_ONEDP_FOR_SGtype4(Iw2,iG,tab_l,para_H) ! in w2, we have H.Iw1
 
-        !write(out_unitp,21) 'Rw1',Rw1%V
-        !write(out_unitp,21) 'Iw1',Iw1%V
-        !write(out_unitp,21) 'Rw2',Rw2(1)%V
-        !write(out_unitp,21) 'Iw2',Iw2(1)%V
+        !write(out_unit,21) 'Rw1',Rw1%V
+        !write(out_unit,21) 'Iw1',Iw1%V
+        !write(out_unit,21) 'Rw2',Rw2(1)%V
+        !write(out_unit,21) 'Iw2',Iw2(1)%V
 
      Rw2(1)%V(:) = Rw2(1)%V - E0 * Rw1%V ! equivalent sub_scaledOpPsi
      Iw2(1)%V(:) = Iw2(1)%V - E0 * Iw1%V ! equivalent sub_scaledOpPsi
 
-        !write(out_unitp,21) 'Rw2',Rw2(1)%V
-        !write(out_unitp,21) 'Iw2',Iw2(1)%V
+        !write(out_unit,21) 'Rw2',Rw2(1)%V
+        !write(out_unit,21) 'Iw2',Iw2(1)%V
 
      Rw1%V(:)    = Rw2(1)%V
      Iw1%V(:)    = Iw2(1)%V
@@ -878,25 +878,25 @@ nb_thread = 1
      Rw2(1)%V(:) = Rw1%V * real(rtj,kind=Rkind) - Iw1%V * Aimag(rtj)
      Iw2(1)%V(:) = Rw1%V * Aimag(rtj)           + Iw1%V * real(rtj,kind=Rkind)
 
-        !write(out_unitp,21) 'Rw2*rtj',Rw2(1)%V
-        !write(out_unitp,21) 'Iw2*rtj',Iw2(1)%V
+        !write(out_unit,21) 'Rw2*rtj',Rw2(1)%V
+        !write(out_unit,21) 'Iw2*rtj',Iw2(1)%V
 
      PsiRvec%V(:) = PsiRvec%V + Rw2(1)%V
      PsiIvec%V(:) = PsiIvec%V + Iw2(1)%V
 
-        !write(out_unitp,21) 'Rpsi',PsiRvec%V
-        !write(out_unitp,21) 'Ipsi',PsiIvec%V
+        !write(out_unit,21) 'Rpsi',PsiRvec%V
+        !write(out_unit,21) 'Ipsi',PsiIvec%V
 
      norm2_w2 = (dot_product(Rw2(1)%V,Rw2(1)%V) + dot_product(Iw2(1)%V,Iw2(1)%V)) / norm2_AT_iG
 
 
-     IF (debug) write(out_unitp,*) 'iG,j,norm2_w2/norm2_AT_iG',iG,j,norm2_w2
+     IF (debug) write(out_unit,*) 'iG,j,norm2_w2/norm2_AT_iG',iG,j,norm2_w2
 
      IF (norm2_w2 > TEN**15) THEN
-       write(out_unitp,*) ' ERROR in ',name_sub
-       write(out_unitp,*) ' Norm of the vector is TOO large (> 10^15)',j,    &
+       write(out_unit,*) ' ERROR in ',name_sub
+       write(out_unit,*) ' Norm of the vector is TOO large (> 10^15)',j,    &
                                              norm2_w2
-       write(out_unitp,*) ' => Reduce the time step !!'
+       write(out_unit,*) ' => Reduce the time step !!'
        STOP
      END IF
      j_exit = j
@@ -919,7 +919,7 @@ nb_thread = 1
                    iG,BasisnD%para_SGType2,BasisnD%WeightSG(iG))
 
 
-   IF (debug)  write(out_unitp,*) 'iG,j,norm2_w2',iG,j,norm2_w2
+   IF (debug)  write(out_unit,*) 'iG,j,norm2_w2',iG,j,norm2_w2
    !deallocate PsiRvec, Psi0Rvec
    CALL dealloc_TypeRVec(PsiRvec)
    CALL dealloc_TypeRVec(PsiIvec)
@@ -932,11 +932,11 @@ nb_thread = 1
 
    IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**5 .AND. &
        mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
-     write(out_unitp,'(a)',ADVANCE='no') '---'
-     flush(out_unitp)
+     write(out_unit,'(a)',ADVANCE='no') '---'
+     flush(out_unit)
    END IF
 
-   !write(out_unitp,*) 'iG done:',iG ; flush(out_unitp)
+   !write(out_unit,*) 'iG done:',iG ; flush(out_unit)
  END DO
 
  Psi%CvecB(:) = cmplx(MarchRPsi%RvecB,MarchIPsi%RvecB,kind=Rkind)
@@ -953,37 +953,37 @@ nb_thread = 1
  CALL dealloc_NParray(tab_nq,'tab_nq',name_sub)
 
  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**5) THEN
-   IF(MPI_id==0) write(out_unitp,'(a)',ADVANCE='yes') '----]'
+   IF(MPI_id==0) write(out_unit,'(a)',ADVANCE='yes') '----]'
  END IF
- flush(out_unitp)
+ flush(out_unit)
 
  IF (abs(norm2_w2) > para_propa%para_poly%poly_tol) THEN
-   write(out_unitp,*) ' ERROR in ',name_sub
-   write(out_unitp,*) ' Norm of the last vector is TOO large',norm2_w2
-   write(out_unitp,*) ' poly_tol: ',para_propa%para_poly%poly_tol
-   write(out_unitp,*) ' => npoly or max_poly are TOO small',               &
+   write(out_unit,*) ' ERROR in ',name_sub
+   write(out_unit,*) ' Norm of the last vector is TOO large',norm2_w2
+   write(out_unit,*) ' poly_tol: ',para_propa%para_poly%poly_tol
+   write(out_unit,*) ' => npoly or max_poly are TOO small',               &
                  para_propa%para_poly%npoly
    STOP
  END IF
 
- !write(out_unitp,*) ' Psi before phase shift '
+ !write(out_unit,*) ' Psi before phase shift '
  !CALL ecri_psi(psi=psi)
  !- Phase Shift -----------------------------------
  !phase = para_H%E0*para_propa%WPdeltaT
  !psi = psi * exp(-cmplx(ZERO,phase,kind=Rkind))
 
- !write(out_unitp,*) ' Psi after phase shift '
+ !write(out_unit,*) ' Psi after phase shift '
  !CALL ecri_psi(psi=psi)
 
 
  !- check norm ------------------
  CALL norm2_psi(psi,GridRep=.FALSE.,BasisRep=.TRUE.)
- IF (debug) write(out_unitp,*) 'norm^2',psi%norm2
+ IF (debug) write(out_unit,*) 'norm^2',psi%norm2
 
  IF ( psi%norm2 > para_propa%max_norm2) THEN
    T  = T + para_propa%WPdeltaT
-   write(out_unitp,*) ' ERROR in ',name_sub
-   write(out_unitp,*) ' STOP propagation: norm > max_norm',psi%norm2
+   write(out_unit,*) ' ERROR in ',name_sub
+   write(out_unit,*) ' STOP propagation: norm > max_norm',psi%norm2
    para_propa%march_error   = .TRUE.
    para_propa%test_max_norm = .TRUE.
    STOP
@@ -1000,8 +1000,8 @@ nb_thread = 1
 !-----------------------------------------------------------
       IF (debug) THEN
         CALL norm2_psi(psi)
-        write(out_unitp,*) 'norm psi',psi%norm2
-        write(out_unitp,*) 'END ',name_sub
+        write(out_unit,*) 'norm psi',psi%norm2
+        write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
 
