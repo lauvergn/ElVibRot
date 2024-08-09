@@ -345,3 +345,7 @@ CONTAINS
   END SUBROUTINE versionEVRT
 
 END MODULE EVR_system_m
+! we add this module for the compatibility with old sub_system and other KEO files
+MODULE mod_system
+  USE EVR_system_m, out_unitp => out_unit, in_unitp  => in_unit
+END MODULE mod_system
