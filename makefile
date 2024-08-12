@@ -12,6 +12,8 @@ OPT = 1
 OMP = 1
 ## Lapack/blas/mkl? Empty: default with Lapack; 0: without Lapack; 1 with Lapack
 LAPACK = 1
+## Arpack? Empty: default No Arpack; 0: without Arpack; 1 with Arpack
+ARPACK = 0
 ## force the default integer (without kind) during the compillation.
 ## default 4: , INT=8 (for kind=8)
 INT = 4
@@ -42,12 +44,10 @@ ifeq ($(LAPACK),)
 else
   LLAPACK      := $(LAPACK)
 endif
-#===============================================================================
-# setup for mpifort
-ifeq ($(FFC),mpifort)
-  ## MPI compiled with: gfortran or ifort
-  MPICORE := $(shell ompi_info | grep 'Fort compiler:' | awk '{print $3}')
-  OOMP = 0
+ifeq ($(ARPACK),)
+  AARPACK      := 0
+else
+  AARPACK      := $(ARPACK)
 endif
 #===============================================================================
 #
@@ -56,6 +56,27 @@ OS :=$(shell uname)
 
 # about EVRT, path, versions ...:
 LOC_path:= $(shell pwd)
+#
+#===============================================================================
+# We cannot use ARPACK without lapack
+ifeq ($(LLAPACK),0)
+  AARPACK = 0
+endif
+#===============================================================================
+# turn off ARPACK when using pgf90
+ifeq ($(F90),pgf90)
+  AARPACK = 0
+endif
+#===============================================================================
+# setup for mpifort
+ifeq ($(FFC),mpifort)
+  ## MPI compiled with: gfortran or ifort
+  MPICORE := $(shell ompi_info | grep 'Fort compiler:' | awk '{print $3}')
+  OOMP = 0
+  ifeq ($(INT),8)
+    AARPACK = 0 ## temp here, disable ARPACK for 64-bit case
+  endif
+endif
 
 # Extension for the object directory and the library
 ifeq ($(FFC),mpifort)
@@ -74,8 +95,18 @@ MOD_DIR=$(OBJ_DIR)
 LIBA=libEVR$(extlibwi_obj).a
 #=================================================================================
 # cpp preprocessing
-CPPSHELL_LAPACK  = -D__LAPACK="$(LLAPACK)"
-
+#=================================================================================
+# cpp preprocessing
+EVR_ver:=$(shell awk '/EVR/ {print $$3}' $(LOC_path)/version-EVR)
+CPPSHELL = -D__COMPILE_DATE="\"$(shell date +"%a %e %b %Y - %H:%M:%S")\"" \
+           -D__COMPILE_HOST="\"$(shell hostname -s)\"" \
+           -D__COMPILER="'$(FFC)'" \
+           -D__COMPILER_VER="'$(FC_VER)'" \
+           -D__COMPILER_OPT="'$(FFLAGS0)'" \
+           -D__EVRTPATH="'$(LOC_path)'" \
+           -D__EVR_VER="'$(EVR_ver)'" \
+           -D__ARPACK="$(AARPACK)"
+#
 #===============================================================================
 #
 #===============================================================================
@@ -115,11 +146,19 @@ CONSTPHYSLIBA     = $(CONSTPHYS_DIR)/libPhysConst$(extlibwi_obj).a
 TNUMTANA_DIR      = $(ExtLibDIR)/Tnum-Tana
 TNUMTANAMOD_DIR   = $(TNUMTANA_DIR)/obj/obj$(extlibwi_obj)
 TNUMTANALIBA      = $(TNUMTANA_DIR)/libTnum-Tana$(extlibwi_obj).a
+# AARPACK library
+ARPACK_DIR        = $(ExtLibDIR)/ARPACK_EVR
+ifeq ($(AARPACK),1)
+  ARPACKLIBA        = $(ARPACK_DIR)/libarpack$(extlibwi_obj).a
+else
+  ARPACKLIBA =
+endif
 
 #EXTLib_pot        = /Users/lauvergn/trav/ElVibRot-work/exa_work/exa_C2H3p/TEST_EVRT/Lauvergnat_PA/tests/libpotFull.a
 EXTLib_pot        = 
 
-EXTLib     = $(EXTLib_pot) $(TNUMTANALIBA) $(CONSTPHYSLIBA) $(FOREVRTLIBA) $(EVRTdnSVMLIBA) $(nDindexLIBA) $(QMLLIBA) $(ADLIBA) $(QDLIBA)
+EXTLib     = $(EXTLib_pot) $(TNUMTANALIBA) $(CONSTPHYSLIBA) $(FOREVRTLIBA) $(EVRTdnSVMLIBA) \
+             $(nDindexLIBA) $(QMLLIBA) $(ADLIBA) $(QDLIBA) $(ARPACKLIBA)
 EXTMod     = -I$(TNUMTANAMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(nDindexMOD_DIR) \
              -I$(EVRTdnSVMMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
 #===============================================================================
@@ -132,19 +171,20 @@ ifeq ($(F90),$(filter $(F90),gfortran gfortran-8))
 
   # opt management
   ifeq ($(OOPT),1)
-    FFLAGS = -O5 -g -fbacktrace -funroll-loops -ftree-vectorize -falign-loops=16
+    NFFLAGS = -O5 -g -fbacktrace -funroll-loops -ftree-vectorize -falign-loops=16
   else
-    FFLAGS = -Og -g -fbacktrace -fcheck=all -fwhole-file -fcheck=pointer -Wuninitialized -finit-real=nan -finit-integer=nan
-  endif
-
-  # integer kind management
-  ifeq ($(INT),8)
-    FFLAGS += -fdefault-integer-8 -Dint8=1
+    NFFLAGS = -Og -g -fbacktrace -fcheck=all -fwhole-file -fcheck=pointer -Wuninitialized -finit-real=nan -finit-integer=nan
   endif
 
   # omp management
   ifeq ($(OOMP),1)
-    FFLAGS += -fopenmp
+    NFFLAGS += -fopenmp
+  endif
+  FFLAGS  := $(NFFLAGS)
+
+ # integer kind management
+  ifeq ($(INT),8)
+    FFLAGS += -fdefault-integer-8 -Dint8=1
   endif
   FFLAGS0 := $(FFLAGS)
 
@@ -170,11 +210,6 @@ ifeq ($(F90),$(filter $(F90),gfortran gfortran-8))
     else                   # Linux
       # linux libs
       FLIB += -llapack -lblas
-      #
-      # linux libs with mkl and with openmp
-      #FLIB = -L$(MKLROOT)/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_gnu_thread
-      # linux libs with mkl and without openmp
-      #FLIB = -L$(MKLROOT)/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential
     endif
   endif
 
@@ -192,17 +227,8 @@ ifeq ($(FFC),$(filter $(FFC),ifort ifx))
   ifeq ($(OOPT),1)
       FFLAGS = -O  -g -traceback -heap-arrays
   else
-      FFLAGS = -O0 -check all -g -traceback
+      FFLAGS = -O0 -check all -g -traceback -heap-arrays
   endif
-
-  # integer kind management
-  ifeq ($(INT),8)
-    FFLAGS += -i8 -Dint8=1
-  endif
-
-  # where to store the modules
-  FFLAGS +=-module $(MOD_DIR)
-
  # omp management
   ifeq ($(OOMP),1)
     ifeq ($(FFC),ifort)
@@ -211,6 +237,15 @@ ifeq ($(FFC),$(filter $(FFC),ifort ifx))
       FFLAGS += -qopenmp
     endif
   endif
+
+ # integer kind management
+  ifeq ($(INT),8)
+    FFLAGS += -i8 -Dint8=1
+  endif
+
+  # where to store the modules
+  FFLAGS +=-module $(MOD_DIR)
+
 
   # where to look the .mod files
   FFLAGS += $(EXTMod)
@@ -249,6 +284,8 @@ $(info ***********COMPILED with:    $(MPICORE))
 endif
 $(info ***********OpenMP:           $(OOMP))
 $(info ***********Lapack:           $(LLAPACK))
+$(info ***********Arpack:           $(AARPACK))
+$(info ***********Arpack lib:       $(ARPACKLIBA))
 $(info ***********FFLAGS0:          $(FFLAGS0))
 $(info ***********FLIB:             $(FLIB))
 $(info ***********ExtLibDIR:        $(ExtLibDIR))
@@ -361,6 +398,7 @@ cleanall : clean clean_extlib
 	cd UnitTests ; ./clean
 	cd Examples ; ./clean
 	cd Working_tests ; ./clean
+	cd $(ARPACK_DIR) ; make clean
 	@echo "  done all cleaning"
 #===============================================
 #================ zip and copy the directory ===
@@ -375,10 +413,12 @@ zip: cleanall
 #=== external libraries ========================
 # AD_dnSVM + QML Libs ...
 #===============================================
-#	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh $(EXTLIB_TYPE))
-#	test -e $(TNUMTANALIBA) && ln -s $(TNUMTANALIBA_old) $(TNUMTANALIBA)
-
-TNUMTANALIBA_old=$(TNUMTANA_DIR)/libCoord_KEO_PrimOp_$(FFC)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT).a
+# ARPACK is needed
+$(ARPACKLIBA):
+	@test -d $(ExtLibDIR)     || (echo $(ExtLibDIR) "does not exist" ; exit 1)
+	@test -d $(ARPACK_DIR)    || (echo $(ARPACK_DIR) "does not exist" ; cd $(ExtLibDIR) ; unzip Save_ARPACK_EVR.zip)
+	( cd $(ARPACK_DIR) ; make lib home=$(ARPACK_DIR) FC=$(FFC) LIBEXT=$(extlib_obj) FFLAGS="$(NFFLAGS) -fallow-argument-mismatch" )
+#
 $(TNUMTANALIBA):
 	@test -d $(ExtLibDIR)    || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh $(EXTLIB_TYPE))

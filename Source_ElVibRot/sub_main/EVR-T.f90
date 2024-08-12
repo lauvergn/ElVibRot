@@ -398,7 +398,7 @@
           CALL end_MPI()
         ENDIF
 
-      END PROGRAM ElVibRot
+END PROGRAM ElVibRot
 SUBROUTINE read_arg(input_filename)
   USE EVR_system_m
   IMPLICIT NONE

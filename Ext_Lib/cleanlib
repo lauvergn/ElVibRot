@@ -1,13 +1,3 @@
-rm -rf QDUtilLib* AD_dnSVM* QuantumModelLib* ConstPhys* FOR_EVRT* Tnum-Tana* nDindex* EVRT_dnSVM*
-
-exit
-for lib in QDUtilLib AD_dnSVM QuantumModelLib ConstPhys FOR_EVRT Tnum-Tana nDindex EVRT_dnSVM
-do
-  echo "-----" $lib
-  [ ! -d $lib ] && continue
-  echo "-----" $lib "exist"
-  cd $lib
-  make cleanall
-  cd ..
-done
-
+rm -rf QDUtilLib* AD_dnSVM* QuantumModelLib* ConstPhys*
+rm -rf FOR_EVRT* Tnum-Tana* nDindex* EVRT_dnSVM*
+rm -rf ARPACK_EVR*

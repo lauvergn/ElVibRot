@@ -8,7 +8,7 @@ DIR_pot=$DIR_vib/sub_pot
  cp $SYSTEM $DIR_pot/sub_system.f
 
 cd $DIR_vib
- make
+ make OPT=0 ARPACK=1
 cd $here
 
 #export OMP_NUM_THREADS=1
@@ -19,6 +19,8 @@ cd $here
 test=f
 
 #&constantes EVRT_path='~/' auTOcm_inv=219475. inv_Name=1822000. version='rr' /
+
+name_WPR='file_WP'
 
 nice $DIR_vib/vib << ** >res
  &system PGrid_omp=1 PGrid_maxth=30 /

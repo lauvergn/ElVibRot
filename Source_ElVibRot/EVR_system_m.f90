@@ -277,7 +277,11 @@ CONTAINS
     END IF
 
     err = err_FileName(FileName,name_sub='make_EVRTFileName')
-    IF (err /= 0) STOP 'ERROR in make_EVRTFileName: problem with the FileName'
+    IF (err /= 0) THEN 
+      !write(out_unit,*) 'ERROR in make_EVRTFileName: problem with the FileName'
+      !write(out_unit,*) 'FileName: "',trim(FileName),'"'
+      STOP 'ERROR in make_EVRTFileName: problem with the FileName'
+    END IF
 
     ilast_char = len_trim(FPath_loc)
 

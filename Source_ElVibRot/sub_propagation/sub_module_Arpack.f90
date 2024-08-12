@@ -278,10 +278,6 @@ CONTAINS
         IF(keep_MPI) call dnaupd(ido, bmat, n, which, nev, tol, resid,                 &
                                   ncv, v, ldv, iparam, ipntr, workd, workl, lworkl,    &
                                   info)
-!#if(run_MPI)
-!        CALL MPI_Bcast(info,size1_MPI,MPI_Integer4,root_MPI,MPI_COMM_WORLD,MPI_err)
-!        CALL MPI_Bcast(ido, size1_MPI,MPI_Integer4,root_MPI,MPI_COMM_WORLD,MPI_err)
-!#endif
        IF(openmpi .AND. MPI_scheme/=1) THEN
          CALL MPI_Bcast_(info,size1_MPI,root_MPI)
          CALL MPI_Bcast_(ido ,size1_MPI,root_MPI)
@@ -362,9 +358,6 @@ CONTAINS
                                   sigmar, sigmai, workev, bmat, n, which, nev, tol,    &
                                   resid, ncv, v, ldv, iparam, ipntr, workd, workl,     &
                                   lworkl, ierr )
-!#if(run_MPI)
-!        CALL MPI_Bcast(ierr,size1_MPI,MPI_Integer4,root_MPI,MPI_COMM_WORLD,MPI_err)
-!#endif
        IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(ierr,size1_MPI,root_MPI)
 #else
         write(out_unit,*) 'ERROR in ',name_sub
@@ -527,7 +520,7 @@ CONTAINS
 !         | Display computed residuals. |
 !         %-----------------------------%
 #if __ARPACK == 1
-          ! bug here for some compiler, diable the output currently
+          ! bug here for some compiler, disable the output currently
 !          IF(MPI_id==0) call dmout(6, nconv, 3, d, maxncv, -6,                     &
 !                     'Ritz values (Real,Imag) and relative residuals')
 #else
@@ -789,9 +782,6 @@ CONTAINS
       IF(MPI_id==0) CALL file_open(Log_file,iunit)
 
       n = para_H%nb_tot
-!#if(run_MPI)
-!      CALL MPI_Bcast(n,size1_MPI,MPI_Integer4,root_MPI,MPI_COMM_WORLD,MPI_err)
-!#endif
       IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(n,size1_MPI,root_MPI)
 
       IF (nb_diago == 0) THEN
@@ -893,11 +883,6 @@ CONTAINS
         IF(keep_MPI) call dsaupd(ido, bmat, n, which, nev, tol, resid,             &
                                   ncv, v, ldv, iparam, ipntr, workd, workl,        &
                                   lworkl, info )
-!#if(run_MPI)
-!        CALL MPI_Bcast(info,size1_MPI, MPI_Integer4,root_MPI,MPI_COMM_WORLD,MPI_err)
-!        CALL MPI_Bcast(ido, size1_MPI, MPI_Integer4,root_MPI,MPI_COMM_WORLD,MPI_err)
-!        CALL MPI_Bcast(ipntr,INT(11,Ikind),MPI_Integer4,root_MPI,MPI_COMM_WORLD,MPI_err)
-!#endif
         IF(openmpi .AND. MPI_scheme/=1) THEN
           CALL MPI_Bcast_(info,size1_MPI,root_MPI)
           CALL MPI_Bcast_(ido ,size1_MPI,root_MPI)
@@ -986,9 +971,6 @@ CONTAINS
         IF(keep_MPI) call dseupd(rvec, 'All', select, d, v, ldv, sigma,                &
                                   bmat, n, which, nev, tol, resid, ncv, v, ldv,        &
                                   iparam, ipntr, workd, workl, lworkl, ierr )
-!#if(run_MPI)
-!        CALL MPI_Bcast(ierr,size1_MPI,MPI_Integer4,root_MPI,MPI_COMM_WORLD,MPI_err)
-!#endif
         IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(ierr,size1_MPI,root_MPI)
 
 #endif
