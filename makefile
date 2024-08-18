@@ -53,9 +53,9 @@ endif
 #
 # Operating system, OS? automatic using uname:
 OS :=$(shell uname)
-
+#
 # about EVRT, path, versions ...:
-LOC_path:= $(shell pwd)
+MAIN_path:= $(shell pwd)
 #
 #===============================================================================
 # We cannot use ARPACK without lapack
@@ -94,25 +94,13 @@ MOD_DIR=$(OBJ_DIR)
 # library name
 LIBA=libEVR$(extlibwi_obj).a
 #=================================================================================
-# cpp preprocessing
-#=================================================================================
-# cpp preprocessing
-EVR_ver:=$(shell awk '/EVR/ {print $$3}' $(LOC_path)/version-EVR)
-CPPSHELL = -D__COMPILE_DATE="\"$(shell date +"%a %e %b %Y - %H:%M:%S")\"" \
-           -D__COMPILE_HOST="\"$(shell hostname -s)\"" \
-           -D__COMPILER="'$(FFC)'" \
-           -D__COMPILER_VER="'$(FC_VER)'" \
-           -D__COMPILER_OPT="'$(FFLAGS0)'" \
-           -D__EVRTPATH="'$(LOC_path)'" \
-           -D__EVR_VER="'$(EVR_ver)'" \
-           -D__ARPACK="$(AARPACK)"
 #
 #===============================================================================
 #
 #===============================================================================
 # external lib (QML, AD_dnSVM ...)
 ifeq ($(ExtLibDIR),)
-  ExtLibDIR := $(LOC_path)/Ext_Lib
+  ExtLibDIR := $(MAIN_path)/Ext_Lib
 endif
 
 QD_DIR            = $(ExtLibDIR)/QDUtilLib
@@ -149,129 +137,40 @@ TNUMTANALIBA      = $(TNUMTANA_DIR)/libTnum-Tana$(extlibwi_obj).a
 # AARPACK library
 ARPACK_DIR        = $(ExtLibDIR)/ARPACK_EVR
 ifeq ($(AARPACK),1)
-  ARPACKLIBA        = $(ARPACK_DIR)/libarpack$(extlibwi_obj).a
+  ARPACKLIBA = $(ARPACK_DIR)/libarpack$(extlibwi_obj).a
 else
   ARPACKLIBA =
 endif
 
 #EXTLib_pot        = /Users/lauvergn/trav/ElVibRot-work/exa_work/exa_C2H3p/TEST_EVRT/Lauvergnat_PA/tests/libpotFull.a
 EXTLib_pot        = 
-
-EXTLib     = $(EXTLib_pot) $(TNUMTANALIBA) $(CONSTPHYSLIBA) $(FOREVRTLIBA) $(EVRTdnSVMLIBA) \
-             $(nDindexLIBA) $(QMLLIBA) $(ADLIBA) $(QDLIBA) $(ARPACKLIBA)
+#
+EXTLib     = $(EXTLib_pot) $(ARPACKLIBA) \
+             $(TNUMTANALIBA) $(CONSTPHYSLIBA) \
+             $(FOREVRTLIBA) $(EVRTdnSVMLIBA) $(nDindexLIBA) \
+             $(QMLLIBA) $(ADLIBA) $(QDLIBA)
 EXTMod     = -I$(TNUMTANAMOD_DIR) -I$(CONSTPHYSMOD_DIR) -I$(FOREVRTMOD_DIR) -I$(nDindexMOD_DIR) \
              -I$(EVRTdnSVMMOD_DIR) -I$(QMLMOD_DIR) -I$(ADMOD_DIR) -I$(QDMOD_DIR)
-#===============================================================================
 #
-#===============================================================================
-# gfortran (osx and linux)
-#ifeq ($(F90),gfortran)
-#===============================================================================
-ifeq ($(F90),$(filter $(F90),gfortran gfortran-8))
-
-  # opt management
-  ifeq ($(OOPT),1)
-    NFFLAGS = -O5 -g -fbacktrace -funroll-loops -ftree-vectorize -falign-loops=16
-  else
-    NFFLAGS = -Og -g -fbacktrace -fcheck=all -fwhole-file -fcheck=pointer -Wuninitialized -finit-real=nan -finit-integer=nan
-  endif
-
-  # omp management
-  ifeq ($(OOMP),1)
-    NFFLAGS += -fopenmp
-  endif
-  FFLAGS  := $(NFFLAGS)
-
- # integer kind management
-  ifeq ($(INT),8)
-    FFLAGS += -fdefault-integer-8 -Dint8=1
-  endif
-  FFLAGS0 := $(FFLAGS)
-
-
-  # where to store the .mod files
-  FFLAGS +=-J$(MOD_DIR)
-
-  # where to look the .mod files
-  FFLAGS += $(EXTMod)
-
-  # some cpreprocessing
-  FFLAGS += -cpp $(CPPSHELL)
-  ifeq ($(OMP),1)
-    FFLAGS += -Drun_openMP=1
-  endif
-
-  FLIB   = $(EXTLib)
-  # OS management
-  ifeq ($(LLAPACK),1)
-    ifeq ($(OS),Darwin)    # OSX
-      # OSX libs (included lapack+blas)
-      FLIB += -framework Accelerate
-    else                   # Linux
-      # linux libs
-      FLIB += -llapack -lblas
-    endif
-  endif
-
-  FC_VER = $(shell $(FFC) --version | head -1 )
-
+#=================================================================================
+# To deal with external compilers.mk file
+CompilersDIR = $(MAIN_path)
+ifeq ($(CompilersDIR),)
+  include compilers.mk
+else
+  include $(CompilersDIR)/compilers.mk
 endif
 #=================================================================================
-#=================================================================================
-#=================================================================================
-# ifort compillation v17 v18 with mkl
-#=================================================================================
-ifeq ($(FFC),$(filter $(FFC),ifort ifx))
-
-  # opt management
-  ifeq ($(OOPT),1)
-      FFLAGS = -O  -g -traceback -heap-arrays
-  else
-      FFLAGS = -O0 -check all -g -traceback -heap-arrays
-  endif
- # omp management
-  ifeq ($(OOMP),1)
-    ifeq ($(FFC),ifort)
-      FFLAGS += -qopenmp -parallel
-    else # ifx
-      FFLAGS += -qopenmp
-    endif
-  endif
-
- # integer kind management
-  ifeq ($(INT),8)
-    FFLAGS += -i8 -Dint8=1
-  endif
-
-  # where to store the modules
-  FFLAGS +=-module $(MOD_DIR)
-
-
-  # where to look the .mod files
-  FFLAGS += $(EXTMod)
-
-  # some cpreprocessing
-  FFLAGS += -cpp $(CPPSHELL)
-  ifeq ($(OMP),1)
-    FFLAGS += -Drun_openMP=1
-  endif
-
-  FLIB    = $(EXTLib)
-  ifeq ($(LLAPACK),1)
-    ifeq ($(FFC),ifort)
-      FLIB += -mkl -lpthread
-    else # ifx
-      FLIB += -qmkl -lpthread
-    endif
-  else
-    FLIB += -lpthread
-  endif
-
-  FC_VER = $(shell $(F90) --version | head -1 )
-
-endif
-#=================================================================================
-#=================================================================================
+# cpp preprocessing
+EVR_ver:=$(shell awk '/EVR/ {print $$3}' $(MAIN_path)/version-EVR)
+ArpackFLAGS := $(FFLAGS)
+ArpackFLAGS += -fallow-argument-mismatch
+FFLAGS += -D__COMPILE_DATE="\"$(shell date +"%a %e %b %Y - %H:%M:%S")\"" \
+          -D__COMPILE_HOST="\"$(shell hostname -s)\"" \
+          -D__EVRTPATH="'$(MAIN_path)'" \
+          -D__EVR_VER="'$(EVR_ver)'" \
+          -D__ARPACK="$(AARPACK)"
+#
 #===============================================================================
 #===============================================================================
 $(info ************************************************************************)
@@ -286,8 +185,7 @@ $(info ***********OpenMP:           $(OOMP))
 $(info ***********Lapack:           $(LLAPACK))
 $(info ***********Arpack:           $(AARPACK))
 $(info ***********Arpack lib:       $(ARPACKLIBA))
-$(info ***********FFLAGS0:          $(FFLAGS0))
-$(info ***********FLIB:             $(FLIB))
+#$(info ***********Arpack flags:     $(ArpackFLAGS))
 $(info ***********ExtLibDIR:        $(ExtLibDIR))
 $(info ***********extf [sub_system]:$(extf))
 $(info ************************************************************************)
@@ -338,11 +236,11 @@ lib libEVR libevr: $(LIBA)
 .PHONY: vib
 vib:
 	@echo "make vib script"
-	./scripts/make_vib.sh $(LOC_path) $(FFC) $(extf)
+	./scripts/make_vib.sh $(MAIN_path) $(FFC) $(extf)
 	chmod a+x vib
 #
 $(VIBEXE): $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_EXT) $(LIBA) | $(EXTLib)
-	$(FFC) $(FFLAGS) -o $(VIBEXE) $(OBJ_DIR)/$(VIBMAIN).o $(LIBA) $(OBJ_EXT) $(FLIB)
+	$(FFC) $(FFLAGS) -o $(VIBEXE) $(OBJ_DIR)/$(VIBMAIN).o $(LIBA) $(OBJ_EXT) $(EXTLib) $(FLIB)
 	@echo EVR-T
 #===============================================
 #============= TESTS ===========================
@@ -415,64 +313,64 @@ zip: cleanall
 #===============================================
 # ARPACK is needed
 $(ARPACKLIBA):
-	@test -d $(ExtLibDIR)     || (echo $(ExtLibDIR) "does not exist" ; exit 1)
+	@test -d $(ExtLibDIR)     || (echo $(ExtLibDIR)  "does not exist" ; exit 1)
 	@test -d $(ARPACK_DIR)    || (echo $(ARPACK_DIR) "does not exist" ; cd $(ExtLibDIR) ; unzip Save_ARPACK_EVR.zip)
-	( cd $(ARPACK_DIR) ; make lib home=$(ARPACK_DIR) FC=$(FFC) LIBEXT=$(extlib_obj) FFLAGS="$(NFFLAGS) -fallow-argument-mismatch" )
+	cd $(ARPACK_DIR) ; make lib home=$(ARPACK_DIR) FC=$(FFC) LIBEXT=$(extlib_obj) FFLAGS="$(ArpackFLAGS)"
 #
 $(TNUMTANALIBA):
 	@test -d $(ExtLibDIR)    || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(TNUMTANA_DIR) || (cd $(ExtLibDIR) ; ./get_Tnum-Tana.sh $(EXTLIB_TYPE))
 	@test -d $(TNUMTANA_DIR) || (echo $(TNUMTANA_DIR) "does not exist" ; exit 1)
-	cd $(TNUMTANA_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	cd $(TNUMTANA_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)  CompilersDIR=$(CompilersDIR)
 	@echo "  done " $(TNUMTANA_DIR) " in "$(BaseName)
 #
 $(CONSTPHYSLIBA):
 	@test -d $(ExtLibDIR)     || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(CONSTPHYS_DIR) || (cd $(ExtLibDIR) ; ./get_ConstPhys.sh $(EXTLIB_TYPE))
 	@test -d $(CONSTPHYS_DIR) || (echo $(CONSTPHYS_DIR) "does not exist" ; exit 1)
-	cd $(CONSTPHYS_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	cd $(CONSTPHYS_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)  CompilersDIR=$(CompilersDIR)
 	@echo "  done " $(CONSTPHYS_DIR) " in "$(BaseName)
 #
 $(nDindexLIBA):
 	@test -d $(ExtLibDIR)   || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(nDindex_DIR) || (cd $(ExtLibDIR) ; ./get_nDindex.sh  $(EXTLIB_TYPE))
 	@test -d $(nDindex_DIR) || (echo $(nDindex_DIR) "does not exist" ; exit 1)
-	cd $(nDindex_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	cd $(nDindex_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR) CompilersDIR=$(CompilersDIR)
 	@echo "  done " $(nDindex_DIR) " in "$(BaseName)
 #
 $(EVRTdnSVMLIBA):
 	@test -d $(ExtLibDIR)     || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(EVRTdnSVM_DIR) || (cd $(ExtLibDIR) ; ./get_EVRT_dnSVM.sh  $(EXTLIB_TYPE))
 	@test -d $(EVRTdnSVM_DIR) || (echo $(EVRTdnSVM_DIR) "does not exist" ; exit 1)
-	cd $(EVRTdnSVM_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	cd $(EVRTdnSVM_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR) CompilersDIR=$(CompilersDIR)
 	@echo "  done " $(EVRTdnSVM_DIR) " in "$(BaseName)
 #
 $(FOREVRTLIBA):
 	@test -d $(ExtLibDIR)   || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(FOREVRT_DIR) || (cd $(ExtLibDIR) ; ./get_FOR_EVRT.sh $(EXTLIB_TYPE))
 	@test -d $(FOREVRT_DIR) || (echo $(FOREVRT_DIR) "does not exist" ; exit 1)
-	cd $(FOREVRT_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	cd $(FOREVRT_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR) CompilersDIR=$(CompilersDIR)
 	@echo "  done " $(FOREVRTLIBA) " in "$(BaseName)
 #
 $(QMLLIBA):
 	@test -d $(ExtLibDIR) || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(QML_DIR)   || (cd $(ExtLibDIR) ; ./get_QML.sh $(EXTLIB_TYPE))
 	@test -d $(QML_DIR)   || (echo $(QML_DIR) "does not exist" ; exit 1)
-	cd $(QML_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	cd $(QML_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR) CompilersDIR=$(CompilersDIR)
 	@echo "  done " $(QDLIBA) " in "$(BaseName)
 #
 $(ADLIBA):
 	@test -d $(ExtLibDIR) || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(AD_DIR)    || (cd $(ExtLibDIR) ; ./get_AD_dnSVM.sh  $(EXTLIB_TYPE))
 	@test -d $(AD_DIR)    || (echo $(AD_DIR) "does not exist" ; exit 1)
-	cd $(AD_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	cd $(AD_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR) CompilersDIR=$(CompilersDIR)
 	@echo "  done " $(AD_DIR) " in "$(BaseName)
 #
 $(QDLIBA):
 	@test -d $(ExtLibDIR) || (echo $(ExtLibDIR) "does not exist" ; exit 1)
 	@test -d $(QD_DIR)    || (cd $(ExtLibDIR) ; ./get_QDUtilLib.sh $(EXTLIB_TYPE))
 	@test -d $(QD_DIR)    || (echo $(QD_DIR) "does not exist" ; exit 1)
-	cd $(QD_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR)
+	cd $(QD_DIR) ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR) CompilersDIR=$(CompilersDIR)
 	@echo "  done " $(QDLIBA) " in "$(BaseName)
 ##
 .PHONY: clean_extlib
