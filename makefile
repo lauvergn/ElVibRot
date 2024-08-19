@@ -208,11 +208,11 @@ OBJ0=${SRCFILES:.f90=.o}
 OBJ0 += QMRPACK_lib.o
 
 OBJ=$(addprefix $(OBJ_DIR)/, $(OBJ0))
-$(info ************ OBJ: $(OBJ))
+#$(info ************ OBJ: $(OBJ))
 #
 OBJ0_EXT= read_para.o sub_system.o calc_f2_f1Q.o Sub_X_TO_Q_ana.o Calc_Tab_dnQflex.o
 OBJ_EXT=$(addprefix $(OBJ_DIR)/, $(OBJ0_EXT))
-$(info ************ OBJ_EXT: $(OBJ_EXT))
+#$(info ************ OBJ_EXT: $(OBJ_EXT))
 
 #
 #===============================================

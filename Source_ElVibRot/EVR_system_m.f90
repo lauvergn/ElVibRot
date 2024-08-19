@@ -76,34 +76,6 @@ MODULE EVR_system_m
 #else
   character (len=Line_len) :: compile_host = "unknown: -D__COMPILE_HOST=?"
 #endif
-#if defined(__COMPILER)
-  character (len=Line_len) :: compiler = __COMPILER
-#else
-  character (len=Line_len) :: compiler = "unknown: -D__COMPILER=?"
-#endif
-#if defined(__COMPILER_VER)
-  character (len=Line_len) :: compiler_ver = __COMPILER_VER
-#else
-  character (len=Line_len) :: compiler_ver = "unknown: -D__COMPILER_VER=?"
-#endif
-#if defined(__COMPILER_OPT)
-  character (len=Line_len) :: compiler_opt = &
-      __COMPILER_OPT
-#else
-  character (len=Line_len) :: compiler_opt = "unknown: -D__COMPILER_OPT=?"
-#endif
-#if defined(__COMPILER_LIBS)
-character (len=Line_len) :: compiler_libs = &
-       __COMPILER_LIBS
-#else
-  character (len=Line_len) :: compiler_libs = "unknown: -D__COMPILER_LIBS=?"
-#endif
-#if defined(__GIT)
-  character (len=Line_len) :: git_branch = __GIT
-#else
-  character (len=Line_len) :: git_branch = "unknown: -D__GIT=?"
-#endif
-
 
   logical :: openmp = .FALSE.
   logical :: openmpi= .FALSE.
@@ -114,6 +86,7 @@ character (len=Line_len) :: compiler_libs = &
   integer :: Grid_omp,Grid_maxth,Grid_maxth_init
   integer :: SG4_omp,SG4_maxth,SG4_maxth_init
   integer :: CRP_omp,CRP_maxth,CRP_maxth_init
+  integer :: Ana_omp,Ana_maxth,Ana_maxth_init
 
   logical :: Tune_SG4_omp  = .FALSE.
   logical :: Tune_Grid_omp = .FALSE.
@@ -299,6 +272,7 @@ CONTAINS
 
   END FUNCTION make_EVRTFileName
   SUBROUTINE versionEVRT(write_version)
+    USE iso_fortran_env
     USE TnumTana_system_m, ONLY : TnumTana_version
     IMPLICIT NONE
   
@@ -317,12 +291,10 @@ CONTAINS
                      EVR_name,trim(adjustl(EVR_version))
   
           write(out_unit,*) 'Compiled on "',trim(compile_host), '" the ',trim(compile_date)
-          write(out_unit,*) 'Compiler version: ',trim(compiler_ver)
-          write(out_unit,*) 'Compiler options: ',trim(compiler_opt)
-          write(out_unit,*) 'Compiler libs: ',trim(compiler_libs)
+          write(out_unit,*) 'Compiler:         ',compiler_version()
+          write(out_unit,*) 'Compiler options: ',compiler_options()
   
           write(out_unit,*) 'EVRT_path: ',trim(EVRT_path)
-          write(out_unit,*) 'git ',trim(git_branch)
   
           write(out_unit,*) '-----------------------------------------------'
   

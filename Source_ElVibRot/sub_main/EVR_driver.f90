@@ -46,6 +46,7 @@
 !===========================================================================
 !===========================================================================
 SUBROUTINE init_EVR_new()
+  !$    USE omp_lib, only : omp_get_max_threads
    USE mod_EVR
       IMPLICIT NONE
       logical  :: intensity_only,analysis_only,Popenmp,Popenmpi
@@ -84,15 +85,15 @@ SUBROUTINE init_EVR_new()
         !> initialize MPI
         !> id=0 to be the master
         !---------------------------------------------------------------------------------
+        maxth              = 1
+        !$ maxth           = omp_get_max_threads()
 #if(run_MPI)
         CALL ini_MPI()
         Popenmpi           = .TRUE.  !< True to run with MPI
         Popenmp            = .FALSE.
-#endif
-
-#if(run_openMP)
-        Popenmp            = .TRUE.  !< True to run openMP
+#else
         Popenmpi           = .FALSE.
+        Popenmp            = (maxth > 1)
 #endif
 
         intensity_only     = .FALSE.
@@ -106,9 +107,6 @@ SUBROUTINE init_EVR_new()
         nDGrid             = .FALSE.
         main_test          = .FALSE.
         optimization       = 0
-
-        maxth              = 1
-        !$ maxth           = omp_get_max_threads()
 
         PMatOp_omp         = 0
         PMatOp_maxth       = maxth
@@ -1157,14 +1155,14 @@ SUBROUTINE init_EVR()
         !> initialize MPI
         !> id=0 to be the master
         !---------------------------------------------------------------------------------
+        maxth              = 1
+        !$ maxth           = omp_get_max_threads()
 #if(run_MPI)
         CALL ini_MPI()
         Popenmpi           = .TRUE.  !< True to run with MPI
         Popenmp            = .FALSE.
-#endif
-
-#if(run_openMP)
-        Popenmp            = .TRUE.  !< True to run openMP
+#else
+        Popenmp            = (maxth > 1)
         Popenmpi           = .FALSE.
 #endif
 
@@ -1179,9 +1177,6 @@ SUBROUTINE init_EVR()
         nDGrid             = .FALSE.
         main_test          = .FALSE.
         optimization       = 0
-
-        maxth              = 1
-        !$ maxth           = omp_get_max_threads()
 
         PMatOp_omp         = 0
         PMatOp_maxth       = maxth

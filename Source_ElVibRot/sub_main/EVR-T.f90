@@ -63,7 +63,7 @@
 
       integer  :: PMatOp_omp,POpPsi_omp,PBasisTOGrid_omp,PGrid_omp,optimization
       integer  :: maxth,PMatOp_maxth,POpPsi_maxth,PBasisTOGrid_maxth,PGrid_maxth
-      integer  :: PCRP_omp,PCRP_maxth
+      integer  :: PCRP_omp,PCRP_maxth,PAna_omp,PAna_maxth
       logical  :: PTune_SG4_omp,PTune_Grid_omp
       integer  :: PSG4_omp,PSG4_maxth
       integer (kind=ILkind)  :: max_mem
@@ -88,6 +88,7 @@
                           PBasisTOGrid_omp,PBasisTOGrid_maxth,          &
                           PGrid_omp,PGrid_maxth,                        &
                           PCRP_omp,PCRP_maxth,                          &
+                          PAna_omp,PAna_maxth,                          &
                           PTune_SG4_omp,PTune_Grid_omp,                 &
 
                           RMatFormat,CMatFormat,EneFormat,              &
@@ -105,17 +106,19 @@
 
         !-------------------------------------------------------------------------------
         ! set parallelization
+        maxth              = 1
+        !$ maxth           = omp_get_max_threads()
+
         Popenmp            = .FALSE.
         Popenmpi           = .FALSE.
 #if(run_MPI)
         Popenmpi           = .TRUE.  !< True to run with MPI
         Popenmp            = .FALSE.
+#else
+        Popenmpi           = .FALSE.
+        Popenmp            = (maxth > 1)
 #endif
 
-#if(run_openMP)
-        Popenmp            = .TRUE.  !< True to run openMP
-        Popenmpi           = .FALSE.
-#endif
 
         intensity_only     = .FALSE.
         analysis_only      = .FALSE.
@@ -131,9 +134,6 @@
         optimization       = 0
         Opt_CAP_Basis      = .FALSE.
 
-        maxth              = 1
-        !$ maxth           = omp_get_max_threads()
-
         PMatOp_omp         = 0
         PMatOp_maxth       = maxth
         POpPsi_omp         = 0
@@ -144,6 +144,9 @@
         PGrid_maxth        = maxth
         PCRP_omp           = 0
         PCRP_maxth         = maxth
+        PAna_omp           = 0
+        PAna_maxth         = maxth
+
         PTune_SG4_omp      = .FALSE.
         PTune_Grid_omp     = .FALSE.
 
@@ -251,6 +254,7 @@
            BasisTOGrid_omp    = 0
            Grid_omp           = 0
            CRP_omp            = 0
+           Ana_omp            = 0
            SG4_omp            = 0
 
            MatOp_maxth        = 1
@@ -258,6 +262,7 @@
            BasisTOGrid_maxth  = 1
            Grid_maxth         = 1
            CRP_maxth          = 1
+           Ana_maxth          = 1
            SG4_maxth          = 1
            maxth              = 1
 
@@ -298,13 +303,19 @@
            END IF
 
            IF (CRP_omp > 0) THEN
-             CRP_maxth          = min(PGrid_maxth,maxth)
+             CRP_maxth          = min(PCRP_maxth,maxth)
            ELSE
              CRP_maxth         = 1
            END IF
 
-           IF (SG4_omp > 0) THEN
-             SG4_maxth         = PSG4_maxth
+           IF (Ana_omp > 0) THEN
+            Ana_maxth          = min(PAna_maxth,maxth)
+          ELSE
+            Ana_maxth         = 1
+          END IF
+
+          IF (SG4_omp > 0) THEN
+             SG4_maxth         = min(PSG4_maxth,maxth)
              Tune_SG4_omp      = PTune_SG4_omp
            ELSE
              SG4_maxth         = 1
@@ -317,6 +328,7 @@
         BasisTOGrid_maxth_init  = BasisTOGrid_maxth
         Grid_maxth_init         = Grid_maxth
         CRP_maxth_init          = CRP_maxth
+        Ana_maxth_init          = Ana_maxth
         SG4_maxth_init          = SG4_maxth
 
         write(out_unit,*) '========================================='
@@ -327,6 +339,7 @@
         write(out_unit,*) 'BasisTOGrid_omp,BasisTOGrid_maxth',BasisTOGrid_omp,BasisTOGrid_maxth
         write(out_unit,*) 'Grid_omp,       Grid_maxth       ',Grid_omp,Grid_maxth
         write(out_unit,*) 'CRP_omp,        CRP_maxth        ',CRP_omp,CRP_maxth
+        write(out_unit,*) 'Ana_omp,        Ana_maxth        ',Ana_omp,Ana_maxth
         write(out_unit,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
         write(out_unit,*) '========================================='
 

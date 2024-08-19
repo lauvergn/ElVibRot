@@ -233,15 +233,17 @@ CONTAINS
       para_ana%ana_psi%Part_Func  = Q
       para_ana%ana_psi%Temp       = para_ana%Temp
       iana                        = 0
-      write(out_unit,'(a)')              'Psi(:) analysis: (%): [--0-10-20-30-40-50-60-70-80-90-100]'
-      write(out_unit,'(a)',ADVANCE='no') 'Psi(:) analysis: (%): ['
-      flush(out_unit)
+      IF (Ana_maxth > 1)  THEN
+        write(out_unit,'(a)')              'Psi(:) analysis: (%): [--0-10-20-30-40-50-60-70-80-90-100]'
+        write(out_unit,'(a)',ADVANCE='no') 'Psi(:) analysis: (%): ['
+        flush(out_unit)
+      END IF
 !$OMP   PARALLEL &
 !$OMP   DEFAULT(NONE) &
 !$OMP   SHARED(nb_psi_in,ene,para_H,para_AllOp,para_ana,tab_Psi,ana_psi,AllPsi_max_RedDensity,const_phys) &
-!$OMP   SHARED(out_unit,para_intensity,tab_PsiAna,iana,MPI_id) &
+!$OMP   SHARED(out_unit,para_intensity,tab_PsiAna,iana,MPI_id,Ana_maxth) &
 !$OMP   PRIVATE(i,info) &
-!$OMP   NUM_THREADS(maxth)
+!$OMP   NUM_THREADS(Ana_maxth)
 
 !$OMP   DO SCHEDULE(STATIC)
       DO i=1,nb_psi_in
@@ -257,6 +259,10 @@ CONTAINS
         CALL SET_string(info," ",TO_string(ene(i)*const_phys%auTOenergy,"f12.6")," : ")
 
         CALL sub_analyze_psi(tab_Psi(i),ana_psi(i),adia=.FALSE.,PsiAna=tab_PsiAna(i)%str)
+        IF (Ana_maxth == 1) THEN
+          write(out_unit,'(a)') tab_PsiAna(i)%str
+          flush(out_unit)
+        END IF
 
         !$OMP CRITICAL (sub_analyse_CRIT)
         IF (allocated(para_ana%ana_psi%max_RedDensity)) THEN
@@ -279,26 +285,29 @@ CONTAINS
 
         deallocate(info)
 
-        IF (mod(iana,nb_psi_in) == 0 .AND. MPI_id == 0) write(out_unit,'(a)',ADVANCE='no') '---'
+        IF (mod(iana,nb_psi_in) == 0 .AND. MPI_id == 0 .AND. Ana_maxth > 1) write(out_unit,'(a)',ADVANCE='no') '---'
       END DO
 !$OMP   END DO
 !$OMP   END PARALLEL
-      write(out_unit,'(a)',ADVANCE='yes') '----]'
+      IF (Ana_maxth > 1) write(out_unit,'(a)',ADVANCE='yes') '----]'
 
-      write(out_unit,*) '=============================================================='
-      write(out_unit,*) '=============================================================='
-      write(out_unit,*) '=============================================================='
-      write(out_unit,*) 'population at T, Q',para_ana%Temp,Q
-      write(out_unit,*) 'Energy level (',const_phys%ene_unit,') pop and averages :'
-      flush(out_unit)
-      DO i=1,nb_psi_in
-        write(out_unit,'(a)') tab_PsiAna(i)%str
+      IF (Ana_maxth > 1) THEN
+        write(out_unit,*) '=============================================================='
+        write(out_unit,*) '=============================================================='
+        write(out_unit,*) '=============================================================='
+        write(out_unit,*) 'population at T, Q',para_ana%Temp,Q
+        write(out_unit,*) 'Energy level (',const_phys%ene_unit,') pop and averages :'
         flush(out_unit)
-      END DO
-      write(out_unit,*) '=============================================================='
-      write(out_unit,*) '=============================================================='
-      write(out_unit,*) '=============================================================='
-      flush(out_unit)
+        DO i=1,nb_psi_in
+          write(out_unit,'(a)') tab_PsiAna(i)%str
+          flush(out_unit)
+        END DO
+        write(out_unit,*) '=============================================================='
+        write(out_unit,*) '=============================================================='
+        write(out_unit,*) '=============================================================='
+        flush(out_unit)
+      END IF
+
 
       IF (allocated(AllPsi_max_RedDensity)) THEN
         CALL Write_Vec(AllPsi_max_RedDensity,out_unit,6,Rformat='e10.3',info='For all psi max_RedDensity ')
