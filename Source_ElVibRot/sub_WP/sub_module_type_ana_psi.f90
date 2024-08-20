@@ -89,7 +89,11 @@
 
 
 
-      logical                        :: AvQ           = .FALSE.   ! Average Values (Qact ...)
+      integer                        :: AvQ_Order     = 0   ! Order of the average of Qi: 
+                                                            !   Order=0 => no-analysis
+                                                            !   Order=1 => <Qi>
+                                                            !   Order=2 => <Qi*Qj>
+
       integer,           allocatable :: Qtransfo_type(:)          ! ???type of the transformation
 
 
@@ -145,7 +149,7 @@
                             Write_psi2_Grid,Write_psi2_Basis,   &
                             Write_psi_Grid,Write_psi_Basis,     &
                             Write_psi,                          &
-                            AvQ,Qtransfo_type,                  &
+                            AvQ_Order,Qtransfo_type,            &
                             AvScalOp,AvHiterm,AvPi,AvOp,        &
                             coherence,coherence_epsi,           &
                             ExactFact,                          &
@@ -168,7 +172,8 @@
     logical,                        optional :: Write_psi_Grid,Write_psi_Basis
     logical,                        optional :: Write_psi
 
-    logical,                        optional :: AvQ,AvScalOp,AvHiterm,AvPi,AvOp
+    logical,                        optional :: AvScalOp,AvHiterm,AvPi,AvOp
+    integer,                        optional :: AvQ_Order
     integer,           allocatable, optional :: Qtransfo_type(:)     ! type of the transformation
 
     integer,                        optional :: coherence         ! coherence_tyep (0 non calculation)
@@ -280,8 +285,8 @@
 
     !------------------------------------------------------------
     ! Average of Qi ...
-    ana_psi%AvQ = .FALSE.
-    IF (present(AvQ))         ana_psi%AvQ         = AvQ
+    ana_psi%AvQ_Order = 0
+    IF (present(AvQ_Order))         ana_psi%AvQ_Order         = AvQ_Order
     IF (present(Qtransfo_type)) THEN
     IF (allocated(Qtransfo_type)) THEN
       CALL alloc_NParray(ana_psi%Qtransfo_type,shape(Qtransfo_type),  &
@@ -360,7 +365,7 @@
                             Write_psi2_Grid,Write_psi2_Basis,   &
                             Write_psi_Grid,Write_psi_Basis,     &
                             Write_psi,                          &
-                            AvQ,Qtransfo_type,                  &
+                            AvQ_Order,Qtransfo_type,                  &
                             AvScalOp,AvHiterm,AvPi,AvOp,        &
                             coherence,coherence_epsi,           &
                             ExactFact,                          &
@@ -382,7 +387,8 @@
     logical,                        optional :: Write_psi_Grid,Write_psi_Basis
     logical,                        optional :: Write_psi
 
-    logical,                        optional :: AvQ,AvScalOp,AvHiterm,AvPi,AvOp
+    logical,                        optional :: AvScalOp,AvHiterm,AvPi,AvOp
+    integer,                        optional :: AvQ_Order
     integer,           allocatable, optional :: Qtransfo_type(:)     ! type of the transformation
 
     integer,                        optional :: coherence         ! coherence_tyep (0 non calculation)
@@ -478,7 +484,7 @@
 
     !------------------------------------------------------------
     ! Average of Qi ...
-    IF (present(AvQ))         ana_psi%AvQ         = AvQ
+    IF (present(AvQ_Order))         ana_psi%AvQ_Order         = AvQ_Order
     IF (present(Qtransfo_type)) THEN
     IF (allocated(Qtransfo_type)) THEN
       CALL alloc_NParray(ana_psi%Qtransfo_type,shape(Qtransfo_type),  &
@@ -598,7 +604,7 @@
     ana_psi1%ExactFact            = ana_psi2%ExactFact
     ana_psi1%file_ExactFactPotCut = ana_psi2%file_ExactFactPotCut
 
-    ana_psi1%AvQ = ana_psi2%AvQ
+    ana_psi1%AvQ_Order = ana_psi2%AvQ_Order
     IF (allocated(ana_psi2%Qtransfo_type)) THEN
       CALL alloc_NParray(ana_psi1%Qtransfo_type,                       &
                                         shape(ana_psi2%Qtransfo_type), &
@@ -712,7 +718,7 @@
 
     write(out_unit,*)
     write(out_unit,*) 'Average over coordinates:'
-    write(out_unit,*) 'AvQ',ana_psi%AvQ
+    write(out_unit,*) 'AvQ_Order',ana_psi%AvQ_Order
     IF (allocated(ana_psi%Qtransfo_type))                             &
               write(out_unit,*) 'Qtransfo_type',ana_psi%Qtransfo_type
 

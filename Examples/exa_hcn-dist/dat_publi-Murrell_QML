@@ -30,6 +30,7 @@ nice $DIR_vib/vib << ** >res
          nat=4
          sym=T
          nrho=2
+         QMLib=t
  /
 $MC
 0.0     1

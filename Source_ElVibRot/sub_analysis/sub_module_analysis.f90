@@ -147,7 +147,8 @@
       integer       :: CRP,nb_CRP_Ene
       logical       :: Rho1D,Rho2D,Wheight_rho
       integer       :: Rho_type
-      logical       :: psi2,psi1D_Q0,psi2D_Q0,psi_adia,AvPi,AvOp
+      logical       :: psi2,psi1D_Q0,psi2D_Q0,psi_adia,AvPi,AvOp,AvQ
+      integer       :: AvQ_Order
 
       integer           :: Coherence
       real (kind=Rkind) :: Coherence_epsi
@@ -180,7 +181,7 @@
                         propa,                                          &
                         print_psi,psi2,psi1D_Q0,psi2D_Q0,QTransfo,      &
                         Rho1D,Rho2D,Wheight_rho,Rho_type,psi_adia,      &
-                        AvScalOp,AvHiterm,AvPi,AvOp,                    &
+                        AvScalOp,AvHiterm,AvPi,AvOp,AvQ,AvQ_Order,  &
                         Coherence,Coherence_epsi,                       &
                         ExactFact,intensity,NLO,CRP,                    &
                         Psi_ScalOp,VibRot,JJmax,                        &
@@ -201,6 +202,8 @@
       AvHiterm             = .FALSE.
       AvPi                 = .FALSE.
       AvOp                 = .FALSE.
+      AvQ                  = .TRUE.
+      AvQ_Order            = 1
 
       Coherence            = 0
       Coherence_epsi       = ONETENTH**6
@@ -248,6 +251,7 @@
       read(in_unit,analyse)
       IF (print_level > 0) write(out_unit,analyse)
       write(out_unit,*)
+      IF (.NOT. AvQ) AvQ_Order = 0
 
       IF (ana) THEN
         write(out_unit,*) ' WARNING in ',name_sub
@@ -366,6 +370,7 @@
                           num_psi=0,propa=propa,T=ZERO,                            &
                           Boltzmann_pop=.FALSE.,                                   &
                           adia=psi_adia,                                           &
+                          AvQ_Order=AvQ_Order,                                      &
                           AvScalOp=AvScalOp,AvHiterm=AvHiterm,AvPi=AvPi,AvOp=AvOp, &
                           Write_psi2_Grid=psi2,Write_psi2_Basis=psi2,              &
                           Write_psi_Grid=(.NOT. psi2),                             &
@@ -384,8 +389,8 @@
         CALL init_ana_psi(para_ana%ana_psi,ana_level=ana_level,                    &
                           num_psi=0,propa=propa,T=ZERO,                            &
                           Boltzmann_pop=.TRUE.,Temp=Temp,                          &
-                          AvQ=.TRUE., &
                           adia=psi_adia,                                           &
+                          AvQ_Order=AvQ_Order,                                      &
                           AvScalOp=AvScalOp,AvHiterm=AvHiterm,AvPi=AvPi,AvOp=AvOp, &
                           Write_psi2_Grid=.FALSE.,                                 &
                           Write_psi2_Basis=.FALSE.,                                &
