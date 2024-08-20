@@ -472,7 +472,7 @@ nb_not_zero = 0
 DO ibb=1,BgG(1)%n3 ! nbb (the others are 1)
   coef = BgG(1)%RDP(1,1,ibb)
   Norm = Norm + coef**2
-  IF (abs(coef) > 1.d-10) THEN
+  IF (abs(coef) > ONETENTH**10) THEN
     nb_not_zero = nb_not_zero + 1
     write(out_unit,*) 'WP',AllPara%ind_Basis(AllPara%D+1)%tab_ind(:,ibb),coef
     IF (sum(abs(tablb0-AllPara%ind_Basis(AllPara%D+1)%tab_ind(:,ibb))) == 0) THEN
@@ -1073,7 +1073,7 @@ CALL TabRDP2_TO_TabRDP1(WPG_temp,WPG)
 DO id=1,AllPara%D
   IF (debug) THEN
     CALL Size_TabRDP(WPG_temp,nb_BG)
-    write(out_unit,*) 'id, size WPG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+    write(out_unit,*) 'id, size WPG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
     flush(out_unit)
   END IF
 
@@ -1083,7 +1083,7 @@ DO id=1,AllPara%D
 
   IF (debug) THEN
     CALL Size_TabRDP(WPB,nb_BG)
-    write(out_unit,*) 'id, size WPB',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+    write(out_unit,*) 'id, size WPB',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
     write(out_unit,*) 'id, nb_mult_id ',id,nb_mult_id
     flush(out_unit)
   END IF
@@ -1140,7 +1140,7 @@ CALL TabRDP2_TO_TabRDP1(WPG,WPB)
 DO id=AllPara%D,1,-1
   IF (debug) THEN
     CALL Size_TabRDP(WPG,nb_BG)
-    write(out_unit,*) 'id, size WPG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+    write(out_unit,*) 'id, size WPG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
     flush(out_unit)
   END IF
 
@@ -1150,7 +1150,7 @@ DO id=AllPara%D,1,-1
 
   IF (debug) THEN
     CALL Size_TabRDP(WPB_temp,nb_BG)
-    write(out_unit,*) 'id, size WPB_temp',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+    write(out_unit,*) 'id, size WPB_temp',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
     write(out_unit,*) 'id, nb_mult_id ',id,nb_mult_id
     flush(out_unit)
   END IF

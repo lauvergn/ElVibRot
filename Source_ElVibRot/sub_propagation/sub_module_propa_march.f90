@@ -509,7 +509,7 @@
         CALL fcn_field(T_DT,w2,w3,para_H,para_Dip,para_field,w5)
       END IF
 
-!     WP = WP + (DT/6)*(w1+w3+2.D0*w4)
+!     WP = WP + (DT/6)*(w1+w3+2*w4)
       w5 = w1 + w3
       w5 = w5 + w4*TWO
       WP(i) = WP(i) + w5*DTo6
@@ -1055,7 +1055,7 @@ SUBROUTINE march_RK4_old(T,no,WP,WP0,para_H,para_propa)
       END IF
 
 
-      !WP = WP + (DT/6)*(w1+w3+2.D0*w4)
+      !WP = WP + (DT/6)*(w1+w3+2.*w4)
       IF(keep_MPI) THEN
         w5 = w1 + w3
         w5 = w5 + w4*TWO
@@ -1231,8 +1231,8 @@ END SUBROUTINE march_RK4_old
     deallocate(yt1)
     !write(out_unit,*) 'march_bs',j,err1
 
-    !IF (err1 < 1.d-6 .OR. err1 > err0) EXIT
-    IF (err1 < 1.d-10) EXIT
+    !IF (err1 < ONETENTH**6 .OR. err1 > err0) EXIT
+    IF (err1 < ONETENTH**10) EXIT
 
     err0 = err1
   END DO
@@ -4111,8 +4111,6 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
           ! 3d: back to the initial basis
           Psi%CvecB = matmul(para_H%Rvp,HPsiOnSpectral)
-
-          !write(6,*) 'E',sum(conjg(HPsiOnSpectral)*HPsiOnSpectral*para_H%Rdiag)
 
         END IF
 

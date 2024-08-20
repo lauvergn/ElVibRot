@@ -1,7 +1,8 @@
 Program test
-IMPLICIT NONE
+  USE, intrinsic :: ISO_FORTRAN_ENV, ONLY : INPUT_UNIT,OUTPUT_UNIT,real32,real64,real128,int32,int64
+  IMPLICIT NONE
 
-integer, parameter :: Rkind=8
+integer, parameter :: Rkind=real64
 
 integer, parameter :: nb_Q0=6
 real(kind=Rkind)   :: th,Q0(nb_Q0)
@@ -15,7 +16,7 @@ real (kind=Rkind), allocatable :: EigenVecG(:,:)  ! eigenvectors on the grid.  E
 real (kind=Rkind), allocatable :: RhoWeight(:)    ! rho(Q).Weight(Q), on the grid points.
 
 
-Q0(:) = [0.900000_8,3.187000_8, 2.179000_8,0.000000_8,3.141593_8,0.000000_8]
+Q0(:) = [0.900000,3.187000_Rkind, 2.179000_Rkind,0.000000_Rkind,3.141593_Rkind,0.000000_Rkind]
 
 CALL init_EVR()
 
@@ -24,20 +25,20 @@ allocate(EigenVal(nb))
 allocate(EigenVecB(nb,nb))
 allocate(EigenVecG(nq,nb))
 allocate(RhoWeight(nq))
-write(out_unit,*) 'END init_EVR'
+write(OUTPUT_UNIT,*) 'END init_EVR'
 
 CALL levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
-write(out_unit,*) 'nb_vec',nb_vec
-write(out_unit,*) 'EigenVal(:)',EigenVal(1:nb_vec)
+write(OUTPUT_UNIT,*) 'nb_vec',nb_vec
+write(OUTPUT_UNIT,*) 'EigenVal(:)',EigenVal(1:nb_vec)
 
-write(out_unit,*) 'modify Q0'
+write(OUTPUT_UNIT,*) 'modify Q0'
 nb_pts = 10
 DO i=1,2*nb_pts-1
-  th = -1.d0+real(i,kind=8)/real(nb_pts,kind=8)
-  Q0(:) = [th,3.187_8, 2.179_8,0._8,3.141593_8,0._8]
+  th = -1._Rkind+real(i,kind=8)/real(nb_pts,kind=8)
+  Q0(:) = [th,3.187_Rkind, 2.179_Rkind,0._Rkind,3.141593_Rkind,0._Rkind]
   CALL Modify_TnumRefGeom_Q0(Q0,nb_Q0,.TRUE.)
   CALL levels_EVR(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
-  write(out_unit,*) 'EigenVal(:)',EigenVal(1:nb_vec)
+  write(OUTPUT_UNIT,*) 'EigenVal(:)',EigenVal(1:nb_vec)
 END DO
 CALL finalyze_EVR()
 END

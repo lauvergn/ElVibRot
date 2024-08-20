@@ -773,7 +773,6 @@ SUBROUTINE sub_quadra_hermite_halfLeft_new(base,paire)
 
     base%x(:,1:nq+1) = x_loc(:,1:nq+1) ! the negative part of the grid
     base%w(  1:nq+1) = w_loc(  1:nq+1)
-    write(6,*) 'x=0?',base%x(:,nq+1)
 
     IF (allocated(base%x_extra)) THEN
       base%x(:,nq+1:nq+base%nq_extra) = base%x_extra(:,:)

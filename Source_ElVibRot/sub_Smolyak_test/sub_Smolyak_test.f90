@@ -585,13 +585,13 @@ write(out_unit,*) '====================================='
 
 DO id=1,D
   CALL Size_TabRDP(NDPBgG,nb_BG)
-  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
   flush(out_unit)
 
   CALL BgG_TO_BbG(NDPBgG,NDPBbG,WSG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id,nb_mult_id)
 
   CALL Size_TabRDP(NDPBbG,nb_BG)
-  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
   write(out_unit,*) 'id, nb_mult_id ',id,nb_mult_id
   flush(out_unit)
 
@@ -633,14 +633,14 @@ write(out_unit,*) '====================================='
 
 DO id=D,1,-1
   CALL Size_TabRDP(NDPBgG,nb_BG)
-  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
   flush(out_unit)
 
   CALL Transfer_BgG_TO_BbG(NDPBgG,NDPBbG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id)
 
 
   CALL Size_TabRDP(NDPBbG,nb_BG)
-  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
   write(out_unit,*) 'id, nb_mult_id ',id,nb_mult_id
   flush(out_unit)
 
@@ -665,13 +665,13 @@ write(out_unit,*) '====================================='
 
 DO id=1,D
   CALL Size_TabRDP(NDPBgG,nb_BG)
-  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, size NDPBgG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
   flush(out_unit)
 
   CALL BgG_TO_BbG(NDPBgG,NDPBbG,WSG,ind_Grid,ind_Basis,tab_ba,D,LG,LB,id,nb_mult_id)
 
   CALL Size_TabRDP(NDPBbG,nb_BG)
-  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024.d0**2)),' MB'
+  write(out_unit,*) 'id, size NDPBbG',id,int(real(nb_BG,kind=Rkind)*EIGHT/(1024._Rkind**2)),' MB'
   write(out_unit,*) 'id, nb_mult_id ',id,nb_mult_id
   flush(out_unit)
 

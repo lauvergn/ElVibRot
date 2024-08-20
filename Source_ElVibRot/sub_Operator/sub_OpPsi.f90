@@ -1417,12 +1417,9 @@ END SUBROUTINE sub_OpBasis_OneCBF
               ELSE
                 RG1 = Psi%RvecG(iqi2:fqi2)
 
-                !write(6,*) iterm,'RG1>',RG1
-
                 CALL DerivOp_TO_RVecG(RG1,Psi%nb_qa,para_Op%BasisnD,  &
                                       para_Op%derive_termQdyn(:,iterm))
 
-                !write(6,*) iterm,'Op(iterm)RG1>',RG1*para_Op%OpGrid(iterm)%Mat_cte(i1_bi,i2_bi)
                 OpPsi%RvecG(iqi1:fqi1) = OpPsi%RvecG(iqi1:fqi1) +     &
                       RG1 * para_Op%OpGrid(iterm)%Mat_cte(i1_bi,i2_bi)
 

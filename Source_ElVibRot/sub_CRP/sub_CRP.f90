@@ -862,12 +862,10 @@ SUBROUTINE sub_CRP_BasisRep_WithMat_test(tab_Op,nb_Op,print_Op,para_CRP)
       CALL diagonalization(tab_Op(para_CRP%iOp_CAP_Reactif)%Rmat,               &
                            ValRea,VecRea,tab_Op(1)%nb_tot,3,-1,.FALSE.)
 
-      !write(6,*) 'ValRea',ValRea
 
       CALL diagonalization(tab_Op(para_CRP%iOp_CAP_Product)%Rmat,               &
                            ValPro,VecPro,tab_Op(1)%nb_tot,3,-1,.FALSE.)
       nb_VecPro = count(ValPro > Thresh)
-      !write(6,*) 'ValPro',ValPro
       CALL alloc_NParray(CRP_Mat,[nb_VecPro,nb_VecPro],'CRP_Mat',name_sub)
 
 

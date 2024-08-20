@@ -105,7 +105,7 @@ MODULE mod_SetOp
           integer, pointer              :: ind_Op(:,:) => null()        ! ind_Op(nb_tot,nb_tot)
           integer, pointer              :: dim_Op(:)   => null()        ! dim_Op(nb_tot)
           logical                       :: pack_Op     =  .FALSE.       ! default=f
-          real (kind=Rkind)             :: tol_pack    =  ONETENTH**7   ! 1.d-7
+          real (kind=Rkind)             :: tol_pack    =  ONETENTH**7
           real (kind=Rkind)             :: ratio_pack  =  ZERO
           real (kind=Rkind)             :: tol_nopack  =  NINE*ONETENTH ! 0.9
                                                  ! no pack, if the packed ratio is larger
@@ -1301,10 +1301,6 @@ END SUBROUTINE alloc_MatOp
 
       character (len=*), parameter :: name_sub='read_OpGrid_OF_Op'
 
-      !write(6,*) 'In ',name_sub,' Type_FileGrid ',para_Op%para_ReadOp%para_FileGrid%Type_FileGrid
-      !write(6,*) 'In ',name_sub,' Read_FileGrid ',para_Op%para_ReadOp%para_FileGrid%Read_FileGrid
-      !write(6,*) 'In ',name_sub,' para_Op%alloc_Grid ',para_Op%alloc_Grid
-
       IF (.NOT. para_Op%para_ReadOp%para_FileGrid%Read_FileGrid .OR. &
           .NOT. para_Op%para_ReadOp%para_FileGrid%Save_MemGrid  .OR. &
                 para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done) RETURN
@@ -1340,11 +1336,6 @@ END SUBROUTINE alloc_MatOp
             id1 = para_Op%OpGrid(k_term)%derive_termQact(1)
             id2 = para_Op%OpGrid(k_term)%derive_termQact(2)
             iterm_Op = d0MatOp%derive_term_TO_iterm(id1,id2)
-            !write(6,*) 'k_term,nb_term',k_term,para_Op%nb_term
-            !write(6,*) 'id1,id1,iterm_Op',id1,id1,iterm_Op
-            !write(6,*) 'shape ...Grid',shape(para_Op%OpGrid(k_term)%Grid)
-            !write(6,*) 'shape ...d0MatOp%ReVal',shape(d0MatOp%ReVal)
-            !flush(6)
 
             para_Op%OpGrid(k_term)%Grid(i_qa,:,:) = d0MatOp%ReVal(:,:,iterm_Op)
 

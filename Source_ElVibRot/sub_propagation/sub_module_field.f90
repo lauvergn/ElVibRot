@@ -109,7 +109,7 @@
          field%E0             = ZERO
          field%phase          = ZERO
          field%t1             = Tmax
-         field%t_cent         = Tmax/2.d0
+         field%t_cent         = Tmax/TWO
          field%sigma          = ZERO
          field%wmin           = ZERO
          field%wmax           = ZERO
@@ -516,7 +516,7 @@
 !     find the index assiociated with t
       DeltaT = para_field%grid_T(1)-para_field%grid_T(0)
       it = int(t/DeltaT)
-      IF (abs(t-para_field%grid_T(it)) > 1.d-4) THEN
+      IF (abs(t-para_field%grid_T(it)) > ONETENTH**4) THEN
         write(out_unit,*) ' ERROR in EatT_TO_para_field'
         write(out_unit,*) ' I cannot find the grid point associated with T',t
         write(out_unit,*) ' it,grid_T(it)',it,para_field%grid_T(it)
@@ -636,7 +636,7 @@
         write(out_unit,*) 'grid_E',para_field%grid_E(1:10,1)
         STOP
       END IF
-      IF (abs(t-para_field%grid_T(it)) > 1.d-4) THEN
+      IF (abs(t-para_field%grid_T(it)) > ONETENTH**4) THEN
         write(out_unit,*) ' ERROR in dnEgrid'
         write(out_unit,*) ' I cannot find the grid point associated with T',t
         write(out_unit,*) ' it,grid_T(it)',it,para_field%grid_T(it)

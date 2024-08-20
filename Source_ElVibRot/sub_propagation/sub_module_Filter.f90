@@ -1125,8 +1125,6 @@ STOP
            END DO
            write(66,*) cos(acEj),f_filter_gauss(cos(acEj),El,sigma),    &
              ff_filter,log10(abs(ff_filter-f_filter_gauss(cos(acEj),El,sigma)))
-           !write(67,*) cos(acEj),log10(f_filter_gauss(cos(acEj),El,sigma)),&
-           !                                            log10(ff_filter)
          END DO
          STOP
        END DO

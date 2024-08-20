@@ -166,10 +166,8 @@
                             para_AllOp%tab_Op(iOp)%para_ReadOp%nb_elec)
         END DO
 
-          !write(6,*) 'coucou before get_d0MatOp_AT_Qact' ; flush(6)
           CALL get_d0MatOp_AT_Qact(Qact,d0MatOp,mole,para_Tnum,         &
                                    para_AllOp%tab_Op(1)%para_ReadOp%PrimOp_t)
-          !write(6,*) 'coucou after get_d0MatOp_AT_Qact' ; flush(6)
           DO iOp=1,size(d0MatOp)
             IF (d0MatOp(iOp)%type_Op == 21) THEN
               iact = d0MatOp(iOp)%iQact

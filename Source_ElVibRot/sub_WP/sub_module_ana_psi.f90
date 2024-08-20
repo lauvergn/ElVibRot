@@ -172,8 +172,6 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna,info)
   END IF
   IF (adia .AND. .NOT. ana_psi%GridDone) STOP 'adia=t and GridDone=f'
 
-  !write(6,*) ' in sub_analyze_psi: 0' ; flush(6)
-
   ! save the GridRep and BasisRep values to be able to deallocate the unused representation
   Grid  = psi%GridRep
   Basis = psi%BasisRep
@@ -223,7 +221,6 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna,info)
     E      = convRWU_TO_R_WITH_WritingUnit(RWU_E)
 
     CALL SET_string(psi_line,'norm^2-WP ',info_loc)
-     !write(6,*) ' in sub_analyze_psi: 1' ; flush(6)
 
     ! add the energy
     iE = int(log10(abs(E)+ONETENTH**8)) ! add 1e-8 to avoid zero
@@ -235,11 +232,8 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna,info)
     END IF
     ana_psi%GridDone = GridDone
 
-    !write(6,*) E,iE,'ana_psi%Eformat: ',ana_psi%Eformat
-    !write(6,*) ' in sub_analyze_psi: 2' ; flush(6)
 
     CALL ADD_TO_string(psi_line,' ',TO_string(E,Rformat=ana_psi%Eformat))
-    !write(6,*) ' in sub_analyze_psi: 2.5' ; flush(6)
 
     ! add the field (if necessary)
     IF (ana_psi%With_field) THEN
@@ -282,7 +276,6 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna,info)
       CALL dealloc_NParray(Mij,'Mij',name_sub)
 
     END IF
-    !write(6,*) ' in sub_analyze_psif: propa' ; flush(6)
 
   ELSE ! not propa
     RWU_E  = REAL_WU(ana_psi%Ene,'au','E')
@@ -2492,8 +2485,6 @@ ELSE
         !- calculation of WrhonD ------------------------------
         WrhonD = Rec_WrhonD(psi%BasisnD,i_qa,OldPara)
 
-        !write(6,*) 'i_qa,wrho*D',i_qa,WrhonD
-
         DO i_be=1,nb_be
         DO i_bi=1,nb_bi
           i_qaie = i_qa + ( (i_bi-1)+(i_be-1)*nb_bi ) * psi%nb_qa
@@ -2626,21 +2617,12 @@ END IF
     DO iG=d1,d2
       nq_AT_iG = psi%BasisnD%para_SGType2%tab_nq_OF_SRep(iG)
       nb0      = psi%BasisnD%para_SGType2%nb0
-!write(6,*) 'iG ',iG
-!write(6,*) 'size Psi%CvecG(iq+1:iq+nb0*nq_AT_iG) ',size(Psi%CvecG(iq+1:iq+nb0*nq_AT_iG))
-!write(6,*) 'nq_AT_iG,nb0 ',nq_AT_iG,psi%BasisnD%para_SGType2%nb0
-!write(6,*) 'nq_AT_iG*nb0 ',nq_AT_iG*psi%BasisnD%para_SGType2%nb0
-!flush(6)
 
       CVecG = reshape(Psi%CvecG(iq+1:iq+nb0*nq_AT_iG),shape=[nq_AT_iG,psi%BasisnD%para_SGType2%nb0])
 
       CALL Get_weight_FROM_OneDP(wrho,iG,                                   &
                     psi%BasisnD%para_SGType2%nDind_SmolyakRep%Tab_nDval,  &
                     psi%BasisnD%tab_basisPrimSG)
-
-      !DO i=1,nq_AT_iG
-      !  write(6,*) 'iq_a,wrho',iq+i,wrho(i),wrho(i)*Psi%BasisnD%WeightSG(iG)
-      !END DO
 
       ib0 = 0
       DO i_be=1,nb_be
@@ -2771,11 +2753,6 @@ END SUBROUTINE Channel_weight_SG4_grid
     DO iG=d1,d2
       nq_AT_iG = psi%BasisnD%para_SGType2%tab_nq_OF_SRep(iG)
       nb0      = psi%BasisnD%para_SGType2%nb0
-!write(6,*) 'iG ',iG
-!write(6,*) 'size Psi%CvecG(iq+1:iq+nb0*nq_AT_iG) ',size(Psi%CvecG(iq+1:iq+nb0*nq_AT_iG))
-!write(6,*) 'nq_AT_iG,nb0 ',nq_AT_iG,psi%BasisnD%para_SGType2%nb0
-!write(6,*) 'nq_AT_iG*nb0 ',nq_AT_iG*psi%BasisnD%para_SGType2%nb0
-!flush(6)
 
       CVecG = reshape(Psi%CvecG(iq+1:iq+nb0*nq_AT_iG),shape=[nq_AT_iG,psi%BasisnD%para_SGType2%nb0])
 

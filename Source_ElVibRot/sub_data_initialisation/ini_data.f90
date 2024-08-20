@@ -655,7 +655,6 @@
           CALL param_Op1TOparam_Op2(para_AllOp%tab_Op(2),para_AllOp%tab_Op(iOp))
           para_AllOp%tab_Op(iOp)%n_Op    = nb_Op+i
           para_AllOp%tab_Op(iOp)%name_Op = 'P_Q' // TO_string(i)
-          write(6,*) para_AllOp%tab_Op(iOp)%name_Op
 
           CALL Init_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,           &
                            type_Op=21,nb_Qact=mole%nb_act1,iQact=i,       &
@@ -674,7 +673,6 @@
           CALL param_Op1TOparam_Op2(para_AllOp%tab_Op(2),para_AllOp%tab_Op(iOp))
           para_AllOp%tab_Op(iOp)%n_Op    = nb_Op+i
           para_AllOp%tab_Op(iOp)%name_Op = 'P^2_Q' // TO_string(i)
-          write(6,*) para_AllOp%tab_Op(iOp)%name_Op
 
           CALL Init_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,           &
                            type_Op=22,nb_Qact=mole%nb_act1,iQact=i,       &

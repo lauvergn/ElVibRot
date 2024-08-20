@@ -2657,7 +2657,6 @@ STOP 'pack and SG2 does not work!!!'
    ELSE
 
      IF (sortX_loc) THEN
-write(6,*) 'coucou0 sort' ; flush(6)
 
        CALL alloc_NParray(tab_iqXmin,[nqo],'tab_iqXmin',name_sub)
        tab_iqXmin(:) = [(i,i=1,nqo)]
@@ -2706,13 +2705,9 @@ write(6,*) 'coucou0 sort' ; flush(6)
 
        CALL alloc_xw_OF_basis(basis_set)
        CALL alloc_dnb_OF_basis(basis_set)
-write(6,*) 'coucou1 sort' ; flush(6)
-write(6,*) 'coucou1 packed',basis_set%packed ; flush(6)
-write(6,*) 'coucou1 packed_done',basis_set%packed_done ; flush(6)
 
        iq0 = 0
        DO iq=1,nqo ! old nq
-write(6,*) 'coucou1 sort',iq ; flush(6)
 
          IF (tab_iqXmin(iq) > 0) THEN
            iq1 = tab_iqXmin(iq)
@@ -2722,7 +2717,6 @@ write(6,*) 'coucou1 sort',iq ; flush(6)
            basis_set%rho(iq0)  = Rec_rhonD(basis_set,iq1)
            basis_set%wrho(iq0) = Rec_WrhonD(basis_set,iq1)
            basis_set%w(iq0)    = Rec_WnD(basis_set,iq1)
-write(6,*) 'coucou2 sort,iq,iq0,iq1',iq,iq0,iq1 ; flush(6)
 
            DO ib=1,basis_set%nb
 

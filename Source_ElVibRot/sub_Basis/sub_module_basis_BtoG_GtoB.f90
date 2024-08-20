@@ -874,7 +874,6 @@
             RVecB(:) = real(CVecB,kind=Rkind)
             CALL tabPackedBasis_TO_SmolyakRepBasis(SRep,RVecB,                 &
               basis_set%tab_basisPrimSG,basis_set%nDindB,basis_set%para_SGType2)
-            !write(6,*) 'real(CVecB)' ; CALL Write_SmolyakRep(SRep)
 
             IF (allocated(basis_set%para_SGType2%nDind_SmolyakRep%Tab_nDval)) THEN
               CALL BSmolyakRep_TO_GSmolyakRep(SRep,                         &
@@ -884,7 +883,6 @@
               CALL BSmolyakRep_TO3_GSmolyakRep(SRep,basis_set%para_SGType2, &
                                                basis_set%tab_basisPrimSG)
             END IF
-            !write(6,*) 'real(CVecG)' ; CALL Write_SmolyakRep(SRep)
 
             IF(openmpi) THEN
               CALL CVecB_TO_CVecG_R_MPI(SRep,CVecG)
@@ -897,12 +895,10 @@
               END DO
             ENDIF
             CALL dealloc_SmolyakRep(SRep)
-            !write(6,*) 'real(CVecG)?',CVecG
 
             RVecB(:) = aimag(CVecB)
             CALL tabPackedBasis_TO_SmolyakRepBasis(SRep,RVecB,              &
               basis_set%tab_basisPrimSG,basis_set%nDindB,basis_set%para_SGType2)
-            !write(6,*) 'im(CVecB)' ; CALL Write_SmolyakRep(SRep)
 
             IF (allocated(basis_set%para_SGType2%nDind_SmolyakRep%Tab_nDval)) THEN
               CALL BSmolyakRep_TO_GSmolyakRep(SRep,                         &
@@ -912,7 +908,6 @@
               CALL BSmolyakRep_TO3_GSmolyakRep(SRep,basis_set%para_SGType2, &
                                                basis_set%tab_basisPrimSG)
             END IF
-            !write(6,*) 'im(CVecG)' ; CALL Write_SmolyakRep(SRep)
 
             IF(openmpi) THEN
               CALL CVecB_TO_CVecG_C_MPI(SRep,CVecG)
@@ -926,7 +921,6 @@
               END DO
             ENDIF
             CALL dealloc_SmolyakRep(SRep)
-            !write(6,*) 'CVecG?',CVecG
 
             CALL dealloc_NParray(RVecB,'RVecB',name_sub)
 

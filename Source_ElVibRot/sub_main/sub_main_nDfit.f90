@@ -929,11 +929,9 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
     ! for tab_i_TO_l
     IF (allocated(tab_i_TO_l)) deallocate(tab_i_TO_l)
     CALL read_name_advNo(in_unit,name_dum,err_read)
-    !write(6,*) 'name_dum',name_dum ; flush(6)
     DO
       CALL read_name_advNo(in_unit,name_dum,err_read)
       read(name_dum,*) ii
-      !write(6,*) 'name_dum: ',name_dum,ii ; flush(6)
       IF (allocated(tab_i_TO_l)) THEN
         tab_i_TO_l = [tab_i_TO_l,ii]
       ELSE
@@ -947,11 +945,9 @@ SUBROUTINE sub_nDGrid_coupling1_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
     ! for Tab_stepQ
     IF (allocated(Tab_stepQ))  deallocate(Tab_stepQ)
     CALL read_name_advNo(in_unit,name_dum,err_read)
-    !write(6,*) 'name_dum',name_dum ; flush(6)
     DO
       CALL read_name_advNo(in_unit,name_dum,err_read)
       read(name_dum,*) stepQ
-      !write(6,*) 'name_dum: ',name_dum,stepQ ; flush(6)
       IF (allocated(Tab_stepQ)) THEN
         Tab_stepQ = [Tab_stepQ,stepQ]
       ELSE
@@ -1146,7 +1142,6 @@ FUNCTION ValGridPoint(para_nDGrid,nDvalG)
       IF (nDvalG(i) /= 0) THEN
         nDval(i) = nDvalG(i)
         CALL calc_nDI(iGP,nDval,para_nDGrid(iG)%nDindG,err_sub)
-        !write(6,*) '1MR',i,':',nDval,'iGP',iGP
         Val = Val + para_nDGrid(iG)%Val(iGP)
       END IF
     END DO
@@ -1164,7 +1159,6 @@ FUNCTION ValGridPoint(para_nDGrid,nDvalG)
         nDval(i) = nDvalG(i)
         nDval(j) = nDvalG(j)
         CALL calc_nDI(iGP,nDval,para_nDGrid(iG)%nDindG,err_sub)
-        !write(6,*) '2MR',i,j,':',nDval,'iGP',iGP
         Val = Val + para_nDGrid(iG)%Val(iGP)
       END IF
     END DO
@@ -1172,7 +1166,6 @@ FUNCTION ValGridPoint(para_nDGrid,nDvalG)
 
   END IF
   ValGridPoint = Val
-  !write(6,*) 'ValGridPoint',Val
 
   CALL dealloc_NParray(nDVal,'nDVal',name_sub)
 
@@ -1607,7 +1600,6 @@ END FUNCTION ValGridPoint
     CALL calc_nDindex(para_nDGrid(iG)%nDindG,iGP,nDvalG)
 
     ValGP = para_nDGrid(iG)%Val(iGP)
-    !write(6,*) 'iG,iGP',iG,iGP,ValGP ; flush(6)
 
     Q(:) = para_nDGrid(iG)%Q0
     IF (allocated(para_nDGrid(iG)%Tab_stepQ)) THEN
@@ -1615,7 +1607,6 @@ END FUNCTION ValGridPoint
         Q(i) = Q(i) + para_nDGrid(iG)%Tab_stepQ(i)%d0(nDvalG(i)+1)
       END DO
     END IF
-    write(6,*) 'iG,iGP,Q,ValGP',iG,iGP,Q,':',ValGP ; flush(6)
 
     IF (para_nDFit%Col_FOR_WeightOFFit > 0) THEN
       Weight_iGP = exp(-para_nDFit%Scal_FOR_WeightOFFit * ValGP)
@@ -2017,7 +2008,6 @@ END FUNCTION ValGridPoint
           CALL calc_nDindex(para_nDGrid(iG)%nDindG,iGP,nDvalG)
 
           ValGP = para_nDGrid(iG)%Val(iGP)
-          !write(6,*) 'iG,iGP',iG,iGP,ValGP ; flush(6)
 
           Q(:) = para_nDGrid(iG)%Q0
           IF (allocated(para_nDGrid(iG)%Tab_stepQ)) THEN

@@ -30,11 +30,9 @@
 
 
 
-      !write(6,*) 'Qxyz',Qxyz
       IF (nb_be == 1 ) THEN
         CALL pes(reshape(Qxyz(1:3*natoms),shape=[3,natoms]),0,mat_V(1,1),g,h)
 
-        !write(6,*) 'Q,mat_V',Qxyz,mat_V(1,1)
         IF (pot_cplx) mat_imV(1,1) = im_pot0(Qxyz)
         IF (calc_ScalOp) THEN
           CALL sub_ScalarOp(ScalOp,nb_ScalOp,Qxyz,mole)
@@ -75,7 +73,7 @@
        IF (Q(3) > Q0) THEN
          im_pot0 = a*(Q(3) - Q0)
        ELSE
-         im_pot0 = 0.d0
+         im_pot0 = ZERO
        END IF
 
        RETURN
@@ -9716,8 +9714,8 @@
      if (iopt.ge.1) then
 
       ! build B matrix  dr/dx  from r = |xi-xj|
-      B=0.d0
-      if (iopt.ge.2) db=0.d0
+      B=ZERO
+      if (iopt.ge.2) db=ZERO
       ij=0
       do i = 1,natoms
        do j = 1,i-1
@@ -9726,7 +9724,7 @@
         jx=(j-1)*3
         r(1:3)=x(1:3,i)-x(1:3,j)
         rrij=r(1)**2+r(2)**2+r(3)**2
-        rrij=1.d0/dsqrt(rrij)
+        rrij=ONE/dsqrt(rrij)
         r(1:3)=rrij*r(1:3)
         B(ij,ix+1:ix+3) =  r(1:3)
         B(ij,jx+1:jx+3) = -r(1:3)
@@ -9792,8 +9790,8 @@
 
      if (iopt.ge.1) then
 
-      g=0.d0
-      gint=0.d0
+      g=ZERO
+      gint=ZERO
 
       do i = 1,nmorse
         ii=imorse(i)
@@ -9844,8 +9842,8 @@
 
      if (iopt.ge.2) then
 
-      h = 0.d0
-      hint = 0.d0
+      h = ZERO
+      hint = ZERO
 
       do i = 1,nmorse
         ii=imorse(i)
@@ -9912,7 +9910,7 @@
       enddo
 
       ! reuse dB as scratch 
-      dB(:,:,1)=0.d0
+      dB(:,:,1)=ZERO
       do j = 1,3*natoms
        kl = 0
        do k = 1,ndist
@@ -9953,7 +9951,7 @@
         double precision, intent(out) :: v
 
         v = al*(re-r)
-        v = dexp(v) - 1.d0
+        v = dexp(v) - ONE
         v = (de*v)**2
         return
 
@@ -9970,8 +9968,8 @@
 
         f = al*(re-r)
         f = dexp(f)
-        f = f*(f-1.d0)
-        f = f*2d0*al*de**2
+        f = f*(f-ONE)
+        f = f*TWO*al*de**2
 
         return
 
@@ -9988,8 +9986,8 @@
 
         h = al*(re-r)
         h = dexp(h)
-        h = h*(2.d0*h-1.d0)
-        h = h*2d0*al**2*de**2
+        h = h*(TWO*h-ONE)
+        h = h*TWO*al**2*de**2
 
         return
 
@@ -10007,11 +10005,11 @@
 
         integer :: i
 
-        v = 0.d0
+        v = ZERO
         do i = 1,ndim
           v = v + (r(i)-x(i))**2 * alpha(i)
         enddo
-        v = v * 0.5d0
+        v = v * HALF
         v = dexp(-v) - shift
         v = v*d
 
@@ -10031,11 +10029,11 @@
         double precision :: vv
         integer :: i
 
-        vv = 0.d0
+        vv = ZERO
         do i = 1,ndim
           vv = vv + (r(i)-x(i))**2 * alpha(i)
         enddo
-        vv = vv * 0.5d0
+        vv = vv * HALF
         vv = dexp(-vv)
         vv = vv*d
 
@@ -10060,11 +10058,11 @@
         double precision :: vv, fi
         integer :: i, j , ij
 
-        vv = 0.d0
+        vv = ZERO
         do i = 1,ndim
           vv = vv + (r(i)-x(i))**2 * alpha(i)
         enddo
-        vv = vv * 0.5d0
+        vv = vv * HALF
         vv = dexp(-vv)
         vv = vv*d
 

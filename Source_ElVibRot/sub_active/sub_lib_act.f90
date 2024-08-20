@@ -752,11 +752,6 @@
               d0MatOp%ReVal(:,:,i_term) = work_bhe(1:nb_bie,1:nb_bie)
             END IF
           END IF
-!         write(out_unit,*) name_sub,', i_term',i_term
-
-
-!IF (i_term == 1) write(777,*) Qact,min(work_bhe(1,1),0.05_Rkind)
-
 
         END DO
 

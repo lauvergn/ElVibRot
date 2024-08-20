@@ -562,7 +562,6 @@
                            Last_GridPoint=num_grid_f,                   &
                            Base_FileName_Grid=name_Grid)
       CASE (5) ! The grid is save in memory, then it save on disk
-        write(6,*) 'coucou direct',direct
         para_ReadOp%Make_Mat  = .FALSE.
         Save_FileGrid         = .NOT. Read_Grid
         CALL init_FileGrid(para_ReadOp%para_FileGrid,                   &

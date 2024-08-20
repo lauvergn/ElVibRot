@@ -2241,10 +2241,6 @@ integer                            :: d1,d2
 
 IF (SRep%Grid) STOP 'Grid is not possible in BSmolyakRep_TO_GSmolyakRep'
 
-!write(6,*) 'BSmolyakRep_TO_GSmolyakRep: shape(tab_ind) ',shape(tab_ind)
-!write(6,*) 'BSmolyakRep_TO_GSmolyakRep: shape(tab_ba) ',shape(tab_ba)
-!write(6,*) 'BSmolyakRep_TO_GSmolyakRep: nb0 ',nb0
-!flush(6)
 
 D = size(tab_ba(0,:))
 !nb_mult_BTOG = 0
@@ -2287,7 +2283,6 @@ allocate(tab_nq(D))
 !DO iG=lbound(SRep%SmolyakRep,dim=1),ubound(SRep%SmolyakRep,dim=1)
 DO iG=d1,d2
 
-  !write(6,*) iG,'tab_ind(:,iG)',tab_ind(:,iG)
   tab_nq = getbis_tab_nq(tab_ind(:,iG),tab_ba)
   tab_nb = getbis_tab_nb(tab_ind(:,iG),tab_ba)
 
@@ -2304,8 +2299,6 @@ IF (allocated(tab_nq)) deallocate(tab_nq)
 !$OMP   END PARALLEL
 
 SRep%Grid = .TRUE.
-!write(6,*) 'END BSmolyakRep_TO_GSmolyakRep'
-!flush(6)
 
 END SUBROUTINE BSmolyakRep_TO_GSmolyakRep
 
@@ -2906,8 +2899,6 @@ real(kind=Rkind), allocatable      :: RTempG(:,:,:)
 character (len=*), parameter :: name_sub='Set_weight_TO_SmolyakRep'
 
 
-!write(6,*) 'Set_weight_TO_SmolyakRep: shape tab_ba',shape(tab_ba) ; flush(6)
-
   CALL alloc_SmolyakRep(SRep,tab_ind,tab_ba,grid=.TRUE.)
 
   !CALL Write_SmolyakRep(Srep)
@@ -2975,8 +2966,6 @@ real(kind=Rkind), allocatable      :: RTempG(:,:,:)
 
   character (len=*), parameter :: name_sub='Get_weight_FROM_OneDP'
 
-
-!write(6,*) 'Get_weight_FROM_OneDP: shape tab_ba',shape(tab_ba) ; flush(6)
 
   CALL alloc_NParray(tab_n,shape(tab_ind(:,1)),'tab_n','alloc_SmolyakRep')
 

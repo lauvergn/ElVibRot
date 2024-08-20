@@ -45,34 +45,35 @@
 !
 !===========================================================================
 !===========================================================================
-  PROGRAM spectre
-      implicit none
+PROGRAM spectre
+  USE, intrinsic :: ISO_FORTRAN_ENV, ONLY : INPUT_UNIT,OUTPUT_UNIT,real32,real64,real128,int32,int64
+  implicit none
 
       integer :: npts,nptE
-      real (kind=8) :: t0,tmax,dt
-      real (kind=8) :: E,Emin,Emax,dE
-      real (kind=8) :: conv
-      real (kind=8), pointer :: t(:)
-      complex (kind=8), pointer :: auto(:)
-      complex (kind=8), pointer :: Expiwt(:)
-      complex (kind=8), pointer :: funcE(:)
+      real (kind=real64) :: t0,tmax,dt
+      real (kind=real64) :: E,Emin,Emax,dE
+      real (kind=real64) :: conv
+      real (kind=real64), pointer :: t(:)
+      complex (kind=real64), pointer :: auto(:)
+      complex (kind=real64), pointer :: Expiwt(:)
+      complex (kind=real64), pointer :: funcE(:)
       character (len=50) :: file_auto
 
-      real (kind=8) :: a,b
+      real (kind=real64) :: a,b
       integer :: i,nio
 
-      complex (kind=8), parameter :: EYE = (0,1)
-      real (kind=8), parameter ::                                       &
-       pi = 3.14159265358979323846264338327950288419716939937511d0
+      complex (kind=real64), parameter :: EYE = (0,1)
+      real (kind=real64), parameter ::                                       &
+       pi = 3.14159265358979323846264338327950288419716939937511_real64
 
 
       namelist / param / Emin,Emax,conv,file_auto
 
 
       file_auto = 'file_auto'
-      conv = 1.d0
-      Emin = 0.d0
-      Emax = -1.d0
+      conv = 1._real64
+      Emin = 0._real64
+      Emax = -1._real64
       read(in_unit,param)
       write(out_unit,param)
 
@@ -86,7 +87,7 @@
 
           DO i=1,npts
             read(nio,*) t(i),a,b
-            auto(i) = cmplx(a,b,kind=8)
+            auto(i) = cmplx(a,b,kind=real64)
           END DO
           dt = t(2)-t(1)
           tmax = t(npts)
@@ -95,10 +96,10 @@
 !     END read the time function
 
 !     Check the funcErgy grid...
-          dE = 2.d0*Pi/tmax
-          IF (Emax <0) Emax=2.d0*Pi/dt
-          IF (Emax> 2.d0*Pi/dt) THEN
-            write(out_unit,*) 'Emax> 2.d0*Pi/dt',Emax,2.d0*Pi/tmax
+          dE = 2._real64*Pi/tmax
+          IF (Emax <0) Emax=2._real64*Pi/dt
+          IF (Emax> 2._real64*Pi/dt) THEN
+            write(out_unit,*) 'Emax> 2Pi/dt',Emax,2._real64*Pi/tmax
             STOP
           END IF
           nptE = int((Emax-Emin)/dE)
@@ -106,10 +107,10 @@
           allocate(funcE(nptE))
           allocate(Expiwt(npts))
           DO i=1,nptE
-            E=Emin+real(i-1,kind=8)*dE
+            E=Emin+real(i-1,kind=real64)*dE
             Expiwt(:) = exp(EYE*E*t(:))
 
-            funcE(i) = 2.d0*dt*sum(Expiwt(:)*auto(:))
+            funcE(i) = 2._real64*dt*sum(Expiwt(:)*auto(:))
             write(out_unit,*) E,funcE(i)
           END DO
 

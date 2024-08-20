@@ -611,7 +611,6 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 !
 ! write(out_unit,*) 'sum=', sum, 'stpmax=', stpmax
 !
- flush(6)
  if(sum.gt.stpmax)then
   do i=1,n
    p(i)=p(i)*(stpmax/sum)

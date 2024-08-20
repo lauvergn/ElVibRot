@@ -108,7 +108,6 @@
         CALL alloc_xw_OF_basis(base)
 
         CALL laguerre_compute (nq,base%x(1,:),base%w,ZERO)
-        !write(6,*) 'x_Laguerre',base%x(1,:)
         base%w(:) = base%w * exp(base%x(1,:))
         !B=30._Rkind
         !DO iq=1,nq
