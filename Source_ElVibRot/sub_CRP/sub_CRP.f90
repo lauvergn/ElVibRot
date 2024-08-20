@@ -1426,6 +1426,7 @@ SUBROUTINE calc_crp_IRL(tab_Op,nb_Op,para_CRP,Ene)
 
 !----- working variables -----------------------------
   TYPE(REAL_WU)     :: RWU_E
+  INTEGER           :: nio
 
       ! Calculate the inverse matrix explicitly? For debuging. It is equivalent to sub_CRP_BasisRep_WithMat
   LOGICAL, PARAMETER :: Inv = .FALSE.
@@ -1530,13 +1531,13 @@ SUBROUTINE calc_crp_IRL(tab_Op,nb_Op,para_CRP,Ene)
      CALL dealloc_NParray(Ginv,'Ginv',name_sub)
      CALL dealloc_NParray(G,   'G',   name_sub)
 
-      open(unit=17, file='P.dat')
+      open(newunit=nio, file='P.dat')
       DO i=1,ncooked
          DO j=1, ncooked
-            WRITE(17,*) gGgG(i,j)
+            WRITE(nio,*) gGgG(i,j)
          END DO
       END DO
-      CLOSE (17)
+      CLOSE (nio)
 
 
      CRP = ZERO

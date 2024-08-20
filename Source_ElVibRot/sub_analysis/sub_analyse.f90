@@ -630,7 +630,7 @@ CONTAINS
 
 
 !------ working variables ---------------------------------
-      integer       :: i,i_q,ie,ieq,nb_bi,nb_qa
+      integer       :: i,i_q,ie,ieq,nb_bi,nb_qa,nio
       real (kind=Rkind), allocatable :: psi_q(:,:)
       integer, parameter :: max_print = 200
 
@@ -651,7 +651,7 @@ CONTAINS
       END IF
 !-----------------------------------------------------------
       write(out_unit,*)
-      write(out_unit,*) 'eigenvectors on a cube (test)',nb_psi
+      write(out_unit,*) 'eigenvector density on a cube (test)',nb_psi
 
 !-----------------------------------------------------------
 
@@ -659,6 +659,7 @@ CONTAINS
 
 
        DO i=1,nb_psi
+          open(newunit=nio,file='file_cube_psi2_' // TO_string(i))
          CALL sub_PsiBasisRep_TO_GridRep(Tab_Psi(i))
 
          DO i_q=1,nb_qa
@@ -674,7 +675,8 @@ CONTAINS
 
          END DO
          !write cube file one for each Tab_Psi(i)
-         write(100+i,*)  psi_q(:,i)
+         write(nio,*)  psi_q(:,i)
+         close(nio)
        END DO
 
       CALL dealloc_NParray(psi_q,'psi_q',name_sub)

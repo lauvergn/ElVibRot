@@ -4,7 +4,7 @@ name_dep=dependencies.mk
 SRCFile=fortranlist.mk
 
 list=`ls Source_ElVibRot/*.f90 Source_ElVibRot/*/*.f90 Source_ElVibRot/*/*/*.f90`
-ExcludeList='Gauss_numlH.f90 spectre.f90 sub_rotation.f90 sub_CRP-jo.f90 temp.f90'
+ExcludeList='Gauss_numlH.f90 spectre.f90 sub_rotation.f90 temp.f90'
 
 echo "#===============================================" > $name_dep
 echo "#===============================================" > $SRCFile
