@@ -11,7 +11,7 @@ dav=$3
 
 
 nice $DIR_vib/vib << ** >"res_HNO3_RPH_LB"$LB"-LG"$LG
- &system printlevel=2 /
+ &system printlevel=2 PTune_Grid_omp=t /
  &constantes version='HandBook70ed' mass_version='HandBook70ed' /
  &variables Old_Qtransfo=f nb_Qtransfo=4 nrho=1 vep_type=1 Write_QMotions=f QMLib_G=f QMLib=t /
  &Coord_transfo name_transfo='zmat' nat=6 /
@@ -62,7 +62,6 @@ sym  rot R1 R+ A+  D2 R- A- RH AH     D2+  RX AX
 
 
  &potential  pot_name='HNO3' /
- Qdyn_TO_QQMLib 1 2 3 4 5 6 7 8 9
 
  &basis_nD iQdyn(1)=1 name="cos" nb=51 nq=81 /
  &basis_nD nb_basis=8 name="direct_prod" L_SparseBasis=$LB L_SparseGrid=$LG SparseGrid_type=4 /
