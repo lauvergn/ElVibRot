@@ -63,7 +63,6 @@ sym  cos(a)      R     r    x    pi   dh
 0.0
 
  &potential  pot_name='HCN_Murrell' option=11 /
- Qdyn_TO_QQMLib 1 2 3
 
  &basis_nD iQact(1)=1 name="Pl0" nb=51 nq=80 nbc=20 auto_contrac=t /
  &basis_nD nb_basis=2 name="direct_prod" L_SparseBasis=$LB L_SparseGrid=$LG SparseGrid_type=4 /

@@ -5,24 +5,15 @@ epsi_e=0.00001
 epsi_p=0.000004
 
 list_propa="Cheby nOD RK4 ModMidPoint Bulirsch-Stoer SIL SIP Spectral"
-list_propa="Cheby"
 
 #echo $list_propa
 
-here=`pwd`
-DIR_vib=$here/../..
-DIR_pot=$DIR_vib/sub_pot
+./comp.sh &> comp.log
 
-cd $DIR_vib
- make OPT=0 &> $here/comp.log
-cd $here
-##compOK=`tail -1 comp.log | grep -c OK `
 compOK=`grep -c 'EVR OK' comp.log `
-if [ $compOK = '1' ]
+echo compOK $compOK
+if [ $compOK = '0' ]
 then
- echo " ElVibRot compilation: OK"
-else
- echo " ElVibRot compilation: ERROR"
  exit
 fi
 
@@ -42,8 +33,10 @@ do
     echo "ElVibRot execution: ERROR"
   else
 
-    #nr2=`grep norm^2 $RES | tail -1 | awk '{print $4" "$5" "$6" "$7" "$8" "$9}'`
-    nr2=`grep norm^2 $RES | tail -1 | awk '{print $4" "$6" "$7" "$8" "$9" "$10}'`
+  #100.00 1.20617 1.0000000 0.9899312 0.0078458 0.0022230 Spectral_ref
+ #norm^2-WP #WP 1 T 100.000000 au 1.2061671 1.0000000 0.9899312 0.0078458 0.0022230
+
+    nr2=`grep norm^2 $RES | tail -1 | awk '{print $5" "$7" "$8" "$9" "$10" "$11}'`
     echo $nr2  $propa
 
     cp RES_ref/Norm2_Spectral_T100 Norm2_temp

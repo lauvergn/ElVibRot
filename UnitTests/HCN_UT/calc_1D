@@ -1,5 +1,16 @@
 #!/bin/bash
 
+
+./comp.sh &> comp.log
+
+compOK=`grep -c 'EVR OK' comp.log `
+echo compOK $compOK
+if [ $compOK = '0' ]
+then
+ exit
+fi
+
+
  echo " dat_publi_rigid0" >> err.log
 
  ./DAT_files/dat_publi_rigid0 >> err.log 2>&1

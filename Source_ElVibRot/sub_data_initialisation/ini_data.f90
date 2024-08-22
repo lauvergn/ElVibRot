@@ -795,7 +795,7 @@ nb_psi_loc = max(nb_psi,1)
 GridMem    = real(nq,kind=Rkind)*real(Rkind,kind=Rkind)
 BasisMem   = real(nb,kind=Rkind)*real(Rkind,kind=Rkind)
 
-MappingSG4Meme = real(nq,kind=ILkind)*real(sizeof(nq),kind=Rkind)
+MappingSG4Meme = real(nq,kind=ILkind)*real(storage_size(nq),kind=Rkind)
 
 psi_Mem        = BasisMem * real(nb_channels,         kind=Rkind)
 PotMem         = GridMem  * real(nb_channels**2,      kind=Rkind)

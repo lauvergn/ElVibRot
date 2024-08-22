@@ -2256,7 +2256,7 @@ MODULE mod_basis
 
             Max_err_d1GG2md2GG = maxval(abs(Check_bGB))
             !IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
-              write(out_unit,'(a,4x,i0,x,i0,x,e9.2)') 'Check d1GG^2 - d2GG',i,j,maxval(abs(Check_bGB))
+              write(out_unit,'(a,4x,i0,1x,i0,1x,e9.2)') 'Check d1GG^2 - d2GG',i,j,maxval(abs(Check_bGB))
             !END IF
             flush(out_unit)
             !basis_set%dnRGG%d2(:,:,i,j) = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))

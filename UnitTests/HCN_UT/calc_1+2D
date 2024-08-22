@@ -1,5 +1,15 @@
 #!/bin/bash
 
+
+./comp.sh &> comp.log
+
+compOK=`grep -c 'EVR OK' comp.log `
+echo compOK $compOK
+if [ $compOK = '0' ]
+then
+ exit
+fi
+
 test_size=$1
 
 if [ -z $test_size ]

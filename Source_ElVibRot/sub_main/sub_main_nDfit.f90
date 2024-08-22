@@ -799,8 +799,8 @@ SUBROUTINE sub_nDGrid_coupling0_v2(para_nDGrid,Qact0,para_Tnum,mole,PrimOp)
     StepQp(:) = StepQp(:) / nb_DeltaQ
 
     DO i=1,mole%nb_act
-      write(out_unit,'(a,i0,100(x,i0))')    'l(:)_',     i,0,([j,j],j=1,nb_DeltaQ)
-      write(out_unit,'(a,i0,100(x,f6.2))') 'DeltaQ(:)_',i,ZERO,([StepQp(i)*j,StepQm(i)*j],j=1,nb_DeltaQ)
+      write(out_unit,'(a,i0,100(1x,i0))')    'l(:)_',     i,0,([j,j],j=1,nb_DeltaQ)
+      write(out_unit,'(a,i0,100(1x,f6.2))') 'DeltaQ(:)_',i,ZERO,([StepQp(i)*j,StepQm(i)*j],j=1,nb_DeltaQ)
     END DO
   ELSE
     read(nioGrid1,*) Name_dum,iGdum,nDinit(:),ValRef

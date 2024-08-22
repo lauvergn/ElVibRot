@@ -169,7 +169,7 @@
         CALL Sub_Energ_OF_ParamBasis(Energ,para_Optimization%xOpt_min,para_Optimization%nb_Opt,BasisnD_Save,&
                                      para_Tnum,mole,                    &
                                      para_H%para_ReadOp%PrimOp_t,Qact)
-        write(out_unit,*) 'Optimal param',xOpt_min,' Energy',Energ
+        write(out_unit,*) 'Optimal param',para_Optimization%xOpt_min,' Energy',Energ
 
       END IF
       IF (para_Optimization%Freq) THEN

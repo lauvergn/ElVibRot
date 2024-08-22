@@ -2413,9 +2413,9 @@ MODULE mod_psi_Op_MPI
     USE mod_MPI_aux
     IMPLICIT NONE
 
+    Integer,                    intent(in)    :: ndim
     TYPE(param_psi),            intent(inout) :: psi(ndim)
     Real(kind=Rkind),           intent(in)    :: Vec(ndim,ndim)
-    Integer,                    intent(in)    :: ndim
     Integer,                    intent(in)    :: nb_save
 
     Real(kind=Rkind),allocatable              :: PsiRk(:)

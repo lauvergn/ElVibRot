@@ -238,14 +238,12 @@ CONTAINS
         write(out_unit,'(a)',ADVANCE='no') 'Psi(:) analysis: (%): ['
         flush(out_unit)
       END IF
-!$OMP   PARALLEL &
+!$OMP   PARALLEL DO &
 !$OMP   DEFAULT(NONE) &
 !$OMP   SHARED(nb_psi_in,ene,para_H,para_AllOp,para_ana,tab_Psi,ana_psi,AllPsi_max_RedDensity,const_phys) &
 !$OMP   SHARED(out_unit,para_intensity,tab_PsiAna,iana,MPI_id,Ana_maxth) &
 !$OMP   PRIVATE(i,info) &
 !$OMP   NUM_THREADS(Ana_maxth)
-
-!$OMP   DO SCHEDULE(STATIC)
       DO i=1,nb_psi_in
         !OMP ATOMIC
         iana = iana + 1
@@ -287,8 +285,7 @@ CONTAINS
 
         IF (mod(iana,nb_psi_in) == 0 .AND. MPI_id == 0 .AND. Ana_maxth > 1) write(out_unit,'(a)',ADVANCE='no') '---'
       END DO
-!$OMP   END DO
-!$OMP   END PARALLEL
+!$OMP   END PARALLEL DO
       IF (Ana_maxth > 1) write(out_unit,'(a)',ADVANCE='yes') '----]'
 
       IF (Ana_maxth > 1) THEN
