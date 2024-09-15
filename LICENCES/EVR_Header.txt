@@ -42,6 +42,7 @@
 !             http://shtools.ipgp.fr
 !        - Some subroutine of QMRPack (see cpyrit.doc) Roland W. Freund and Noel M. Nachtigal:
 !             https://www.netlib.org/linalg/qmr/
+!        - ARPACK library by Richard Lehoucq,Danny C. Sorensen, Chao Yang
 !
 !===========================================================================
 !===========================================================================

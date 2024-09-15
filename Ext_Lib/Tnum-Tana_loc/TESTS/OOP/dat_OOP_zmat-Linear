@@ -1,0 +1,39 @@
+
+here=`pwd`
+DIR_EVRT=$here/../..
+
+cd $DIR_EVRT
+  make OPT=0 oop
+cd $here
+
+$DIR_EVRT/Tnum_OOP.exe << ** > res
+  &variables nb_Qtransfo=3  /
+  &Coord_transfo name_transfo='zmat' nat=3 /
+    X
+    H 1
+    H 1 -2
+
+ &Coord_transfo name_transfo='linear' read_nml=t /
+   &linear check_LinearTransfo=t /
+sym  R+   R-   a
+3
+1    1.   1.   0.
+2    1.  -1.   0.
+3    0.   0.   1.
+
+  &Coord_transfo name_transfo='active' /
+1 0 1
+
+&minimum  read_itQ0transfo=1 unit='angs' /
+ROH1 1. angs
+ROH2 2.1 bohr
+u2   -0.5
+
+ &minimum  read_itQ0transfo=0 unit='angs' /
+ H   0. 0. 1.1
+ H   1. 0. 0.2
+ X   0. 0. 0.
+
+
+
+**

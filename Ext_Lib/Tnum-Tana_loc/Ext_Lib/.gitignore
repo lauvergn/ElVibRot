@@ -1,0 +1,11 @@
+.DS_Store
+*/*.a
+*/obj/*
+*/OBJ/*
+/QDUtilLib
+/AD_dnSVM
+/ConstPhys
+/QuantumModelLib
+/nDindex
+/EVRT_dnSVM
+/FOR_EVRT
