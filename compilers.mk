@@ -11,6 +11,7 @@ ifeq ($(FFC),gfortran)
     FFLAGS = -Og -g -fbacktrace -fcheck=all -fwhole-file -fcheck=pointer -Wuninitialized -finit-real=nan -finit-integer=nan
     CFLAGS = -O0 -g                         -fwhole-file -Wuninitialized
   endif
+  #with -O0 and -fopenmp => ICE
 
   # integer kind management
   ifeq ($(INT),8)

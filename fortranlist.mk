@@ -1,5 +1,6 @@
 #===============================================
 SRCFILES= \
+EVR-T.f90  \
 EVR_system_m.f90  \
 sub_Auto_Basis.f90  \
 sub_module_basis_BtoG_GtoB_SG4.f90  \
@@ -81,7 +82,6 @@ sub_HST_harm.f90  \
 sub_ana_HS.f90  \
 sub_changement_de_var.f90  \
 sub_inactive_harmo.f90  \
-EVR-T.f90  \
 EVR_Module.f90  \
 EVR_driver.f90  \
 cart.f90  \

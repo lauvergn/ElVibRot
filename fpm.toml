@@ -1,0 +1,43 @@
+name = "ElVibRot"
+version = "200.0"
+license = "MIT"
+author = "David Lauvergnat"
+maintainer = "david.lauvergnat@universite-paris-saclay.fr"
+copyright = "2015 David Lauvergnat"
+
+[[executable]]
+name="EVRT"
+source-dir="APP"
+main="EVR-T.f90"
+
+
+[build]
+link = ["blas", "lapack"]
+auto-executables = false
+auto-examples = false
+auto-tests = false
+
+[library]
+source-dir="SRC"
+
+[fortran]
+implicit-external = true
+source-form="default"
+
+[dependencies]
+QDUtilLib       = { path = "Ext_lib/QDUtilLib" }
+AD_dnSVM        = { path = "Ext_lib/AD_dnSVM" }
+ConstPhys       = { path = "Ext_lib/ConstPhys" }
+nDindex         = { path = "Ext_lib/nDindex" }
+EVRT_dnSVM      = { path = "Ext_lib/EVRT_dnSVM" }
+FOR_EVRT        = { path = "Ext_lib/FOR_EVRT" }
+QuantumModelLib = { path = "Ext_lib/QuantumModelLib" }
+Tnum-Tana       = { path = "Ext_lib/Tnum-Tana" }
+openmp          = "*"
+
+[preprocess]
+cpp.macros = [
+    "__LAPACK=1","__COMPILE_DATE=\"'`date +\"%a %e %b %Y - %H:%M:%S\"`'\"",
+    "__COMPILE_HOST=\"'`hostname -s`'\"",
+    "__EVR_VER=\"'`awk '/EVR/ {print $3}' version-EVR`'\""
+    ]

@@ -48,8 +48,8 @@
 MODULE EVR_system_m
   USE QDUtil_m
   USE mod_MPI
-  USE FOR_EVRT_system_m, ONLY : param_FOR_optimization, para_FOR_optimization
-
+  USE FOR_EVRT_system_m, ONLY : param_FOR_optimization, para_FOR_optimization, &
+                                Write_Mat_MPI, Write_Vec_MPI
   IMPLICIT NONE
 
 #if defined(__EVR_VER)
@@ -272,52 +272,47 @@ CONTAINS
 
   END FUNCTION make_EVRTFileName
   SUBROUTINE versionEVRT(write_version)
-    USE iso_fortran_env
+    USE iso_fortran_env,   ONLY : compiler_version, compiler_options
     USE TnumTana_system_m, ONLY : TnumTana_version
     IMPLICIT NONE
   
-        logical :: write_version
+    logical, intent(in) :: write_version
   
-        character (len=*), parameter :: EVR_name='ElVibRot'
-        character (len=*), parameter :: Tnum_name='Tnum'
-        character (len=*), parameter :: Tana_name='Tana'
+    character (len=*), parameter :: EVR_name='ElVibRot'  
   
-  
-  
-        IF (write_version .AND. MPI_id==0) THEN
-          write(out_unit,*) '==============================================='
-          write(out_unit,*) '==============================================='
-          write(out_unit,*) 'Working with ',                             &
-                     EVR_name,trim(adjustl(EVR_version))
-  
-          write(out_unit,*) 'Compiled on "',trim(compile_host), '" the ',trim(compile_date)
-          write(out_unit,*) 'Compiler:         ',compiler_version()
-          write(out_unit,*) 'Compiler options: ',compiler_options()
-  
-          write(out_unit,*) 'EVRT_path: ',trim(EVRT_path)
-  
-          write(out_unit,*) '-----------------------------------------------'
-  
-          write(out_unit,*) EVR_name,' is written by David Lauvergnat [1] '
-          write(out_unit,*) '  with contributions of'
-          write(out_unit,*) '     Josep Maria Luis (optimization) [2]'
-          write(out_unit,*) '     Ahai Chen (MPI) [1,4]'
-          write(out_unit,*) '     Lucien Dupuy (CRP) [5]'
-  
-          write(out_unit,*) EVR_name,' is under MIT license.'
- 
-          write(out_unit,*)
-          write(out_unit,*) '[1]: Institut de Chimie Physique, UMR 8000, CNRS-Université Paris-Saclay, France'
-          write(out_unit,*) '[2]: Institut de Química Computacional and Departament de Química',&
-                                     ' Universitat de Girona, Catalonia, Spain'
-          write(out_unit,*) '[3]: Department of Chemistry, Aarhus University, DK-8000 Aarhus C, Denmark'
-          write(out_unit,*) '[4]: Maison de la Simulation USR 3441, CEA Saclay, France'
-          write(out_unit,*) '[5]: Laboratoire Univers et Particule de Montpellier, UMR 5299,', &
-                                     ' Université de Montpellier, France'
-          write(out_unit,*) '==============================================='
-          write(out_unit,*) '==============================================='
-          CALL TnumTana_version(write_version)
-        END IF
+    IF (write_version .AND. MPI_id==0) THEN
+      write(out_unit,*) '==============================================='
+      write(out_unit,*) '==============================================='
+      write(out_unit,*) 'Working with ',EVR_name,trim(adjustl(EVR_version))
+
+      write(out_unit,*) 'Compiled on "',trim(compile_host), '" the ',trim(compile_date)
+      write(out_unit,*) 'Compiler:         ',compiler_version()
+      write(out_unit,*) 'Compiler options: ',compiler_options()
+
+      write(out_unit,*) 'EVRT_path: ',trim(EVRT_path)
+
+      write(out_unit,*) '-----------------------------------------------'
+
+      write(out_unit,*) EVR_name,' is written by David Lauvergnat [1] '
+      write(out_unit,*) '  with contributions of'
+      write(out_unit,*) '     Josep Maria Luis (optimization) [2]'
+      write(out_unit,*) '     Ahai Chen (MPI) [1,4]'
+      write(out_unit,*) '     Lucien Dupuy (CRP) [5]'
+
+      write(out_unit,*) EVR_name,' is under MIT license.'
+
+      write(out_unit,*)
+      write(out_unit,*) '[1]: Institut de Chimie Physique, UMR 8000, CNRS-Université Paris-Saclay, France'
+      write(out_unit,*) '[2]: Institut de Química Computacional and Departament de Química',&
+                                 ' Universitat de Girona, Catalonia, Spain'
+      write(out_unit,*) '[3]: Department of Chemistry, Aarhus University, DK-8000 Aarhus C, Denmark'
+      write(out_unit,*) '[4]: Maison de la Simulation USR 3441, CEA Saclay, France'
+      write(out_unit,*) '[5]: Laboratoire Univers et Particule de Montpellier, UMR 5299,', &
+                                 ' Université de Montpellier, France'
+      write(out_unit,*) '==============================================='
+      write(out_unit,*) '==============================================='
+      CALL TnumTana_version(write_version)
+    END IF
   END SUBROUTINE versionEVRT
 
 END MODULE EVR_system_m

@@ -1,5 +1,6 @@
 #===============================================
 evr_system_m = $(OBJ_DIR)/EVR_system_m.o
+mod_system = $(OBJ_DIR)/EVR_system_m.o
 mod_auto_basis = $(OBJ_DIR)/sub_Auto_Basis.o
 mod_basis_btog_gtob_sgtype4 = $(OBJ_DIR)/sub_module_basis_BtoG_GtoB_SG4.o
 mod_basis_btog_gtob_sgtype4_mpi = $(OBJ_DIR)/sub_module_basis_BtoG_GtoB_SG4_MPI.o
@@ -64,10 +65,16 @@ mod_propa = $(OBJ_DIR)/sub_module_propagation.o
 mod_propa_mpi = $(OBJ_DIR)/sub_module_propagation_MPI.o
 mod_fullpropa = $(OBJ_DIR)/sub_propagation.o
 #===============================================
+$(OBJ_DIR)/EVR-T.o : \
+          $(evr_system_m) \
+          $(mod_ndgridfit)
 $(OBJ_DIR)/EVR_system_m.o : \
           $(qdutil_m) \
           $(mod_mpi) \
-          $(for_evrt_system_m)
+          $(for_evrt_system_m) \
+          $(iso_fortran_env) \
+          $(tnumtana_system_m) \
+          $(evr_system_m)
 $(OBJ_DIR)/sub_Auto_Basis.o : \
           $(mod_coord_keo) \
           $(mod_primop) \
@@ -580,9 +587,6 @@ $(OBJ_DIR)/sub_inactive_harmo.o : \
           $(mod_ndindex) \
           $(mod_primop) \
           $(mod_basis)
-$(OBJ_DIR)/EVR-T.o : \
-          $(evr_system_m) \
-          $(mod_ndgridfit)
 $(OBJ_DIR)/EVR_Module.o : \
           $(evr_system_m) \
           $(mod_constant) \
