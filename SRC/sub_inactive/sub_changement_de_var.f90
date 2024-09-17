@@ -507,7 +507,7 @@
        write(out_unit,*) 'Qeq',Qeq
        write(out_unit,*) 'x',x
        write(out_unit,*) 'c_inv'
-       CALL Write_Mat(c_inv,out_unit,5)
+       CALL Write_Mat_MPI(c_inv,out_unit,5)
       END IF
 !---------------------------------------------------------------------
 
@@ -564,15 +564,15 @@
        write(out_unit,*) 'd1Qeq',d1Qeq
        write(out_unit,*) 'd2Qeq',d2Qeq
        write(out_unit,*) 'd0c'
-       CALL Write_Mat(d0c,out_unit,5)
+       CALL Write_Mat_MPI(d0c,out_unit,5)
        DO i=1,nb_inact2
          write(out_unit,*) 'd1c',i
-         CALL Write_Mat(d1c(:,:,i),out_unit,5)
+         CALL Write_Mat_MPI(d1c(:,:,i),out_unit,5)
        END DO
        DO i=1,nb_inact2
        DO j=1,nb_inact2
        write(out_unit,*) 'd2c',i,j
-       CALL Write_Mat(d2c(:,:,i,j),out_unit,5)
+       CALL Write_Mat_MPI(d2c(:,:,i,j),out_unit,5)
        END DO
        END DO
       END IF

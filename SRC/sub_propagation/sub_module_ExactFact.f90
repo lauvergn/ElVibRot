@@ -317,7 +317,7 @@ SUBROUTINE sub_ExactFact_analysis_gV(psi,para_H,Tmax,deltaT)
       CALL get_d0GG(Qact,para_H%para_Tnum,para_H%mole,d0GG,def=.TRUE.)
     END IF
     write(nio,*) ' metric Tensor (nb_act1 x nb_act1)',psi%nb_act1
-    CALL Write_Mat(d0GG,nio,psi%nb_act1)
+    CALL Write_Mat_MPI(d0GG,nio,psi%nb_act1)
     write(nio,*)
 
     ! set the grid and the diabatic potential
@@ -564,7 +564,7 @@ SUBROUTINE sub_ExactFact_analysis_v1(T,psi,ana_psi,para_H,Tmax,deltaT,para_field
       CALL get_d0GG(Qact,para_H%para_Tnum,para_H%mole,d0GG,def=.TRUE.)
     END IF
     write(nio,*) ' metric Tensor (nb_act1 x nb_act1)',psi%nb_act1
-    CALL Write_Mat(d0GG,nio,psi%nb_act1)
+    CALL Write_Mat_MPI(d0GG,nio,psi%nb_act1)
     write(nio,*)
 
     ! set the grid and the diabatic potential

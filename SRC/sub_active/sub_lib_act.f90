@@ -262,9 +262,9 @@
           write(nio,*) 'nb_bie:',nb_bie
           write(nio,*) 'w: ',w
           write(nio,*) 'Qdyn: ',nb_var
-          CALL Write_Vec(Qdyn,nio,5,Rformat='e30.23')
+          CALL Write_Vec_MPI(Qdyn,nio,5,Rformat='e30.23')
           write(nio,*) 'Qact: ',nb_act1
-          CALL Write_Vec(Qact(1:nb_act1),nio,5,Rformat='e30.23')
+          CALL Write_Vec_MPI(Qact(1:nb_act1),nio,5,Rformat='e30.23')
           write(nio,*) 'JJ: ',para_AllOp%tab_Op(1)%para_Tnum%JJ
           write(nio,*) 'pot_cplx: ',para_AllOp%tab_Op(1)%cplx
           write(nio,*) 'calc_scalar_Op: ',para_AllOp%tab_Op(1)%para_ReadOp%calc_scalar_Op
@@ -287,7 +287,7 @@
               iterm = d0MatOp(iOp)%derive_term_TO_iterm(i1,i2)
 
               write(nio,*) name_Op,n_Op,i1,i2,.FALSE.
-              CALL Write_Mat(d0MatOp(iOp)%ReVal(:,:,iterm),nio,5,Rformat='e30.23')
+              CALL Write_Mat_MPI(d0MatOp(iOp)%ReVal(:,:,iterm),nio,5,Rformat='e30.23')
             END DO
 
             IF (para_AllOp%tab_Op(iOp)%cplx) THEN
@@ -296,7 +296,7 @@
               name_Op = '-im_' // trim(para_AllOp%tab_Op(iOp)%name_Op)  &
                          // '-----'
               write(nio,*) name_Op,n_Op,0,0,.TRUE.
-              CALL Write_Mat(d0MatOp(iOp)%ImVal(:,:),nio,5,Rformat='e30.23')
+              CALL Write_Mat_MPI(d0MatOp(iOp)%ImVal(:,:),nio,5,Rformat='e30.23')
             END IF
           END DO
 

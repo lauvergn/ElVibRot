@@ -388,7 +388,7 @@
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING ',name_sub
         write(out_unit,*) ' nb_save,ndim',nb_save,ndim
-        CALL Write_Mat(Vec,out_unit,5)
+        CALL Write_Mat_MPI(Vec,out_unit,5)
         write(out_unit,*)
         flush(out_unit)
       END IF
@@ -584,7 +584,7 @@
           RS(j,i) =  Real(Overlap,kind=Rkind)
         END DO
         END DO
-        IF (debug) CALL Write_Mat(RS,out_unit,5)
+        IF (debug) CALL Write_Mat_MPI(RS,out_unit,5)
 
         CALL diagonalization(RS,Eig,Vec,nb_psi,1,-1,.FALSE.)
         IF (debug) THEN

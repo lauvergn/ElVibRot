@@ -206,7 +206,7 @@
 
       IF (debug) THEN
         write(out_unit,*) 'H_VR'
-        CALL Write_Mat(H_VR,out_unit,5)
+        CALL Write_Mat_MPI(H_VR,out_unit,5)
       END IF
 
       CALL sub_hermitic_H(H_VR,nb_bVR,non_hermitic,para_H%sym_Hamil)
@@ -237,7 +237,7 @@
 
       IF (debug) THEN
         write(out_unit,*) 'Vec_VR (in column)'
-        CALL Write_Mat(Vec_VR,out_unit,5)
+        CALL Write_Mat_MPI(Vec_VR,out_unit,5)
       END IF
 
 

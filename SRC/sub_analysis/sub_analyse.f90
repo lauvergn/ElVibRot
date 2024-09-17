@@ -307,7 +307,7 @@ CONTAINS
 
 
       IF (allocated(AllPsi_max_RedDensity)) THEN
-        CALL Write_Vec(AllPsi_max_RedDensity,out_unit,6,Rformat='e10.3',info='For all psi max_RedDensity ')
+        CALL Write_Vec_MPI(AllPsi_max_RedDensity,out_unit,6,Rformat='e10.3',info='For all psi max_RedDensity ')
         !write(out_unit,*) 'For all psi max_RedDensity ',AllPsi_max_RedDensity(:)
         CALL dealloc_NParray(AllPsi_max_RedDensity,"AllPsi_max_RedDensity",name_sub)
       END IF
@@ -349,7 +349,7 @@ CONTAINS
         nb_col = 5
         write(out_unit,*) 'eigenvectors in column'
         write(out_unit,*) nb_col,para_ana%print_psi,tab_Psi(1)%nb_tot
-        CALL Write_Mat(Mat_psi(:,1:para_ana%print_psi),out_unit,nb_col)
+        CALL Write_Mat_MPI(Mat_psi(:,1:para_ana%print_psi),out_unit,nb_col)
         CALL dealloc_NParray(Mat_psi,"Mat_psi",name_sub)
 
       END IF

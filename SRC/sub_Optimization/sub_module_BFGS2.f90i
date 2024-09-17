@@ -219,7 +219,7 @@
 
           CALL Get_Hess_FROM_Tab_OF_dnMatOp(para_BFGS%hessian_inv_init,dnMatOp) ! for the ground state
 
-          CALL Write_Mat(para_BFGS%hessian_inv_init,out_unitp,5)
+          CALL Write_Mat_MPI(para_BFGS%hessian_inv_init,out_unitp,5)
 
           !-------- deallocation ---------------------------------------------
           CALL dealloc_Tab_OF_dnMatOp(dnMatOp)

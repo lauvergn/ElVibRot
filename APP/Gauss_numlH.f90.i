@@ -389,7 +389,7 @@
                                 param_LHA%d2Ene,param_LHA%d0G)
            write(out_unit,*) 'freq cm-1',freq * get_ConvUnit('E','cm-1')
            write(out_unit,*) 'width matrix'
-           CALL Write_Mat(A,out_unit,5)
+           CALL Write_Mat_MPI(A,out_unit,5)
            memory = size(freq)
            deallocate(freq,stat=err_mem) ! change dealloc done
            CALL error_memo_allo(err_mem,-memory,"freq","main")

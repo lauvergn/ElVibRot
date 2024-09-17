@@ -313,7 +313,7 @@ CONTAINS
 
         ! if symmetric
         CALL sub_hermitic_H(H,ndim,non_hermitic,sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
         IF (debug) write(out_unit,*) 'shape H',shape(H)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
@@ -398,7 +398,7 @@ CONTAINS
         !CALL time_perso('projec done')
           IF (debug) write(out_unit,*) 'selec',it,ndim,ndim0
           IF (debug) flush(out_unit)
-          ! CALL Write_Mat(Vec,out_unit,5)
+          ! CALL Write_Mat_MPI(Vec,out_unit,5)
           ! Save vec(:) on vec0(:)
           !----------------------------------------------------------
 
@@ -1192,7 +1192,7 @@ ndim = size(psi)
 
 IF(openmpi) THEN
   CALL sub_ana_S(S_overlap(1:ndim,1:ndim),ndim,max_Sii,max_Sij,.TRUE.)
-  IF (Print_Mat ) CALL Write_Mat(S_overlap(1:ndim,1:ndim),out_unit,5)
+  IF (Print_Mat ) CALL Write_Mat_MPI(S_overlap(1:ndim,1:ndim),out_unit,5)
   flush(out_unit)
 ELSE
  CALL alloc_NParray(S,[ndim,ndim],"S",name_sub)
@@ -1205,7 +1205,7 @@ ELSE
  END DO
 
  CALL sub_ana_S(S,ndim,max_Sii,max_Sij,.TRUE.)
- IF (Print_Mat) CALL Write_Mat(S,out_unit,5)
+ IF (Print_Mat) CALL Write_Mat_MPI(S,out_unit,5)
  flush(out_unit)
  CALL dealloc_NParray(S,"S",name_sub)
 ENDIF ! openmpi
@@ -1692,11 +1692,11 @@ END SUBROUTINE sub_NewVec_Davidson
    write(out_unit,*) ' nb_diago',nb_diago
    IF (allocated(Vec)) THEN
      write(out_unit,*) 'Vec',shape(Vec)
-     !CALL Write_Mat(Vec,out_unit,5)
+     !CALL Write_Mat_MPI(Vec,out_unit,5)
    END IF
    IF (allocated(Vec0)) THEN
      write(out_unit,*) 'Vec0',shape(Vec0)
-     !CALL Write_Mat(Vec0,out_unit,5)
+     !CALL Write_Mat_MPI(Vec0,out_unit,5)
    END IF
    write(out_unit,*) 'Ene',Ene(1:ndim)
    write(out_unit,*) 'min_Ene',min_Ene
@@ -1871,9 +1871,9 @@ END SUBROUTINE sub_NewVec_Davidson
 
    !write(out_unit,*)
    !write(out_unit,*) 'Vec',ndim
-   !CALL Write_Mat(Vec,out_unit,5)
+   !CALL Write_Mat_MPI(Vec,out_unit,5)
    !write(out_unit,*) 'Vec0',ndim0
-   !CALL Write_Mat(Vec0,out_unit,5)
+   !CALL Write_Mat_MPI(Vec0,out_unit,5)
  END IF
 
 

@@ -162,7 +162,7 @@
       IF (debug) THEN
         write(out_unit,*)
         write(out_unit,*) ' td0b(:,k)',k,para_Op%nb_ba
-        CALL Write_Vec(td0b(:,k),out_unit,8)
+        CALL Write_Vec_MPI(td0b(:,k),out_unit,8)
         write(out_unit,*)
         write(out_unit,*) ' d0MatOpd0bWrho(:,:)'
         DO i=1,ubound(d0MatOpd0bWrho,dim=2)

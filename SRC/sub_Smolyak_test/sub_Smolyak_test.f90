@@ -254,7 +254,7 @@ CALL time_perso('sub_main_testHpsi')
 write(out_unit,*) '====================================='
 flush(out_unit)
 write(out_unit,*) 'V matrix'
-CALL write_mat(H,6,5)
+CALL Write_Mat_MPI(H,6,5)
 write(out_unit,*) 'END V matrix'
 
 
@@ -375,7 +375,7 @@ DO ibbb=1,AllPara%ind_Basis(AllPara%D+1)%MaxnD
   IF (debug) CALL time_perso('sub_main_testSmat: G=>B')
   H(:,ibbb)  = Hpsi_ON_B(1)%RDP(1,1,:)
   write(out_unit,*) 'ibb',ibbb
-  CALL Write_VecMat(Hpsi_ON_B(1)%RDP(1,1,:),out_unit,5)
+  CALL Write_Vec_MPI(Hpsi_ON_B(1)%RDP(1,1,:),out_unit,5)
   !write(out_unit,*) 'ibb',ibbb,Hpsi_ON_B(1)%RDP(1,1,:)
   flush(out_unit)
 
@@ -389,7 +389,7 @@ flush(out_unit)
 
 
 write(out_unit,*) 'H partial'
-CALL Write_VecMat(H,out_unit,5)
+CALL Write_Mat_MPI(H,out_unit,5)
 
 END SUBROUTINE sub_main_testSmat
 
@@ -920,7 +920,7 @@ DO ibb=1,B_nDind%MaxnD
   END DO
 END DO
 write(out_unit,*) 'V matrix'
-CALL write_mat(H,6,5)
+CALL Write_Mat_MPI(H,6,5)
 write(out_unit,*) 'END V matrix'
 
 

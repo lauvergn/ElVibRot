@@ -984,10 +984,10 @@
           flush(out_unit)
           write(nio_res_int,*) para_H%nb_tot,para_ana%max_ana
           write(nio_res_int,*) 'ene'
-          CALL Write_Vec(para_H%Rdiag,nio_res_int,5,Rformat='e30.23')
+          CALL Write_Vec_MPI(para_H%Rdiag,nio_res_int,5,Rformat='e30.23')
           write(nio_res_int,*) 'psi'
           flush(out_unit)
-          CALL Write_Mat(para_H%Rvp,nio_res_int,5,Rformat='e30.23')
+          CALL Write_Mat_MPI(para_H%Rvp,nio_res_int,5,Rformat='e30.23')
           flush(nio_res_int)
         END IF ! for intensity_only
         flush(out_unit)
@@ -1301,11 +1301,11 @@
 
     CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,para_H%para_ReadOp%PrimOp_t)
     CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess_TS,dnMatOp) ! for the ground state
-    CALL Write_Mat(hess_TS, out_unit, 5, info='hess_TS')
+    CALL Write_Mat_MPI(hess_TS, out_unit, 5, info='hess_TS')
     Ene_TS = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
     write(out_unit,*) 'Ene_TS',Ene_TS
     CALL get_d0GG(Qact,para_Tnum,mole,d0G_TS,def=.TRUE.)
-    CALL Write_Mat(d0G_TS, out_unit, 5, info='d0G_TS')
+    CALL Write_Mat_MPI(d0G_TS, out_unit, 5, info='d0G_TS')
     CALL dealloc_Tab_OF_dnMatOp(dnMatOp)
 
     write(out_unit,*)
@@ -1355,11 +1355,11 @@
 
     CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,para_H%para_ReadOp%PrimOp_t)
     CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess_R,dnMatOp) ! for the ground state
-    CALL Write_Mat(hess_R, out_unit, 5, info='hess_R')
+    CALL Write_Mat_MPI(hess_R, out_unit, 5, info='hess_R')
     Ene_R = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
     write(out_unit,*) 'Ene_R',Ene_R
     CALL get_d0GG(Qact,para_Tnum,mole,d0G_R,def=.TRUE.)
-    CALL Write_Mat(d0G_R, out_unit, 5, info='d0G_R')
+    CALL Write_Mat_MPI(d0G_R, out_unit, 5, info='d0G_R')
     CALL dealloc_Tab_OF_dnMatOp(dnMatOp)
 
     write(out_unit,*)
@@ -1397,12 +1397,12 @@
 
     CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,para_H%para_ReadOp%PrimOp_t)
     CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess_P,dnMatOp) ! for the ground state
-    CALL Write_Mat(hess_P, out_unit, 5, info='hess_P')
+    CALL Write_Mat_MPI(hess_P, out_unit, 5, info='hess_P')
     Ene_P = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
     write(out_unit,*) 'Ene_P',Ene_P
     CALL dealloc_Tab_OF_dnMatOp(dnMatOp)
     CALL get_d0GG(Qact,para_Tnum,mole,d0G_P,def=.TRUE.)
-    CALL Write_Mat(d0G_P, out_unit, 5, info='d0G_P')
+    CALL Write_Mat_MPI(d0G_P, out_unit, 5, info='d0G_P')
 
     write(out_unit,*) '=================================================================='
     write(out_unit,*) '=================================================================='

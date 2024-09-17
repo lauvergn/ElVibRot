@@ -166,7 +166,7 @@
 !----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING sub_ana_S'
-        CALL Write_Mat(S,out_unit,5)
+        CALL Write_Mat_MPI(S,out_unit,5)
       END IF
 !-----------------------------------------------------------
 

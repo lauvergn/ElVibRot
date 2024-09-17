@@ -330,7 +330,7 @@ CONTAINS
            write(out_unit,*) i,RdiagX(i)
          END DO
          write(out_unit,*) ' RvpX:'
-         CALL Write_Mat(RvpX,out_unit,5)
+         CALL Write_Mat_MPI(RvpX,out_unit,5)
          !write(out_unit,*) 'Id?',matmul(transpose(RvpX),RvpX) ; stop
          flush(out_unit)
       END IF
@@ -362,7 +362,7 @@ CONTAINS
                         [basis_POGridRep%nb,basis_POGridRep%nb], &
                         "basis_POGridRep%Rvec",name_sub)
         basis_POGridRep%Rvec = basis_temp%Rvec
-        !CALL Write_Mat(basis_temp%Rvec,out_unit,5) ; stop
+        !CALL Write_Mat_MPI(basis_temp%Rvec,out_unit,5) ; stop
         basis_POGridRep%nbc = nqc0
         CALL sub_contraction_basis(basis_POGridRep,.TRUE.)
         IF (debug) THEN
@@ -545,7 +545,7 @@ CONTAINS
               write(out_unit,*) i,RdiagX(i)
             END DO
             write(out_unit,*) ' RvpX:'
-            CALL Write_Mat(RvpX,out_unit,5)
+            CALL Write_Mat_MPI(RvpX,out_unit,5)
             !write(out_unit,*) 'Id?',matmul(transpose(RvpX),RvpX) ; stop
             flush(out_unit)
          END IF
@@ -593,7 +593,7 @@ CONTAINS
                            [basis_POGridRep%nb,basis_POGridRep%nb], &
                                         "basis_POGridRep%Rvec",name_sub)
            basis_POGridRep%Rvec = basis_temp%Rvec
-           !CALL Write_Mat(basis_temp%Rvec,out_unit,5) ; stop
+           !CALL Write_Mat_MPI(basis_temp%Rvec,out_unit,5) ; stop
            CALL sub_contraction_basis(basis_POGridRep,.TRUE.)
            IF (debug) THEN
              write(out_unit,*) 'Eigenvectors on the POGridRep grid:'
@@ -921,7 +921,7 @@ GOTO 99
         matS(:,:) = matmul(tbasiswrho,basis_temp%dnRGB%d0)
         CALL dealloc_NParray(tbasiswrho,"tbasiswrho",name_sub)
 
-        CALL Write_Mat(matS,out_unit,5)
+        CALL Write_Mat_MPI(matS,out_unit,5)
 
         DO i=1,basis_temp%nb
           Sii = matS(i,i) -ONE
@@ -942,7 +942,7 @@ GOTO 99
         CALL diagonalization(matS,Rdiag,Rvp,basis_temp%nb,2,0,.FALSE.)
 
         write(out_unit,*) 'Rvp:'
-        CALL Write_Mat(Rvp,out_unit,5)
+        CALL Write_Mat_MPI(Rvp,out_unit,5)
 
 
         IF (max_Sii > ONETENTH**5 .OR. max_Sij > ONETENTH**5) THEN
@@ -1076,12 +1076,12 @@ GOTO 99
         END DO
         matX_basis(:,:) = matmul(tbasiswrhox,basis_temp%dnRGB%d0)
         CALL dealloc_NParray(tbasiswrhox,"tbasiswrho",name_sub)
-        !CALL Write_Mat(matX_basis,out_unit,5)
+        !CALL Write_Mat_MPI(matX_basis,out_unit,5)
 
 !---------------------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'matX_basis:'
-        CALL Write_Mat(matX_basis,out_unit,5)
+        CALL Write_Mat_MPI(matX_basis,out_unit,5)
         write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
@@ -1130,12 +1130,12 @@ GOTO 99
         matX_basis(:,:) = matmul(tbasiswrhox,basis_temp%dnRGB%d0)
 
         CALL dealloc_NParray(tbasiswrhox,"tbasiswrho",name_sub)
-        !CALL Write_Mat(matX_basis,out_unit,5)
+        !CALL Write_Mat_MPI(matX_basis,out_unit,5)
 
 !---------------------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'matX_basis:'
-        CALL Write_Mat(matX_basis,out_unit,5)
+        CALL Write_Mat_MPI(matX_basis,out_unit,5)
         write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
@@ -1189,7 +1189,7 @@ GOTO 99
         MatX(:,:) = matmul(tbasiswrhox,basis_temp%dnRGB%d0)
         CALL dealloc_NParray(tbasiswrhox,"tbasiswrho",name_sub)
         !write(out_unit,*) 'matX:',i
-        !CALL Write_Mat(matX,out_unit,5)
+        !CALL Write_Mat_MPI(matX,out_unit,5)
 
 
         DO i1=1,basis_temp%nb
@@ -1222,7 +1222,7 @@ GOTO 99
         END DO
         END DO
       write(out_unit,*) 'mat for i:',i
-      CALL Write_Mat(MatX,6,5)
+      CALL Write_Mat_MPI(MatX,6,5)
 
       END DO
 

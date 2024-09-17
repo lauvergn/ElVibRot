@@ -160,11 +160,11 @@
           DO k_term=1,d0MatHADAOp(iOp)%nb_term
             write(out_unit,*) ' deriv_term:',                          &
                              d0MatHADAOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
+            CALL Write_Mat_MPI(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatHADAOp(iOp)%cplx) THEN
             write(out_unit,*) ' cplx Op:'
-            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
+            CALL Write_Mat_MPI(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
           END IF
         END DO
         !---------------------------------------------------
@@ -363,11 +363,11 @@
           DO k_term=1,d0MatHADAOp(iOp)%nb_term
             write(out_unit,*) ' deriv_term:',                          &
                              d0MatHADAOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
+            CALL Write_Mat_MPI(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatHADAOp(iOp)%cplx) THEN
             write(out_unit,*) ' cplx Op:'
-            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
+            CALL Write_Mat_MPI(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
           END IF
         END DO
         write(out_unit,*) 'END ',name_sub

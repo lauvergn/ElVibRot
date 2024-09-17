@@ -303,7 +303,7 @@
 
           CALL Get_Grad_FROM_Tab_OF_dnMatOp(grad,dnMatOp)
           write(out_unit,*) 'grad'
-          CALL Write_Vec(grad,out_unit,5)
+          CALL Write_Vec_MPI(grad,out_unit,5)
           CALL dealloc_NParray(grad,'grad',name_sub)
 
           CALL Get_Hess_FROM_Tab_OF_dnMatOp(hessian,dnMatOp) ! for the ground state
@@ -349,7 +349,7 @@
         IF (allocated(hessian)) THEN
           IF (print_level > 1 .OR. nb_Opt <= para_BFGS%max_Q_ForPrinting) THEN
             write(out_unit,*) 'hessian'
-            CALL Write_Mat(hessian,out_unit,5)
+            CALL Write_Mat_MPI(hessian,out_unit,5)
           ELSE
             write(out_unit,*) 'The hessian is too large. => No printing'
           END IF
@@ -358,7 +358,7 @@
 
           IF (print_level > 1 .OR. nb_Opt <= para_BFGS%max_Q_ForPrinting) THEN
             write(out_unit,*) 'hessian inverse'
-            CALL Write_Mat(para_BFGS%hessian_inv_init,out_unit,5)
+            CALL Write_Mat_MPI(para_BFGS%hessian_inv_init,out_unit,5)
           ELSE
             write(out_unit,*) 'The hessian inverse is too large. => No printing'
           END IF
@@ -860,9 +860,9 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         
           !IF (debug) CALL Write_Tab_OF_dnMatOp(dnMatOp)
           CALL Get_Grad_FROM_Tab_OF_dnMatOp(grad,dnMatOp)  
-          IF (debug) CALL Write_Vec(grad, out_unit, 5, info='grad')
+          IF (debug) CALL Write_Vec_MPI(grad, out_unit, 5, info='grad')
           CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess,dnMatOp) ! for the ground state
-          IF (debug) CALL Write_Mat(hess, out_unit, 5, info='hess')
+          IF (debug) CALL Write_Mat_MPI(hess, out_unit, 5, info='hess')
           Ene = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
 
           IF (allocated(para_BFGS%TS_Vector)) THEN
@@ -877,7 +877,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
             CALL diagonalization(hess,diag,vec_ext(:,2:nb_Opt+1),nb_Opt)
             vec_ext(:,1) = para_BFGS%TS_Vector
             vec_ext(:,:) = Ortho_GramSchmidt(vec_ext)
-            IF (debug) CALL Write_Mat(vec_ext, out_unit, 5, info='vec_ortho')
+            IF (debug) CALL Write_Mat_MPI(vec_ext, out_unit, 5, info='vec_ortho')
             iqq = 0
             DO iq=1,nb_Opt+1
               IF (dot_product(vec_ext(:,iq),vec_ext(:,iq)) > HALF) THEN
@@ -921,7 +921,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           !write(out_unit,*) 'hess?',matmul(Vec,tVec)
         
           mDQit = LinearSys_Solve(hess,grad)
-          IF (debug) CALL Write_Vec(mDQit, out_unit, 5, info='mDQit')
+          IF (debug) CALL Write_Vec_MPI(mDQit, out_unit, 5, info='mDQit')
 
         
           max_grad = maxval(abs(grad))

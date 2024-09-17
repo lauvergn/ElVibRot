@@ -1604,9 +1604,9 @@
 
       IF (debug) THEN
         write(out_unit,*) 'Eigenvalues for the contraction'
-        CALL Write_VecMat(Rdiag,out_unit,5)
+        CALL Write_Vec_MPI(Rdiag,out_unit,5)
         write(out_unit,*) 'Eigenvectors for the contraction'
-        CALL Write_Mat(Rvp,out_unit,5)
+        CALL Write_Mat_MPI(Rvp,out_unit,5)
       END IF
       !---------------------------------------------------------------
       ! Energy levels + the new nbc

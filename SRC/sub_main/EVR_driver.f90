@@ -999,10 +999,10 @@ SUBROUTINE levels_EVR_new(EigenVal,EigenVecB,EigenVecG,RhoWeight,nb,nq,nb_vec)
           flush(out_unit)
           write(tab_EVRT(ith)%nio_res_int,*) para_H%nb_tot,tab_EVRT(ith)%para_ana%max_ana
           write(tab_EVRT(ith)%nio_res_int,*) 'ene'
-          CALL Write_Vec(para_H%Rdiag,tab_EVRT(ith)%nio_res_int,5,Rformat='e30.23')
+          CALL Write_Vec_MPI(para_H%Rdiag,tab_EVRT(ith)%nio_res_int,5,Rformat='e30.23')
           write(tab_EVRT(ith)%nio_res_int,*) 'psi'
           flush(out_unit)
-          CALL Write_Mat(para_H%Rvp,tab_EVRT(ith)%nio_res_int,5,Rformat='e30.23')
+          CALL Write_Mat_MPI(para_H%Rvp,tab_EVRT(ith)%nio_res_int,5,Rformat='e30.23')
           flush(tab_EVRT(ith)%nio_res_int)
         END IF ! for intensity_only
         flush(out_unit)
@@ -2037,10 +2037,10 @@ write(out_unit,*) 'intensity',para_EVRT%para_ana%intensity ; flush(out_unit)
           flush(out_unit)
           write(nio_res_int,*) para_H%nb_tot,para_EVRT%para_ana%max_ana
           write(nio_res_int,*) 'ene'
-          CALL Write_Vec(para_H%Rdiag,nio_res_int,5,Rformat='e30.23')
+          CALL Write_Vec_MPI(para_H%Rdiag,nio_res_int,5,Rformat='e30.23')
           write(nio_res_int,*) 'psi'
           flush(out_unit)
-          CALL Write_Mat(para_H%Rvp,nio_res_int,5,Rformat='e30.23')
+          CALL Write_Mat_MPI(para_H%Rvp,nio_res_int,5,Rformat='e30.23')
           flush(nio_res_int)
         END IF ! for intensity_only
         flush(out_unit)

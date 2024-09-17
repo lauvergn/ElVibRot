@@ -416,7 +416,7 @@ nb = size(P0_cheby)
         !IF (debug) write(out_unit,*) 'S matrix: done'
         flush(out_unit)
         CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
 
 
@@ -433,7 +433,7 @@ nb = size(P0_cheby)
         flush(out_unit)
 
         CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
           If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
@@ -790,7 +790,7 @@ STOP
         !IF (debug) write(out_unit,*) 'S matrix: done'
         flush(out_unit)
         CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
 
 
@@ -807,7 +807,7 @@ STOP
         flush(out_unit)
 
         CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
           If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
@@ -1151,7 +1151,7 @@ STOP
         !IF (debug) write(out_unit,*) 'S matrix: done'
         flush(out_unit)
         CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
 
 
@@ -1168,7 +1168,7 @@ STOP
         flush(out_unit)
 
         CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
           If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
@@ -1468,7 +1468,7 @@ STOP
         !IF (debug) write(out_unit,*) 'S matrix: done'
         flush(out_unit)
         CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
 
 
@@ -1485,7 +1485,7 @@ STOP
         flush(out_unit)
 
         CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-        !IF (debug) CALL Write_Mat(H,out_unit,5)
+        !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
         IF (non_hermitic > FOUR*ONETENTH**4) THEN
           If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
@@ -1811,7 +1811,7 @@ STOP
       flush(out_unit)
       CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
 
-      !IF (debug) CALL Write_Mat(H,out_unit,5)
+      !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
 
 
@@ -1829,7 +1829,7 @@ STOP
       flush(out_unit)
 
       CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-      !IF (debug) CALL Write_Mat(H,out_unit,5)
+      !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
       IF (non_hermitic > FOUR*ONETENTH**4) THEN
         If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'
@@ -2132,7 +2132,7 @@ STOP
       flush(out_unit)
       CALL sub_ana_S(H,nb_diago,max_Sii,max_Sij,.TRUE.)
 
-      !IF (debug) CALL Write_Mat(H,out_unit,5)
+      !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
 
 
@@ -2150,7 +2150,7 @@ STOP
       flush(out_unit)
 
       CALL sub_hermitic_H(H,nb_diago,non_hermitic,para_H%sym_Hamil)
-      !IF (debug) CALL Write_Mat(H,out_unit,5)
+      !IF (debug) CALL Write_Mat_MPI(H,out_unit,5)
 
       IF (non_hermitic > FOUR*ONETENTH**4) THEN
         If(MPI_id==0) write(out_unit,*) 'WARNING: non_hermitic is BIG'

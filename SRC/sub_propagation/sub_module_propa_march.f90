@@ -1620,7 +1620,7 @@ END SUBROUTINE march_RK4_old
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'S with TDParam'
-        CALL Write_Mat(S,out_unit,6)
+        CALL Write_Mat_MPI(S,out_unit,6)
         write(out_unit,*) 'END ',name_sub
       END IF
 !----------------------------------------------------------
@@ -2328,9 +2328,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         write(out_unit,*)
         write(out_unit,*) 'Real(S)'
-        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
+        CALL Write_Mat_MPI(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
         write(out_unit,*) 'im(S)'
-        CALL Write_Mat(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
+        CALL Write_Mat_MPI(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
 
 
         ! psi(t+dt)=sum_{i}^{n} <Vec|psi_0>exp(-i*Ei*dt) |Vec>
@@ -2531,9 +2531,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         write(out_unit,*)
         write(out_unit,*) 'Real(S)'
-        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
+        CALL Write_Mat_MPI(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
         write(out_unit,*) 'im(S)'
-        CALL Write_Mat(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
+        CALL Write_Mat_MPI(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
 
         ! The matrix H is a part of S
         H(1:j-1,1:j-1) = S(1:j-1,2:j)
@@ -2790,9 +2790,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
         write(out_unit,*)
         write(out_unit,*) 'Real(S)'
-        CALL Write_Mat(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
+        CALL Write_Mat_MPI(real(S(1:j,1:j),kind=Rkind),out_unit,6,Rformat='(f18.14)')
         write(out_unit,*) 'im(S)'
-        CALL Write_Mat(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
+        CALL Write_Mat_MPI(aimag(S(1:j,1:j)),out_unit,6,Rformat='(f18.14)')
 
         ! The matrix H is a part of S
         !H(1:j-1,1:j-1) = S(1:j-1,2:j)
@@ -3136,7 +3136,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         write(out_unit,*) 'With_diago',With_diago
         IF (With_diago .AND. n <= nmax) THEN
           write(out_unit,*) 'H'
-          CALL Write_Mat(H,out_unit,6)
+          CALL Write_Mat_MPI(H,out_unit,6)
         END IF
       END IF
 !-----------------------------------------------------------
@@ -3219,14 +3219,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           write(out_unit,*)
           write(out_unit,*) 'H'
           write(out_unit,*) 'Real(H)'
-          CALL Write_Mat(real(H,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(H,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(H)'
-          CALL Write_Mat(aimag(H),out_unit,6)
+          CALL Write_Mat_MPI(aimag(H),out_unit,6)
           write(out_unit,*)
           write(out_unit,*) 'Real(S)'
-          CALL Write_Mat(real(S,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(S,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(S)'
-          CALL Write_Mat(aimag(S),out_unit,6)
+          CALL Write_Mat_MPI(aimag(S),out_unit,6)
         END IF
       END IF
 !-----------------------------------------------------------
@@ -3279,16 +3279,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           write(out_unit,*)
           write(out_unit,*) 'Ho'
           write(out_unit,*) 'Real(Ho)'
-          CALL Write_Mat(real(Ho,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(Ho,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(Ho)'
-          CALL Write_Mat(aimag(Ho),out_unit,6)
+          CALL Write_Mat_MPI(aimag(Ho),out_unit,6)
 
           write(out_unit,*)
           write(out_unit,*) 'So: Identity matrix'
           write(out_unit,*) 'Real(So)'
-          CALL Write_Mat(real(So,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(So,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(So)'
-          CALL Write_Mat(aimag(So),out_unit,6)
+          CALL Write_Mat_MPI(aimag(So),out_unit,6)
           write(out_unit,*)
         END IF
 
@@ -3305,9 +3305,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           write(out_unit,*) ' So is not the identity matrix. max_diff:',max_diff
           write(out_unit,*)
           write(out_unit,*) 'Real(So)'
-          CALL Write_Mat(real(So,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(So,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(So)'
-          CALL Write_Mat(aimag(So),out_unit,6)
+          CALL Write_Mat_MPI(aimag(So),out_unit,6)
           write(out_unit,*)
           STOP 'ERROR in UGPsi_spec: So is not the identity matrix.'
         END IF
@@ -3328,9 +3328,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
           write(out_unit,*)
           write(out_unit,*) 'Real(Vec)'
-          CALL Write_Mat(real(Vec,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(Vec,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(Vec)'
-          CALL Write_Mat(aimag(Vec),out_unit,6)
+          CALL Write_Mat_MPI(aimag(Vec),out_unit,6)
           write(out_unit,*)
         END IF
 
@@ -3413,14 +3413,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           write(out_unit,*)
           write(out_unit,*) 'H'
           write(out_unit,*) 'Real(H)'
-          CALL Write_Mat(real(H,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(H,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(H)'
-          CALL Write_Mat(aimag(H),out_unit,6)
+          CALL Write_Mat_MPI(aimag(H),out_unit,6)
           write(out_unit,*)
           write(out_unit,*) 'Real(S)'
-          CALL Write_Mat(real(S,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(S,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(S)'
-          CALL Write_Mat(aimag(S),out_unit,6)
+          CALL Write_Mat_MPI(aimag(S),out_unit,6)
         END IF
       END IF
 !-----------------------------------------------------------
@@ -3471,16 +3471,16 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           write(out_unit,*)
           write(out_unit,*) 'Ho'
           write(out_unit,*) 'Real(Ho)'
-          CALL Write_Mat(real(Ho,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(Ho,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(Ho)'
-          CALL Write_Mat(aimag(Ho),out_unit,6)
+          CALL Write_Mat_MPI(aimag(Ho),out_unit,6)
 
           write(out_unit,*)
           write(out_unit,*) 'So: Identity matrix'
           write(out_unit,*) 'Real(So)'
-          CALL Write_Mat(real(So,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(So,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(So)'
-          CALL Write_Mat(aimag(So),out_unit,6)
+          CALL Write_Mat_MPI(aimag(So),out_unit,6)
           write(out_unit,*)
         END IF
 
@@ -3497,9 +3497,9 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
           write(out_unit,*) ' So is not the identity matrix. max_diff:',max_diff
           write(out_unit,*)
           write(out_unit,*) 'Real(So)'
-          CALL Write_Mat(real(So,kind=Rkind),out_unit,6)
+          CALL Write_Mat_MPI(real(So,kind=Rkind),out_unit,6)
           write(out_unit,*) 'im(So)'
-          CALL Write_Mat(aimag(So),out_unit,6)
+          CALL Write_Mat_MPI(aimag(So),out_unit,6)
           write(out_unit,*)
           STOP 'ERROR in UGPsi_spec: So is not the identity matrix.'
         END IF
@@ -3910,14 +3910,14 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       IF (debug) THEN
         write(out_unit,*) 'H'
-        CALL Write_Mat(H,out_unit,6)
+        CALL Write_Mat_MPI(H,out_unit,6)
       END IF
 
       CALL diagonalization(H,Eig,Vec,3,1,.TRUE.)
 
       IF (debug) THEN
         write(out_unit,*) 'Vec'
-        CALL Write_Mat(Vec,out_unit,6)
+        CALL Write_Mat_MPI(Vec,out_unit,6)
         write(out_unit,*) 'Eig',Eig
       END IF
 
@@ -3930,10 +3930,10 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         END DO
         END DO
         write(out_unit,*) 'S'
-        CALL Write_Mat(S,out_unit,6)
+        CALL Write_Mat_MPI(S,out_unit,6)
 
         write(out_unit,*) 'H'
-        CALL Write_Mat(H,out_unit,6)
+        CALL Write_Mat_MPI(H,out_unit,6)
 
         write(out_unit,*) 'Eig1',dot_product(Vec(:,1),matmul(H,Vec(:,1)))
 
@@ -3945,7 +3945,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
         !H = matmul(transpose(conjg(Vec)),matmul(H,Vec)) ! wrong expression
 
         write(out_unit,*) 'H'
-        CALL Write_Mat(H,out_unit,6)
+        CALL Write_Mat_MPI(H,out_unit,6)
         STOP
       END IF
 

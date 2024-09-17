@@ -1980,7 +1980,7 @@ CONTAINS
 !-----------------------------------------------------------
     IF (debug) THEN
       write(out_unit,*) 'MatRGG',dnba_ind
-      CALL write_Mat(MatRGG,out_unit,5)
+      CALL Write_Mat_MPI(MatRGG,out_unit,5)
       write(out_unit,*) 'END ',name_sub
     END IF
 !-----------------------------------------------------------
@@ -2033,7 +2033,7 @@ CONTAINS
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'MatRGB',dnba_ind
-        CALL write_Mat(MatRGB,out_unit,5)
+        CALL Write_Mat_MPI(MatRGB,out_unit,5)
         write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
@@ -2085,7 +2085,7 @@ CONTAINS
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'MatRBB',dnba_ind
-        CALL write_Mat(MatRBB,out_unit,5)
+        CALL Write_Mat_MPI(MatRBB,out_unit,5)
         write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
@@ -2135,7 +2135,7 @@ SUBROUTINE Get2_MATdnPara_OF_RBB(basis_set,MatRBB,dnba_ind)
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'MatRBB',dnba_ind
-        CALL write_Mat(MatRBB,out_unit,5)
+        CALL Write_Mat_MPI(MatRBB,out_unit,5)
         write(out_unit,*) 'END ',name_sub
       END IF
 !-----------------------------------------------------------
@@ -2673,7 +2673,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        IF ( allocated(basis_set%x_extra) .AND. write_all_loc) THEN
         write(out_unit,*) Rec_line,'-------------------------------------------'
         write(out_unit,*) Rec_line,'x_extra'
-        CALL Write_Mat(basis_set%x_extra,out_unit,8,info=Rec_line)
+        CALL Write_Mat_MPI(basis_set%x_extra,out_unit,8,info=Rec_line)
         write(out_unit,*) Rec_line,'-------------------------------------------'
         write(out_unit,*)
        END IF
@@ -2682,22 +2682,22 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
        IF (nq > 0 .AND.  basis_set%ndim > 0  .AND. write_all_loc) THEN
          IF ( allocated(basis_set%x) ) THEN
            write(out_unit,*) Rec_line,'x'
-           CALL Write_Mat(basis_set%x,out_unit,8,info=Rec_line)
+           CALL Write_Mat_MPI(basis_set%x,out_unit,8,info=Rec_line)
            write(out_unit,*)
          END IF
          IF ( allocated(basis_set%w) ) THEN
            write(out_unit,*) Rec_line,'w'
-           CALL Write_Vec(basis_set%w,out_unit,8,info=Rec_line)
+           CALL Write_Vec_MPI(basis_set%w,out_unit,8,info=Rec_line)
            write(out_unit,*)
          END IF
          IF ( allocated(basis_set%wrho) ) THEN
            write(out_unit,*) Rec_line,'w*rho'
-           CALL Write_Vec(basis_set%wrho,out_unit,8,info=Rec_line)
+           CALL Write_Vec_MPI(basis_set%wrho,out_unit,8,info=Rec_line)
            write(out_unit,*)
          END IF
          IF ( allocated(basis_set%rho) ) THEN
            write(out_unit,*) Rec_line,'rho'
-           CALL Write_Vec(basis_set%rho,out_unit,8,info=Rec_line)
+           CALL Write_Vec_MPI(basis_set%rho,out_unit,8,info=Rec_line)
            write(out_unit,*)
          END IF
 
@@ -2743,7 +2743,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 
          IF (allocated(basis_set%EneH0)) THEN
            IF(MPI_id==0) write(out_unit,*) Rec_line,'EneH0 = <d0b(:,ib) I H0 I d0b(:,ib)>'
-           CALL Write_Vec(basis_set%EneH0,out_unit,8,info=Rec_line)
+           CALL Write_Vec_MPI(basis_set%EneH0,out_unit,8,info=Rec_line)
          END IF
 
        write(out_unit,*) Rec_line,'END RecWrite_basis'

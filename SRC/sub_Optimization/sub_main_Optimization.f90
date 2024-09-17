@@ -435,7 +435,7 @@
 
       IF (debug) THEN
         write(out_unit,*) 'Eigenvectors of ',name_sub
-        CALL Write_Mat(para_AllOp_loc%tab_Op(1)%Rvp,out_unit,5)
+        CALL Write_Mat_MPI(para_AllOp_loc%tab_Op(1)%Rvp,out_unit,5)
       END IF
       !---------------------------------------------------------------
 
@@ -617,8 +617,8 @@
         END DO
 
       END DO
-      !CALL Write_VecMat(R,out_unit,5)
-      !CALL Write_VecMat(M,out_unit,5)
+      !CALL Write_Vec_MPI(R,out_unit,5)
+      !CALL Write_Mat_MPI(M,out_unit,5)
 
 
       ! matrices of the linear (square nq*nq) system (Mt.M).W=(Mt.R)
@@ -631,11 +631,11 @@
 
       WHERE (W < ZERO) W = W * 0.9_Rkind
 
-      !CALL Write_VecMat(W,out_unit,5)
+      !CALL Write_Vec_MPI(W,out_unit,5)
 
 
       ER(:) = matmul(M,W)-R(:)
-      !CALL Write_VecMat(ER,out_unit,5)
+      !CALL Write_Vec_MPI(ER,out_unit,5)
 
       Energ = sqrt(dot_product(ER,ER)/real(nDindB%Max_nDI,kind=Rkind))
 
@@ -739,12 +739,12 @@
         END DO
 
       END DO
-      !CALL Write_VecMat(R,out_unit,5)
-      !CALL Write_VecMat(M,out_unit,5)
+      !CALL Write_Vec_MPI(R,out_unit,5)
+      !CALL Write_Mat_MPI(M,out_unit,5)
 
 
       ER(:) = matmul(M,W)-R(:)
-      !CALL Write_VecMat(ER,out_unit,5)
+      !CALL Write_Vec_MPI(ER,out_unit,5)
 
       Energ = sqrt(dot_product(ER,ER)/real(nDindB%Max_nDI,kind=Rkind))
 

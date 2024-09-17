@@ -2812,7 +2812,7 @@ END SUBROUTINE sub_TabOpPsi_OF_ONEDP_FOR_SGtype4_SRG_MPI
     END DO
     write(out_unit,*) 'GGiq(iq,:,:)'
     DO iq=1,nq
-      CALL Write_Mat(GGiq(iq,:,:),out_unit,6)
+      CALL Write_Mat_MPI(GGiq(iq,:,:),out_unit,6)
     END DO
     write(out_unit,*) 'END ',name_sub
     flush(out_unit)

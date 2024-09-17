@@ -1617,7 +1617,7 @@ END FUNCTION ValGridPoint
     DO iB=1,nb_B
       F(iB) = nDFunct_WITH_Q(Q,iB,para_nDFit)
     END DO
-    !CALL Write_Vec(F, out_unit, 5, name_info='F')
+    !CALL Write_Vec_MPI(F, out_unit, 5, name_info='F')
 
     DO iB=1,nb_B
        DO jB=1,nb_B
@@ -1629,8 +1629,8 @@ END FUNCTION ValGridPoint
   END DO
   END DO
 
-  !CALL Write_Mat(A, out_unit, 5, name_info='A')
-  !CALL Write_Vec(B, out_unit, 5, name_info='B')
+  !CALL Write_Mat_MPI(A, out_unit, 5, name_info='A')
+  !CALL Write_Vec_MPI(B, out_unit, 5, name_info='B')
 
   IF (para_nDFit%svd) THEN
     !une facon.... SVD

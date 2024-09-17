@@ -92,8 +92,8 @@ CONTAINS
         write(out_unit,*) 'nb_tot',para_Op%nb_tot
         write(out_unit,*)
         CALL write_param_Op(para_Op)
-!        IF (allocated(para_Op%Cmat)) CALL Write_Mat(para_Op%Cmat,out_unit,3)
-!        IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+!        IF (allocated(para_Op%Cmat)) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+!        IF (allocated(para_Op%Rmat)) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
       END IF
 !-----------------------------------------------------------
     RealTime = Delta_RealTime(MatOp_Time)
@@ -170,9 +170,9 @@ CONTAINS
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -203,9 +203,9 @@ CONTAINS
         IF ((print_Op .OR. debug) .AND. MPI_id==0) THEN
           write(out_unit,*) para_Op%name_Op,' symmetrized'
           IF (para_Op%cplx) THEN
-            CALL Write_Mat(para_Op%Cmat,out_unit,3)
+            CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
           ELSE
-            CALL Write_Mat(para_Op%Rmat,out_unit,5)
+            CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
           END IF
         END IF
       ELSE
@@ -234,9 +234,9 @@ CONTAINS
       IF (para_Op%spectral .AND. (print_Op .OR. debug)) THEN
         IF(MPI_id==0) write(out_unit,*) para_Op%name_Op,' spectral'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
     END IF
@@ -382,9 +382,9 @@ CONTAINS
         write(out_unit,*)
         write(out_unit,*) '==== Write Op: ',para_Op%name_Op
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(CMatOp,out_unit,5)
+          CALL Write_Mat_MPI(CMatOp,out_unit,5)
         ELSE
-          CALL Write_Mat(RMatOp,out_unit,5)
+          CALL Write_Mat_MPI(RMatOp,out_unit,5)
         END IF
         flush(out_unit)
       END IF
@@ -573,8 +573,8 @@ CONTAINS
         write(out_unit,*) 'nb_tot',para_Op%nb_tot
         write(out_unit,*)
         CALL write_param_Op(para_Op)
-!       IF (allocated(para_Op%Cmat)) CALL Write_Mat(para_Op%Cmat,out_unit,3)
-!       IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+!       IF (allocated(para_Op%Cmat)) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+!       IF (allocated(para_Op%Rmat)) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
       END IF
 !-----------------------------------------------------------
 
@@ -937,14 +937,14 @@ CONTAINS
             END DO
             mat1(:,ib1) = matmul(td0b(:,1:nplus),VecQ(1:nplus))
           END DO
-          !CALL Write_Mat(mat1,out_unit,5)
+          !CALL Write_Mat_MPI(mat1,out_unit,5)
 
           IF (para_Op%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
             mat2 = matmul(mat1,para_Op%para_AllBasis%basis_ext2n%d0Cba_ON_HAC(:,:,i2_h) )
             mat3 = transpose(para_Op%para_AllBasis%basis_ext2n%d0Cba_ON_HAC(:,:,i1_h))
             mat1 = matmul(mat3,mat2)
           END IF
-          !CALL Write_Mat(mat1,out_unit,5)
+          !CALL Write_Mat_MPI(mat1,out_unit,5)
 
           IF (para_Op%cplx) THEN
             DO ib1=1,para_Op%nb_ba
@@ -953,14 +953,14 @@ CONTAINS
               END DO
               mat1Im(:,ib1) = matmul(td0b(:,1:nplus),VecQ(1:nplus))
             END DO
-            !CALL Write_Mat(mat1Im,out_unit,5)
+            !CALL Write_Mat_MPI(mat1Im,out_unit,5)
 
             IF (para_Op%para_AllBasis%basis_ext2n%contrac_ba_ON_HAC) THEN
               mat2 = matmul(mat1Im,para_Op%para_AllBasis%basis_ext2n%d0Cba_ON_HAC(:,:,i2_h) )
               mat3 = transpose(para_Op%para_AllBasis%basis_ext2n%d0Cba_ON_HAC(:,:,i1_h))
               mat1Im = matmul(mat3,mat2)
             END IF
-            !CALL Write_Mat(mat1Im,out_unit,5)
+            !CALL Write_Mat_MPI(mat1Im,out_unit,5)
           END IF
 
 
@@ -1035,9 +1035,9 @@ CONTAINS
         write(out_unit,*)
         write(out_unit,*) para_Op%name_Op,' non symetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
         write(out_unit,*)
       END IF
@@ -1270,7 +1270,7 @@ CONTAINS
           END DO
           !write(out_unit,*) '===================================================='
           !write(out_unit,*) 'MatRV%ReVal',iterm_Op,MatRV%derive_termQact(:,iterm_Op)
-          !CALL Write_Mat(MatRV%ReVal(:,:,iterm_Op),out_unit,5)
+          !CALL Write_Mat_MPI(MatRV%ReVal(:,:,iterm_Op),out_unit,5)
 
 
           ! Rotational contribution
@@ -1369,9 +1369,9 @@ CONTAINS
         write(out_unit,*)
         write(out_unit,*) para_Op%name_Op,' non symetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
         write(out_unit,*)
       END IF
@@ -1689,7 +1689,7 @@ CONTAINS
           DO i_Op=1,MatRV%nb_term
             write(out_unit,*) 'matRV,i_Op',i_Op,                       &
                                 'der_term',MatRV%derive_termQact(:,i_Op)
-            CALL Write_Mat(MatRV%ReVal(:,:,i_Op),out_unit,5)
+            CALL Write_Mat_MPI(MatRV%ReVal(:,:,i_Op),out_unit,5)
           END DO
         END IF
 
@@ -1856,9 +1856,9 @@ CONTAINS
         write(out_unit,*)
         write(out_unit,*) para_Op%name_Op,' non symetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
         write(out_unit,*)
       END IF
@@ -2171,7 +2171,7 @@ CONTAINS
           DO i_Op=1,MatRV%nb_term
             write(out_unit,*) 'matRV,i_Op',i_Op,                       &
                                 'der_term',MatRV%derive_termQact(:,i_Op)
-            CALL Write_Mat(MatRV%ReVal(:,:,i_Op),out_unit,5)
+            CALL Write_Mat_MPI(MatRV%ReVal(:,:,i_Op),out_unit,5)
           END DO
         END IF
 
@@ -2278,9 +2278,9 @@ CONTAINS
         write(out_unit,*)
         write(out_unit,*) para_Op%name_Op,' non symetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
         write(out_unit,*)
       END IF
@@ -2388,9 +2388,9 @@ CONTAINS
         IF (debug .OR. print_Op) THEN
           write(out_unit,*) 'Read: ',para_Op%name_Op
           IF (para_Op%cplx) THEN
-            CALL Write_Mat(para_Op%Cmat,out_unit,3)
+            CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
           ELSE
-            CALL Write_Mat(para_Op%Rmat,out_unit,5)
+            CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
           END IF
         END IF
         IF (debug) THEN
@@ -2560,9 +2560,9 @@ CONTAINS
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -2723,9 +2723,9 @@ CONTAINS
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -2925,9 +2925,9 @@ END SUBROUTINE sub_MatOp_direct3_v2
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -3125,9 +3125,9 @@ END SUBROUTINE sub_MatOp_direct3_v1
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -3234,9 +3234,9 @@ END SUBROUTINE sub_MatOp_direct3_v0
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -3336,9 +3336,9 @@ END SUBROUTINE sub_MatOp_direct3_v0
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -3492,9 +3492,9 @@ END SUBROUTINE sub_MatOp_direct2_v0
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -3629,9 +3629,9 @@ END SUBROUTINE sub_MatOp_direct2_v0
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -3746,9 +3746,9 @@ END SUBROUTINE sub_MatOp_direct2_v0
 
       IF (debug) THEN
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -3856,9 +3856,9 @@ END SUBROUTINE sub_MatOp_direct2_v0
       IF (debug) THEN
         write(out_unit,*) para_Op%name_Op,' non-symmetrized'
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -4000,9 +4000,9 @@ END SUBROUTINE sub_MatOp_direct2_v0
 
       IF (debug) THEN
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -4146,9 +4146,9 @@ END SUBROUTINE sub_MatOp_direct2_v0
 
       IF (debug) THEN
         IF (para_Op%cplx) THEN
-          CALL Write_Mat(para_Op%Cmat,out_unit,3)
+          CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
         ELSE
-          CALL Write_Mat(para_Op%Rmat,out_unit,5)
+          CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         END IF
       END IF
 
@@ -4268,7 +4268,7 @@ END SUBROUTINE sub_MatOp_direct2_v0
    write(out_unit,*) '# (diff 0 and diff 1)',size(para_Op%Rmat)-       &
                      (count(para_Op%Rmat == 0)+count(para_Op%Rmat == 1))
 
-   CALL Write_Mat(para_Op%Rmat,out_unit,5)
+   CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
 
    write(out_unit,*) 'for MatOp**2'
    para_Op%Rmat = matmul(para_Op%Rmat,para_Op%Rmat)
@@ -4278,7 +4278,7 @@ END SUBROUTINE sub_MatOp_direct2_v0
    write(out_unit,*) '# (diff 0 and diff 1)',size(para_Op%Rmat)-       &
                    (count(para_Op%Rmat == 0)+count(para_Op%Rmat == 1))
 
-   CALL Write_Mat(para_Op%Rmat,out_unit,5)
+   CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
 !     ----------------------------------------------------------
       para_Op%Make_mat = .TRUE.
 

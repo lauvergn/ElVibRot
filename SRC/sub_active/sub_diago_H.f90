@@ -135,7 +135,7 @@
     END DO
 
     write(out_unit,*) ' Vec:'
-    CALL Write_Mat(Vec,out_unit,5)
+    CALL Write_Mat_MPI(Vec,out_unit,5)
 
     write(out_unit,*) 'END ',name_sub
     flush(out_unit)
@@ -202,7 +202,7 @@ END SUBROUTINE sub_diago_H
         END DO
 
         write(out_unit,*) ' Vec:'
-        CALL Write_Mat(CVec,out_unit,5)
+        CALL Write_Mat_MPI(CVec,out_unit,5)
 
         write(out_unit,*) 'END sub_diago_CH'
       END IF

@@ -1323,7 +1323,7 @@ MODULE mod_march_MPI
       write(out_unit,*) 'With_diago',With_diago
       IF (With_diago .AND. n <= nmax) THEN
         write(out_unit,*) 'H'
-        CALL Write_Mat(H,out_unit,6)
+        CALL Write_Mat_MPI(H,out_unit,6)
       END IF
     END IF
 !-----------------------------------------------------------

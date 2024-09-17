@@ -145,8 +145,8 @@ CONTAINS
         IF (present(iOp)) write(out_unit,*) 'iOp',iOp
         write(out_unit,*)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat)) CALL Write_Mat(para_Op%Cmat,out_unit,3)
-        IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        IF (allocated(para_Op%Cmat)) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat)) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         write(out_unit,*)
         write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
@@ -215,8 +215,8 @@ CONTAINS
         write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
         flush(out_unit)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unit,3)
-        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         write(out_unit,*)
         write(out_unit,*) 'Psi'
         CALL ecri_psi(Psi=Psi)
@@ -321,8 +321,8 @@ CONTAINS
                     para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
         flush(out_unit)
         !CALL write_param_Op(para_Op)
-        !IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unit,3)
-        !IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        !IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+        !IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         write(out_unit,*)
         write(out_unit,*) 'Psi'
         CALL ecri_psi(Psi=Psi)
@@ -739,8 +739,8 @@ END SUBROUTINE sub_OpBasis_OneCBF
         write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
         flush(out_unit)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unit,3)
-        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         write(out_unit,*)
         write(out_unit,*) 'TabPsi'
         DO i=1,size(TabPsi)
@@ -985,8 +985,8 @@ END SUBROUTINE sub_OpBasis_OneCBF
         write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
         flush(out_unit)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Cmat,out_unit,3)
-        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         write(out_unit,*)
         write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)
@@ -2914,8 +2914,8 @@ STOP 'cplx in sub_OpPsi_WITH_MemGrid_BGG_Hamil10'
         write(out_unit,*) 'nb_var',para_Op%mole%nb_var
         write(out_unit,*)
         CALL write_param_Op(para_Op)
-        IF (allocated(para_Op%Cmat)) CALL Write_Mat(para_Op%Cmat,out_unit,3)
-        IF (allocated(para_Op%Rmat)) CALL Write_Mat(para_Op%Rmat,out_unit,5)
+        IF (allocated(para_Op%Cmat)) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+        IF (allocated(para_Op%Rmat)) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
         write(out_unit,*)
         write(out_unit,*) 'PsiBasisRep'
         CALL ecri_psi(Psi=Psi)

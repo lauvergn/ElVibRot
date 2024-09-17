@@ -1559,15 +1559,15 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 
             IF (debug) THEN
               write(out_unit,*) 'Gate Matrix (WP0)',nb_WP
-              CALL Write_Mat(para_propa%para_control%Mgate0,out_unit,4)
+              CALL Write_Mat_MPI(para_propa%para_control%Mgate0,out_unit,4)
               write(out_unit,*) 'Gate Matrix (WPt)',nb_WP
-              CALL Write_Mat(para_propa%para_control%Mgatet,out_unit,4)
+              CALL Write_Mat_MPI(para_propa%para_control%Mgatet,out_unit,4)
             END IF
 
             DO i=1,nb_WP
-              CALL Write_Vec(para_propa%para_control%Mgate0(i,:),       &
+              CALL Write_Vec_MPI(para_propa%para_control%Mgate0(i,:),       &
                              out_unit,4,info="#WP0 " // TO_string(i) )
-              CALL Write_Vec(para_propa%para_control%Mgatet(i,:),       &
+              CALL Write_Vec_MPI(para_propa%para_control%Mgatet(i,:),       &
                              out_unit,4,info="#WPt " // TO_string(i))
             END DO
           ELSE

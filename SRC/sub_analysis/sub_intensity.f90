@@ -134,7 +134,7 @@
         write(out_unit,*) 'convAif',const_phys%convAif
         write(out_unit,*)
         write(out_unit,*) 'Rvp',shape(para_H%Rvp)
-!       CALL Write_Mat(para_H%Rvp,out_unit,5)
+!       CALL Write_Mat_MPI(para_H%Rvp,out_unit,5)
         write(out_unit,*)
       END IF
 !-----------------------------------------------------------
@@ -201,17 +201,17 @@
             END IF
             Mat_Aif(:,:) = Mat_Aif(:,:) + para_Dip(k)%Rmat(1:nb_ana,1:nb_ana)**2
             !write(out_unit,*) 'para_Dip(k)%Rmat',k
-            !CALL Write_Mat(para_Dip(k)%Rmat,out_unit,5)
+            !CALL Write_Mat_MPI(para_Dip(k)%Rmat,out_unit,5)
             CALL dealloc_para_Op(para_Dip(k))
           END IF
 
           flush(out_unit)
         END DO
         write(nio_res_int,*) 'Mat_Aif'
-        CALL Write_Mat(Mat_Aif,nio_res_int,5,Rformat='e30.23')
+        CALL Write_Mat_MPI(Mat_Aif,nio_res_int,5,Rformat='e30.23')
         IF (allocated(para_intensity%ABC)) THEN
           write(nio_res_int,*) 'ABC'
-          CALL Write_Mat(para_intensity%ABC,nio_res_int,5,Rformat='e30.23')
+          CALL Write_Mat_MPI(para_intensity%ABC,nio_res_int,5,Rformat='e30.23')
         END IF
         write(out_unit,*) '==================================================='
         write(out_unit,*) '==================================================='
@@ -255,7 +255,7 @@
         write(out_unit,*) '==================================================='
         write(out_unit,*) '==================================================='
         write(out_unit,*) ' DE(i-f)*S(i-f):'
-        CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e15.8')
+        CALL Write_Mat_MPI(Mat_Aif,out_unit,5,Rformat='e15.8')
         write(out_unit,*) '==================================================='
         write(out_unit,*) '==================================================='
 
@@ -272,12 +272,12 @@
         END DO
         END DO
         write(out_unit,*) 'Life time (1/Aif) in s'
-        CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e15.8')
+        CALL Write_Mat_MPI(Mat_Aif,out_unit,5,Rformat='e15.8')
         write(out_unit,*) '==================================================='
 
       ELSE IF (para_intensity%l_Aif) THEN
         write(out_unit,*) 'Einstein coef (Aif) in s-1'
-        CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e15.8')
+        CALL Write_Mat_MPI(Mat_Aif,out_unit,5,Rformat='e15.8')
         write(out_unit,*) '==================================================='
 
       ELSE IF (para_intensity%l_Int) THEN
@@ -300,7 +300,7 @@
         END DO
       ELSE IF (para_intensity%l_IntVR) THEN
         write(out_unit,*) 'intensity Vib+Rot (dip)'
-        IF (debug) CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e15.8')
+        IF (debug) CALL Write_Mat_MPI(Mat_Aif,out_unit,5,Rformat='e15.8')
       END IF
       flush(out_unit)
 
@@ -510,7 +510,7 @@
         write(out_unit,*) 'size(para_ScalOp)',size(para_ScalOp)
 
         write(out_unit,*) 'Rvp',shape(para_H%Rvp)
-        !CALL Write_Mat(para_H%Rvp,out_unit,5)
+        !CALL Write_Mat_MPI(para_H%Rvp,out_unit,5)
         write(out_unit,*)
         flush(out_unit)
       END IF
@@ -538,9 +538,9 @@
 
         !Mat_Aif(:,:) = Mat_Aif(:,:) + para_ScalOp(k)%Rmat(1:nb_ana,1:nb_ana)**2
         !write(out_unit,*) 'para_ScalOp(k)%Rmat',k
-        !CALL Write_Mat(para_ScalOp(k)%Rmat,out_unit,5)
+        !CALL Write_Mat_MPI(para_ScalOp(k)%Rmat,out_unit,5)
         !write(out_unit,*) 'Mat_Aif'
-        !CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e30.23')
+        !CALL Write_Mat_MPI(Mat_Aif,out_unit,5,Rformat='e30.23')
         !write(out_unit,*) 'Mat_Aif(:,1)',Mat_Aif(:,1)
 
         write(out_unit,*) '==================================================='

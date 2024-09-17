@@ -238,7 +238,7 @@ step  = ONETENTH**4
     d0b_pseudoInv = inv_OF_Mat_TO(d0b)
 
     !write(out_unit,*) 'd0b_pseudoInv'
-    !CALL Write_VecMat(d0b_pseudoInv,out_unit,5)
+    !CALL Write_Mat_MPI(d0b_pseudoInv,out_unit,5)
     !flush(out_unit)
     deallocate(d0b)
 
@@ -249,16 +249,16 @@ step  = ONETENTH**4
 
     d0bxd0bT = matmul(ba%d0b,transpose(ba%d0b))
     !write(out_unit,*) 'd0bxd0bT'
-    !CALL Write_VecMat(d0bxd0bT,out_unit,5)
+    !CALL Write_Mat_MPI(d0bxd0bT,out_unit,5)
 
     d0bxd0bT_inv = inv_OF_Mat_TO(d0bxd0bT,inv_type=1,epsi=ONETENTH**10) ! SVD
 
     !write(out_unit,*) 'd0bxd0bT_inv'
-    !CALL Write_VecMat(d0bxd0bT_inv,out_unit,5)
+    !CALL Write_Mat_MPI(d0bxd0bT_inv,out_unit,5)
 
     d0b_pseudoInv =  matmul(transpose(ba%d0b),d0bxd0bT_inv)
     !write(out_unit,*) 'd0b_pseudoInv'
-    !CALL Write_VecMat(d0b_pseudoInv,out_unit,5)
+    !CALL Write_Mat_MPI(d0b_pseudoInv,out_unit,5)
 
     deallocate(d0bxd0bT)
     deallocate(d0bxd0bT_inv)
@@ -341,7 +341,7 @@ step  = ONETENTH**4
   END DO
 
   !IF (debug) write(out_unit,*) '===================== d0b'
-  !IF (debug) CALL Write_Mat(DelatBa%d0b,6,5)
+  !IF (debug) CALL Write_Mat_MPI(DelatBa%d0b,6,5)
 
   !IF (debug) write(out_unit,*) '===================== ortho ?'
   max_S = ZERO
@@ -433,7 +433,7 @@ step  = ONETENTH**4
   END DO
 
   !IF (debug) write(out_unit,*) '===================== d0b'
-  !IF (debug) CALL Write_Mat(DelatBa%d0b,6,5)
+  !IF (debug) CALL Write_Mat_MPI(DelatBa%d0b,6,5)
 
   !IF (debug) write(out_unit,*) '===================== ortho ?'
   max_S = ZERO

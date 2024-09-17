@@ -124,7 +124,7 @@
 
       write(out_unit,*) 'd0Qeq',RPHpara_AT_Qact1%dnQopt%d0
       write(out_unit,*) 'd0c'
-      CALL Write_Mat(RPHpara_AT_Qact1%dnC%d0,out_unit,5)
+      CALL Write_Mat_MPI(RPHpara_AT_Qact1%dnC%d0,out_unit,5)
       write(out_unit,*)
 !-----------------------------------------------------------------
       n_h = Basis2n%nDindB%Max_nDI

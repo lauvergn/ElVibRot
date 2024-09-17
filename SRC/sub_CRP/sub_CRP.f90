@@ -402,11 +402,11 @@ END SUBROUTINE read_CRP
       IF (debug) THEN
         nb_col = 5
         write(out_unit,*) 'H:'
-        CALL Write_Mat(tab_Op(1)%Rmat,out_unit,nb_col)
+        CALL Write_Mat_MPI(tab_Op(1)%Rmat,out_unit,nb_col)
         write(out_unit,*) 'Reactif CAP:'
-        CALL Write_Mat(tab_Op(para_CRP%iOp_CAP_Reactif)%Rmat,out_unit,nb_col)
+        CALL Write_Mat_MPI(tab_Op(para_CRP%iOp_CAP_Reactif)%Rmat,out_unit,nb_col)
         write(out_unit,*) 'Product CAP:'
-        CALL Write_Mat(tab_Op(para_CRP%iOp_CAP_Product)%Rmat,out_unit,nb_col)
+        CALL Write_Mat_MPI(tab_Op(para_CRP%iOp_CAP_Product)%Rmat,out_unit,nb_col)
       END IF
 
       write(out_unit,*) 'Ginv calc'
@@ -428,7 +428,7 @@ END SUBROUTINE read_CRP
         IF (debug) THEN
           nb_col = 5
           write(out_unit,*) 'Ginv:'
-          CALL Write_Mat(Ginv,out_unit,nb_col)
+          CALL Write_Mat_MPI(Ginv,out_unit,nb_col)
         END IF
 
         G = inv_OF_Mat_TO(Ginv)
@@ -436,7 +436,7 @@ END SUBROUTINE read_CRP
         IF (debug) THEN
           nb_col = 5
           write(out_unit,*) 'G:'
-          CALL Write_Mat(G,out_unit,nb_col)
+          CALL Write_Mat_MPI(G,out_unit,nb_col)
         END IF
 
         !Ginv = matmul(Ginv,G)
@@ -451,7 +451,7 @@ END SUBROUTINE read_CRP
         IF (debug) THEN
           nb_col = 5
           write(out_unit,*) 'gGgG:'
-          CALL Write_Mat(gGgG,out_unit,nb_col)
+          CALL Write_Mat_MPI(gGgG,out_unit,nb_col)
         END IF
 
         RWU_E  = REAL_WU(Ene,'au','E')
@@ -566,11 +566,11 @@ END SUBROUTINE sub_CRP_BasisRep_WithMat
       IF (debug) THEN
         nb_col = 5
         write(out_unit,*) 'H:'
-        CALL Write_Mat(tab_Op(1)%Rmat,out_unit,nb_col)
+        CALL Write_Mat_MPI(tab_Op(1)%Rmat,out_unit,nb_col)
         write(out_unit,*) 'Reactif CAP:'
-        CALL Write_Mat(tab_Op(para_CRP%iOp_CAP_Reactif)%Rmat,out_unit,nb_col)
+        CALL Write_Mat_MPI(tab_Op(para_CRP%iOp_CAP_Reactif)%Rmat,out_unit,nb_col)
         write(out_unit,*) 'Product CAP:'
-        CALL Write_Mat(tab_Op(para_CRP%iOp_CAP_Product)%Rmat,out_unit,nb_col)
+        CALL Write_Mat_MPI(tab_Op(para_CRP%iOp_CAP_Product)%Rmat,out_unit,nb_col)
       END IF
       CALL BlockAna_Mat(tab_Op(1)%Rmat,list_block,info='H')
       CALL BlockAna_Mat(tab_Op(para_CRP%iOp_CAP_Reactif)%Rmat,list_block,info='Reactif CAP')
@@ -595,7 +595,7 @@ END SUBROUTINE sub_CRP_BasisRep_WithMat
         IF (debug) THEN
           nb_col = 5
           write(out_unit,*) 'Ginv:'
-          CALL Write_Mat(Ginv,out_unit,nb_col)
+          CALL Write_Mat_MPI(Ginv,out_unit,nb_col)
         END IF
         CALL BlockAna_Mat(Ginv,list_block,info='Ginv')
 
@@ -604,7 +604,7 @@ END SUBROUTINE sub_CRP_BasisRep_WithMat
         IF (debug) THEN
           nb_col = 5
           write(out_unit,*) 'G:'
-          CALL Write_Mat(G,out_unit,nb_col)
+          CALL Write_Mat_MPI(G,out_unit,nb_col)
         END IF
         CALL BlockAna_Mat(G,list_block,info='G')
 
@@ -620,7 +620,7 @@ END SUBROUTINE sub_CRP_BasisRep_WithMat
         IF (debug) THEN
           nb_col = 5
           write(out_unit,*) 'gGgG:'
-          CALL Write_Mat(gGgG,out_unit,nb_col)
+          CALL Write_Mat_MPI(gGgG,out_unit,nb_col)
         END IF
         CALL BlockAna_Mat(gGgG,list_block,info='gGgG')
 
@@ -1312,7 +1312,7 @@ SUBROUTINE calc_crp_p_lanczos(tab_Op,nb_Op,para_CRP,Ene,GuessVec)
             h(nks, mks+1) = conjg(h(mks+1,nks))
          end do
          IF (debug) write(out_unit,*) '# in KS iterations, h'
-         IF (debug) CALL Write_Mat(h(1:nks,1:nks),out_unit,5)
+         IF (debug) CALL Write_Mat_MPI(h(1:nks,1:nks),out_unit,5)
 
          ! Orthogonalize vectors (twice)
          IF (debug) write(out_unit,*) '# in KS iterations: Orthogonalize the vectors'
@@ -2197,12 +2197,12 @@ SUBROUTINE FluxOp_Mat(H,HStep_Op,FluxOp)
       nb_col = 5
       write(out_unit,*) 'Flux eigenvectors in column'
       write(out_unit,*) nb_col,H%nb_tot,H%nb_tot
-      CALL Write_Mat(Rvp,out_unit,nb_col)
+      CALL Write_Mat_MPI(Rvp,out_unit,nb_col)
 
 
       write(out_unit,*) 'Ortho ?'
       Rvp = matmul(transpose(Rvp),Rvp)
-      CALL Write_Mat(Rvp,out_unit,nb_col)
+      CALL Write_Mat_MPI(Rvp,out_unit,nb_col)
 
 
       !write(out_unit,*) 'Diag',Rdiag
@@ -2236,12 +2236,12 @@ SUBROUTINE FluxOp_Mat_old(H,HStep_Op,FluxOp)
       nb_col = 5
       write(out_unit,*) 'Flux eigenvectors in column'
       write(out_unit,*) nb_col,H%nb_tot,H%nb_tot
-      CALL Write_Mat(Rvp,out_unit,nb_col)
+      CALL Write_Mat_MPI(Rvp,out_unit,nb_col)
 
 
       !write(out_unit,*) 'Ortho ?'
       !Rvp = matmul(transpose(Rvp),Rvp)
-      !CALL Write_Mat(Rvp,out_unit,nb_col)
+      !CALL Write_Mat_MPI(Rvp,out_unit,nb_col)
 
 
       !write(out_unit,*) 'Diag',Rdiag
@@ -2273,12 +2273,12 @@ SUBROUTINE FluxOp_Mat_v0(H,HStep_Op,FluxOp)
       nb_col = 5
       write(out_unit,*) 'Flux eigenvectors in column'
       write(out_unit,*) nb_col,H%nb_tot,H%nb_tot
-      CALL Write_Mat(Rvp,out_unit,nb_col)
+      CALL Write_Mat_MPI(Rvp,out_unit,nb_col)
 
 
       !write(out_unit,*) 'Ortho ?'
       !Rvp = matmul(transpose(Rvp),Rvp)
-      !CALL Write_Mat(Rvp,out_unit,nb_col)
+      !CALL Write_Mat_MPI(Rvp,out_unit,nb_col)
 
 
       !write(out_unit,*) 'Diag',Rdiag
@@ -2372,7 +2372,7 @@ SUBROUTINE Calc_EigenVec_CAPs(tab_Op,para_CRP)
         nb_col = 5
         Mat = matmul(transpose(Vec),matmul(mat,Vec))
         write(out_unit,*) 'Reactif+Product CAP: diago?'
-        CALL Write_Mat(Mat,out_unit,nb_col)
+        CALL Write_Mat_MPI(Mat,out_unit,nb_col)
       END IF
 
       write(out_unit,*) 'Val',Val
@@ -2383,18 +2383,18 @@ SUBROUTINE Calc_EigenVec_CAPs(tab_Op,para_CRP)
       nb_col = 5
       write(out_unit,*) 'CAP eigenvectors in column'
       write(out_unit,*) nb_col,tab_Op(1)%nb_tot,tab_Op(1)%nb_tot
-      CALL Write_Mat(Vec,out_unit,nb_col)
+      CALL Write_Mat_MPI(Vec,out_unit,nb_col)
 
       IF (debug) THEN
         nb_col = 5
         !check if each CAP matrices are diagonal (on the grid they are)
         Mat = matmul(transpose(Vec),matmul(tab_Op(para_CRP%iOp_CAP_Reactif)%Rmat,Vec))
         write(out_unit,*) 'Reactif CAP: diago?'
-        CALL Write_Mat(Mat,out_unit,nb_col)
+        CALL Write_Mat_MPI(Mat,out_unit,nb_col)
 
         Mat = matmul(transpose(Vec),matmul(tab_Op(para_CRP%iOp_CAP_Product)%Rmat,Vec))
         write(out_unit,*) 'Product CAP: diago?'
-        CALL Write_Mat(Mat,out_unit,nb_col)
+        CALL Write_Mat_MPI(Mat,out_unit,nb_col)
       END IF
 
       CALL dealloc_NParray(Vec,'Vec',   name_sub)

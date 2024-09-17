@@ -333,20 +333,20 @@
 
       IF (debug) THEN
         write(out_unit,*) 'PWangDag (in line)'
-        CALL Write_Mat(PWangDag,out_unit,5)
+        CALL Write_Mat_MPI(PWangDag,out_unit,5)
 
         write(out_unit,*) 'PWang (in column)'
-        CALL Write_Mat(PWang,out_unit,5)
+        CALL Write_Mat_MPI(PWang,out_unit,5)
       END IF
 
       !CALL alloc_NParray(test_inv,[RotBasis_Para%nb_Rot,RotBasis_Para%nb_Rot],         &
       !                  'test_inv',name_sub)
       !test_inv = matmul(PWang,PWangDag)
       !write(out_unit,*) 'PWang . PWangDag'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       !test_inv = matmul(PWangDag,PWang)
       !write(out_unit,*) 'PWangDag . PWang'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       !CALL dealloc_NParray(test_inv,'test_inv',name_sub)
 
 
@@ -379,11 +379,11 @@
 
       !write(out_unit,*)
       !write(out_unit,*) 'Re Jx'
-      !CALL Write_Mat(real(Jx),out_unit,5)
+      !CALL Write_Mat_MPI(real(Jx),out_unit,5)
       !write(out_unit,*) 'Jy'
-      !CALL Write_Mat(aimag(Jy),out_unit,5)
+      !CALL Write_Mat_MPI(aimag(Jy),out_unit,5)
       !write(out_unit,*) 'Jz'
-      !CALL Write_Mat(real(Jz),out_unit,5)
+      !CALL Write_Mat_MPI(real(Jz),out_unit,5)
 
 !---------------------------------------------------------------------
       ! -3- Jx,Jy,Jz in the Wang basis
@@ -394,17 +394,17 @@
       IF (debug) THEN
         write(out_unit,*)
         write(out_unit,*) 'Im(Jx), SumRe(Jx)',sum(abs(real(Ji(:,:,-1))))
-        CALL Write_Mat(aimag(Ji(:,:,-1)),out_unit,5)
+        CALL Write_Mat_MPI(aimag(Ji(:,:,-1)),out_unit,5)
         write(out_unit,*) 'Im(Jy), SumRe(Jy)',sum(abs(real(Ji(:,:,-2))))
-        CALL Write_Mat(aimag(Ji(:,:,-2)),out_unit,5)
+        CALL Write_Mat_MPI(aimag(Ji(:,:,-2)),out_unit,5)
         write(out_unit,*) 'Im(Jz), SumRe(Jz)',sum(abs(real(Ji(:,:,-3))))
-        CALL Write_Mat(aimag(Ji(:,:,-3)),out_unit,5)
+        CALL Write_Mat_MPI(aimag(Ji(:,:,-3)),out_unit,5)
       END IF
       !CALL alloc_NParray(test_inv,[RotBasis_Para%nb_Rot,RotBasis_Para%nb_Rot],         &
       !                  'test_inv',name_sub)
       !test_inv = matmul(Jx,Jx)+matmul(Jy,Jy)+matmul(Jz,Jz)
       !write(out_unit,*) 'J^2'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       !CALL dealloc_NParray(test_inv,'test_inv',name_sub)
 
 !---------------------------------------------------------------------
@@ -530,20 +530,20 @@
 
       IF (debug) THEN
         write(out_unit,*) 'PWangDag (in line)'
-        CALL Write_Mat(PWangDag,out_unit,5)
+        CALL Write_Mat_MPI(PWangDag,out_unit,5)
 
         write(out_unit,*) 'PWang (in column)'
-        CALL Write_Mat(PWang,out_unit,5)
+        CALL Write_Mat_MPI(PWang,out_unit,5)
       END IF
 
       !CALL alloc_NParray(test_inv,[RotBasis_Para%nb_Rot,RotBasis_Para%nb_Rot],         &
       !                  'test_inv',name_sub)
       !test_inv = matmul(PWang,PWangDag)
       !write(out_unit,*) 'PWang . PWangDag'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       !test_inv = matmul(PWangDag,PWang)
       !write(out_unit,*) 'PWangDag . PWang'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       !CALL dealloc_NParray(test_inv,'test_inv',name_sub)
 
 
@@ -576,11 +576,11 @@
 
       !write(out_unit,*)
       !write(out_unit,*) 'Re Jx'
-      !CALL Write_Mat(real(Jx),out_unit,5)
+      !CALL Write_Mat_MPI(real(Jx),out_unit,5)
       !write(out_unit,*) 'Jy'
-      !CALL Write_Mat(aimag(Jy),out_unit,5)
+      !CALL Write_Mat_MPI(aimag(Jy),out_unit,5)
       !write(out_unit,*) 'Jz'
-      !CALL Write_Mat(real(Jz),out_unit,5)
+      !CALL Write_Mat_MPI(real(Jz),out_unit,5)
 
 !---------------------------------------------------------------------
       ! -3- Jx,Jy,Jz in the Wang basis
@@ -591,17 +591,17 @@
       IF (debug) THEN
         write(out_unit,*)
         write(out_unit,*) 'Im(Jx), SumRe(Jx)',sum(abs(real(Ji(:,:,-1))))
-        CALL Write_Mat(aimag(Ji(:,:,-1)),out_unit,5)
+        CALL Write_Mat_MPI(aimag(Ji(:,:,-1)),out_unit,5)
         write(out_unit,*) 'Im(Jy), SumRe(Jy)',sum(abs(real(Ji(:,:,-2))))
-        CALL Write_Mat(aimag(Ji(:,:,-2)),out_unit,5)
+        CALL Write_Mat_MPI(aimag(Ji(:,:,-2)),out_unit,5)
         write(out_unit,*) 'Im(Jz), SumRe(Jz)',sum(abs(real(Ji(:,:,-3))))
-        CALL Write_Mat(aimag(Ji(:,:,-3)),out_unit,5)
+        CALL Write_Mat_MPI(aimag(Ji(:,:,-3)),out_unit,5)
       END IF
       !CALL alloc_NParray(test_inv,[RotBasis_Para%nb_Rot,RotBasis_Para%nb_Rot],         &
       !                  'test_inv',name_sub)
       !test_inv = matmul(Jx,Jx)+matmul(Jy,Jy)+matmul(Jz,Jz)
       !write(out_unit,*) 'J^2'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       !CALL dealloc_NParray(test_inv,'test_inv',name_sub)
 
 !---------------------------------------------------------------------
@@ -627,24 +627,24 @@
 
       test_inv=matmul(Ji(:,:,-1),Ji(:,:,-2))-matmul(Ji(:,:,-2),Ji(:,:,-1))
       !write(out_unit,*) '[Jx,Jy]'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       test_inv = test_inv + EYE*Ji(:,:,-3)
       write(out_unit,*) '[Jx,Jy] + i Jz = 0 ?',sum(abs(test_inv))
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
 
       test_inv=matmul(Ji(:,:,-3),Ji(:,:,-1))-matmul(Ji(:,:,-1),Ji(:,:,-3))
       !write(out_unit,*) '[Jz,Jx]'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       test_inv = test_inv+EYE*Ji(:,:,-2)
       write(out_unit,*) '[Jz,Jx] + i Jy = 0 ?',sum(abs(test_inv))
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
 
       test_inv=matmul(Ji(:,:,-2),Ji(:,:,-3))-matmul(Ji(:,:,-3),Ji(:,:,-2))
       !write(out_unit,*) '[Jy,Jz]'
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
       test_inv = test_inv+EYE*Ji(:,:,-1)
       write(out_unit,*) '[Jy,Jz] + i Jx = 0 ?',sum(abs(test_inv))
-      !CALL Write_Mat(test_inv,out_unit,5)
+      !CALL Write_Mat_MPI(test_inv,out_unit,5)
 
 
 
@@ -715,17 +715,17 @@
         DO J2=-3,-1
           iterm = RotBasis_Para%tab_der_TO_iterm(J1,J2)
           write(out_unit,*) 'JiJj op.',J1,J2,' iterm: ',iterm
-          CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,iterm),out_unit,5)
+          CALL Write_Mat_MPI(RotBasis_Para%tab_RotOp(:,:,iterm),out_unit,5)
         END DO
         END DO
         DO J1=-3,-1
           iterm = RotBasis_Para%tab_der_TO_iterm(J1,0)
           write(out_unit,*) 'Im(Ji op.)',J1,' iterm: ',iterm
-          CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,iterm),out_unit,5)
+          CALL Write_Mat_MPI(RotBasis_Para%tab_RotOp(:,:,iterm),out_unit,5)
         END DO
 
         write(out_unit,*) 'Id'
-        CALL Write_Mat(RotBasis_Para%tab_RotOp(:,:,0),out_unit,5)
+        CALL Write_Mat_MPI(RotBasis_Para%tab_RotOp(:,:,0),out_unit,5)
       END IF
 
 !---------------------------------------------------------------------

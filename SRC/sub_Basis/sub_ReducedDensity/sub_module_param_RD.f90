@@ -214,7 +214,7 @@ character (len=*), parameter :: name_sub='init_RD'
 
     IF (debug) THEN
       write(out_unit,*) 'para_RD%cbb(:,:)'
-      CALL Write_Mat(para_RD%cbb,out_unit,5)
+      CALL Write_Mat_MPI(para_RD%cbb,out_unit,5)
     END IF
 
   END IF
@@ -289,7 +289,7 @@ character (len=*), parameter :: name_sub='calc_RD'
 
   IF (debug) THEN
     write(out_unit,*) 'RD_loc(:,:)'
-    CALL Write_Mat(RD_loc,out_unit,5)
+    CALL Write_Mat_MPI(RD_loc,out_unit,5)
   END IF
 
   IF (printRD_loc) write(out_unit,*) 'Diag RD           ',para_RD%basis_index,(RD_loc(i,i),i=1,para_RD%nb)
@@ -304,7 +304,7 @@ character (len=*), parameter :: name_sub='calc_RD'
 
     IF (debug) THEN
       write(out_unit,*) 'RDcontrac_loc(:,:)'
-      CALL Write_Mat(RDcontrac_loc,out_unit,5)
+      CALL Write_Mat_MPI(RDcontrac_loc,out_unit,5)
     END IF
 
     IF (present(RDcontrac)) CALL MOVE_ALLOC( TO=RDcontrac, FROM=RDcontrac_loc )
@@ -380,7 +380,7 @@ character (len=*), parameter :: name_sub='calc_CRD'
 
   IF (debug) THEN
     write(out_unit,*) 'CRD_loc(:,:)'
-    CALL Write_Mat(CRD_loc,out_unit,5)
+    CALL Write_Mat_MPI(CRD_loc,out_unit,5)
   END IF
 
   IF (printRD_loc) write(out_unit,*) 'Diag CRD           ',para_RD%basis_index,(CRD_loc(i,i),i=1,para_RD%nb)
@@ -395,7 +395,7 @@ character (len=*), parameter :: name_sub='calc_CRD'
 
     IF (debug) THEN
       write(out_unit,*) 'CRDcontrac_loc(:,:)'
-      CALL Write_Mat(CRDcontrac_loc,out_unit,5)
+      CALL Write_Mat_MPI(CRDcontrac_loc,out_unit,5)
     END IF
 
     IF (present(CRDcontrac)) CALL MOVE_ALLOC( TO=CRDcontrac, FROM=CRDcontrac_loc )

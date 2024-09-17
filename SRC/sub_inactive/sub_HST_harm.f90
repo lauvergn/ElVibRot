@@ -393,11 +393,11 @@
             write(out_unit,*) ' name_Op, deriv_term:',                 &
                              para_AllOp%tab_Op(iOp)%name_Op,            &
                              d0MatOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatOp(iOp)%ReVal(:,:,k_term),out_unit,5)
+            CALL Write_Mat_MPI(d0MatOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatOp(iOp)%cplx) THEN
             write(out_unit,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
-            CALL Write_Mat(d0MatOp(iOp)%Imval(:,:),out_unit,5)
+            CALL Write_Mat_MPI(d0MatOp(iOp)%Imval(:,:),out_unit,5)
           END IF
         END DO
 
@@ -573,11 +573,11 @@
             write(out_unit,*) ' name_Op, deriv_term:',                 &
                              para_AllOp%tab_Op(iOp)%name_Op,            &
                              d0MatHADAOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
+            CALL Write_Mat_MPI(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatHADAOp(iOp)%cplx) THEN
             write(out_unit,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
-            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
+            CALL Write_Mat_MPI(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
           END IF
         END DO
         flush(out_unit)
@@ -880,11 +880,11 @@
             write(out_unit,*) ' name_Op, deriv_term:',                 &
                              para_AllOp%tab_Op(iOp)%name_Op,            &
                              d0MatHADAOp(iOp)%derive_termQact(:,k_term)
-            CALL Write_Mat(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
+            CALL Write_Mat_MPI(d0MatHADAOp(iOp)%ReVal(:,:,k_term),out_unit,5)
           END DO
           IF (d0MatHADAOp(iOp)%cplx) THEN
             write(out_unit,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
-            CALL Write_Mat(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
+            CALL Write_Mat_MPI(d0MatHADAOp(iOp)%ImVal(:,:),out_unit,5)
           END IF
         END DO
         flush(out_unit)

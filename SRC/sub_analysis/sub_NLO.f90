@@ -92,7 +92,7 @@
       IF (debug) THEN
         write(out_unit,*) 'nb_ana',nb_ana
         write(out_unit,*) 'Rvp',shape(para_H%Rvp)
-!       CALL Write_Mat(para_H%Rvp,out_unit,5)
+!       CALL Write_Mat_MPI(para_H%Rvp,out_unit,5)
         write(out_unit,*)
       END IF
 !-----------------------------------------------------------
@@ -126,7 +126,7 @@
       DO k=1,3
         Mat_Aif(:,:) = Mat_Aif(:,:) + para_Dip(k)%Rmat(1:nb_ana,1:nb_ana)**2
       END DO
-      CALL Write_Mat(Mat_Aif,out_unit,5,Rformat='e30.23')
+      CALL Write_Mat_MPI(Mat_Aif,out_unit,5,Rformat='e30.23')
       write(out_unit,*) '==================================================='
       write(out_unit,*) '==================================================='
       flush(out_unit)

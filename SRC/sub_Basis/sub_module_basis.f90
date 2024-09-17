@@ -1017,7 +1017,7 @@ MODULE mod_basis
         IF (debug) THEN
           write(out_unit,*) ' contraction basis'
           write(out_unit,*)
-          CALL Write_Mat(Mat_read,out_unit,nb_col)
+          CALL Write_Mat_MPI(Mat_read,out_unit,nb_col)
           flush(out_unit)
         END IF
 !       -------------------------------------------------
@@ -2114,7 +2114,7 @@ MODULE mod_basis
 
           IF (debug) THEN
             write(out_unit,*) 'd0bxd0bT'
-            CALL Write_VecMat(d0bxd0bT,out_unit,5)
+            CALL Write_Mat_MPI(d0bxd0bT,out_unit,5)
             flush(out_unit)
           END IF
 
@@ -2158,8 +2158,8 @@ MODULE mod_basis
             !    IF (abs(valP(i)) > epsi) d0bxd0bT(:,i) = VecP(:,i)/valP(i)
             !  END DO
             d0bxd0bT_inv = matmul(d0bxd0bT,transpose(VecP))
-            !CALL Write_VecMat(matmul(d0bxd0bT,d0bxd0bT_inv),out_unit,5)
-            !CALL Write_VecMat(matmul(d0bxd0bT_inv,d0bxd0bT),out_unit,5)
+            !CALL Write_Mat_MPI(matmul(d0bxd0bT,d0bxd0bT_inv),out_unit,5)
+            !CALL Write_Mat_MPI(matmul(d0bxd0bT_inv,d0bxd0bT),out_unit,5)
 
             CALL dealloc_NParray(valP,'valP',name_sub)
             CALL dealloc_NParray(vecP,'vecP',name_sub)
@@ -2172,7 +2172,7 @@ MODULE mod_basis
 
           IF (debug) THEN
             write(out_unit,*) 'd0bxd0bT_inv'
-            CALL Write_VecMat(d0bxd0bT_inv,out_unit,5)
+            CALL Write_Mat_MPI(d0bxd0bT_inv,out_unit,5)
             flush(out_unit)
           END IF
 
@@ -2181,7 +2181,7 @@ MODULE mod_basis
           d0b_pseudoInv =  matmul(basis_set%dnRBG%d0,d0bxd0bT_inv)
           IF (debug) THEN
             write(out_unit,*) 'True d0b_pseudoInv'
-            CALL Write_VecMat(d0b_pseudoInv,out_unit,5)
+            CALL Write_Mat_MPI(d0b_pseudoInv,out_unit,5)
             flush(out_unit)
           END IF
         ELSE
@@ -2196,7 +2196,7 @@ MODULE mod_basis
 
           IF (debug) THEN
             write(out_unit,*) 'Standard d0b_pseudoInv'
-            CALL Write_VecMat(d0b_pseudoInv,out_unit,5)
+            CALL Write_Mat_MPI(d0b_pseudoInv,out_unit,5)
             flush(out_unit)
           END IF
         END IF
@@ -2205,7 +2205,7 @@ MODULE mod_basis
 
         IF (debug) THEN
           !write(out_unit,*) 'dnRGG%d0'
-          !CALL Write_VecMat(basis_set%dnRGG%d0,out_unit,5)
+          !CALL Write_Mat_MPI(basis_set%dnRGG%d0,out_unit,5)
           write(out_unit,*) 'dnRGG%d0 done'
           flush(out_unit)
         END IF
@@ -2225,7 +2225,7 @@ MODULE mod_basis
         IF (debug) THEN
           write(out_unit,*) 'dnRGG%d1'
           DO i=1,basis_set%ndim
-          !  CALL Write_VecMat(basis_set%dnRGG%d1(:,:,i),out_unit,5)
+          !  CALL Write_Mat_MPI(basis_set%dnRGG%d1(:,:,i),out_unit,5)
           END DO
           write(out_unit,*) 'dnRGG%d1 done'
           flush(out_unit)
@@ -2248,11 +2248,11 @@ MODULE mod_basis
           DO i=1,basis_set%ndim
           DO j=1,basis_set%ndim
             Check_bGB = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))
-            IF (debug) CALL Write_VecMat(Check_bGB,out_unit,5,info='d1GG^2')
-            IF (debug) CALL Write_VecMat(basis_set%dnRGG%d2(:,:,i,j),out_unit,5,info='d2GG')
+            IF (debug) CALL Write_Mat_MPI(Check_bGB,out_unit,5,info='d1GG^2')
+            IF (debug) CALL Write_Mat_MPI(basis_set%dnRGG%d2(:,:,i,j),out_unit,5,info='d2GG')
 
             Check_bGB = matmul(basis_set%dnRGG%d1(:,:,i),basis_set%dnRGG%d1(:,:,j))-basis_set%dnRGG%d2(:,:,i,j)
-            IF (debug) CALL Write_VecMat(Check_bGB,out_unit,5,info='d1GG^2 - d2GG')
+            IF (debug) CALL Write_Mat_MPI(Check_bGB,out_unit,5,info='d1GG^2 - d2GG')
 
             Max_err_d1GG2md2GG = maxval(abs(Check_bGB))
             !IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
@@ -2272,7 +2272,7 @@ MODULE mod_basis
           Max_err_Check_bGB = maxval(abs(Check_bGB))
           IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
             write(out_unit,'(a,4x,e9.2)') 'Check_bGB%d0',maxval(abs(Check_bGB))
-            CALL Write_VecMat(Check_bGB,out_unit,5)
+            CALL Write_Mat_MPI(Check_bGB,out_unit,5)
           END IF
           flush(out_unit)
 
@@ -2281,7 +2281,7 @@ MODULE mod_basis
             Max_err_Check_bGB = max(Max_err_Check_bGB,maxval(abs(Check_bGB)))
             IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
               write(out_unit,'(a,1x,i0,2x,e9.2)') 'Check_bGB%d1',i,maxval(abs(Check_bGB))
-              CALL Write_VecMat(Check_bGB,out_unit,5)
+              CALL Write_Mat_MPI(Check_bGB,out_unit,5)
             END IF
           END DO
           flush(out_unit)
@@ -2292,7 +2292,7 @@ MODULE mod_basis
             Max_err_Check_bGB = max(Max_err_Check_bGB,maxval(abs(Check_bGB)))
             IF (debug .OR. maxval(abs(Check_bGB)) > ONETENTH**8) THEN
               write(out_unit,'(a,1x,i0,1x,i0,e9.2)') 'Check_bGB%d2',i,j,maxval(abs(Check_bGB))
-              CALL Write_VecMat(Check_bGB,out_unit,5)
+              CALL Write_Mat_MPI(Check_bGB,out_unit,5)
             END IF
           END DO
           END DO
@@ -2874,7 +2874,7 @@ END SUBROUTINE pack_basis_old
         IF (max_Sii > ONETENTH**5 .OR. max_Sij > ONETENTH**5) THEN
           write(out_unit,*) ' Overlap Matrix:'
           CALL Write_nDindex(basis_temp%nDindB)
-          CALL Write_Mat(matS,out_unit,5)
+          CALL Write_Mat_MPI(matS,out_unit,5)
         END IF
 
 
@@ -4606,7 +4606,7 @@ END SUBROUTINE pack_basis_old
       IF (debug) THEN
         write(out_unit,*)
         write(out_unit,*) ' d0b',BasisnD%nb
-        CALL Write_Vec(d0b,out_unit,8)
+        CALL Write_Vec_MPI(d0b,out_unit,8)
         write(out_unit,*)
         write(out_unit,*) 'END calc_d0b'
       END IF

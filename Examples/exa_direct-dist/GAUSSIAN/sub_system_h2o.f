@@ -125,13 +125,13 @@ c     - read the hessain matrix
         write(out_unit,*) 'located,err',located,err
         STOP
       END IF
-!     CALL Write_Mat(hh,out_unit,5)
+!     CALL Write_Mat_MPI(hh,out_unit,5)
       DO j=1,n
       DO i=1,j-1
         hh(j,i) = hh(i,j)
       END DO
       END DO
-      CALL Write_Mat(hh,out_unit,5)
+      CALL Write_Mat_MPI(hh,out_unit,5)
 
       END
 C================================================================
