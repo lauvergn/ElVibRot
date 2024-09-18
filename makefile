@@ -316,14 +316,14 @@ zip: cleanall
 DEV=dev
 .PHONY: getlib
 getlib:
-	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib $(DEV)
-	cd $(ExtLibDIR) ; ./get_Lib.sh AD_dnSVM $(DEV)
-	cd $(ExtLibDIR) ; ./get_Lib.sh ConstPhys $(DEV)
-	cd $(ExtLibDIR) ; ./get_Lib.sh QuantumModelLib $(DEV)
-	cd $(ExtLibDIR) ; ./get_Lib.sh nDindex $(DEV)
-	cd $(ExtLibDIR) ; ./get_Lib.sh EVRT_dnSVM $(DEV)
-	cd $(ExtLibDIR) ; ./get_Lib.sh FOR_EVRT $(DEV)
-	cd $(ExtLibDIR) ; ./get_Lib.sh Tnum-Tana $(DEV)
+	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib 		$(DEV)
+	cd $(ExtLibDIR) ; ./get_Lib.sh AD_dnSVM  		$(DEV)
+	cd $(ExtLibDIR) ; ./get_Lib.sh ConstPhys 		$(DEV)
+	cd $(ExtLibDIR) ; ./get_Lib.sh QuantumModelLib  $(DEV)
+	cd $(ExtLibDIR) ; ./get_Lib.sh nDindex 			$(DEV)
+	cd $(ExtLibDIR) ; ./get_Lib.sh EVRT_dnSVM 		$(DEV)
+	cd $(ExtLibDIR) ; ./get_Lib.sh FOR_EVRT 		$(DEV)
+	cd $(ExtLibDIR) ; ./get_Lib.sh Tnum-Tana 		$(DEV)
 #
 $(QDLIBA): 
 	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib $(DEV)
