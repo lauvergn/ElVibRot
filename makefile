@@ -313,7 +313,7 @@ zip: cleanall
 # QDUtilLib AD_dnSVM ConstPhys QuantumModelLib nDindex EVRT_dnSVM FOR_EVRT
 #===============================================
 #
-DEV=dev
+DEV=
 .PHONY: getlib
 getlib:
 	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib 		$(DEV)
