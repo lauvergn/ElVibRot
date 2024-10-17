@@ -58,7 +58,7 @@
         logical                    :: hessian_old      = .TRUE.
         logical                    :: hessian_cart     = .TRUE.
         logical                    :: hessian_onthefly = .FALSE.
-        TYPE (File_t)          :: file_hessian
+        TYPE (File_t)              :: file_hessian
         integer                    :: nb_NM            = 0      ! nb_act
 
         integer                    :: NM_TO_sym_ver    = 4
@@ -67,6 +67,10 @@
         logical                    :: hessian_read     = .FALSE.
         logical                    :: k_read           = .FALSE.
         integer                    :: nb_read          = 0
+
+        integer                    :: ncart_act        = 0
+        real (kind=Rkind), allocatable :: hCC(:,:)
+
         real (kind=Rkind), pointer :: d0h(:,:)         =>null()
         real (kind=Rkind), pointer :: d0k(:,:)         =>null()
 
@@ -75,14 +79,14 @@
         real (kind=Rkind), pointer :: scaleQ_HObasis(:)    =>null()
 
 
-        real (kind=Rkind), pointer :: d0c_inv(:,:)     =>null()
-        real (kind=Rkind), pointer :: d0c(:,:)         =>null()
-        real (kind=Rkind), pointer :: phase(:)         =>null() ! to change the sign of d0c
-        real (kind=Rkind), pointer :: d0eh(:)          =>null()
-        logical                    :: purify_hess      = .FALSE.! if .TRUE., we use an hessian purified (default : .FALSE.)
+        real (kind=Rkind), pointer :: d0c_inv(:,:)             =>null()
+        real (kind=Rkind), pointer :: d0c(:,:)                 =>null()
+        real (kind=Rkind), pointer :: phase(:)                 =>null() ! to change the sign of d0c
+        real (kind=Rkind), pointer :: d0eh(:)                  =>null()
+        logical                    :: ReadCoordBlocks  = .FALSE.! if .TRUE., the hessian is transformed to a block diagonal form (default : .FALSE.)
+        integer, allocatable       :: BlockCoord(:)             ! define the list of coordinate blocks (same integer => same block)
         logical                    :: eq_hess          = .FALSE.! if .TRUE., we use an hessian purified (default : .FALSE.)
         logical                    :: k_Half           = .FALSE.! if .TRUE., make a transfo, to get -1/2D2./dx2
-        integer, pointer           :: Qact1_sym(:)     =>null() ! Qact1_sym(nb_NM)  : for the symmetrized H0
         integer, pointer           :: Qact1_eq(:,:)    =>null() ! Qact1_eq(nb_NM,nb_NM) : for the symmetrized H0
         integer                    :: nb_equi          = 0      ! number of set of equivalent variables
         integer, pointer           :: dim_equi(:)      =>null() ! dimension for each set of equivalence
@@ -691,8 +695,8 @@
       IF (associated(NMTransfo%tab_equi))  THEN
         CALL dealloc_array(NMTransfo%tab_equi,"NMTransfo%tab_equi",name_sub)
       END IF
-      IF (associated(NMTransfo%Qact1_sym))  THEN
-        CALL dealloc_array(NMTransfo%Qact1_sym,"NMTransfo%Qact1_sym",name_sub)
+      IF (allocated(NMTransfo%BlockCoord))  THEN
+        CALL dealloc_NParray(NMTransfo%BlockCoord,"NMTransfo%BlockCoord",name_sub)
       END IF
       IF (associated(NMTransfo%Qact1_eq))  THEN
         CALL dealloc_array(NMTransfo%Qact1_eq,"NMTransfo%Qact1_eq",name_sub)
@@ -728,7 +732,7 @@
 
       NMTransfo%nb_NM         = 0
 
-      NMTransfo%purify_hess   = .FALSE.
+      NMTransfo%ReadCoordBlocks   = .FALSE.
       NMTransfo%eq_hess       = .FALSE.
       NMTransfo%k_Half        = .FALSE.
       NMTransfo%nb_equi       = 0
@@ -740,24 +744,79 @@
       !!@description: TODO
       !!@param: TODO
       SUBROUTINE Read_NMTransfo(NMTransfo,nb_Qin)
+        USE mod_MPI, ONLY : MPI_id
 
       integer, intent(in) :: nb_Qin
       TYPE (Type_NMTransfo), intent(inout) :: NMTransfo
 
-      integer                  :: i,k,it,nb_col,nb_NM
+      integer                  :: i,k,it,nb_col,nb_NM,nio
+      logical                  :: is_opened
       character (len=Name_len) :: name0
       real(kind=Rkind), allocatable :: mat(:,:)
 
-      logical, parameter :: debug=.TRUE.
-      !logical, parameter :: debug=.FALSE.
+      !logical, parameter :: debug=.TRUE.
+      logical, parameter :: debug=.FALSE.
       integer            :: err_read
       character (len=*), parameter :: name_sub='Read_NMTransfo'
 
 
       IF (NMTransfo%NM_TO_sym_ver == 0) NMTransfo%NM_TO_sym_ver = 4
 
+      IF (NMTransfo%hessian_cart .AND. NMTransfo%hessian_read) THEN
+        IF (len(NMTransfo%file_hessian%name) > 0) THEN
+          write(out_unit,*) ' Read the Cartesian hessian from a file "',trim(NMTransfo%file_hessian%name),'"'
 
-      IF (NMTransfo%d0c_read) THEN
+          CALL file_open(NMTransfo%file_hessian, nio, lformatted=.TRUE.,err_file=err_read)
+          IF (err_read /= 0) THEN
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) ' error while openning the hessian file.'
+            CALL file_write(NMTransfo%file_hessian)
+            STOP 'ERROR in Read_NMTransfo: while openning the hessian file.'
+          END IF
+        ELSE
+          write(out_unit,*) ' Read the Cartesian hessian from the input data file'
+          nio = in_unit
+        END IF
+        read(nio,*,IOSTAT=err_read)     ! for read a title (like d0h)
+        IF (err_read /= 0) THEN
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' "End of file", while reading an empty line or title of hCC matrix.'
+          write(out_unit,*) ' NMTransfo%hessian_read: ',NMTransfo%hessian_read
+          write(out_unit,*) ' Check your data !!'
+          STOP 'ERROR in Read_NMTransfo: "End of file", while reading an empty line or title of hCC matrix.'
+        END IF
+        read(nio,*,IOSTAT=err_read) nb_col
+
+        IF (err_read /= 0) THEN
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' "End of file", while reading nb_col of hCC matrix.'
+          write(out_unit,*) ' Check your data !!'
+          STOP
+        END IF
+
+        IF (.NOT. allocated(NMTransfo%hCC)) THEN
+          CALL alloc_array(NMTransfo%hCC,[NMTransfo%ncart_act,NMTransfo%ncart_act],  &
+                          "NMTransfo%hCC",name_sub)
+          NMTransfo%hCC(:,:) = ZERO
+        END IF
+
+        CALL Read_Mat(NMTransfo%hCC,nio,nb_col,err_read)
+        IF (err_read /= 0) THEN
+          write(out_unit,*) 'ERROR ',name_sub
+          write(out_unit,*) ' reading the matrix "NMTransfo%hCC"'
+          write(out_unit,*) ' Check your data !!'
+          STOP
+        END IF
+        ! close the file if needed
+        IF (nio /= in_unit) THEN
+          inquire(unit=nio, opened=is_opened)
+          IF (is_opened) CALL file_close(NMTransfo%file_hessian)
+        END IF
+
+        write(out_unit,*) ' The Cartesian hessian is read'
+        IF (debug) CALL Write_Mat_MPI(NMTransfo%hCC,out_unit,nb_col)
+
+      ELSE IF (NMTransfo%d0c_read) THEN
 
         read(in_unit,*,IOSTAT=err_read)     ! for read a title (like d0c)
         IF (err_read /= 0) THEN
@@ -800,165 +859,160 @@
           CALL Write_Mat_MPI(mat,out_unit,nb_col,Rformat='f10.6')
           CALL dealloc_NParray(mat,"mat",name_sub)
         END IF
+        flush(out_unit)
 
+      ELSE
+        IF (NMTransfo%hessian_read .NEQV. NMTransfo%k_read) THEN
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' You MUST read both hessian and k matrix'
+          write(out_unit,*) ' hessian_read: ',NMTransfo%hessian_read
+          write(out_unit,*) ' k_read:       ',NMTransfo%k_read
+          write(out_unit,*) ' Check your data !!'
+          STOP
+        END IF
+  
+        IF (NMTransfo%hessian_read .AND. NMTransfo%nb_read < 1) THEN
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' You WANT to read both hessian and k matrix'
+          write(out_unit,*) ' but nb_read is < 1: ',NMTransfo%nb_read
+          write(out_unit,*) ' Check your data !!'
+          STOP
+        END IF
+        IF (NMTransfo%hessian_read) THEN
+  
+          DO i=1,NMTransfo%nb_read
+  
+            read(in_unit,*,IOSTAT=err_read)     ! for read a title (like d0h)
+            IF (err_read /= 0) THEN
+              write(out_unit,*) ' ERROR in ',name_sub
+              write(out_unit,*) ' "End of file", while reading an empty ', &
+                 ' line or title of d0h matrices.'
+              write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
+              write(out_unit,*) ' NMTransfo%hessian_read: ',NMTransfo%hessian_read
+              write(out_unit,*) ' Check your data !!'
+              STOP
+            END IF
+            read(in_unit,*,IOSTAT=err_read) nb_NM,nb_col
+            IF (err_read /= 0) THEN
+              write(out_unit,*) ' ERROR in ',name_sub
+              write(out_unit,*) ' "End of file", while reading nb_NM,nb_col ',&
+                              ' of d0h matrices.'
+              write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
+              write(out_unit,*) ' NMTransfo%hessian_read: ',NMTransfo%hessian_read
+              write(out_unit,*) ' Check your data !!'
+              STOP
+            END IF
+  
+            NMTransfo%nb_NM = nb_NM
+            IF (.NOT. associated(NMTransfo%d0h)) THEN
+              CALL alloc_array(NMTransfo%d0h,[nb_NM,nb_NM],"NMTransfo%d0h",name_sub)
+              NMTransfo%d0h(:,:) = ZERO
+              CALL alloc_NParray(mat,[nb_NM,nb_NM],"mat",name_sub)
+            END IF
+  
+  
+            CALL Read_Mat(mat,in_unit,nb_col,err_read)
+            IF (err_read /= 0) THEN
+              write(out_unit,*) 'ERROR ',name_sub
+              write(out_unit,*) ' reading the matrix "NMTransfo%d0h"'
+              write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
+              write(out_unit,*) ' NMTransfo%hessian_read: ',NMTransfo%hessian_read
+              write(out_unit,*) ' Check your data !!'
+              STOP
+            END IF
+            IF (debug) CALL Write_Mat_MPI(mat,out_unit,nb_col)
+  
+            NMTransfo%d0h(:,:) = NMTransfo%d0h(:,:) + mat(:,:)
+  
+          END DO
+          NMTransfo%d0h(:,:) = NMTransfo%d0h(:,:)/real(NMTransfo%nb_read,kind=Rkind)
+  
+          IF (allocated(mat)) CALL dealloc_NParray(mat,"mat",name_sub)
+  
+        END IF
+        flush(out_unit)
+  
+        IF (NMTransfo%k_read) THEN
+  
+          DO i=1,NMTransfo%nb_read
+  
+            read(in_unit,*,IOSTAT=err_read)     ! for read a title (like d0h)
+            IF (err_read /= 0) THEN
+              write(out_unit,*) ' ERROR in ',name_sub
+              write(out_unit,*) ' "End of file", while reading an empty ', &
+                 ' line or title of d0k matrices.'
+              write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
+              write(out_unit,*) ' NMTransfo%k_read: ',NMTransfo%k_read
+              write(out_unit,*) ' Check your data !!'
+              STOP
+            END IF
+            read(in_unit,*,IOSTAT=err_read) nb_NM,nb_col
+            IF (err_read /= 0) THEN
+              write(out_unit,*) ' ERROR in ',name_sub
+              write(out_unit,*) ' "End of file", while reading nb_NM,nb_col',&
+                              ' of d0k matrices.'
+              write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
+              write(out_unit,*) ' NMTransfo%k_read: ',NMTransfo%k_read
+              write(out_unit,*) ' Check your data !!'
+              STOP
+            END IF
+  
+            IF (.NOT. associated(NMTransfo%d0k)) THEN
+              CALL alloc_array(NMTransfo%d0k,[nb_NM,nb_NM],"NMTransfo%d0k",name_sub)
+              NMTransfo%d0k(:,:) = ZERO
+              CALL alloc_NParray(mat,[nb_NM,nb_NM],"mat",name_sub)
+            END IF
+  
+  
+            CALL Read_Mat(mat,in_unit,nb_col,err_read)
+            IF (err_read /= 0) THEN
+              write(out_unit,*) 'ERROR ',name_sub
+              write(out_unit,*) ' reading the matrix "NMTransfo%d0k"'
+              write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
+              write(out_unit,*) ' NMTransfo%k_read: ',NMTransfo%k_read
+              write(out_unit,*) ' Check your data !!'
+              STOP
+            END IF
+            IF (debug) CALL Write_Mat_MPI(mat,out_unit,nb_col)
+  
+            NMTransfo%d0k(:,:) = NMTransfo%d0k(:,:) + mat(:,:)
+  
+          END DO
+          NMTransfo%d0k(:,:) = NMTransfo%d0k(:,:)/real(NMTransfo%nb_read,kind=Rkind)
+  
+          IF (allocated(mat)) CALL dealloc_NParray(mat,"mat",name_sub)
+  
+        END IF
+        flush(out_unit)
       END IF
-      flush(out_unit)
 
+      IF (NMTransfo%ReadCoordBlocks) THEN
 
-      IF (NMTransfo%hessian_read .NEQV. NMTransfo%k_read) THEN
-        write(out_unit,*) ' ERROR in ',name_sub
-        write(out_unit,*) ' You MUST read both hessian and k matrix'
-        write(out_unit,*) ' hessian_read: ',NMTransfo%hessian_read
-        write(out_unit,*) ' k_read:       ',NMTransfo%k_read
-        write(out_unit,*) ' Check your data !!'
-        STOP
-      END IF
-
-      IF (NMTransfo%hessian_read .AND. NMTransfo%nb_read < 1) THEN
-        write(out_unit,*) ' ERROR in ',name_sub
-        write(out_unit,*) ' You WANT to read both hessian and k matrix'
-        write(out_unit,*) ' but nb_read is < 1: ',NMTransfo%nb_read
-        write(out_unit,*) ' Check your data !!'
-        STOP
-      END IF
-      IF (NMTransfo%hessian_read) THEN
-
-        DO i=1,NMTransfo%nb_read
-
-          read(in_unit,*,IOSTAT=err_read)     ! for read a title (like d0h)
-          IF (err_read /= 0) THEN
-            write(out_unit,*) ' ERROR in ',name_sub
-            write(out_unit,*) ' "End of file", while reading an empty ', &
-               ' line or title of d0h matrices.'
-            write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
-            write(out_unit,*) ' NMTransfo%hessian_read: ',NMTransfo%hessian_read
-            write(out_unit,*) ' Check your data !!'
-            STOP
-          END IF
-          read(in_unit,*,IOSTAT=err_read) nb_NM,nb_col
-          IF (err_read /= 0) THEN
-            write(out_unit,*) ' ERROR in ',name_sub
-            write(out_unit,*) ' "End of file", while reading nb_NM,nb_col ',&
-                            ' of d0h matrices.'
-            write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
-            write(out_unit,*) ' NMTransfo%hessian_read: ',NMTransfo%hessian_read
-            write(out_unit,*) ' Check your data !!'
-            STOP
-          END IF
-
-          NMTransfo%nb_NM = nb_NM
-          IF (.NOT. associated(NMTransfo%d0h)) THEN
-            CALL alloc_array(NMTransfo%d0h,[nb_NM,nb_NM],"NMTransfo%d0h",name_sub)
-            NMTransfo%d0h(:,:) = ZERO
-            CALL alloc_NParray(mat,[nb_NM,nb_NM],"mat",name_sub)
-          END IF
-
-
-          CALL Read_Mat(mat,in_unit,nb_col,err_read)
-          IF (err_read /= 0) THEN
-            write(out_unit,*) 'ERROR ',name_sub
-            write(out_unit,*) ' reading the matrix "NMTransfo%d0h"'
-            write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
-            write(out_unit,*) ' NMTransfo%hessian_read: ',NMTransfo%hessian_read
-            write(out_unit,*) ' Check your data !!'
-            STOP
-          END IF
-          IF (debug) CALL Write_Mat_MPI(mat,out_unit,nb_col)
-
-          NMTransfo%d0h(:,:) = NMTransfo%d0h(:,:) + mat(:,:)
-
-        END DO
-        NMTransfo%d0h(:,:) = NMTransfo%d0h(:,:)/real(NMTransfo%nb_read,kind=Rkind)
-
-        IF (allocated(mat)) CALL dealloc_NParray(mat,"mat",name_sub)
-
-      END IF
-      flush(out_unit)
-
-      IF (NMTransfo%k_read) THEN
-
-        DO i=1,NMTransfo%nb_read
-
-          read(in_unit,*,IOSTAT=err_read)     ! for read a title (like d0h)
-          IF (err_read /= 0) THEN
-            write(out_unit,*) ' ERROR in ',name_sub
-            write(out_unit,*) ' "End of file", while reading an empty ', &
-               ' line or title of d0k matrices.'
-            write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
-            write(out_unit,*) ' NMTransfo%k_read: ',NMTransfo%k_read
-            write(out_unit,*) ' Check your data !!'
-            STOP
-          END IF
-          read(in_unit,*,IOSTAT=err_read) nb_NM,nb_col
-          IF (err_read /= 0) THEN
-            write(out_unit,*) ' ERROR in ',name_sub
-            write(out_unit,*) ' "End of file", while reading nb_NM,nb_col',&
-                            ' of d0k matrices.'
-            write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
-            write(out_unit,*) ' NMTransfo%k_read: ',NMTransfo%k_read
-            write(out_unit,*) ' Check your data !!'
-            STOP
-          END IF
-
-          IF (.NOT. associated(NMTransfo%d0k)) THEN
-            CALL alloc_array(NMTransfo%d0k,[nb_NM,nb_NM],"NMTransfo%d0k",name_sub)
-            NMTransfo%d0k(:,:) = ZERO
-            CALL alloc_NParray(mat,[nb_NM,nb_NM],"mat",name_sub)
-          END IF
-
-
-          CALL Read_Mat(mat,in_unit,nb_col,err_read)
-          IF (err_read /= 0) THEN
-            write(out_unit,*) 'ERROR ',name_sub
-            write(out_unit,*) ' reading the matrix "NMTransfo%d0k"'
-            write(out_unit,*) ' i_read,NMTransfo%nb_read: ',i,NMTransfo%nb_read
-            write(out_unit,*) ' NMTransfo%k_read: ',NMTransfo%k_read
-            write(out_unit,*) ' Check your data !!'
-            STOP
-          END IF
-          IF (debug) CALL Write_Mat_MPI(mat,out_unit,nb_col)
-
-          NMTransfo%d0k(:,:) = NMTransfo%d0k(:,:) + mat(:,:)
-
-        END DO
-        NMTransfo%d0k(:,:) = NMTransfo%d0k(:,:)/real(NMTransfo%nb_read,kind=Rkind)
-
-        IF (allocated(mat)) CALL dealloc_NParray(mat,"mat",name_sub)
-
-      END IF
-      flush(out_unit)
-
-      IF (NMTransfo%purify_hess) THEN
-
-        IF (.NOT. associated(NMTransfo%Qact1_sym)) THEN
-          CALL alloc_array(NMTransfo%Qact1_sym,[nb_Qin],              &
-                          "NMTransfo%Qact1_sym",name_sub)
+        IF (.NOT. allocated(NMTransfo%BlockCoord)) THEN
+          CALL alloc_NParray(NMTransfo%BlockCoord,[nb_Qin],"NMTransfo%BlockCoord",name_sub)
         END IF
         IF (.NOT. associated(NMTransfo%Qact1_eq)) THEN
-          CALL alloc_array(NMTransfo%Qact1_eq,[nb_Qin,nb_Qin],        &
-                          "NMTransfo%Qact1_eq",name_sub)
+          CALL alloc_array(NMTransfo%Qact1_eq,[nb_Qin,nb_Qin],"NMTransfo%Qact1_eq",name_sub)
         END IF
         IF (.NOT. associated(NMTransfo%dim_equi)) THEN
-          CALL alloc_array(NMTransfo%dim_equi,[nb_Qin],               &
-                          "NMTransfo%dim_equi",name_sub)
+          CALL alloc_array(NMTransfo%dim_equi,[nb_Qin],"NMTransfo%dim_equi",name_sub)
         END IF
         IF (.NOT. associated(NMTransfo%tab_equi)) THEN
-          CALL alloc_array(NMTransfo%tab_equi,[nb_Qin,nb_Qin],        &
-                          "NMTransfo%tab_equi",name_sub)
+          CALL alloc_array(NMTransfo%tab_equi,[nb_Qin,nb_Qin],"NMTransfo%tab_equi",name_sub)
         END IF
 
         write(out_unit,*)
         write(out_unit,*) "========================================"
-        write(out_unit,*) 'Hessian purification',NMTransfo%purify_hess
+        write(out_unit,*) 'Hessian block transformation',NMTransfo%ReadCoordBlocks
 
         write(out_unit,*) 'nb_Qin',nb_Qin
-        NMTransfo%Qact1_sym(:)  = 0
+        NMTransfo%BlockCoord(:)  = 0
         NMTransfo%Qact1_eq(:,:) = 0
 
-        read(in_unit,*,IOSTAT=err_read) name0,NMTransfo%Qact1_sym(:)
+        read(in_unit,*,IOSTAT=err_read) name0,NMTransfo%BlockCoord(:)
         IF (err_read /= 0) THEN
           write(out_unit,*) 'ERROR ',name_sub
-          write(out_unit,*) ' while reading Qact1_sym',name0,NMTransfo%Qact1_sym(:)
+          write(out_unit,*) ' while reading BlockCoord',name0,NMTransfo%BlockCoord(:)
           write(out_unit,*) ' Check your data !!'
           STOP
         END IF
@@ -992,8 +1046,8 @@
         END DO
 
 
-        write(out_unit,*) 'Hessian purification parameters'
-        write(out_unit,*) 'Qact1_sym',NMTransfo%Qact1_sym(:)
+        write(out_unit,*) 'Hessian block transformation'
+        write(out_unit,*) 'BlockCoord',NMTransfo%BlockCoord(:)
         DO i=1,nb_Qin
           write(out_unit,*) 'Qact1_eq',i,NMTransfo%Qact1_eq(i,:)
         END DO
@@ -1030,7 +1084,11 @@
                                             NMTransfo%file_hessian%name
       write(out_unit,*) 'k_Half',NMTransfo%k_Half
 
-
+      write(out_unit,*) 'ncart_act',NMTransfo%ncart_act
+      IF (allocated(NMTransfo%hCC)) THEN 
+        write(out_unit,*) 'hCC: hessian in Cartesian coordinates'
+        CALL write_Mat_MPI(NMTransfo%hCC,out_unit,6)
+      END IF
 
       IF (associated(NMTransfo%Q0_HObasis)) THEN
         write(out_unit,*) 'Q0_HObasis'
@@ -1082,13 +1140,13 @@
 
       END IF
 
-      IF (NMTransfo%purify_hess) THEN
+      IF (NMTransfo%ReadCoordBlocks) THEN
 
         write(out_unit,*)
         write(out_unit,*) "========================================"
-        write(out_unit,*) 'Hessian purification',NMTransfo%purify_hess
-        nb_Qin = size(NMTransfo%Qact1_sym(:))
-        write(out_unit,*)  'Qact1_sym: ',NMTransfo%Qact1_sym(:)
+        write(out_unit,*) 'Hessian block transformation',NMTransfo%ReadCoordBlocks
+        nb_Qin = size(NMTransfo%BlockCoord(:))
+        write(out_unit,*)  'BlockCoord: ',NMTransfo%BlockCoord(:)
 
         IF (NMTransfo%eq_hess) THEN
           DO i=1,nb_Qin
@@ -1137,6 +1195,8 @@
       NMTransfo2%nb_read          = NMTransfo1%nb_read
       NMTransfo2%d0c_read         = NMTransfo1%d0c_read
 
+      NMTransfo2%ncart_act        = NMTransfo1%ncart_act
+      IF (allocated(NMTransfo1%hCC)) NMTransfo2%hCC = NMTransfo1%hCC
 
       IF (associated(NMTransfo1%d0h)) THEN
         CALL alloc_array(NMTransfo2%d0h,shape(NMTransfo1%d0h),          &
@@ -1181,16 +1241,16 @@
 
       END IF
 
-      NMTransfo2%k_Half      = NMTransfo1%k_Half
-      NMTransfo2%purify_hess = NMTransfo1%purify_hess
-      NMTransfo2%eq_hess     = NMTransfo1%eq_hess
+      NMTransfo2%k_Half          = NMTransfo1%k_Half
+      NMTransfo2%ReadCoordBlocks = NMTransfo1%ReadCoordBlocks
+      NMTransfo2%eq_hess         = NMTransfo1%eq_hess
 
-      IF (NMTransfo2%purify_hess) THEN
-        nb_Qin = size(NMTransfo1%Qact1_sym)
+      IF (NMTransfo2%ReadCoordBlocks) THEN
+        nb_Qin = size(NMTransfo1%BlockCoord)
 
-        CALL alloc_array(NMTransfo2%Qact1_sym,shape(NMTransfo1%Qact1_sym),&
-                        "NMTransfo2%Qact1_sym",name_sub)
-        NMTransfo2%Qact1_sym = NMTransfo1%Qact1_sym
+        CALL alloc_NParray(NMTransfo2%BlockCoord,shape(NMTransfo1%BlockCoord),&
+                          "NMTransfo2%BlockCoord",name_sub)
+        NMTransfo2%BlockCoord = NMTransfo1%BlockCoord
 
         CALL alloc_array(NMTransfo2%Qact1_eq,shape(NMTransfo1%Qact1_eq),&
                         "NMTransfo2%Qact1_eq",name_sub)

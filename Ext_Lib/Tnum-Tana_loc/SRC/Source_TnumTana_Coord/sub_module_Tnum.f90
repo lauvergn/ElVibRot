@@ -976,6 +976,7 @@ MODULE mod_Tnum
             mole%tab_Qtransfo(it)%type_Qout => mole%tab_Qtransfo(it-1)%type_Qin
             mole%tab_Qtransfo(it)%name_Qout => mole%tab_Qtransfo(it-1)%name_Qin
             mole%tab_Qtransfo(it)%nb_Qout    = mole%tab_Qtransfo(it-1)%nb_Qin
+            mole%tab_Qtransfo(it)%ncart_act  = mole%ncart_act
             IF (mole%tab_Qtransfo(it)%nb_Qout < 1) THEN
               write(out_unit,*) ' ERROR in ',name_sub
               write(out_unit,*) '  it:',it
@@ -1290,7 +1291,7 @@ MODULE mod_Tnum
                           "mole%tab_Qtransfo(it)%NMTransfo",name_sub)
           mole%NMTransfo => mole%tab_Qtransfo(it)%NMTransfo
 
-          mole%tab_Qtransfo(it)%NMTransfo%purify_hess      = purify_hess
+          mole%tab_Qtransfo(it)%NMTransfo%ReadCoordBlocks  = purify_hess
           mole%tab_Qtransfo(it)%NMTransfo%k_Half           = k_Half
           mole%tab_Qtransfo(it)%NMTransfo%hessian_old      = hessian_old
           mole%tab_Qtransfo(it)%NMTransfo%hessian_onthefly = hessian_onthefly

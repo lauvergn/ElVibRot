@@ -2068,15 +2068,15 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
       CALL alloc_NParray(d0c,    [nb_NM,nb_NM],"d0c",    name_sub)
       CALL alloc_NParray(d0eh,   [nb_NM],      "d0eh",   name_sub)
 
-      IF (mole%NMTransfo%purify_hess) THEN
+      IF (mole%NMTransfo%ReadCoordBlocks) THEN
 
-        CALL H0_symmetrization(d0h,nb_NM,mole%NMTransfo%Qact1_sym,      &
+        CALL H0_symmetrization(d0h,nb_NM,mole%NMTransfo%BlockCoord,      &
                          mole%NMTransfo%dim_equi,mole%NMTransfo%tab_equi)
         write(out_unit,*) 'purified hessian matrix'
         write(out_unit,*) nb_NM,5
         CALL Write_Mat_MPI(d0h,out_unit,5,Rformat='e20.13')
 
-        CALL H0_symmetrization(d0k,nb_NM,mole%NMTransfo%Qact1_sym,      &
+        CALL H0_symmetrization(d0k,nb_NM,mole%NMTransfo%BlockCoord,      &
                         mole%NMTransfo%dim_equi,mole%NMTransfo%tab_equi)
         write(out_unit,*) 'purified K (kinetic) matrix'
         write(out_unit,*) nb_NM,5
@@ -2111,7 +2111,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
       END IF
 
       write(out_unit,*) '========================================='
-      IF (associated(mole%NMTransfo%Qact1_sym)) THEN
+      IF (allocated(mole%NMTransfo%BlockCoord)) THEN
         IF (debug) write(out_unit,*) '   d0eh,d0c,d0c_inv after "sort_with_Tab"'
 
         CALL alloc_NParray(tab_sort,[nb_NM],"tab_sort",name_sub)
@@ -2119,7 +2119,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
         max_freq = maxval(d0eh(:))
         DO i=1,nb_NM
           k = maxloc(abs(d0c(:,i)),dim=1)
-          tab_sort(i) = real(mole%NMTransfo%Qact1_sym(k),kind=Rkind)
+          tab_sort(i) = real(mole%NMTransfo%BlockCoord(k),kind=Rkind)
           IF (tab_sort(i) > ZERO) tab_sort(i) = d0eh(i) + tab_sort(i) * max_freq
         END DO
         write(out_unit,*) 'tab_sort: ',tab_sort(:)
@@ -2367,8 +2367,8 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
 
 !      -----------------------------------------------------------------
       integer :: err_mem,memory
-      !logical, parameter :: debug=.FALSE.
-      logical, parameter :: debug=.TRUE.
+      logical, parameter :: debug=.FALSE.
+      !logical, parameter :: debug=.TRUE.
       character (len=*), parameter :: name_sub = 'calc4_NM_TO_sym'
 !      -----------------------------------------------------------------
        IF (debug) THEN
@@ -2397,8 +2397,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
       !-----------------------------------------------------------------
       !-----------------------------------------------------------------
       ! analysis the number of block ... => nb_NM
-      CALL alloc_NParray(Ind_Coord_PerBlock,[mole%nb_var],          &
-                        "Ind_Coord_PerBlock",name_sub)
+      CALL alloc_NParray(Ind_Coord_PerBlock,[mole%nb_var],"Ind_Coord_PerBlock",name_sub)
 
       ! parameters for uncoupled HO
       CALL alloc_NParray(ScalePara   ,[mole%nb_var],"ScalePara",name_sub)
@@ -2416,8 +2415,8 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
       CALL alloc_NParray(d0eh_all,[mole%nb_var],"d0eh_all",name_sub)
       d0eh_all(:) = ZERO
 
-      IF (associated(mole%NMTransfo%Qact1_sym)) THEN
-        Ind_Coord_PerBlock(:) = mole%NMTransfo%Qact1_sym(:)
+      IF (allocated(mole%NMTransfo%BlockCoord)) THEN
+        Ind_Coord_PerBlock(:) = mole%NMTransfo%BlockCoord(:)
 
         ! first count the blocks
         nb_Block = 0
@@ -2430,7 +2429,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
              EXIT
           END IF
         END DO
-        Ind_Coord_PerBlock(:) = mole%NMTransfo%Qact1_sym(:)
+        Ind_Coord_PerBlock(:) = mole%NMTransfo%BlockCoord(:)
 
         ! then, count the number of coordinates per block
         CALL alloc_NParray(nb_PerBlock,      [nb_Block],"nb_PerBlock",      name_sub)
@@ -2448,7 +2447,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
           WHERE (Ind_Coord_PerBlock == i) Ind_Coord_PerBlock = -Huge(1)
 
         END DO
-        Ind_Coord_PerBlock(:) = mole%NMTransfo%Qact1_sym(:)
+        Ind_Coord_PerBlock(:) = mole%NMTransfo%BlockCoord(:)
 
       ELSE
         Ind_Coord_PerBlock(:) = 1
@@ -2522,7 +2521,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
         CALL alloc_NParray(d0h,     [nb_NM,nb_NM],"d0h",     name_sub)
         CALL alloc_NParray(d0k_save,[nb_NM,nb_NM],"d0k_save",name_sub)
         CALL alloc_NParray(d0c_ini, [nb_NM,nb_NM],"d0c_ini", name_sub)
-        CALL alloc_NParray(d0eh,    [nb_NM],    "d0eh",    name_sub)
+        CALL alloc_NParray(d0eh,    [nb_NM],      "d0eh",    name_sub)
 
         CALL get_hess_k(d0k,d0h,nb_NM,Qact,mole_1,para_Tnum,          &
                         Ind_Coord_AtBlock(i_Block),Ind_Coord_PerBlock,  &
@@ -2903,14 +2902,14 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
       CALL alloc_NParray(d0eh_all,[mole%nb_var],"d0eh_all",name_sub)
       d0eh_all(:) = ZERO
 
-      IF (.NOT. associated(mole%NMTransfo%Qact1_sym)) THEN
-        CALL alloc_array(mole%NMTransfo%Qact1_sym,[mole%nb_var],      &
-                        "mole%NMTransfo%Qact1_sym",name_sub)
-        mole%NMTransfo%Qact1_sym(:) = mole%ActiveTransfo%list_act_OF_Qdyn(:)
+      IF (.NOT. allocated(mole%NMTransfo%BlockCoord)) THEN
+        CALL alloc_NParray(mole%NMTransfo%BlockCoord,[mole%nb_var],      &
+                        "mole%NMTransfo%BlockCoord",name_sub)
+        mole%NMTransfo%BlockCoord(:) = mole%ActiveTransfo%list_act_OF_Qdyn(:)
       END IF
 
-      IF (associated(mole%NMTransfo%Qact1_sym)) THEN
-        Ind_Coord_PerBlock(:) = mole%NMTransfo%Qact1_sym(:)
+      IF (allocated(mole%NMTransfo%BlockCoord)) THEN
+        Ind_Coord_PerBlock(:) = mole%NMTransfo%BlockCoord(:)
 
         ! first count the blocks
         nb_Block = 0
@@ -2923,7 +2922,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
              EXIT
           END IF
         END DO
-        Ind_Coord_PerBlock(:) = mole%NMTransfo%Qact1_sym(:)
+        Ind_Coord_PerBlock(:) = mole%NMTransfo%BlockCoord(:)
 
         ! then, count the number of coordinates per block
         CALL alloc_NParray(nb_PerBlock,      [nb_Block],"nb_PerBlock",      name_sub)
@@ -2941,7 +2940,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
           WHERE (Ind_Coord_PerBlock == i) Ind_Coord_PerBlock = -Huge(1)
 
         END DO
-        Ind_Coord_PerBlock(:) = mole%NMTransfo%Qact1_sym(:)
+        Ind_Coord_PerBlock(:) = mole%NMTransfo%BlockCoord(:)
 
       ELSE
         Ind_Coord_PerBlock(:) = 1
@@ -3667,22 +3666,38 @@ SUBROUTINE Finalize_TnumTana_Coord_PrimOp(para_Tnum,mole,PrimOp,Tana,KEO_only)
 
           CALL get_Qact0(Qact,mole%ActiveTransfo)
 
-          SELECT CASE (mole%NMTransfo%NM_TO_sym_ver)
-          CASE(3)
-            CALL alloc_NParray(hCC,[mole%ncart_act,mole%ncart_act],"hCC",name_sub)
-            CALL calc3_NM_TO_sym(Qact,mole,para_Tnum,PrimOp,hCC,.FALSE.)
-            CALL dealloc_NParray(hCC,"hCC",name_sub)
-
-          CASE(4)
-            CALL calc4_NM_TO_sym(Qact,mole,para_Tnum,PrimOp)
-
-          CASE(5)
-            CALL calc5_NM_TO_sym(Qact,mole,para_Tnum,PrimOp)
-
-          CASE Default
-            CALL calc4_NM_TO_sym(Qact,mole,para_Tnum,PrimOp)
-
-          END SELECT
+          IF (mole%NMTransfo%hessian_cart .AND. mole%NMTransfo%hessian_read .AND. .NOT. mole%NMTransfo%hessian_onthefly) THEN
+            SELECT CASE (mole%NMTransfo%NM_TO_sym_ver)
+            CASE(3)
+              CALL calc3_NM_TO_sym(Qact,mole,para_Tnum,PrimOp,hCC=mole%NMTransfo%hCC,l_HCC=.TRUE.)  
+            CASE(4)
+              CALL calc4_NM_TO_sym(Qact,mole,para_Tnum,PrimOp,hCC=mole%NMTransfo%hCC,l_HCC=.TRUE.)
+  
+            CASE(5)
+              CALL calc5_NM_TO_sym(Qact,mole,para_Tnum,PrimOp,hCC=mole%NMTransfo%hCC,l_HCC=.TRUE.)
+  
+            CASE Default
+              CALL calc4_NM_TO_sym(Qact,mole,para_Tnum,PrimOp,hCC=mole%NMTransfo%hCC,l_HCC=.TRUE.)
+  
+            END SELECT
+          ELSE
+            SELECT CASE (mole%NMTransfo%NM_TO_sym_ver)
+            CASE(3)
+              CALL alloc_NParray(hCC,[mole%ncart_act,mole%ncart_act],"hCC",name_sub)
+              CALL calc3_NM_TO_sym(Qact,mole,para_Tnum,PrimOp,hCC,.FALSE.)
+              CALL dealloc_NParray(hCC,"hCC",name_sub)
+  
+            CASE(4)
+              CALL calc4_NM_TO_sym(Qact,mole,para_Tnum,PrimOp)
+  
+            CASE(5)
+              CALL calc5_NM_TO_sym(Qact,mole,para_Tnum,PrimOp)
+  
+            CASE Default
+              CALL calc4_NM_TO_sym(Qact,mole,para_Tnum,PrimOp)
+  
+            END SELECT
+          END IF
           !IF (print_level > 1) CALL sub_QplusDQ_TO_Cart(Qact,mole)
 
         END IF
