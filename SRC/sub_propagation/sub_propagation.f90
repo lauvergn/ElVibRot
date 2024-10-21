@@ -919,11 +919,11 @@ CONTAINS
          IF (RealTime < TEN) THEN
            write(out_unit,'(a,a,a,i0)') 'At T: ',                              &
                           RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.), &
-                          ', Delta Real time (ms): ',int(10**3*RealTime)
+                          ', Elapsed Real time (ms): ',int(10**3*RealTime)
          ELSE
            write(out_unit,'(a,a,a,i0)') 'At T: ',                              &
                           RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.), &
-                          ', Delta Real time (s): ',int(RealTime)
+                          ', Elapsed Real time (s): ',int(RealTime)
          END IF
          flush(out_unit)
 

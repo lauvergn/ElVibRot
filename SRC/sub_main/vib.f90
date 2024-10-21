@@ -2098,7 +2098,7 @@ DO SG4_maxth=1,PSG4_maxth_save
   END IF
 
   RealTime(SG4_maxth) = Delta_RealTime(HPsiTime)
-  write(out_unit,*) 'With ',SG4_maxth,'threads, Delta Real Time',RealTime(SG4_maxth)
+  write(out_unit,*) 'With ',SG4_maxth,'threads, Elapsed Real Time',RealTime(SG4_maxth)
   IF (RealTime(SG4_maxth) < Opt_RealTime) THEN
     IF (RealTime(SG4_maxth) > 0) THEN
       Opt_RealTime   = RealTime(SG4_maxth)
@@ -2112,7 +2112,7 @@ DO SG4_maxth=1,PSG4_maxth_save
 END DO
 
 SG4_maxth = opt_PSG4_maxth
-write(out_unit,*) 'Optimal threads: ',SG4_maxth,' Delta Real Time',RealTime(SG4_maxth)
+write(out_unit,*) 'Optimal threads: ',SG4_maxth,' Elapsed Real Time',RealTime(SG4_maxth)
 write(out_unit,*) '    => Speed-up: ',RealTime(1)/RealTime(SG4_maxth)
 
 write(out_unit,*) '============================================'

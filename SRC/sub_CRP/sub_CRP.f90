@@ -1378,7 +1378,7 @@ SUBROUTINE calc_crp_p_lanczos(tab_Op,nb_Op,para_CRP,Ene,GuessVec)
       end if
       RealTime = Delta_RealTime(CRP_Time)
       IF (debug .OR. print_Op .OR. print_level > 0) Then
-        write(out_unit,*) 'CRP Energy iteration: Delta Real Time',RealTime
+        write(out_unit,*) 'CRP Energy iteration: Elapsed Real Time',RealTime
       END IF
       flush(out_unit)
 
@@ -1971,7 +1971,7 @@ SUBROUTINE calc_crp_IRL(tab_Op,nb_Op,para_CRP,Ene)
   END IF
   RealTime = Delta_RealTime(CRP_Time)
   IF (debug .OR. print_Op .OR. print_level > 0) Then
-    write(out_unit,*) 'CRP Energy iteration: Delta Real Time',RealTime
+    write(out_unit,*) 'CRP Energy iteration: Elapsed Real Time',RealTime
   END IF
   flush(out_unit)
 

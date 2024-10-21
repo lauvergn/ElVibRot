@@ -248,7 +248,7 @@ CONTAINS
 
     RealTime = Delta_RealTime(MatOp_Time)
     IF (debug .OR. print_Op .OR. print_level > 0) Then
-        write(out_unit,*) 'Building MatOp: Delta Real Time',RealTime
+        write(out_unit,*) 'Building MatOp: Elapsed Real Time',RealTime
         flush(out_unit)
     END IF
 

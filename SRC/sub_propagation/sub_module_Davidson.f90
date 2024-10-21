@@ -618,9 +618,9 @@ CONTAINS
 
           RealTime = Delta_RealTime(DavidsonTime)
           IF (RealTime < TEN) THEN
-            write(out_unit,'(a,i0,a,i0)') 'At Davidson iteration: ',it,', Delta Real time (ms): ',int(10**3*RealTime)
+            write(out_unit,'(a,i0,a,i0)') 'At Davidson iteration: ',it,', Elapsed Real time (ms): ',int(10**3*RealTime)
           ELSE
-            write(out_unit,'(a,i0,a,i0)') 'At Davidson iteration: ',it,', Delta Real time (s): ',int(RealTime)
+            write(out_unit,'(a,i0,a,i0)') 'At Davidson iteration: ',it,', Elapsed Real time (s): ',int(RealTime)
           END IF
           flush(out_unit)
 

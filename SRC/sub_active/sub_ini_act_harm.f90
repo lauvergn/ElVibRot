@@ -542,7 +542,7 @@
     !$OMP   END PARALLEL
 
     RealTime(i_maxth) = Delta_RealTime(GridTime)
-    write(out_unit,*) 'With ',i_maxth,'threads, Delta Real Time',RealTime(i_maxth)
+    write(out_unit,*) 'With ',i_maxth,'threads, Elapsed Real Time',RealTime(i_maxth)
     flush(out_unit)
     IF (RealTime(i_maxth) < Opt_RealTime) THEN
       IF (RealTime(i_maxth) > 0) THEN
@@ -558,7 +558,7 @@
   CALL set_print_level(print_level_save,force=.TRUE.)
 
   Grid_maxth = opt_Grid_maxth
-  write(out_unit,*) 'Optimal threads: ',Grid_maxth,' Delta Real Time',RealTime(Grid_maxth)
+  write(out_unit,*) 'Optimal threads: ',Grid_maxth,' Elapsed Real Time',RealTime(Grid_maxth)
   write(out_unit,*) '    => Speed-up: ',RealTime(1)/RealTime(Grid_maxth)
   write(out_unit,*) '============================================'
 
