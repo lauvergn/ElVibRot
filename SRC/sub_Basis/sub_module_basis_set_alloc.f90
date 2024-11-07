@@ -84,6 +84,7 @@ MODULE mod_basis_set_alloc
           integer                        :: nb_init = 0                       !  nb of basis functions (before contraction)
           TYPE (Basis_Grid_Param)        :: Basis_Grid_Para
           integer                        :: nq_extra = 0                      ! add extra points on the grid (usefull for the flux with SG), the weight are null.
+          logical                        :: with_grid = .TRUE.                ! when false the transformation G<->B are not performed
 
           real (kind=Rkind), allocatable :: EneH0(:)     ! EeneH0(nb) : EeneH0(ib)=<d0b(:,ib) I H0 I d0b(:,ib)>
 
@@ -293,6 +294,7 @@ MODULE mod_basis_set_alloc
       PUBLIC  Set_nq_OF_basis, get_nq_FROM_basis, get_nqa_FROM_basis, get_nb_FROM_basis
       PUBLIC  get_tab_nq_OF_Qact, get_nb_bi_FROM_AllBasis
       PUBLIC  get_nb_be_FROM_basis
+      PUBLIC  get_nqa_FROM_basis_withNoGrid
 
       PUBLIC basis_ext2n_t,alloc_basis_ext2n,write_basis_ext2n,dealloc_basis_ext2n
 
@@ -1589,6 +1591,7 @@ CONTAINS
         basis_set1%print_info_OF_basisDP = basis_set2%print_info_OF_basisDP
 
         basis_set1%ndim              = basis_set2%ndim
+        basis_set1%with_grid         = basis_set2%with_grid
 
         basis_set1%nb_Transfo        = basis_set2%nb_Transfo
 
@@ -2170,10 +2173,11 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
       write(out_unit,*) 'nb_basis,nb_B',nb_basis,nb_B
       write(out_unit,*) 'nq',nq
       write(out_unit,*) 'B',B(:)
+      !write(out_unit,*) 'G',G(:)
     END IF
     !-----------------------------------------------------------
 
-    IF (NewBasisEl .AND. base%ndim == 0) THEN
+    IF (NewBasisEl .AND. base%ndim == 0 .OR. .NOT. base%with_grid) THEN
       G(:) = B
     ELSE
       IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
@@ -2258,7 +2262,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     END IF
     !-----------------------------------------------------------
 
-    IF (NewBasisEl .AND. base%ndim == 0) THEN
+    IF (NewBasisEl .AND. base%ndim == 0 .OR. .NOT. base%with_grid) THEN
       B(:) = G
     ELSE
 
@@ -2313,7 +2317,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     END IF
     !-----------------------------------------------------------
 
-    IF (NewBasisEl .AND. base%ndim == 0) THEN
+    IF (NewBasisEl .AND. base%ndim == 0 .OR. .NOT. base%with_grid) THEN
       G(:) = B
     ELSE
       IF (nb_basis < nb_B .OR. nq /= size(G)) THEN
@@ -2399,7 +2403,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     END IF
     !-----------------------------------------------------------
 
-    IF (NewBasisEl .AND. base%ndim == 0) THEN
+    IF (NewBasisEl .AND. base%ndim == 0  .OR. .NOT. base%with_grid) THEN
       B(:) = G
     ELSE
 
@@ -3231,7 +3235,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
 
-      IF (basis_set%ndim == 0) THEN ! for the electronic basis
+      IF (.NOT. basis_set%with_grid) THEN
         nq = get_nb_FROM_basis(basis_set)
       ELSE
         IF (present(init)) THEN
@@ -3262,18 +3266,22 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
       integer :: err_mem,memory
       character (len=*), parameter :: name_sub='get_nqa_FROM_basis'
       logical,parameter :: debug=.FALSE.
-!      logical,parameter :: debug=.TRUE.
+      !logical,parameter :: debug=.TRUE.
 !---------------------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*)
         write(out_unit,*) 'BEGINNING ',name_sub
-        CALL RecWriteMini_basis(basis_set)
+        !CALL RecWriteMini_basis(basis_set)
+        write(out_unit,*) 'with_grid',basis_set%with_grid
+        write(out_unit,*) 'packed_done',basis_set%packed_done
+        write(out_unit,*) 'nb_basis',basis_set%nb_basis
+        write(out_unit,*) 'SparseGrid_type',basis_set%SparseGrid_type
         write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
-    IF (basis_set%ndim == 0 .AND. NewBasisEl) THEN
-      nqa = 1 ! Correct value ???
+    IF (.NOT. basis_set%with_grid) THEN
+      nqa = 1
     ELSE
       IF (basis_set%packed_done) THEN
         nqa = get_nq_FROM_basis(basis_set)
@@ -3294,7 +3302,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
             nqa = nqa + get_nqa_FROM_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
           END DO
 
-        CASE (2,4) ! Sparse basis (Smolyak 2d  implementation)
+        CASE (2,4) ! Sparse basis (Smolyak 2d and 4th implementations)
           nqa = 0
           DO i_SG=1,basis_set%nb_SG
 
@@ -3324,6 +3332,85 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
 !---------------------------------------------------------------------
 
       END FUNCTION get_nqa_FROM_basis
+
+      RECURSIVE FUNCTION get_nqa_FROM_basis_withNoGrid(basis_set) RESULT(nqa)
+
+      TYPE (basis), intent(in) :: basis_set
+      integer           :: nqa
+
+
+      integer           :: ib,L,nqa_SG,i_SG
+
+!---------------------------------------------------------------------
+      integer :: err_mem,memory
+      character (len=*), parameter :: name_sub='get_nqa_FROM_basis_withNoGrid'
+      logical,parameter :: debug=.FALSE.
+      !logical,parameter :: debug=.TRUE.
+!---------------------------------------------------------------------
+      IF (debug) THEN
+        write(out_unit,*)
+        write(out_unit,*) 'BEGINNING ',name_sub
+        !CALL RecWriteMini_basis(basis_set)
+        write(out_unit,*) 'with_grid',basis_set%with_grid
+        write(out_unit,*) 'packed_done',basis_set%packed_done
+        write(out_unit,*) 'nb_basis',basis_set%nb_basis
+        write(out_unit,*) 'SparseGrid_type',basis_set%SparseGrid_type
+        write(out_unit,*)
+      END IF
+!---------------------------------------------------------------------
+!---------------------------------------------------------------------
+    IF (.NOT. basis_set%with_grid) THEN
+      nqa = get_nb_FROM_basis(basis_set) ! here with_grid=f, so we get nb
+    ELSE
+      IF (basis_set%packed_done) THEN
+        nqa = get_nq_FROM_basis(basis_set) ! here with_grid=t, so we get nq
+      ELSE
+        IF (basis_set%nb_basis == 0 ) STOP ' ERROR with packed!!!'
+
+        SELECT CASE (basis_set%SparseGrid_type)
+        CASE (0) ! Direct product
+          nqa = 1
+          DO ib=1,basis_set%nb_basis
+            nqa = nqa * get_nqa_FROM_basis_withNoGrid(basis_set%tab_Pbasis(ib)%Pbasis)
+          END DO
+
+        CASE (1) ! Sparse basis (Smolyak 1st implementation)
+          ! Just the grid point number for the SG:
+          nqa = 0
+          DO i_SG=1,basis_set%nb_SG
+            nqa = nqa + get_nqa_FROM_basis_withNoGrid(basis_set%tab_PbasisSG(i_SG)%Pbasis)
+          END DO
+
+        CASE (2,4) ! Sparse basis (Smolyak 2d and 4th implementations)
+          nqa = 0
+          DO i_SG=1,basis_set%nb_SG
+
+            nqa_SG = 1
+            DO ib=1,basis_set%nb_basis
+              L = basis_set%para_SGType2%nDind_SmolyakRep%Tab_nDval(ib,i_SG)
+              nqa_SG = nqa_SG * get_nqa_FROM_basis_withNoGrid(basis_set%tab_basisPrimSG(L,ib))
+            END DO
+
+            nqa = nqa + nqa_SG
+          END DO
+
+        CASE DEFAULT
+          write(out_unit,*) ' ERROR in',name_sub
+          write(out_unit,*) ' WRONG SparseGrid_type',basis_set%SparseGrid_type
+          write(out_unit,*) ' The possibilities are: 0, 1, 2, 4'
+          STOP
+        END SELECT
+      END IF
+    END IF
+
+!---------------------------------------------------------------------
+      IF (debug) THEN
+        write(out_unit,*) 'nqa',nqa
+        write(out_unit,*) 'END ',name_sub
+      END IF
+!---------------------------------------------------------------------
+
+      END FUNCTION get_nqa_FROM_basis_withNoGrid
 
       RECURSIVE SUBROUTINE get_tab_nq_OF_Qact(tab_nq,basis_set)
 

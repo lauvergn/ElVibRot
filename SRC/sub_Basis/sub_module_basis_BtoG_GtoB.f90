@@ -644,7 +644,7 @@
             DO i_SG=1,basis_set%nb_SG
                nq_SG = get_nq_FROM_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
                !write(out_unit,*) 'i_SG,nq_SG',i_SG,nq_SG
-!               iq1_SG = iq1_SG + nq_SG
+               !iq1_SG = iq1_SG + nq_SG
                iq0_SG = 1
                DO ii_SG=1,i_SG-1
                  nq0_SG = get_nq_FROM_basis(basis_set%tab_PbasisSG(ii_SG)%Pbasis)

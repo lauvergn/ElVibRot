@@ -51,21 +51,14 @@
 !        For this basis nq must be equal to nb
 !
 !=============================================================
-      SUBROUTINE sub_Basis_El(base)
-      USE EVR_system_m
-      USE mod_basis
-      IMPLICIT NONE
+  SUBROUTINE Init_NoGrid_basis(base)
+    USE EVR_system_m
+    USE mod_basis
+    IMPLICIT NONE
 
-!---------------------------------------------------------------------
-!---------- variables passees en argument ----------------------------
-      TYPE (basis)      :: base
-
-
-
-!---------------------------------------------------------------------
-!---------------------------------------------------------------------
-
-!---------------------------------------------------------------------
+    !---------------------------------------------------------------------
+    !---------- variables passees en argument ----------------------------
+     TYPE (basis), intent(inout) :: base
 
 
       integer           :: i,Read_symab
@@ -74,7 +67,7 @@
 
 !----- for debuging --------------------------------------------------
       integer :: err_io,err_mem,memory
-      character (len=*), parameter :: name_sub='sub_Basis_El'
+      character (len=*), parameter :: name_sub='Init_NoGrid_basis'
       logical,parameter :: debug=.FALSE.
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
@@ -83,32 +76,14 @@
          write(out_unit,*) 'nb',base%nb
        END IF
 !-----------------------------------------------------------
-       IF (NewBasisEl) THEN
-         write(out_unit,*) ' ERROR in ',name_sub
-         write(out_unit,*) '  A electronic basis is already defined'
-         write(out_unit,*) '   CHECK your data!!'
-         STOP
-       END IF
 
      IF (base%nb <= 0) STOP 'ERROR nb<=0'
-     NewBasisEl = .TRUE.
      base%with_grid = .FALSE.
 
-     ! here nq=nb or nq=0
-     ! nq and ndim have the wrong value
      base%ndim = 1
-     CALL Set_nq_OF_basis(base,base%nb)
-
+     ! nq is not defined
 !----------------------------------------------------------------------------
 
-      CALL alloc_xw_OF_basis(base)
-      base%x(:,:)   = ZERO
-      base%w(:)     = ONE
-      base%rho(:)   = ONE
-      base%wrho(:)  = ONE
-
-      CALL alloc_dnb_OF_basis(base)
-      base%dnRGB%d0 = Identity_Mat(base%nb)
       base%primitive_done = .TRUE.
       base%packed_done    = .TRUE.
 
@@ -129,8 +104,7 @@
       CALL Set_nbPERsym_FROM_SymAbelian(base%P_SymAbelian)
       !CALL Write_SymAbelian(base%P_SymAbelian)
 
-     !CALL Set_nq_OF_basis(base,0)
-     base%ndim = 0
+      base%ndim = 1
 
 
 !-----------------------------------------------------------
@@ -140,4 +114,5 @@
       END IF
 !-----------------------------------------------------------
 
-      END SUBROUTINE sub_Basis_El
+  END SUBROUTINE Init_NoGrid_basis
+

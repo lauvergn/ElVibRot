@@ -393,7 +393,7 @@ MODULE mod_basis
 !================================================================
 ! ++    Construct a primitive basis set
 !================================================================
-      SUBROUTINE construct_primitive_basis(basis_primi)
+    SUBROUTINE construct_primitive_basis(basis_primi)
       use mod_nDindex
       IMPLICIT NONE
 
@@ -496,6 +496,11 @@ MODULE mod_basis
         basis_temp%type = 2
         write(out_unit,*) 'Basis "El": for several diabatic PES'
         CALL sub_basis_El(basis_temp)
+
+      CASE ("no-grid")
+        basis_temp%type = 2
+        write(out_unit,*) 'Basis "no-grid": just operator on the basis'
+        CALL Init_NoGrid_basis(basis_temp)
 
       CASE ("pl0")
         basis_temp%type = 10
@@ -678,6 +683,8 @@ MODULE mod_basis
 
         write(out_unit,*) ' 70 : Pl1m*Pl2m*Fourier                   : coll_ABplusCD'
 
+        write(out_unit,*) '    : Generic Basis without grid          : No-Grid'
+
         STOP
       END SELECT
 
@@ -687,96 +694,92 @@ MODULE mod_basis
 
       nq = get_nq_FROM_basis(basis_primi)
       !write(out_unit,*) 'basis_primi nq',nq
-      IF (nq < 1) RETURN
-
-      basis_primi%primitive      = .TRUE.
-      basis_primi%primitive_done = .TRUE.
-
-      CALL dealloc_nDindex(basis_primi%nDindG)
-      CALL init_nDindexPrim(basis_primi%nDindG,1,[nq])
-
-      IF (basis_primi%type == 2000) THEN
-        CONTINUE ! nD-HO with cubature: already done
-      ELSE IF (basis_primi%type == 60 .OR. basis_primi%type == 600 .OR. basis_primi%type == 601) THEN
-        CONTINUE ! Ylm: already done
-      ELSE IF (basis_primi%type == 2) THEN
-        CONTINUE ! El basis set: already done
-      ELSE
-        CALL dealloc_nDindex(basis_primi%nDindB)
-        IF (basis_primi%With_L) THEN
-          basis_primi%nDindB%packed = .TRUE.
-          CALL init_nDindexPrim(basis_primi%nDindB,1,[basis_primi%nb])
-          basis_primi%nDindB%With_L = .TRUE.
-          basis_primi%nDindB%Tab_L(:)    = -1
-          basis_primi%nDindB%Tab_Norm(:) = -ONE
-
-          DO L=basis_primi%L_SparseBasis,0,-1
-            nb = Get_nb_FROM_l_OF_PrimBasis(L,basis_primi)
-            basis_primi%nDindB%Tab_L(1:nb)    = L
-            basis_primi%nDindB%Tab_Norm(1:nb) = real(L,kind=Rkind)
-          END DO
-
-          !CALL Write_nDindex(basis_primi%nDindB)
-
-          !STOP 'With_L'
+      IF (basis_primi%with_grid) THEN
+        basis_primi%primitive      = .TRUE.
+        basis_primi%primitive_done = .TRUE.
+  
+        CALL dealloc_nDindex(basis_primi%nDindG)
+        CALL init_nDindexPrim(basis_primi%nDindG,1,[nq])
+  
+        IF (basis_primi%type == 2000) THEN
+          CONTINUE ! nD-HO with cubature: already done
+        ELSE IF (basis_primi%type == 60 .OR. basis_primi%type == 600 .OR. basis_primi%type == 601) THEN
+          CONTINUE ! Ylm: already done
+        ELSE IF (basis_primi%type == 2) THEN
+          CONTINUE ! El basis set: already done
         ELSE
-          weight = basis_primi%weight_OF_nDindB
-          basis_primi%nDindB%packed = .TRUE.
-          CALL init_nDindexPrim(basis_primi%nDindB,ndim=1,               &
-                            Type_OF_nDindex=basis_primi%Type_OF_nDindB,  &
-                            MaxNorm=basis_primi%Norm_OF_nDindB,          &
-                            nDinit=[basis_primi%nDinit_OF_nDindB],   &
-                            nDsize=[basis_primi%nb],                 &
-                            nDweight=[weight]      )
+          CALL dealloc_nDindex(basis_primi%nDindB)
+          IF (basis_primi%With_L) THEN
+            basis_primi%nDindB%packed = .TRUE.
+            CALL init_nDindexPrim(basis_primi%nDindB,1,[basis_primi%nb])
+            basis_primi%nDindB%With_L = .TRUE.
+            basis_primi%nDindB%Tab_L(:)    = -1
+            basis_primi%nDindB%Tab_Norm(:) = -ONE
+  
+            DO L=basis_primi%L_SparseBasis,0,-1
+              nb = Get_nb_FROM_l_OF_PrimBasis(L,basis_primi)
+              basis_primi%nDindB%Tab_L(1:nb)    = L
+              basis_primi%nDindB%Tab_Norm(1:nb) = real(L,kind=Rkind)
+            END DO
+  
+            !CALL Write_nDindex(basis_primi%nDindB)
+  
+            !STOP 'With_L'
+          ELSE
+            weight = basis_primi%weight_OF_nDindB
+            basis_primi%nDindB%packed = .TRUE.
+            CALL init_nDindexPrim(basis_primi%nDindB,ndim=1,               &
+                              Type_OF_nDindex=basis_primi%Type_OF_nDindB,  &
+                              MaxNorm=basis_primi%Norm_OF_nDindB,          &
+                              nDinit=[basis_primi%nDinit_OF_nDindB],   &
+                              nDsize=[basis_primi%nb],                 &
+                              nDweight=[weight]      )
+          END IF
+        END IF
+  
+        CALL Basis_Grid_ParamTOBasis_Grid_Param_init(basis_primi%Basis_Grid_Para)
+        basis_primi%nb_init = basis_primi%nb
+  
+        CALL pack_nDindex(basis_primi%nDindB)
+  
+        !- symmetry of the basis ---------------------------------
+        IF (basis_primi%type == 60 .OR. basis_primi%type == 600 .OR. basis_primi%type == 601) THEN
+          CONTINUE ! Ylm: already done
+        ELSE IF (basis_primi%type == 2) THEN
+          CONTINUE ! El basis set: already done
+        ELSE
+          CALL Set_tab_SymAbelian(basis_primi%P_SymAbelian,basis_primi%nb)
+        END IF
+  
+        !- scaling of the basis ---------------------------------
+        CALL sub_scale_basis(basis_primi)
+        !write(out_unit,*) 'x (grid points)',basis_primi%x
+  
+        IF (basis_primi%xPOGridRep_done) RETURN
+        flush(out_unit)
+        !- d1b => d1BasisRep and  d2b => d2BasisRep ------------
+        CALL sub_dnGB_TO_dnBB(basis_primi)
+  
+        flush(out_unit)
+        !- d1b => dnBGG%d1 and  d2b => dnBGG%d2 ------------
+        CALL sub_dnGB_TO_dnGG(basis_primi)
+  
+        !- d0b => transpose(d0b) ... transpose(d0bwrho) ---
+        CALL sub_dnGB_TO_dnBG(basis_primi)
+  
+        !- for Time-Dependent Parameters ---
+        CALL sub_dnGB_TO_dnPara_OF_GB(basis_primi)
+        CALL sub_dnPara_OF_dnGB_TO_dnPara_OF_BB(basis_primi)
+  
+        !- check the overlap matrix -----------------------------
+        CALL check_ortho_basis(basis_primi)
+  
+        IF (print_level > 2 .AND. allocated(basis_primi%x)) THEN
+          write(out_unit,*) '---------------------------------------'
+          write(out_unit,*) 'x Grid:',basis_primi%x
+          write(out_unit,*) '---------------------------------------'
         END IF
       END IF
-
-      CALL Basis_Grid_ParamTOBasis_Grid_Param_init(basis_primi%Basis_Grid_Para)
-      basis_primi%nb_init = basis_primi%nb
-
-      CALL pack_nDindex(basis_primi%nDindB)
-
-    !- symmetry of the basis ---------------------------------
-    IF (basis_primi%type == 60 .OR. basis_primi%type == 600 .OR. basis_primi%type == 601) THEN
-      CONTINUE ! Ylm: already done
-    ELSE IF (basis_primi%type == 2) THEN
-      CONTINUE ! El basis set: already done
-    ELSE
-      CALL Set_tab_SymAbelian(basis_primi%P_SymAbelian,basis_primi%nb)
-    END IF
-
-      !- scaling of the basis ---------------------------------
-      CALL sub_scale_basis(basis_primi)
-      !write(out_unit,*) 'x (grid points)',basis_primi%x
-
-      IF (basis_primi%xPOGridRep_done) RETURN
-      flush(out_unit)
-!     - d1b => d1BasisRep and  d2b => d2BasisRep ------------
-      CALL sub_dnGB_TO_dnBB(basis_primi)
-
-      flush(out_unit)
-!     - d1b => dnBGG%d1 and  d2b => dnBGG%d2 ------------
-      CALL sub_dnGB_TO_dnGG(basis_primi)
-
-      !- d0b => transpose(d0b) ... transpose(d0bwrho) ---
-      CALL sub_dnGB_TO_dnBG(basis_primi)
-
-      !- for Time-Dependent Parameters ---
-      CALL sub_dnGB_TO_dnPara_OF_GB(basis_primi)
-      CALL sub_dnPara_OF_dnGB_TO_dnPara_OF_BB(basis_primi)
-
-!     - check the overlap matrix -----------------------------
-      CALL check_ortho_basis(basis_primi)
-
-      IF (print_level > 2 .AND. allocated(basis_primi%x)) THEN
-        write(out_unit,*) '---------------------------------------'
-        write(out_unit,*) 'x Grid:',basis_primi%x
-        write(out_unit,*) '---------------------------------------'
-      END IF
-
-!    DO k=1,size(basis_primi%x,dim=2)
-!      write(out_unit66,'(101(x,f10.5))') basis_primi%x(:,k),basis_primi%dnRGB%d0(k,1:min(10,basis_primi%nb))
-!    END DO
 
 !---------------------------------------------------------------------
       IF (debug) THEN
@@ -790,7 +793,7 @@ MODULE mod_basis
       END IF
 !---------------------------------------------------------------------
 
-      END SUBROUTINE construct_primitive_basis
+  END SUBROUTINE construct_primitive_basis
 
       FUNCTION d0b_OF_primitive_basis_AT_Q(basis_temp,ib,Qbasis) result(d0b)
       IMPLICIT NONE
@@ -1607,7 +1610,7 @@ MODULE mod_basis
 !      logical, parameter :: debug=.TRUE.
       character (len=*), parameter :: name_sub='sub_dnGB_TO_dnBB'
 !-----------------------------------------------------------
-      IF (basis_set%ndim == 0) RETURN
+      IF (.NOT. basis_set%with_grid) RETURN
 
       nq = get_nq_FROM_basis(basis_set)
       IF (debug) THEN
@@ -1691,7 +1694,7 @@ MODULE mod_basis
       !logical, parameter :: debug=.TRUE.
       character (len=*), parameter :: name_sub='sub_dnGB_TO_dnPara_OF_GB'
 !-----------------------------------------------------------
-      IF (basis_set%ndim == 0) RETURN
+      IF (.NOT. basis_set%with_grid) RETURN
       IF (.NOT. basis_set%packed_done) RETURN
 
       nb_TD = count(basis_set%TD_Q0) + count(basis_set%TD_scaleQ)
@@ -1881,7 +1884,7 @@ MODULE mod_basis
       !logical, parameter :: debug=.TRUE.
       character (len=*), parameter :: name_sub='sub_dnPara_OF_dnGB_TO_dnPara_OF_BB'
 !-----------------------------------------------------------
-      IF (basis_set%ndim == 0) RETURN
+      IF (.NOT. basis_set%with_grid) RETURN
       IF (.NOT. basis_set%packed_done) RETURN
 
       nb_TD = count(basis_set%TD_Q0) + count(basis_set%TD_scaleQ)
@@ -1971,7 +1974,7 @@ MODULE mod_basis
 
   IF (.NOT. basis_set%packed_done) RETURN
 
-  IF (NewBasisEl .AND. basis_set%ndim == 0) THEN
+  IF (.NOT. basis_set%with_grid) THEN
  
       CALL dealloc_dnMat(basis_set%dnRBG)
       CALL alloc_dnMat(basis_set%dnRBG,basis_set%nb,basis_set%nb,nb_var_deriv=basis_set%ndim,nderiv=0)
@@ -2078,7 +2081,7 @@ MODULE mod_basis
       !logical, parameter :: debug=.TRUE.
       character (len=*), parameter :: name_sub='sub_dnGB_TO_dnGG'
 !-----------------------------------------------------------
-      IF (basis_set%ndim == 0) RETURN
+      IF (.NOT. basis_set%with_grid) RETURN
       IF (.NOT. basis_set%dnGGRep) RETURN
       nq = get_nq_FROM_basis(basis_set)
       nb = basis_set%nb
@@ -2349,7 +2352,7 @@ MODULE mod_basis
       logical,parameter :: debug=.FALSE.
       !logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (basis_set%ndim == 0 .OR. .NOT. basis_set%packed .OR. basis_set%packed_done) RETURN
+      IF (.NOT. basis_set%with_grid .OR. .NOT. basis_set%packed .OR. basis_set%packed_done) RETURN
 
       nqo = get_nq_FROM_basis(basis_set)
       !write(out_unit,*) 'BEGINNING ',name_sub
@@ -2471,7 +2474,7 @@ SUBROUTINE pack_basis_old(basis_set,sortX)
       !logical,parameter :: debug=.FALSE.
       logical,parameter :: debug=.TRUE.
 !-----------------------------------------------------------
-      IF (basis_set%ndim == 0) RETURN
+      IF (.NOT. basis_set%with_grid) RETURN
       IF (.NOT. basis_set%packed) RETURN
       IF (basis_set%packed_done) RETURN
 
@@ -2837,7 +2840,7 @@ END SUBROUTINE pack_basis_old
         write(out_unit,*)
       END IF
 !---------------------------------------------------------------------
-      IF (basis_temp%ndim == 0) RETURN
+      IF (.NOT. basis_temp%with_grid) RETURN
       IF (.NOT. basis_temp%check_basis .OR. .NOT. basis_temp%packed_done) RETURN
       !IF (.NOT. basis_temp%packed_done) RETURN
       nq = get_nq_FROM_basis(basis_temp)
@@ -3182,7 +3185,7 @@ END SUBROUTINE pack_basis_old
        END IF
 !-----------------------------------------------------------
 !
-       IF (BasisnD%ndim == 0) THEN
+       IF (.NOT. BasisnD%with_grid) THEN
          WrhonD = ONE ! no grid point
        ELSE IF (BasisnD%packed_done) THEN
          !CALL RecWrite_basis(BasisnD,write_all=.TRUE.)
@@ -3307,7 +3310,7 @@ END SUBROUTINE pack_basis_old
        END IF
 !-----------------------------------------------------------
 !
-       IF (BasisnD%ndim == 0) THEN
+       IF (.NOT. BasisnD%with_grid) THEN
          CONTINUE ! no grid point
        ELSE IF (BasisnD%primitive) THEN
          IF (present(iqi)) THEN
@@ -3433,7 +3436,7 @@ END SUBROUTINE pack_basis_old
        END IF
 !-----------------------------------------------------------
 
-       IF (BasisnD%ndim == 0) THEN
+       IF (.NOT. BasisnD%with_grid) THEN
          rhonD = ONE ! no grid point
        ELSE IF (BasisnD%packed_done) THEN
          rhonD = BasisnD%rho(iq)
@@ -3541,7 +3544,7 @@ END SUBROUTINE pack_basis_old
        END IF
 !-----------------------------------------------------------
 !
-       IF (BasisnD%ndim == 0) THEN
+       IF (.NOT. BasisnD%with_grid) THEN
          WnD = ONE ! no grid point
        ELSE IF (BasisnD%packed_done) THEN
          WnD = BasisnD%w(iq)
@@ -3662,7 +3665,7 @@ END SUBROUTINE pack_basis_old
       !write(out_unit,*) ' in ',name_sub,'iq',iq
 
 
-       IF (BasisnD%ndim == 0) THEN
+       IF (.NOT. BasisnD%with_grid) THEN
          CONTINUE ! no grid point
        ELSE IF (BasisnD%packed_done) THEN
          !write(out_unit,*) 'iq',iq ; flush(out_unit)

@@ -98,7 +98,7 @@
 
 !----- for debuging --------------------------------------------------
       logical, parameter :: debug = .FALSE.
-!      logical, parameter :: debug = .TRUE.
+      !logical, parameter :: debug = .TRUE.
       character (len=*), parameter :: name_sub = 'Auto_basis'
 !---------------------------------------------------------------------
       IF (debug) THEN
@@ -1822,54 +1822,57 @@
       para_H%Basis2n       => para_H%para_AllBasis%Basis2n
 !     ------------------------------
 
-      para_H%para_ReadOp   = para_ReadOp
+      para_H%para_ReadOp      = para_ReadOp
 
-      para_H%n_Op          = 0
-      para_H%name_Op       = 'H'
+      para_H%n_Op             = 0
+      para_H%name_Op          = 'H'
 
 
-      para_H%nb_OpPsi      = 0
+      para_H%nb_OpPsi         = 0
 
-      para_H%nb_ba         = get_nb_FROM_basis(para_AllBasis%BasisnD)
+      para_H%nb_ba            = get_nb_FROM_basis(para_AllBasis%BasisnD)
       IF (para_ReadOp%Op_WithContracRVec) THEN
-        para_H%nbc_ba      = para_AllBasis%BasisnD%nDindB_contracted%Max_nDI
+        para_H%nbc_ba         = para_AllBasis%BasisnD%nDindB_contracted%Max_nDI
       ELSE
-        para_H%nbc_ba      = para_H%nb_ba
+        para_H%nbc_ba         = para_H%nb_ba
       END IF
-      para_H%nb_qa         = get_nqa_FROM_basis(para_AllBasis%BasisnD)
+      para_H%nb_qa            = get_nqa_FROM_basis(para_AllBasis%BasisnD)
+
+      para_H%nb_qa_WithNoGrid = get_nqa_FROM_basis_withNoGrid(para_AllBasis%BasisnD)
 
       IF (mole%nb_inact2n == 0) THEN
-        para_H%nb_bi       = 1
+        para_H%nb_bi          = 1
       ELSE
-        para_H%nb_bi       = get_nb_bi_FROM_AllBasis(para_AllBasis)
+        para_H%nb_bi          = get_nb_bi_FROM_AllBasis(para_AllBasis)
       END IF
-      para_H%nb_be         = para_ReadOp%nb_elec
+      para_H%nb_be            = para_ReadOp%nb_elec
 
 
-      para_H%nb_bie        = para_H%nb_bi * para_H%nb_be
+      para_H%nb_bie           = para_H%nb_bi * para_H%nb_be
 
-      para_H%nb_bai        = para_H%nb_ba * para_H%nb_bi
-      para_H%nb_qai        = para_H%nb_qa * para_H%nb_bi
+      para_H%nb_bai           = para_H%nb_ba * para_H%nb_bi
+      para_H%nb_qai           = para_H%nb_qa * para_H%nb_bi
 
-      para_H%nb_baie       = para_H%nb_bai * para_H%nb_be
-      para_H%nb_qaie       = para_H%nb_qai * para_H%nb_be
-
-
-      para_H%nb_bRot       = para_ReadOp%nb_bRot
-
-      para_H%nb_tot        = para_H%nbc_ba * para_H%nb_bie * para_H%nb_bRot
-      para_H%nb_tot_ini    = para_H%nb_baie * para_H%nb_bRot
-
-      para_H%Make_Mat      = para_ReadOp%Make_Mat
-      para_H%pack_Op       = para_ReadOp%pack_Op
-      para_H%read_Op       = para_ReadOp%read_Op
-      para_H%tol_pack      = para_ReadOp%tol_pack
-      para_H%tol_nopack    = para_ReadOp%tol_nopack
-      para_H%spectral      = para_ReadOp%spectral
-      para_H%spectral_Op   = para_ReadOp%spectral_Op
+      para_H%nb_baie          = para_H%nb_bai * para_H%nb_be
+      para_H%nb_qaie          = para_H%nb_qai * para_H%nb_be
+      para_H%nq_tot           = para_H%nb_qa_WithNoGrid * para_H%nb_bie
 
 
-      para_H%nb_act1       = mole%nb_act1
+      para_H%nb_bRot          = para_ReadOp%nb_bRot
+
+      para_H%nb_tot           = para_H%nbc_ba * para_H%nb_bie * para_H%nb_bRot
+      para_H%nb_tot_ini       = para_H%nb_baie * para_H%nb_bRot
+
+      para_H%Make_Mat         = para_ReadOp%Make_Mat
+      para_H%pack_Op          = para_ReadOp%pack_Op
+      para_H%read_Op          = para_ReadOp%read_Op
+      para_H%tol_pack         = para_ReadOp%tol_pack
+      para_H%tol_nopack       = para_ReadOp%tol_nopack
+      para_H%spectral         = para_ReadOp%spectral
+      para_H%spectral_Op      = para_ReadOp%spectral_Op
+
+
+      para_H%nb_act1          = mole%nb_act1
 
       CALL Init_TypeOp(para_H%param_TypeOp,                             &
                        type_Op=para_ReadOp%type_HamilOp,                &

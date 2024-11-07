@@ -1518,41 +1518,33 @@
         write(out_unit,*) '================================================'
   
   END SUBROUTINE sub_Opt_CAP_basis
-      SUBROUTINE sub_GridTOBasis_test(max_mem)
-      USE EVR_system_m
-      USE mod_Constant
-      USE mod_Coord_KEO
-      USE mod_PrimOp
-      USE mod_basis
-      USE mod_psi
-      USE mod_Op
-      USE mod_analysis
-      USE mod_propa
-      IMPLICIT NONE
+  SUBROUTINE sub_GridTOBasis_test(max_mem)
+    USE EVR_system_m
+    USE mod_Constant
+    USE mod_Coord_KEO
+    USE mod_PrimOp
+    USE mod_basis
+    USE mod_psi
+    USE mod_Op
+    USE mod_analysis
+    USE mod_propa
+    IMPLICIT NONE
 
-!
-!=====================================================================
-!
-!     variables
-!
-!=====================================================================
-!
+    !----- variables for the dynamical memory allocation -----------------
+    logical  :: intensity_only
+    integer  :: nio_res_int
 
-!----- variables for the dynamical memory allocation -----------------
-      logical  :: intensity_only
-      integer  :: nio_res_int
-
-      integer (kind=ILkind)  :: max_mem
-      logical   test_mem
+    integer (kind=ILkind)  :: max_mem
+    logical   test_mem
 
 
 
-!----- physical and mathematical constants ---------------------------
-      TYPE (constant) :: const_phys
+    !----- physical and mathematical constants ---------------------------
+    TYPE (constant) :: const_phys
 
-!----- for the CoordType and Tnum --------------------------------------
-      TYPE (CoordType) :: mole
-      TYPE (Tnum)      :: para_Tnum
+    !----- for the CoordType and Tnum --------------------------------------
+    TYPE (CoordType) :: mole
+    TYPE (Tnum)      :: para_Tnum
 
 !----- variables for the construction of H ----------------------------
       TYPE (param_AllOp), target  :: para_AllOp
@@ -1572,99 +1564,92 @@
 
 !----- variables divers ----------------------------------------------
        integer           :: i,ibb,nb_it = 1
-!      real (kind=Rkind) :: T,DE,Ep,Em
-!      logical           :: print_mat
-!      integer           :: err
-!      integer :: err_mem,memory
-
 
 !=====================================================================
-!=====================================================================
-!=====================================================================
-!=====================================================================
-      write(out_unit,*)
-      write(out_unit,*) '================================================='
-      write(out_unit,*) ' VIB: BEGINNING ini_data'
-      CALL time_perso('ini_data')
-      write(out_unit,*)
-      write(out_unit,*)
-      CALL     ini_data(const_phys,para_Tnum,mole,                      &
-                        para_AllBasis,para_AllOp,                       &
-                        para_ana,para_intensity,intensity_only,         &
-                        para_propa)
+  write(out_unit,*)
+  write(out_unit,*) '================================================='
+  write(out_unit,*) ' VIB: BEGINNING ini_data'
+  CALL time_perso('ini_data')
+  write(out_unit,*)
+  write(out_unit,*)
+  CALL     ini_data(const_phys,para_Tnum,mole,                      &
+                    para_AllBasis,para_AllOp,                       &
+                    para_ana,para_intensity,intensity_only,         &
+                    para_propa)
 
-      write(out_unit,*)
-      write(out_unit,*)
-      CALL time_perso('ini_data')
-      write(out_unit,*) ' VIB: END ini_data'
-      write(out_unit,*) '================================================='
-      write(out_unit,*)
+  write(out_unit,*)
+  write(out_unit,*)
+  CALL time_perso('ini_data')
+  write(out_unit,*) ' VIB: END ini_data'
+  write(out_unit,*) '================================================='
+  write(out_unit,*)
 !=====================================================================
 
+  CALL init_psi(WP0,para_AllOp%tab_Op(1),.FALSE.)
+  CALL alloc_psi(WP0,BasisRep=.TRUE.,GridRep=.TRUE.)
+  nb_mult_BTOG = 0
+  nb_mult_GTOB = 0
 
+  para_mem%mem_debug = .FALSE.
 
+  write(out_unit,*)
+  write(out_unit,*) '================================================='
+  write(out_unit,*) ' VIB: BEGINNING GridTOBasis_test'
+  write(out_unit,*)
 
-      CALL init_psi(WP0,para_AllOp%tab_Op(1),.FALSE.)
-      CALL alloc_psi(WP0,BasisRep=.TRUE.,GridRep=.TRUE.)
-      nb_mult_BTOG = 0
-      nb_mult_GTOB = 0
-
-para_mem%mem_debug = .FALSE.
-
-      write(out_unit,*)
-      write(out_unit,*) '================================================='
-      write(out_unit,*) ' VIB: BEGINNING GridTOBasis_test'
-      write(out_unit,*)
-
-!DO ibb=1,WP0%nb_tot
-  ibb=2
+  ibb=min(2,WP0%nb_tot)
   WP0 = ONETENTH
   WP0%RvecB(ibb) = ONE
+
+  CALL norm2_psi(WP0,BasisRep=.TRUE.)
+  CALL  ecri_init_psi(psi=WP0)
+
   WP1 = WP0 !for the comparison
   !CALL ecri_psi(psi=WP0)
 
 
-      CALL time_perso('B=>G')
+  CALL time_perso('B=>G')
 
-      DO i=1,nb_it
-        IF (mod(i,100) == 0) write(out_unit,*) i ; flush(out_unit)
-        CALL sub_PsiBasisRep_TO_GridRep(WP0)
-      END DO
+  DO i=1,nb_it
+    IF (mod(i,100) == 0) write(out_unit,*) i ; flush(out_unit)
+    CALL sub_PsiBasisRep_TO_GridRep(WP0)
+  END DO
 
-      CALL time_perso('B=>G')
+  CALL time_perso('B=>G')
 
-      !CALL ecri_psi(psi=WP0)
-      WP0%RvecB(:) = ZERO
+  CALL norm2_psi(WP0,GridRep=.TRUE.)
+  CALL  ecri_init_psi(psi=WP0)
 
-      write(out_unit,*)
-      write(out_unit,*)
-      CALL time_perso('G=>B')
-      DO i=1,nb_it
-        IF (mod(i,100) == 0) write(out_unit,*) i ; flush(out_unit)
-        CALL sub_PsiGridRep_TO_BasisRep(WP0)
-      END DO
-      CALL time_perso('G=>B')
-      !CALL ecri_psi(psi=WP0)
+  !CALL ecri_psi(psi=WP0)
+  WP0%RvecB(:) = ZERO
 
-      write(out_unit,*)
-      write(out_unit,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
-      write(out_unit,*)
-      write(out_unit,*) ' VIB: END GridTOBasis_test'
-      write(out_unit,*) '================================================='
-      write(out_unit,*)
+  write(out_unit,*)
+  write(out_unit,*)
+  CALL time_perso('G=>B')
+  DO i=1,nb_it
+    IF (mod(i,100) == 0) write(out_unit,*) i ; flush(out_unit)
+    CALL sub_PsiGridRep_TO_BasisRep(WP0)
+  END DO
+  CALL time_perso('G=>B')
+  !CALL ecri_psi(psi=WP0)
 
-      WP3 = WP1-WP0
-      write(out_unit,*) 'max diff',maxval(abs(WP3%RvecB))
-!END DO
-      write(out_unit,*) '================================================'
-      write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
-      write(out_unit,*) '================================================'
+  write(out_unit,*)
+  write(out_unit,*) 'nb_mult_BTOG,nb_mult_GTOB',nb_mult_BTOG,nb_mult_GTOB
+  write(out_unit,*)
+  write(out_unit,*) ' VIB: END GridTOBasis_test'
+  write(out_unit,*) '================================================='
+  write(out_unit,*)
 
+  WP3 = WP1-WP0
+  write(out_unit,*) 'max diff',maxval(abs(WP3%RvecB))
 
-para_mem%mem_debug = .FALSE.
+  write(out_unit,*) '================================================'
+  write(out_unit,*) ' ElVibRot-Tnum AU REVOIR!!!'
+  write(out_unit,*) '================================================'
 
+  para_mem%mem_debug = .FALSE.
 
-      END SUBROUTINE sub_GridTOBasis_test
+END SUBROUTINE sub_GridTOBasis_test
 
       SUBROUTINE Sub_OpPsi_test(max_mem)
       USE EVR_system_m

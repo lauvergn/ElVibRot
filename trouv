@@ -1,6 +1,6 @@
 
 list1=$1
-fich='Source*/*f90 Source*/*/*f90 Source*/*/*/*f90 Source*/*f Source*/*/*f Source*/*/*/*f sub*/*f90 sub*/*f '
+fich='SRC/*f90 SRC/*/*f90 Source*/*/*/*f90 SRC/*f SRC/*/*f SRC/*/*/*f APP/*f90'
 
 #fich='exa*/*.f exa*/*/*.f'
 

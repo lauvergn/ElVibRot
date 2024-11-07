@@ -119,6 +119,9 @@ $(OBJ_DIR)/sub_SymAbelian_OF_Basis.o : \
 $(OBJ_DIR)/sub_basis_El.o : \
           $(evr_system_m) \
           $(mod_basis)
+$(OBJ_DIR)/sub_basis_NoGrid.o : \
+          $(evr_system_m) \
+          $(mod_basis)
 $(OBJ_DIR)/sub_module_BasisMakeGrid.o : \
           $(evr_system_m) \
           $(mod_coord_keo) \
@@ -645,6 +648,21 @@ $(OBJ_DIR)/vib.o : \
           $(mod_mpi_aux) \
           $(mod_optimization) \
           $(mod_wp0)
+$(OBJ_DIR)/Calc_Tab_dnQflex.o : \
+          $(evr_system_m) \
+          $(mod_dnsvm)
+$(OBJ_DIR)/Sub_X_TO_Q_ana.o : \
+          $(evr_system_m)
+$(OBJ_DIR)/calc_f2_f1Q.o : \
+          $(evr_system_m) \
+          $(mod_tnum) \
+          $(mod_constant)
+$(OBJ_DIR)/read_para.o : \
+          $(evr_system_m)
+$(OBJ_DIR)/sub_system.o : \
+          $(evr_system_m) \
+          $(mod_tnum) \
+          $(mod_dnsvm)
 $(OBJ_DIR)/sub_Hmax.o : \
           $(evr_system_m) \
           $(mod_op) \

@@ -85,6 +85,8 @@
         integer       :: nb_qa            =0
         integer       :: nb_qaie          =0
         integer       :: nb_paie          =0
+        integer       :: nb_qa_WithNoGrid =0
+        integer       :: nq_tot           =0
 
         integer       :: nb_act1          =0
         integer       :: nb_act           =0
@@ -240,8 +242,8 @@
     TYPE (param_AllBasis), target, intent(in), optional :: para_AllBasis_ana
 
     !----- for debuging --------------------------------------------------
-    !logical, parameter :: debug = .TRUE.
-    logical, parameter :: debug = .FALSE.
+    logical, parameter :: debug = .TRUE.
+    !logical, parameter :: debug = .FALSE.
     !-----------------------------------------------------------
     IF (debug) THEN
       write(out_unit,*) 'BEGINNING init_psi_t : cplx',cplx
@@ -352,9 +354,9 @@ END SUBROUTINE init_psi_t
         write(out_unit,*) ' nb_tot <1 ',psi%nb_tot
         STOP
       END IF
-      IF (psi%GridRep .AND. psi%nb_qaie < 1) THEN
+      IF (psi%GridRep .AND. psi%nq_tot < 1) THEN
         write(out_unit,*) ' ERROR in alloc_psi'
-        write(out_unit,*) ' nb_qaie <1 ',psi%nb_qaie
+        write(out_unit,*) ' nq_tot <1 ',psi%nq_tot
         STOP
       END IF
 
@@ -395,7 +397,7 @@ END SUBROUTINE init_psi_t
       IF (psi%GridRep) THEN ! allocate psi%GridRep
         IF (psi%cplx) THEN
           IF ( .NOT. allocated(psi%CvecG) ) THEN
-            IF(keep_MPI) CALL alloc_NParray(psi%CvecG,[psi%nb_qaie],'psi%CvecG','alloc_psi')
+            IF(keep_MPI) CALL alloc_NParray(psi%CvecG,[psi%nq_tot],'psi%CvecG','alloc_psi')
             IF (debug) write(out_unit,*) 'alloc: CvecG'
             IF(keep_MPI) psi%CvecG(:) = CZERO
           END IF
@@ -405,7 +407,7 @@ END SUBROUTINE init_psi_t
           END IF
         ELSE
           IF ( .NOT. allocated(psi%RvecG) ) THEN
-            IF(keep_MPI) CALL alloc_NParray(psi%RvecG,[psi%nb_qaie],'psi%RvecG','alloc_psi')
+            IF(keep_MPI) CALL alloc_NParray(psi%RvecG,[psi%nq_tot],'psi%RvecG','alloc_psi')
             IF (debug) write(out_unit,*) 'alloc: RvecG'
             IF(keep_MPI) psi%RvecG(:) = ZERO
           END IF
@@ -690,6 +692,7 @@ END SUBROUTINE init_psi_t
         psi%nb_tot           = 0
         psi%nb_tot_contrac   = 0
         psi%nb_tot_uncontrac = 0
+        psi%nq_tot           = 0
 
         psi%nb_paie          = 0
         psi%nb_baie          = 0
@@ -699,6 +702,7 @@ END SUBROUTINE init_psi_t
         psi%nb_bRot          = 0
         psi%nb_qa            = 0
         psi%nb_qaie          = 0
+        psi%nb_qa_WithNoGrid = 0
 
         psi%nb_act1          = 0
         psi%nb_act           = 0
@@ -1011,6 +1015,7 @@ END SUBROUTINE init_psi_t
       psi1%symab            = psi2%symab
 
       psi1%nb_tot           = psi2%nb_tot
+      psi1%nq_tot           = psi2%nq_tot
       psi1%nb_tot_contrac   = psi2%nb_tot_contrac
       psi1%nb_tot_uncontrac = psi2%nb_tot_uncontrac
 
@@ -1022,6 +1027,7 @@ END SUBROUTINE init_psi_t
 
       psi1%nb_qa            = psi2%nb_qa
       psi1%nb_qaie          = psi2%nb_qaie
+      psi1%nb_qa_WithNoGrid = psi2%nb_qa_WithNoGrid
 
       psi1%nb_act1          = psi2%nb_act1
       psi1%nb_act           = psi2%nb_act
@@ -1158,32 +1164,35 @@ END SUBROUTINE init_psi_t
       psi1%BasisRep_contrac = psi2%BasisRep_contrac
 
 
-      psi1%SRG_MPI=psi2%SRG_MPI
-      psi1%SRB_MPI=psi2%SRB_MPI
+      psi1%SRG_MPI          = psi2%SRG_MPI
+      psi1%SRB_MPI          = psi2%SRB_MPI
 
-      psi1%symab = psi2%symab
+      psi1%symab            = psi2%symab
 
 
       psi1%nb_tot           = psi2%nb_tot
+      psi1%nq_tot           = psi2%nq_tot
+
       psi1%nb_tot_contrac   = psi2%nb_tot_contrac
       psi1%nb_tot_uncontrac = psi2%nb_tot_uncontrac
 
-      psi1%nb_baie = psi2%nb_baie
-      psi1%nb_ba   = psi2%nb_ba
-      psi1%nb_bi   = psi2%nb_bi
-      psi1%nb_be   = psi2%nb_be
-      psi1%nb_bRot = psi2%nb_bRot
-      psi1%nb_qa   = psi2%nb_qa
-      psi1%nb_qaie = psi2%nb_qaie
+      psi1%nb_baie          = psi2%nb_baie
+      psi1%nb_ba            = psi2%nb_ba
+      psi1%nb_bi            = psi2%nb_bi
+      psi1%nb_be            = psi2%nb_be
+      psi1%nb_bRot          = psi2%nb_bRot
+      psi1%nb_qa            = psi2%nb_qa
+      psi1%nb_qaie          = psi2%nb_qaie
+      psi1%nb_qa_WithNoGrid = psi2%nb_qa_WithNoGrid
 
-      psi1%nb_act1       = psi2%nb_act1
-      psi1%nb_act        = psi2%nb_act
-      psi1%nb_basis_act1 = psi2%nb_basis_act1
-      psi1%nb_basis      = psi2%nb_basis
+      psi1%nb_act1          = psi2%nb_act1
+      psi1%nb_act           = psi2%nb_act
+      psi1%nb_basis_act1    = psi2%nb_basis_act1
+      psi1%nb_basis         = psi2%nb_basis
 
-      psi1%max_dim       = psi2%max_dim
+      psi1%max_dim          = psi2%max_dim
 
-      psi1%nb_TDParam    = psi2%nb_TDParam
+      psi1%nb_TDParam       = psi2%nb_TDParam
 
 
       IF (psi1%nb_tot <= 0) THEN
@@ -3574,11 +3583,13 @@ END SUBROUTINE init_psi_t
       write(out_unit,*) 'nb_tot_contrac  ',psi%nb_tot_contrac
       write(out_unit,*) 'nb_tot_uncontrac',psi%nb_tot_uncontrac
       write(out_unit,*) 'BasisRep_contrac',psi%BasisRep_contrac
+      write(out_unit,*) 'nq_tot          ',psi%nq_tot
 
       write(out_unit,*)
       write(out_unit,*) 'nb_ba,nb_bi,nb_be,nb_bRot',psi%nb_ba,psi%nb_bi,psi%nb_be,psi%nb_bRot
       write(out_unit,*) 'nb_qa',psi%nb_qa
       write(out_unit,*) 'nb_baie,nb_qaie,nb_paie',psi%nb_baie,psi%nb_qaie,psi%nb_paie
+      write(out_unit,*) 'nb_qa_WithNoGrid',psi%nb_qa_WithNoGrid
       write(out_unit,*)
       write(out_unit,*) 'nb_act1,nb_act',psi%nb_act1,psi%nb_act
       write(out_unit,*) 'nb_basis_act1,nb_basis',psi%nb_basis_act1,psi%nb_basis

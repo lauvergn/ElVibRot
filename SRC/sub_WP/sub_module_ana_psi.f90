@@ -2480,14 +2480,14 @@ ELSE
 
       CALL dealloc_OldParam(OldPara)
 
-      DO i_qa=1,psi%nb_qa
+      DO i_qa=1,psi%nb_qa_WithNoGrid
 
         !- calculation of WrhonD ------------------------------
         WrhonD = Rec_WrhonD(psi%BasisnD,i_qa,OldPara)
 
         DO i_be=1,nb_be
         DO i_bi=1,nb_bi
-          i_qaie = i_qa + ( (i_bi-1)+(i_be-1)*nb_bi ) * psi%nb_qa
+          i_qaie = i_qa + ( (i_bi-1)+(i_be-1)*nb_bi ) * psi%nb_qa_WithNoGrid
 
           IF (psi%cplx) THEN
             temp = abs( psi%CvecG(i_qaie))

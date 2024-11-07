@@ -87,11 +87,15 @@ MODULE mod_SetOp
           integer :: nb_bi=0,nb_be=0             ! number of active basis functions and grid points
           integer :: nb_ba=0,nb_qa=0             ! number of active basis functions and grid points
           integer :: nbc_ba=0                    ! number of active contracted basis
+          integer :: nb_qa_WithNoGrid=0          ! number of grid points included basis set without grid
 
           integer :: nb_bai=0,nb_qai=0           ! number of total active basis functions with HADA basis
           integer :: nb_baie=0,nb_qaie=0         ! number of total active basis functions
           integer :: nb_bRot=0                   ! number of total rotational basis functions
-          integer :: nb_tot=0                    ! real size of the hamiltonian
+
+          integer :: nb_tot=0                    ! real size of the hamiltonian (basis functions)
+          integer :: nq_tot=0                    ! number of grid points included basis set without grid (time nb_bie)
+
                                                  ! can be smaller than nb_baie (HADA or spectral contraction)
           integer :: nb_tot_ini=0                ! size of the hamiltonian (before contraction)
                                                  ! usefull before the spectral transformation (for another operator)
@@ -549,19 +553,21 @@ END SUBROUTINE alloc_MatOp
         para_Op%nb_OpPsi    = 0
 
 
-        para_Op%nb_bi       = 0
-        para_Op%nb_be       = 0
-        para_Op%nb_bie      = 0
-        para_Op%nb_ba       = 0
-        para_Op%nbc_ba      = 0
-        para_Op%nb_qa       = 0
-        para_Op%nb_bai      = 0
-        para_Op%nb_qai      = 0
-        para_Op%nb_baie     = 0
-        para_Op%nb_qaie     = 0
-        para_Op%nb_bRot     = 0
-        para_Op%nb_tot      = 0
-        para_Op%nb_tot_ini  = 0
+        para_Op%nb_bi             = 0
+        para_Op%nb_be             = 0
+        para_Op%nb_bie            = 0
+        para_Op%nb_ba             = 0
+        para_Op%nbc_ba            = 0
+        para_Op%nb_qa             = 0
+        para_Op%nb_bai            = 0
+        para_Op%nb_qai            = 0
+        para_Op%nb_baie           = 0
+        para_Op%nb_qaie           = 0
+        para_Op%nb_bRot           = 0
+        para_Op%nb_tot            = 0
+        para_Op%nb_tot_ini        = 0
+        para_Op%nq_tot            = 0
+        para_Op%nb_qa_WithNoGrid  = 0
 
 
         para_Op%pack_Op = .FALSE.
@@ -677,6 +683,7 @@ END SUBROUTINE alloc_MatOp
 
       write(out_unit,*)
       write(out_unit,*) 'nb_tot',para_Op%nb_tot
+      write(out_unit,*) 'nq_tot',para_Op%nq_tot
       write(out_unit,*) 'nb_tot_ini',para_Op%nb_tot_ini
       write(out_unit,*) 'symab, bits(symab)',                          &
                                       WriteTOstring_symab(para_Op%symab)
@@ -686,6 +693,7 @@ END SUBROUTINE alloc_MatOp
       write(out_unit,*) 'nb_bi,nb_be',para_Op%nb_bi,para_Op%nb_be
       write(out_unit,*) 'nb_bai,nb_qai',para_Op%nb_bai,para_Op%nb_qai
       write(out_unit,*) 'nb_baie,nb_qaie',para_Op%nb_baie,para_Op%nb_qaie
+      write(out_unit,*) 'nb_qa_WithNoGrid',para_Op%nb_qa_WithNoGrid
 
       write(out_unit,*) 'allo List_Mat_i_todo',allocated(para_Op%List_Mat_i_todo)
       IF (allocated(para_Op%List_Mat_i_todo)) write(out_unit,*) shape(para_Op%List_Mat_i_todo)
@@ -962,32 +970,35 @@ END SUBROUTINE alloc_MatOp
       para_H_HADA%derive_termQdyn(:,:) = para_H%derive_termQdyn(:,:)
 
       !- for para_H_HADA ------------------
-      para_H_HADA%spectral         = .FALSE.
-      para_H_HADA%spectral_Op      =  0
+      para_H_HADA%spectral          = .FALSE.
+      para_H_HADA%spectral_Op       =  0
 
-      para_H_HADA%n_Op            = para_H%n_Op
-      para_H_HADA%name_Op         = para_H%name_Op
-      para_H_HADA%Make_Mat        = para_H%Make_Mat
-      para_H_HADA%Partial_MatOp   = .FALSE.
-      para_H_HADA%file_Grid       = para_H%file_Grid
-      para_H_HADA%sym_Hamil       = para_H%sym_Hamil
+      para_H_HADA%n_Op              = para_H%n_Op
+      para_H_HADA%name_Op           = para_H%name_Op
+      para_H_HADA%Make_Mat          = para_H%Make_Mat
+      para_H_HADA%Partial_MatOp     = .FALSE.
+      para_H_HADA%file_Grid         = para_H%file_Grid
+      para_H_HADA%sym_Hamil         = para_H%sym_Hamil
 
-      para_H_HADA%read_Op         = para_H%read_Op
+      para_H_HADA%read_Op           = para_H%read_Op
 
-      para_H_HADA%nb_bi         = 1
-      para_H_HADA%nb_be         = 1
-      para_H_HADA%nb_bie        = 1
-      para_H_HADA%nb_ba         = para_H%nb_ba
-      para_H_HADA%nbc_ba        = para_H%nbc_ba
-      para_H_HADA%nb_qa         = para_H%nb_qa
-      para_H_HADA%nb_bai        = para_H%nb_ba
-      para_H_HADA%nb_qai        = para_H%nb_qa
-      para_H_HADA%nb_baie       = para_H%nb_ba
-      para_H_HADA%nb_bRot       = 1
+      para_H_HADA%nb_bi             = 1
+      para_H_HADA%nb_be             = 1
+      para_H_HADA%nb_bie            = 1
+      para_H_HADA%nb_ba             = para_H%nb_ba
+      para_H_HADA%nbc_ba            = para_H%nbc_ba
+      para_H_HADA%nb_qa             = para_H%nb_qa
+      para_H_HADA%nb_bai            = para_H%nb_ba
+      para_H_HADA%nb_qai            = para_H%nb_qa
+      para_H_HADA%nb_baie           = para_H%nb_ba
+      para_H_HADA%nb_bRot           = 1
+      para_H_HADA%nb_tot            = para_H%nb_ba
+      para_H_HADA%nb_tot_ini        = para_H%nb_ba
 
-      para_H_HADA%nb_tot        = para_H%nb_ba
-      para_H_HADA%nb_tot_ini    = para_H%nb_ba
-      para_H_HADA%nb_qaie       = para_H%nb_qa
+      para_H_HADA%nb_qaie           = para_H%nb_qa
+      para_H_HADA%nq_tot            = para_H_HADA%nb_qa_WithNoGrid
+      para_H_HADA%nb_qa_WithNoGrid  = para_H_HADA%nb_qa_WithNoGrid
+
       nullify(para_H_HADA%ind_Op)
       nullify(para_H_HADA%dim_Op)
       para_H_HADA%pack_Op         = para_H%pack_Op
@@ -1132,31 +1143,33 @@ END SUBROUTINE alloc_MatOp
                           'para_Op2%List_Mat_i_todo','param_Op1TOparam_Op2')
       END IF
 
-      para_Op2%para_ReadOp     = para_Op1%para_ReadOp
-      para_Op2%file_Grid       = para_Op1%file_Grid
-      para_Op2%read_Op         = para_Op1%read_Op
-      para_Op2%cplx            = para_Op1%cplx
-      para_Op2%nb_OpPsi        = 0
-      para_Op2%sym_Hamil       = para_Op1%sym_Hamil
+      para_Op2%para_ReadOp      = para_Op1%para_ReadOp
+      para_Op2%file_Grid        = para_Op1%file_Grid
+      para_Op2%read_Op          = para_Op1%read_Op
+      para_Op2%cplx             = para_Op1%cplx
+      para_Op2%nb_OpPsi         = 0
+      para_Op2%sym_Hamil        = para_Op1%sym_Hamil
 
-      para_Op2%nb_bi         = para_Op1%nb_bi
-      para_Op2%nb_be         = para_Op1%nb_be
-      para_Op2%nb_ba         = para_Op1%nb_ba
-      para_Op2%nbc_ba        = para_Op1%nbc_ba
-      para_Op2%nb_bie        = para_Op1%nb_bie
-      para_Op2%nb_qa         = para_Op1%nb_qa
-      para_Op2%nb_bai        = para_Op1%nb_bai
-      para_Op2%nb_qai        = para_Op1%nb_qai
-      para_Op2%nb_baie       = para_Op1%nb_baie
-      para_Op2%nb_qaie       = para_Op1%nb_qaie
-      para_Op2%nb_bRot       = para_Op1%nb_bRot
-
-      para_Op2%nb_tot_ini    = para_Op1%nb_tot_ini
+      para_Op2%nb_bi            = para_Op1%nb_bi
+      para_Op2%nb_be            = para_Op1%nb_be
+      para_Op2%nb_ba            = para_Op1%nb_ba
+      para_Op2%nbc_ba           = para_Op1%nbc_ba
+      para_Op2%nb_bie           = para_Op1%nb_bie
+      para_Op2%nb_qa            = para_Op1%nb_qa
+      para_Op2%nb_bai           = para_Op1%nb_bai
+      para_Op2%nb_qai           = para_Op1%nb_qai
+      para_Op2%nb_baie          = para_Op1%nb_baie
+      para_Op2%nb_qaie          = para_Op1%nb_qaie
+      para_Op2%nb_bRot          = para_Op1%nb_bRot
+      para_Op2%nb_qa_WithNoGrid = para_Op1%nb_qa_WithNoGrid
+      para_Op2%nb_tot_ini       = para_Op1%nb_tot_ini
       IF (para_Op1%spectral) THEN
-        para_Op2%nb_tot        = para_Op1%nb_tot_ini
+        para_Op2%nb_tot         = para_Op1%nb_tot_ini
       ELSE
-        para_Op2%nb_tot        = para_Op1%nb_tot
+        para_Op2%nb_tot         = para_Op1%nb_tot
       END IF
+      para_Op2%nq_tot           = para_Op1%nq_tot
+
       nullify(para_Op2%ind_Op)
       nullify(para_Op2%dim_Op)
       para_Op2%pack_Op         = para_Op1%pack_Op
@@ -1640,8 +1653,8 @@ END SUBROUTINE alloc_MatOp
       TYPE (param_AllBasis), target, intent(in), optional :: para_AllBasis_ana
 
 !----- for debuging --------------------------------------------------
-       !logical, parameter :: debug = .TRUE.
-       logical, parameter :: debug = .FALSE.
+      !logical, parameter :: debug = .TRUE.
+      logical, parameter :: debug = .FALSE.
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING init_psi_FROM_Op : cplx',cplx
@@ -1683,31 +1696,33 @@ END SUBROUTINE alloc_MatOp
         psi%para_AllBasis_ana => psi%para_AllBasis
       END IF
 
-      psi%init          = .TRUE.
-      psi%cplx          = cplx
+      psi%init              = .TRUE.
+      psi%cplx              = cplx
 
-      psi%nb_tot           = para_H%nb_tot
-      psi%nb_tot_contrac   = para_H%nb_tot
-      psi%nb_tot_uncontrac = para_H%nb_tot_ini
+      psi%nb_tot            = para_H%nb_tot
+      psi%nq_tot            = para_H%nq_tot
+      psi%nb_tot_contrac    = para_H%nb_tot
+      psi%nb_tot_uncontrac  = para_H%nb_tot_ini
 
 
-      psi%nb_baie       = para_H%nb_baie
-      psi%nb_ba         = para_H%nb_ba
-      psi%nb_bi         = para_H%nb_bi
-      psi%nb_be         = para_H%nb_be
-      psi%nb_bRot       = para_H%nb_bRot
+      psi%nb_baie           = para_H%nb_baie
+      psi%nb_ba             = para_H%nb_ba
+      psi%nb_bi             = para_H%nb_bi
+      psi%nb_be             = para_H%nb_be
+      psi%nb_bRot           = para_H%nb_bRot
 
-      psi%nb_qa         = para_H%nb_qa
-      psi%nb_qaie       = para_H%nb_qaie
+      psi%nb_qa             = para_H%nb_qa
+      psi%nb_qaie           = para_H%nb_qaie
+      psi%nb_qa_WithNoGrid  = para_H%nb_qa_WithNoGrid
 
-      psi%nb_act1       = para_H%mole%nb_act1
-      psi%nb_act        = para_H%mole%nb_act
+      psi%nb_act1           = para_H%mole%nb_act1
+      psi%nb_act            = para_H%mole%nb_act
 
-      psi%nb_basis_act1 = max(1,psi%BasisnD%nb_basis)
-      psi%nb_basis      = psi%nb_basis_act1 + psi%Basis2n%nb_basis
-      psi%max_dim       = maxval( psi%BasisnD%nDindB%nDsize(:) )
+      psi%nb_basis_act1     = max(1,psi%BasisnD%nb_basis)
+      psi%nb_basis          = psi%nb_basis_act1 + psi%Basis2n%nb_basis
+      psi%max_dim           = maxval( psi%BasisnD%nDindB%nDsize(:) )
 
-      psi%nb_TDParam    = get_nb_TDParam_FROM_basis(psi%BasisnD)
+      psi%nb_TDParam        = get_nb_TDParam_FROM_basis(psi%BasisnD)
 
       IF (debug) THEN
         CALL ecri_init_psi(psi)

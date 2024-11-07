@@ -81,7 +81,7 @@ CONTAINS
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING ',name_sub
-        write(out_unit,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
+        write(out_unit,*) 'nb_ba,nb_qa_WithNoGrid',psi%nb_ba,psi%nb_qa_WithNoGrid
         write(out_unit,*) 'nb_act1',psi%nb_act1
         write(out_unit,*) 'asso BasisnD ',associated(psi%BasisnD)
         write(out_unit,*) 'nb_basis',psi%BasisnD%nb_basis
@@ -112,20 +112,20 @@ CONTAINS
         END IF
         IF (NewBasisEl) THEN
           CALL RecCvecB_TO_CvecG(psi%CvecB,psi%CvecG,psi%nb_ba,psi%nb_qa,psi%BasisnD)
-        ELSE IF (psi%BasisnD%SparseGrid_type == 4) THEN ! specail case with SG4
+        ELSE IF (psi%BasisnD%SparseGrid_type == 4) THEN ! special case with SG4
           CALL RecCvecB_TO_CvecG(psi%CvecB,psi%CvecG,psi%nb_ba,psi%nb_qa,psi%BasisnD)
         ELSE
           iqaie0 = 1
           ibaie0 = 1
-          iqaie1 = psi%nb_qa
+          iqaie1 = psi%nb_qa_WithNoGrid
           ibaie1 = psi%nb_ba
           DO ibie=1,psi%nb_bi*psi%nb_be
             CALL RecCvecB_TO_CvecG(psi%CvecB(ibaie0:ibaie1),            &
                                    psi%CvecG(iqaie0:iqaie1),            &
-                                   psi%nb_ba,psi%nb_qa,psi%BasisnD)
-            iqaie0 = iqaie0 + psi%nb_qa
+                                   psi%nb_ba,psi%nb_qa_WithNoGrid,psi%BasisnD)
+            iqaie0 = iqaie0 + psi%nb_qa_WithNoGrid
             ibaie0 = ibaie0 + psi%nb_ba
-            iqaie1 = iqaie1 + psi%nb_qa
+            iqaie1 = iqaie1 + psi%nb_qa_WithNoGrid
             ibaie1 = ibaie1 + psi%nb_ba
           END DO
         END IF
@@ -143,15 +143,15 @@ CONTAINS
         ELSE
           iqaie0 = 1
           ibaie0 = 1
-          iqaie1 = psi%nb_qa
+          iqaie1 = psi%nb_qa_WithNoGrid
           ibaie1 = psi%nb_ba
           DO ibie=1,psi%nb_bi*psi%nb_be
             CALL RecRvecB_TO_RvecG(psi%RvecB(ibaie0:ibaie1),            &
                                    psi%RvecG(iqaie0:iqaie1),            &
-                                   psi%nb_ba,psi%nb_qa,psi%BasisnD)
-            iqaie0 = iqaie0 + psi%nb_qa
+                                   psi%nb_ba,psi%nb_qa_WithNoGrid,psi%BasisnD)
+            iqaie0 = iqaie0 + psi%nb_qa_WithNoGrid
             ibaie0 = ibaie0 + psi%nb_ba
-            iqaie1 = iqaie1 + psi%nb_qa
+            iqaie1 = iqaie1 + psi%nb_qa_WithNoGrid
             ibaie1 = ibaie1 + psi%nb_ba
           END DO
         END IF
@@ -198,7 +198,7 @@ CONTAINS
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING ',name_sub
-        write(out_unit,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
+        write(out_unit,*) 'nb_ba,nb_qa_WithNoGrid',psi%nb_ba,psi%nb_qa_WithNoGrid
         write(out_unit,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
         write(out_unit,*) 'nb_act1',psi%nb_act1
         write(out_unit,*)
@@ -236,15 +236,15 @@ CONTAINS
         ELSE
           iqaie0 = 1
           ibaie0 = 1
-          iqaie1 = psi%nb_qa
+          iqaie1 = psi%nb_qa_WithNoGrid
           ibaie1 = psi%nb_ba
           DO ibie=1,psi%nb_bi*psi%nb_be
             CALL RecCvecG_TO_CvecB(psi%CvecG(iqaie0:iqaie1),            &
                                        psi%CvecB(ibaie0:ibaie1),        &
-                                       psi%nb_qa,psi%nb_ba,psi%BasisnD)
-            iqaie0 = iqaie0 + psi%nb_qa
+                                       psi%nb_qa_WithNoGrid,psi%nb_ba,psi%BasisnD)
+            iqaie0 = iqaie0 + psi%nb_qa_WithNoGrid
             ibaie0 = ibaie0 + psi%nb_ba
-            iqaie1 = iqaie1 + psi%nb_qa
+            iqaie1 = iqaie1 + psi%nb_qa_WithNoGrid
             ibaie1 = ibaie1 + psi%nb_ba
           END DO
         END IF
@@ -263,15 +263,15 @@ CONTAINS
         ELSE
           iqaie0 = 1
           ibaie0 = 1
-          iqaie1 = psi%nb_qa
+          iqaie1 = psi%nb_qa_WithNoGrid
           ibaie1 = psi%nb_ba
           DO ibie=1,psi%nb_bi*psi%nb_be
             CALL RecRvecG_TO_RvecB(psi%RvecG(iqaie0:iqaie1),            &
                                      psi%RvecB(ibaie0:ibaie1),          &
-                                     psi%nb_qa,psi%nb_ba,psi%BasisnD)
-            iqaie0 = iqaie0 + psi%nb_qa
+                                     psi%nb_qa_WithNoGrid,psi%nb_ba,psi%BasisnD)
+            iqaie0 = iqaie0 + psi%nb_qa_WithNoGrid
             ibaie0 = ibaie0 + psi%nb_ba
-            iqaie1 = iqaie1 + psi%nb_qa
+            iqaie1 = iqaie1 + psi%nb_qa_WithNoGrid
             ibaie1 = ibaie1 + psi%nb_ba
           END DO
         END IF
@@ -319,7 +319,7 @@ CONTAINS
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING ',name_sub
-        write(out_unit,*) 'nb_ba,nb_qa',psi%nb_ba,psi%nb_qa
+        write(out_unit,*) 'nb_ba,nb_qa_WithNoGrid',psi%nb_ba,psi%nb_qa_WithNoGrid
         write(out_unit,*) 'nb_act1',psi%nb_act1
         write(out_unit,*)
         write(out_unit,*) 'nb_basis',psi%BasisnD%nb_basis
@@ -354,16 +354,16 @@ CONTAINS
         psi%CvecG(:) = CZERO
         iqaie0 = 1
         ibaie0 = 1
-        iqaie1 = psi%nb_qa
+        iqaie1 = psi%nb_qa_WithNoGrid
         ibaie1 = psi%nb_ba
         DO ibie=1,psi%nb_bi*psi%nb_be
           CALL RecCvecB_TO_CvecG(psi%CvecB(ibaie0:ibaie1),              &
                                  psi%CvecG(iqaie0:iqaie1),              &
-                                 psi%nb_ba,psi%nb_qa,psi%BasisnD,       &
+                                 psi%nb_ba,psi%nb_qa_WithNoGrid,psi%BasisnD,       &
                                  tab_derQdyn)
-          iqaie0 = iqaie0 + psi%nb_qa
+          iqaie0 = iqaie0 + psi%nb_qa_WithNoGrid
           ibaie0 = ibaie0 + psi%nb_ba
-          iqaie1 = iqaie1 + psi%nb_qa
+          iqaie1 = iqaie1 + psi%nb_qa_WithNoGrid
           ibaie1 = ibaie1 + psi%nb_ba
         END DO
       ELSE
@@ -376,16 +376,16 @@ CONTAINS
         psi%RvecG(:) = ZERO
         iqaie0 = 1
         ibaie0 = 1
-        iqaie1 = psi%nb_qa
+        iqaie1 = psi%nb_qa_WithNoGrid
         ibaie1 = psi%nb_ba
         DO ibie=1,psi%nb_bi*psi%nb_be
           CALL RecRvecB_TO_RvecG(psi%RvecB(ibaie0:ibaie1),              &
                                  psi%RvecG(iqaie0:iqaie1),              &
-                                 psi%nb_ba,psi%nb_qa,psi%BasisnD,       &
+                                 psi%nb_ba,psi%nb_qa_WithNoGrid,psi%BasisnD,       &
                                  tab_derQdyn)
-          iqaie0 = iqaie0 + psi%nb_qa
+          iqaie0 = iqaie0 + psi%nb_qa_WithNoGrid
           ibaie0 = ibaie0 + psi%nb_ba
-          iqaie1 = iqaie1 + psi%nb_qa
+          iqaie1 = iqaie1 + psi%nb_qa_WithNoGrid
           ibaie1 = ibaie1 + psi%nb_ba
         END DO
       END IF
