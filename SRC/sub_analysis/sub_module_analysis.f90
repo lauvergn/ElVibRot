@@ -55,9 +55,10 @@
           real (kind=Rkind)    :: max_ene     = TEN**4    ! (cm-1)
           integer              :: ana_level   = 2         ! 2: full analysis, 0: no-analysis, 1: minimal analysis
 
-          integer :: print_psi                     ! nb of level write on the grid
-          logical :: psi2                          ! print psi^2 instead of psi
+          integer              :: print_psi               ! nb of level write on the grid
+          logical              :: psi2                    ! print psi^2 instead of psi
 
+          logical              :: print_WP0 = .FALSE.
           TYPE (param_ana_psi) :: ana_psi
 
           logical              :: Read_zpe                ! (default F), T is Ezpe is read
@@ -148,6 +149,7 @@
       logical       :: Rho1D,Rho2D,Wheight_rho
       integer       :: Rho_type
       logical       :: psi2,psi1D_Q0,psi2D_Q0,psi_adia,AvPi,AvOp,AvQ
+      logical       :: print_WP0
       integer       :: AvQ_Order
 
       integer           :: Coherence
@@ -178,10 +180,10 @@
 !-----------------------------------------------------------
 
       NAMELIST /analyse/ana,ana_level,print,nb_harm_ana,max_ana,max_ene,        &
-                        propa,                                          &
+                        propa,print_WP0,                                &
                         print_psi,psi2,psi1D_Q0,psi2D_Q0,QTransfo,      &
                         Rho1D,Rho2D,Wheight_rho,Rho_type,psi_adia,      &
-                        AvScalOp,AvHiterm,AvPi,AvOp,AvQ,AvQ_Order,  &
+                        AvScalOp,AvHiterm,AvPi,AvOp,AvQ,AvQ_Order,      &
                         Coherence,Coherence_epsi,                       &
                         ExactFact,intensity,NLO,CRP,                    &
                         Psi_ScalOp,VibRot,JJmax,                        &
@@ -241,6 +243,7 @@
       ana_level       = -1 ! default (2: full analysis, 0: no-analysis, 1: minimal analysis
       !IF (openmpi) ana_level       = 1 ! eq to ana_mini=t in sub_analyze_WP_OpWP
       print_psi       = 0
+      print_WP0       = .FALSE.
       nb_harm_ana     = 1
       max_ana         = -1
       Temp            = -ONE
@@ -317,6 +320,7 @@
 
       para_ana%print                = print
       para_ana%propa                = propa
+      para_ana%print_WP0            = (print_WP0 .AND. propa)
       para_ana%control              = control
       para_ana%davidson             = davidson
       para_ana%arpack               = arpack

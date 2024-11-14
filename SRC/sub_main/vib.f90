@@ -116,7 +116,7 @@
       integer :: Get_nbPERsym_FROM_SymAbelianOFAllBasis ! function
 
 !----- variables divers ----------------------------------------------------------------
-      integer           :: i,ip,i_baie,f_baie,id,nb_ScalOp
+      integer           :: i,ib,ip,i_baie,f_baie,id,nb_ScalOp
       integer           :: nb_baie_sym,nb_bi,nb_be,nb_ba,nb_bie
       real (kind=Rkind) :: T,DE,Ep,Em,Q,fac,zpe,pop
       logical           :: print_mat
@@ -443,11 +443,24 @@
               IF (para_H%cplx) THEN
                 ! 1st: project psi on the spectral basis
                 WP0(i)%CvecB(:) = matmul(transpose(para_H%Cvp),WP0(i)%CvecB)
+                IF (para_ana%print_WP0) THEN
+                  DO ib=1,size(WP0(i)%CvecB)
+                    IF ( real(para_H%Cdiag(ib)-para_H%Cdiag(1),kind=Rkind) > para_ana%max_ene) EXIT
+                    write(out_unit,*) 'WP0' // TO_string(i),ib,para_H%Cdiag(ib),WP0(i)%CvecB(ib)
+                  END DO
+                END IF
               ELSE
                 ! 1st: project psi on the spectral basis
                 WP0(i)%CvecB(:) = matmul(transpose(para_H%Rvp),WP0(i)%CvecB)
+                IF (para_ana%print_WP0) THEN
+                  DO ib=1,size(WP0(i)%CvecB)
+                    IF ( (para_H%Rdiag(ib)-para_H%Rdiag(1)) > para_ana%max_ene) EXIT
+                    write(out_unit,*) 'WP0' // TO_string(i),ib,para_H%Rdiag(ib),WP0(i)%CvecB(ib)
+                  END DO
+                END IF
               END IF
             END DO
+
           END IF
 
           IF(MPI_id==0) THEN
