@@ -161,6 +161,7 @@ END SUBROUTINE sub_diago_H
       complex (kind=Rkind) :: CH(n,n)
       complex (kind=Rkind) :: CVec(n,n)
       complex (kind=Rkind) :: CE(n)
+      complex (kind=Rkind) :: S(n,n)
 
       real (kind=Rkind)    :: auTOcm_inv
 
@@ -170,8 +171,8 @@ END SUBROUTINE sub_diago_H
 
 
 !----- for debuging --------------------------------------------------
-      logical, parameter :: debug=.FALSE.
-      !logical, parameter :: debug=.TRUE.
+      !logical, parameter :: debug=.FALSE.
+      logical, parameter :: debug=.TRUE.
 !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING sub_diago_CH'
@@ -185,7 +186,7 @@ END SUBROUTINE sub_diago_H
 !
 !=====================================================================
 
-      CALL diagonalization(CH,CE,CVec)
+      CALL diagonalization(CH,CE,CVec,diago_type=4)
 
 !=====================================================================
 !
@@ -204,6 +205,12 @@ END SUBROUTINE sub_diago_H
         write(out_unit,*) ' Vec:'
         CALL Write_Mat_MPI(CVec,out_unit,5)
 
+        IF (debug) THEN
+          S = matmul(transpose(CVec),CVec)
+          CALL Write_Mat_MPI(S,out_unit,5,info='eigenvector Overlap1')
+        END IF
+
+stop
         write(out_unit,*) 'END sub_diago_CH'
       END IF
 !-----------------------------------------------------------

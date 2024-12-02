@@ -156,6 +156,7 @@
       ELSE
         cplx_loc = .FALSE.
       END IF
+      para_TypeOp%cplx = cplx_loc
 
       IF (present(JRot)) THEN
         para_TypeOp%JRot = JRot
