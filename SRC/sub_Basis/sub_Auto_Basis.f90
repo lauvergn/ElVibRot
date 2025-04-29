@@ -83,7 +83,7 @@
       TYPE (param_AllBasis), target :: para_AllBasis
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in) :: para_ReadOp
+      TYPE (ReadOp_t), intent(in) :: para_ReadOp
 
 
 !----- local variables
@@ -227,7 +227,7 @@
       TYPE (basis) :: basisnD
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in) :: para_ReadOp
+      TYPE (ReadOp_t), intent(in) :: para_ReadOp
 
 
 !----- local variables
@@ -505,7 +505,7 @@
 !----- for the basis set ----------------------------------------------
       TYPE (basis),        intent(inout) :: basisnD
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in)    :: para_ReadOp
+      TYPE (ReadOp_t), intent(in)    :: para_ReadOp
 
 !----- local variables
       integer             :: i,ib,L,nb
@@ -717,7 +717,7 @@
       TYPE (basis),        intent(inout) :: basis_Set
 
       !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in)    :: para_ReadOp
+      TYPE (ReadOp_t), intent(in)    :: para_ReadOp
 
 !----- local variables -----------------------------------------------
       real(kind=Rkind), allocatable :: Hmat(:,:)
@@ -794,7 +794,7 @@
       !----- for the basis set ----------------------------------------------
       TYPE (basis),        intent(inout) :: basis_Set
       !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in)    :: para_ReadOp
+      TYPE (ReadOp_t), intent(in)    :: para_ReadOp
 
 !----- local variables -----------------------------------------------
       real(kind=Rkind), allocatable :: Hmat(:,:)
@@ -882,7 +882,7 @@
       TYPE (basis)          :: basis_Set
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in)         :: para_ReadOp
+      TYPE (ReadOp_t), intent(in)         :: para_ReadOp
 
 
 
@@ -979,7 +979,7 @@
       logical :: calc_scalar_Op,direct_KEO
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in)         :: para_ReadOp
+      TYPE (ReadOp_t), intent(in)         :: para_ReadOp
 
 
        integer       :: i
@@ -1151,7 +1151,7 @@
       logical :: calc_scalar_Op,direct_KEO
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in)         :: para_ReadOp
+      TYPE (ReadOp_t), intent(in)         :: para_ReadOp
 
 
       integer           :: i,type_Q
@@ -1358,7 +1358,7 @@
       TYPE (basis),        intent(in)  :: basis_Set
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in)  :: para_ReadOp
+      TYPE (ReadOp_t), intent(in)  :: para_ReadOp
 
 !----- local variables -----------------------------------------------
       real(kind=Rkind), allocatable :: Hmat(:,:),Rdiag(:),Rvp(:,:)
@@ -1428,12 +1428,12 @@
       TYPE (basis),                   intent(in)  :: basis_Set
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp),            intent(in)  :: para_ReadOp
+      TYPE (ReadOp_t),            intent(in)  :: para_ReadOp
 
 
 !----- local variables -----------------------------------------------
 !----- Operators and para_ReadOp ----------------
-      TYPE (param_ReadOp)         :: ReadOp_AutoBasis
+      TYPE (ReadOp_t)         :: ReadOp_AutoBasis
       TYPE (param_AllOp)          :: para_AllOp_loc
 !----- for the basis set ----------------------------------------------
       TYPE (param_AllBasis)       :: para_AllBasis_loc
@@ -1555,7 +1555,7 @@
       TYPE (Tnum),         intent(in)    :: para_Tnum
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp), intent(in)    :: para_ReadOp
+      TYPE (ReadOp_t), intent(in)    :: para_ReadOp
 
 
 !----- local variables -----------------------------------------------
@@ -1790,7 +1790,7 @@
 
 !----- variables for the construction of H ---------------------------
       TYPE (param_Op)     :: para_H
-      TYPE (param_ReadOp), intent(in) :: para_ReadOp
+      TYPE (ReadOp_t), intent(in) :: para_ReadOp
 
 
 !----- working variables ---------------------------------------------

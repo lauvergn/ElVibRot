@@ -1,46 +1,128 @@
-C=======================================================================
-C    calcN_op: calculation of the potential and scalar operator matrices
-C     - mat_V(nb_be,nb_be):   potential (real part)
-C     - mat_imV(nb_be,nb_be): potential (imaginary part)
-C     - mat_ScalOp(nb_be,nb_be,nb_ScalOp): scalar operators (dipole ...)
-C    nb_be:     nb of diabatic electronic states
-C    nb_ScalOp: nb of scalar operators
-C
-C    Qpot are the coordinates (active, dynamic Cartesian ... ones)
-C    nb_Qpot: nb of coordinates
-C
-C     mole: coordinate definition
-C=======================================================================
+c
+C================================================================
+C    calc_Op : calculation of the potential and scalar operator matrices
+c    mat_V(nb_be,nb_be) and Mat_Scal(nb_be,nb_be,nb_ScalOp)
+c    nb_be : nb of electronic surfaces
+c    Q are the coordinates in active order or dyn order
+C================================================================
       SUBROUTINE calcN_op(mat_V,mat_imV,mat_ScalOp,nb_be,nb_ScalOp,
-     *                    Qpot,nb_Qpot,mole,calc_ScalOp,pot_cplx)
+     *                    Qop,nb_QOp,mole,calc_ScalOp,pot_cplx)
+
       USE EVR_system_m
       USE mod_Tnum
       IMPLICIT NONE
 
-      !----- for the coordinate definition------------------------------
-      TYPE (CoordType)    :: mole
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
 
-      integer           :: nb_be,nb_ScalOp,nb_Qpot
+      integer           :: nb_be,nb_ScalOp,nb_QOp
       logical           :: calc_ScalOp,pot_cplx
-      real (kind=Rkind) :: mat_V(nb_be,nb_be)
-      real (kind=Rkind) :: mat_imV(nb_be,nb_be)
+      real (kind=Rkind) :: mat_V(nb_be,nb_be),mat_imV(nb_be,nb_be)
       real (kind=Rkind) :: mat_ScalOp(nb_be,nb_be,nb_ScalOp)
-      real (kind=Rkind) :: Qpot(nb_Qpot)
+      real (kind=Rkind) :: Qop(nb_QOp)
 
+      integer           :: nb_QOp_loc=2
 
-      !-----------------------------------------------------------------
-      mat_V(:,:) = ZERO
+      IF (nb_be == 1 ) THEN
+        write(out_unit,*) ' ERROR sub_system for 2 PES'
+        STOP
+      END IF
+
+      CALL Mat_pot0(mat_V,Qop(1:nb_QOp_loc),nb_be,nb_QOp_loc) 
+
       IF (pot_cplx) THEN
-        mat_imV(:,:) = ZERO
+        CALL Mat_im_pot0(mat_imV,Qop(1:nb_QOp_loc),nb_be,nb_QOp_loc)
       END IF
-      IF (calc_ScalOp) THEN
-          mat_ScalOp(:,:,:) = ZERO
-      END IF
-      !-----------------------------------------------------------------
 
-      STOP 'STOP in calcN_op: you have to set-up the potential ond the other operators!!'
+      IF (calc_ScalOp) THEN
+        CALL Mat_ScalarOp(mat_ScalOp,Qop(1:nb_QOp_loc),mole,
+     *                    nb_be,nb_ScalOp,nb_QOp_loc)
+      END IF
 
       END SUBROUTINE calcN_op
+C================================================================
+C     pot0(x) 1 D 2 surfaces
+C================================================================
+      SUBROUTINE Mat_pot0(mat_V,Qop,nb_be,nb_QOp)
+      USE EVR_system_m
+      IMPLICIT NONE
+
+      integer           :: nb_be,nb_QOp
+      real (kind=Rkind) :: Qop(nb_QOp)
+      real (kind=Rkind) :: mat_V(nb_be,nb_be)
+
+      real (kind=Rkind) :: kdiag(nb_QOp)
+      real (kind=Rkind) :: Qeq1(nb_QOp)
+      real (kind=Rkind) :: Qeq2(nb_QOp)
+      real (kind=Rkind) :: DQ(nb_QOp)
+      real (kind=Rkind), parameter :: e11  = 0.00_Rkind
+      real (kind=Rkind), parameter :: e22  = 0.03_Rkind
+      real (kind=Rkind), parameter :: e12  = 0.005_Rkind
+
+       kdiag(:) = [ 0.1_Rkind,0.5_Rkind]
+       Qeq1(:)  = [-0.7_Rkind,0.5_Rkind]
+       Qeq2(:)  = [-0.6_Rkind,0.4_Rkind]
+
+       !Write(6,*) 'Qop',Qop
+       !Write(6,*) 'kdiag',kdiag
+
+       DQ(:) = Qop-Qeq1
+       !Write(6,*) 'DQ1',DQ
+       mat_V(1,1) = e11 + HALF * dot_product(kdiag*DQ,DQ)
+
+       DQ(:) = Qop-Qeq2
+       !Write(6,*) 'DQ2',DQ
+       mat_V(2,2) = e22 + HALF * dot_product(kdiag*DQ,DQ)
+
+       mat_V(1,2) = e12
+       mat_V(2,1) = e12
+
+       !write(6,*) 'mat_V',mat_V
+
+      END SUBROUTINE Mat_pot0
+C================================================================
+C    fonction im_pot0(x) imaginary part of pot0
+C================================================================
+      SUBROUTINE Mat_im_pot0(mat_imV,Qop,nb_be,nb_QOp)
+      USE EVR_system_m
+      IMPLICIT NONE
+
+      integer           :: nb_be,nb_QOp
+      real (kind=Rkind) :: mat_imV(nb_be,nb_be)
+      real (kind=Rkind) :: Qop(nb_QOp)
+
+      integer           :: i
+      real (kind=Rkind) :: im_pot0 ! imaginary function
+
+      mat_imV = ZERO
+      mat_imV(1,1) = -0.001_Rkind
+
+      END SUBROUTINE Mat_im_pot0
+c
+C================================================================
+C    Scalar Opertor (here dipole moment, 3 components (x, y, z)
+C================================================================
+      SUBROUTINE Mat_ScalarOp(mat_ScalOp,Qop,mole,
+     *                        nb_be,nb_ScalOp,nb_QOp)
+      USE EVR_system_m
+      USE mod_Tnum
+      IMPLICIT NONE
+
+c----- for the CoordType and Tnum --------------------------------------
+      TYPE (CoordType) :: mole
+
+
+      integer           :: nb_be,nb_ScalOp,nb_QOp
+      real (kind=Rkind) :: mat_ScalOp(nb_be,nb_be,nb_ScalOp)
+      real (kind=Rkind) :: Qop(nb_QOp)
+
+
+       mat_ScalOp(:,:,:) = ZERO
+
+       mat_ScalOp(1,2,1) = ONE
+       mat_ScalOp(2,1,1) = ONE
+
+       END SUBROUTINE Mat_ScalarOp
 C
 C=======================================================================
 C    fonction pot_rest(x)

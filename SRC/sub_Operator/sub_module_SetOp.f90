@@ -53,11 +53,10 @@ MODULE mod_SetOp
 
   USE mod_basis
   USE mod_OpGrid
-  USE mod_ReadOp
+  USE ReadOp_m
   IMPLICIT NONE
 
-!------------------------------------------------------------------------------
-  TYPE, EXTENDS(param_TypeOp) :: param_Op
+  TYPE, EXTENDS(SplitOp_t) :: param_Op
 
           logical                        :: init_var      = .FALSE.
           logical                        :: alloc         = .FALSE.
@@ -136,7 +135,7 @@ MODULE mod_SetOp
           logical                      :: Grid_done            = .FALSE.
           TYPE (File_t)                :: file_Grid                    ! file of the grid
 
-          TYPE (param_ReadOp)          :: para_ReadOp
+          TYPE (ReadOp_t)          :: para_ReadOp
 
           ! for H Operator n_Op = 0
           logical           :: scaled   = .FALSE.     ! if T scaled H
@@ -151,8 +150,6 @@ MODULE mod_SetOp
           real (kind=Rkind)              :: pot0              = ZERO    !
           logical                        :: pot_only          = .FALSE. ! comput only the PES without T (and the vep)
           logical                        :: T_only            = .FALSE. ! comput only the T (with the vep)
-          logical                        :: SplitH            = .FALSE. ! When true, the H is split in a diagonal part wich contains the KEO and also part of the potential (for HO basis set)
-          real (kind=Rkind), allocatable :: SplitDiagB(:)               ! if SplitH=t, the Hamiltonian diagonal values on the basis set
 
   END TYPE param_Op
   TYPE param_AllOp
@@ -178,12 +175,14 @@ MODULE mod_SetOp
   PUBLIC :: Set_ZPE_OF_Op,Get_ZPE,init_psi
 
 CONTAINS
-
-!=======================================================================================
-!
-!  allocate/deallocate para_Op
-!
-!=======================================================================================
+  !===============================================================================
+  ! param_op part
+  !===============================================================================
+  !=======================================================================================
+  !
+  !  allocate/deallocate para_Op
+  !
+  !=======================================================================================
       !!@description: TODO
       !!@param: TODO
       !!@param: TODO
@@ -500,7 +499,7 @@ END SUBROUTINE alloc_MatOp
       END IF
 
       IF (.NOT. keep_init_loc) THEN
-        CALL dealloc_TypeOp(para_Op%param_TypeOp)
+        CALL dealloc_SplitOp(para_Op%SplitOp_t)
 
         IF (allocated(para_Op%derive_termQdyn))  THEN
           CALL dealloc_NParray(para_Op%derive_termQdyn,'para_Op%derive_termQdyn',name_sub)
@@ -676,7 +675,7 @@ END SUBROUTINE alloc_MatOp
 
       write(out_unit,*) 'cplx',para_Op%cplx
 
-      CALL Write_TypeOp(para_Op%param_TypeOp)
+      CALL Write_SplitOp(para_Op%SplitOp_t)
 
       write(out_unit,*) 'spectral,spectral_Op',                        &
                   para_Op%spectral,para_Op%spectral_Op

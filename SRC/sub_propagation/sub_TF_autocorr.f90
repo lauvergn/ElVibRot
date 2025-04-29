@@ -70,6 +70,7 @@
       real (kind=Rkind)        :: ca,cb,cc,auTOcm_inv
       integer :: err_mem,memory
 
+      write(out_unit,*) 'BEGINNING TF_autocorr'
       CALL file_open(para_propa%file_autocorr,ni)
       IF(MPI_id==0) THEN
         CALL file_open(para_propa%file_spectrum,no)
@@ -133,6 +134,7 @@
 
       CALL dealloc_array(C,"C","TF_autocorr")
       CALL dealloc_array(W,"C","TF_autocorr")
+      write(out_unit,*) 'END TF_autocorr'
 
   END SUBROUTINE TF_autocorr
 

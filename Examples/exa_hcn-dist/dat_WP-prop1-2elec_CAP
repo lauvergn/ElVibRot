@@ -1,0 +1,69 @@
+ SYSTEM=sub_system_2elec.f
+
+here=`pwd`
+DIR_vib=$here/../..
+DIR_pot=$DIR_vib/sub_pot
+
+ cp $SYSTEM $DIR_pot/sub_system.f
+
+cd $DIR_vib
+ make OPT=1
+cd $here
+
+nice $DIR_vib/vib << ** >res
+ &system printlevel=1 /
+ &constantes ene_unit='au' /
+ &variables
+        nrho=1
+        Without_Rot=t Centered_ON_CoM=f 
+
+        Old_Qtransfo=f
+        nb_Qtransfo=2
+/
+&Coord_transfo name_transfo='zmat' nat=5 /
+ X
+ X  1
+ X  1  2
+ 1000. 0 0 0
+ 2000. 0 0 0
+
+ &Coord_transfo name_transfo='active' /
+0 0 0   1 0 0     1 0 0
+
+ &minimum pot0=0. pot_act=t pot_cplx=t nb_elec=2 read_Qdyn0=t /
+ 1. bohr
+ 1. bohr
+ 90 °
+ -0.7 bohr
+ 0.
+ 0.
+0.5 bohr
+ 0.
+ 0.
+
+ &basis_nD iQact=1 name="boxAB" nb=31 nq=32 A=-1.5 B=0.5 /
+ &basis_nD iQact=2 name="HO"    nb=10 nq=15 Q0=0.4 k_HO=0.5 m_HO=2000. /
+ &inactives /
+
+ &actives test=f direct=2 /
+ &analyse propa=t 
+          print_psi=0 Rho1D=t Rho2D=t /
+
+ &propa
+        WPTmax=10. 'fs' WPdeltaT=0.1 'fs' nb_micro=1
+
+        name_WPpropa='tdH-Taylor' poly_tol=1.d-20 auto_Hmax=f
+
+        new_GWP0=t nb_WP0=1
+ /
+ &defGWP I_ElecChannel=2 Coef=(1.,0.) /
+   &defWP0 k=0.1 m=1000. Qeq=-0.6 imp_k=0.0 /
+   &defWP0 k=0.5 m=2000. Qeq= 0.4 imp_k=0.0 /
+
+
+ &field  nb_pulse=1 type='cos' max_der=100
+         pola_xyz(1:3)=t,f,f
+         w(1:3,1)=0.0064,0.,0.0
+         E0(1:3,1)=0.1,0.,0.0 /
+
+**

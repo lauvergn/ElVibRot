@@ -25,40 +25,49 @@ nice $DIR_vib/vib << ** >res
          nb_Qtransfo=3
          Write_QMotions=f
  /
- &Coord_transfo name_transfo='zmat' nat=4 /
+ &Coord_transfo name_transfo='zmat' nat=5 /
 C
 X     1
 N     2  1
 H     2 -1 3
+1.    0  0 0
 
  &Coord_transfo name_transfo='linear' /
-sym  cos(a)      R     r    x    pi   dh
-6
-1      0.        0.  $x1    1.   0.   0.
-2      0.        0.  $x2   -1.   0.   0.
-3      0.        0.  0.     0.   1.   0.
-4      0.        1.  0.     0.   0.   0.
-5      1.        0.  0.     0.   0.   0.
-6      0.        0.  0.     0.   0.   1.
+sym  cos(a)      R     r    x    pi   dh  extra x2 x3
+9
+1      0.        0.  $x1    1.   0.   0.  0.  0.  0.
+2      0.        0.  $x2   -1.   0.   0.  0.  0.  0.
+3      0.        0.  0.     0.   1.   0.  0.  0.  0.
+4      0.        1.  0.     0.   0.   0.  0.  0.  0.
+5      1.        0.  0.     0.   0.   0.  0.  0.  0.
+6      0.        0.  0.     0.   0.   1.  0.  0.  0.
+7      0.        0.  0.     0.   0.   0.  1.  0.  0.
+8      0.        0.  0.     0.   0.   0.  0.  1.  0.
+9      0.        0.  0.     0.   0.   0.  0.  0.  1.
 
  &Coord_transfo name_transfo='active' /
- 0 1 1    0 0 0
+ 0 1 1    0 0 0    1 0 0
 
- &minimum pot0=0. pot_act=f pot_cplx=f 
-          read_Qdyn0=t read_nameQ=t unit='bohr' /
-cosa .999d0
-R 3.187
-r 2.179
-x 0.
-pi 3.141592653589793238462643383279d0
-dh 0.0
+ &minimum pot0=-0.499465823200 pot_itQtransfo=2 /
+cosa  .999d0
+R     3.187
+r     2.179
+x     0.
+pi    3.141592653589793238462643383279d0
+dh    0.0
+extra 0.0
+x2    0.0
+x3    0.0
 
  &basis_nD iQdyn=2 name="HO" Q0=3.2 nb=5 nq=8 /
- &basis_nD iQdyn=3 name="No-Grid" nb=2 /
- &basis_nD iQdyn=2 name="No-Grid" nb=5 /
+ &basis_nD iQdyn=3 name="HO" Q0=2.2 nb=5 nq=8 /
+ &basis_nD iQdyn=7 name="No-Grid" nb=2 /
  &inactives /
 
- &actives test=f direct=2 /
+ &actives test=f direct=2 NewOp=t nb_Op=1 /
+   &TypeOp type_Op=0 direct_KEO=f direct_ScalOp=f cplx=f /
+
+
  &analyse max_ana=20 max_ene=20000. "cm-1" print=f propa=t /
  &propa
         WPTmax=1000. WPdeltaT=10. nb_micro=1
@@ -73,5 +82,6 @@ dh 0.0
  /
  &defGWP Coef=(1.,0.) /
    &defWP0 iQdyn=2 sigma=1.4142135624 Qeq=3.2 imp_k=0.0 /
-   &defWP0 iQdyn=3 sigma=0.2 Qeq=2.2 imp_k=0.0 /
+   &defWP0 iQdyn=3 sigma=1.4142135624 Qeq=2.2 imp_k=0.0 /
+   &defWP0 iQdyn=7 sigma=0.2 Qeq=0.0 imp_k=0.0 /
 **

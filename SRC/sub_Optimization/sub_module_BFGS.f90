@@ -232,7 +232,7 @@
       logical          :: calc_scalar_Op
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp)         :: para_ReadOp
+      TYPE (ReadOp_t)         :: para_ReadOp
       logical                     :: Save_FileGrid,Save_MemGrid
 
 
@@ -796,7 +796,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         logical          :: calc_scalar_Op
         
         !----- variables for the construction of H ---------------------------
-        TYPE (param_ReadOp)         :: para_ReadOp
+        TYPE (ReadOp_t)         :: para_ReadOp
         logical                     :: Save_FileGrid,Save_MemGrid
         
         

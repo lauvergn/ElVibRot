@@ -217,10 +217,8 @@
       write(out_unit,*) '================================================='
       write(out_unit,*)
 
-      IF (para_EVRT_calc%Grid_only) STOP 'EVRT stop: Grid_only=.TRUE.'
-!#if(run_MPI)
-!      Grid_allco=.True.
-!#endif
+      IF (para_EVRT_calc%Grid_only) STOP 'EVR stop: Grid_only=.TRUE.'
+
 !---------------------------------------------------------------------------------------
 !      contraction of the active basis set with HADA basis
 !---------------------------------------------------------------------------------------
@@ -460,8 +458,10 @@
                 END IF
               END IF
             END DO
-
           END IF
+          DO i=1,size(WP0)
+            write(out_unit,*) 'spectral Norm^2 of WP0',TO_string(i),':',dot_product(WP0(i)%CvecB,WP0(i)%CvecB)
+          END DO
 
           IF(MPI_id==0) THEN
             write(out_unit,*)

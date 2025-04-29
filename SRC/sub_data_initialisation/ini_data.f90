@@ -78,7 +78,7 @@
       USE mod_CAP,       only : Read_CAP
       USE mod_basis
       USE mod_Set_paraRPH
-      USE mod_ReadOp
+      USE ReadOp_m
       USE mod_Op
       USE mod_analysis
       USE mod_propa
@@ -114,7 +114,7 @@
 
 
 !----- Parameters to set the operators --------------------------------
-      TYPE (param_ReadOp)            :: para_ReadOp
+      TYPE (ReadOp_t)            :: para_ReadOp
 
       integer                        :: i,j,rk,rl,i_term,iOp,it,ib
       integer                        :: nq,nb_ba,nb_bi,nb_be,nb_bie
@@ -257,17 +257,25 @@
         write(out_unit,*) "============================================================"
         flush(out_unit)
       ENDIF
-
-      CALL read_active(para_Tnum,mole,para_ReadOp)
-
 !---------------------------------------------------------------------
-!------- read the parameter to analyze wave functions ----------------
+!---------------------------------------------------------------------
+
+      CALL read_ReadOp(para_ReadOp,mole)
+      ! Tnum modification if Rotational calculations are performed
+      IF (para_ReadOp%nb_bRot > 1) THEN
+        para_Tnum%JJ                = (para_ReadOp%nb_bRot-1)/2 ! it MUST be JJ
+        para_Tnum%With_Cart_Transfo = (para_Tnum%JJ>0) .AND. mole%Cart_transfo
+      END IF
+
+      !---------------------------------------------------------------------
+      !------- read the parameter to analyze wave functions ----------------
       CALL alloc_NParray(Qana,[mole%nb_var],"Qana",name_sub)
       CALL get_Qact0(Qana,mole%ActiveTransfo)
 
       CALL read_analyse(para_ana,Qana,mole)
 
       CALL dealloc_NParray(Qana,"Qana",name_sub)
+
 
       IF (para_ana%VibRot .AND. para_ana%JJmax <= 0) THEN
         write(out_unit,*) ' ERROR in ',name_sub
@@ -553,7 +561,8 @@
       IF (spectral_H) THEN
         para_AllOp%tab_Op(iOp)%spectral    = .TRUE.
         para_AllOp%tab_Op(iOp)%spectral_Op = para_AllOp%tab_Op(iOp)%n_Op
-         para_AllOp%tab_Op(iOp)%para_ReadOp%make_Mat = .TRUE.
+        para_AllOp%tab_Op(iOp)%para_ReadOp%make_Mat = .TRUE.
+        para_AllOp%tab_Op(iOp)%Make_Mat = .TRUE.
       END IF
       para_AllOp%tab_Op(iOp)%symab      = 0 ! totally symmetric
       IF (para_ana%VibRot) Para_Tnum%JJ = 0
@@ -562,7 +571,6 @@
         write(out_unit,*) 'para_H%Make_Mat               ',para_AllOp%tab_Op(iOp)%Make_Mat
         write(out_unit,*) 'para_H%...%Op_WithContracRVec ',para_AllOp%tab_Op(iOp)%para_ReadOp%Op_WithContracRVec
       ENDIF
-
       IF (debug) CALL Write_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp)
 
       iOp = 2 ! for S
@@ -629,8 +637,7 @@
         iOp = iOp + 1
         CALL param_Op1TOparam_Op2(para_AllOp%tab_Op(1),para_AllOp%tab_Op(iOp))
         para_AllOp%tab_Op(iOp)%n_Op    = para_ReadOp%nb_scalar_Op+i
-        para_AllOp%tab_Op(iOp)%name_Op = 'FluxOp' // TO_string(i) // '_'      &
-                                          // TO_string(iOp)
+        para_AllOp%tab_Op(iOp)%name_Op = 'FluxOp' // TO_string(i) // '_' // TO_string(iOp)
 
         CALL Init_TypeOp(para_AllOp%tab_Op(iOp)%param_TypeOp,           &
                          type_Op=0,nb_Qact=mole%nb_act1,cplx=.FALSE.,   &
@@ -696,7 +703,6 @@
         para_AllOp%tab_Op(iOp)%para_ReadOp%para_FileGrid%Read_FileGrid = .FALSE.
         para_AllOp%tab_Op(iOp)%para_ReadOp%para_FileGrid%Save_FileGrid = .FALSE.
         para_AllOp%tab_Op(iOp)%para_ReadOp%para_FileGrid%Save_MemGrid  = .FALSE.
-
       END IF
 
 
@@ -722,6 +728,8 @@
       IF(MPI_id==0) THEN
         DO i=1,para_AllOp%nb_Op
           write(out_unit,*) i,'Operator name: ',trim(para_AllOp%tab_Op(i)%name_Op)
+          write(out_unit,*) i,'cplx:          ',para_AllOp%tab_Op(iOp)%cplx
+
           IF (para_AllOp%tab_Op(i)%para_ReadOp%save_MatOp .OR.                  &
             para_AllOp%tab_Op(i)%para_ReadOp%restart_MatOp) THEN
             write(out_unit,*) '    restart MatOp file: ',                      &

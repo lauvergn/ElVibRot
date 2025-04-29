@@ -250,10 +250,21 @@
 
       IF (para_H%spectral) THEN
         IF (para_H%cplx) THEN
+          IF (.NOT. associated(para_H%Cdiag)) THEN
+            write(out_unit,*) ' ERROR in ',name_sub
+            write(out_unit,*) '  spectral=t and para_H%Cdiag is not allocated'
+            STOP 'ERROR in sub_Hmax: pectral=t and para_H%Cdiag is not allocated'
+          END IF
+
           para_H%Hmax = para_H%Cdiag(para_H%para_AllBasis%basis_ext%nb_vp_spec)
           para_H%Hmin = para_H%Cdiag(1)
         ELSE
-          para_H%Hmax = para_H%Rdiag(para_H%para_AllBasis%basis_ext%nb_vp_spec)
+           IF (.NOT. associated(para_H%Rdiag)) THEN
+                 write(out_unit,*) ' ERROR in ',name_sub
+                 write(out_unit,*) '  spectral=t and para_H%Rdiag is not allocated'
+                 STOP 'ERROR in sub_Hmax: pectral=t and para_H%Rdiag is not allocated'
+               END IF
+           para_H%Hmax = para_H%Rdiag(para_H%para_AllBasis%basis_ext%nb_vp_spec)
           para_H%Hmin = para_H%Rdiag(1)
         END IF
         para_propa%Hmax = para_H%Hmax

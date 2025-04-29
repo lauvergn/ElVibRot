@@ -285,7 +285,7 @@
       logical          :: calc_scalar_Op
 
 !----- variables for the construction of H ---------------------------
-      TYPE (param_ReadOp)         :: para_ReadOp
+      TYPE (ReadOp_t)         :: para_ReadOp
       logical                     :: Save_FileGrid,Save_MemGrid
 
 

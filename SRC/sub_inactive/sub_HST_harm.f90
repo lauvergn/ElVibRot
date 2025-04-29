@@ -120,6 +120,7 @@
                              para_AllOp%tab_Op(iOp)%name_Op,            &
                  para_AllOp%tab_Op(iOp)%derive_termQact(:,k_term)
             END DO
+            write(out_unit,*) ' iOp, cplx:',iOp,para_AllOp%tab_Op(iOp)%cplx
             IF (para_AllOp%tab_Op(iOp)%cplx) THEN
               write(out_unit,*) ' cplx name_Op:',para_AllOp%tab_Op(iOp)%name_Op
             END IF

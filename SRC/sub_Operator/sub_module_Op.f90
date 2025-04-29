@@ -48,7 +48,7 @@
 MODULE mod_Op
 
   USE mod_SetOp
-  USE mod_ReadOp
+  USE ReadOp_m
   USE mod_MatOp
   USE mod_OpPsi
   IMPLICIT NONE
