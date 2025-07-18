@@ -38,7 +38,7 @@ C=======================================================================
       END IF
       !-----------------------------------------------------------------
 
-      STOP 'STOP in calcN_op: you have to set-up the potential ond the other operators!!'
+      STOP ' STOP in calcN_op: you have to set-up the potential'
 
       END SUBROUTINE calcN_op
 C
