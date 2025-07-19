@@ -17,7 +17,7 @@ The exactness is guaranteed by the automatic differentiation procedures used for
 
 ### 1a) Installation with a makefile
 
-The installation is simple with a makefile. However, we do not have an fully automatic procedure (like configure ...). The program uses some Fortran 2003 features. Therefore, the compilers gfortran or ifort need to be recent.
+The installation is simple with a makefile. However, we do not have an fully automatic procedure (like configure ...). The program uses some Fortran 2003 features. Therefore, the compilers gfortran (working with gfortran-11 and above) or ifort need to be recent.
 
 For instance, main executables can be built:
 
@@ -26,6 +26,8 @@ For instance, main executables can be built:
 make Tnum
 # Example of Fortran driver:
 make Tnum_FDriver
+# another smplier example of Fortran driver (cartesian to curvilinear transformation):
+make X2Q
 # Example of c driver:
 make Tnum_cDriver
 # Special main Tnum/Tana executable for MCTDH:
@@ -82,6 +84,9 @@ To run some tests:
 ```bash
 fpm run cDriver --< TESTS/exa_TnumDriver/dat_driver0
 fpm run cDriver --< TESTS/exa_TnumDriver/dat_driver1
+
+fpm run X2Q --< TESTS/exa_TnumDriver/dat_driver0
+fpm run X2Q --< TESTS/exa_TnumDriver/dat_driver1
 
 fpm run FDriver -- -i TESTS/exa_TnumDriver/dat_driver0
 fpm run FDriver -- -i TESTS/exa_TnumDriver/dat_driver1

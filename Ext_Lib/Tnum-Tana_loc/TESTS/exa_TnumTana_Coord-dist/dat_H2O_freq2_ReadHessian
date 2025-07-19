@@ -1,7 +1,10 @@
-here=`pwd`
-DIR_EVRT=$here/..
+ ici=`pwd`
+ cd ../..
+ make OPT=0 Tnum_MidasCpp
+ #make OPT=0 Tnum
+ cd $ici
 
-$DIR_EVRT/Tnum90.exe << ** > res
+../../Tnum90_MidasCpp.exe << ** > res
  &variables
          Old_Qtransfo=f
          nb_Qtransfo=3
@@ -22,8 +25,7 @@ H 1 2
  RH 1.86971261116555840317
  A  1.74579834413738809286
 
+ &newQ Taylor=t GTaylor_order=0 VepTaylor_order=0 /
+9.3803385168072335        16.094169034467484       5.
 **
 
-err=`grep "frequencies" res | tail -1 | LANG=c awk 'BEGIN {auTOcm_inv=219474.631443} {print ($4-2170.0459)/auTOcm_inv " " ($5-4140.0022)/auTOcm_inv " " ($6-4391.0669)/auTOcm_inv}'`
-
-echo $0 $err

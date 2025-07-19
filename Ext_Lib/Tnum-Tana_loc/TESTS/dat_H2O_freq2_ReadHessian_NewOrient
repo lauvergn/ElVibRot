@@ -1,7 +1,7 @@
 here=`pwd`
 DIR_EVRT=$here/..
 
-$DIR_EVRT/Tnum90.exe << ** > res
+../Tnum90_MidasCpp.exe << ** > res
  &variables
          Old_Qtransfo=f
          nb_Qtransfo=3
@@ -37,6 +37,9 @@ Hessian in CC HF/STO-3G
     8     -1.23259516E-32  0.00000000E+00  2.40298428E-01
     1      1.97215226E-31  1.43256478E+00 -9.61193712E-01
     1     -1.75438588E-16 -1.43256478E+00 -9.61193712E-01
+
+&newQ Taylor=t GTaylor_order=1 VepTaylor_order=1 /
+9.3803385168072335        16.094169034467484       0.
 **
 # gaussian values : 2170.0459 4140.0022 4391.0669
 

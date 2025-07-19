@@ -12,7 +12,7 @@ O
 H 1
 H 1 2
 
- &Coord_transfo name_transfo='NM' hessian_cart=t hessian_read=t /
+ &Coord_transfo name_transfo='NM' hessian_cart=t hessian_read=t k_Half=t /
 Hessian in CC HF/STO-3G
     9
   1  0.70470860199999996        2.6009244899999999E-016  -8.3234457400000003E-002  -7.9856536399999997E-002  -4.9247208300000000E-017   5.3849103600000003E-002 -0.62485206500000001       -2.1084524100000000E-016   2.9385353699999998E-002

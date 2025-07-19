@@ -68,14 +68,14 @@ MODULE QDUtil_diago_m
     integer              :: i
     complex(kind=Rkind), allocatable :: work(:)
 
-    complex(kind=Rkind), allocatable :: CEigVecLeft(:)
+    complex(kind=Rkind), allocatable :: CEigVecLeft(:,:)
     real(kind=Rkind),    allocatable :: RWork(:)
 
 
     !----- for debuging --------------------------------------------------
     character (len=*), parameter :: name_sub='QDUtil_Cdiagonalization'
-    logical, parameter :: debug = .FALSE.
-    !logical, parameter :: debug = .TRUE.
+    !logical, parameter :: debug = .FALSE.
+    logical, parameter :: debug = .TRUE.
     !-----------------------------------------------------------
 
     IF (present(sort)) THEN
@@ -162,18 +162,18 @@ MODULE QDUtil_diago_m
       !Query the optimal workspace.
       lwork4 = -1_int32
       n4     = int(n,kind=int32)
-      allocate(CEigVecLeft(1))
+      allocate(CEigVecLeft(n,n))
       allocate(RWork(n+n))
       allocate(work(1))
 
-      CALL ZGEEV('N','V',n4,CMat_save,n4,CEigVal,CEigVecLeft,1_int32,CEigVec,n4,work,lwork4,RWork,ierr4)
+      CALL ZGEEV('V','V',n4,CMat_save,n4,CEigVal,CEigVecLeft,n4,CEigVec,n4,work,lwork4,RWork,ierr4)
       lwork4 = int(work(1),kind=int32)
       deallocate(work)
 
       ! diagonalization
       allocate(work(lwork4))
 
-      CALL ZGEEV('N','V',n4,CMat_save,n4,CEigVal,CEigVecLeft,1_int32,CEigVec,n4,work,lwork4,RWork,ierr4)
+      CALL ZGEEV('V','V',n4,CMat_save,n4,CEigVal,CEigVecLeft,n4,CEigVec,n4,work,lwork4,RWork,ierr4)
 
       IF (debug) write(out_unit,*)'ierr=',ierr4
       IF (ierr4 /= 0_int32) THEN
@@ -185,6 +185,13 @@ MODULE QDUtil_diago_m
         DO i=1,n
           write(out_unit,*) 'Eigenvalue(', i, ') = ', CEigVal(i)
         END DO
+        CALL Write_Mat(CMat_save,out_unit,5,info='eigenvector Overlap')
+
+        CMat_save = matmul(transpose(conjg(CEigVecLeft)),CEigVec)
+        DO i=1,n
+          CMat_save(i,i) = CMat_save(i,i)-CONE
+        END DO
+        write(out_unit,*) 'Max diff identity ?',maxval(abs(CMat_save))
       END IF
 
       deallocate(work)
@@ -226,8 +233,6 @@ MODULE QDUtil_diago_m
     END SELECT
 
     DO i=1,n
-      !CEigVec(:,i) = CEigVec(:,i)/sqrt(sum(CEigVec(:,i)*CEigVec(:,i)))
-
       CEigVec(:,i) = CEigVec(:,i)/sqrt(dot_product(CEigVec(:,i),CEigVec(:,i)))
     END DO
 

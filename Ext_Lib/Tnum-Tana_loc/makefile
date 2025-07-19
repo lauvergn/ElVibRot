@@ -156,8 +156,8 @@ $(info ************************************************************************)
 $(info ************************************************************************)
 
 #==========================================
-VPATH = APP APP/cDriver APP/FDriver \
-		 SRC/Source_PrimOperator SRC/sub_pot \
+VPATH = APP \
+		SRC/Source_PrimOperator SRC/sub_pot \
         SRC/Source_TnumTana_Coord SRC/Source_TnumTana_Coord/Qtransfo \
 		SRC/Source_TnumTana_Coord/QtransfoOOP SRC/Source_TnumTana_Coord/Tana \
         SRC/Source_TnumTana_Coord/Tnum SRC/sub_operator_T
@@ -204,13 +204,18 @@ $(TNUMOOPEXE):  $(OBJ_DIR)/$(TNUMOOPMAIN).o $(LIBAF)
 #
 #  Drivers (c and f90)
 #
+Main_X2QEXE=Main_X2Q.exe
+Main_X2Q   =Main_X2Q
+
 Main_TnumTana_FDriverEXE=Main_TnumTana_FDriver.exe
 Main_TnumTana_FDriver   =Main_TnumTana_FDriver
 
 Main_TnumTana_cDriverEXE=Main_TnumTana_cDriver.exe
 Main_TnumTana_cDriver   =Main_TnumTana_cDriver
 
-.PHONY: Tnum_FDriver Tnum_cDriver cDriver FDriver
+.PHONY: Tnum_FDriver Tnum_cDriver cDriver FDriver X2Q
+X2Q: $(Main_X2QEXE)
+	@echo "Main_X2Q OK"
 FDriver Tnum_FDriver: $(Main_TnumTana_FDriverEXE)
 	@echo "Main_TnumTana_FDriver OK"
 cDriver Tnum_cDriver: $(Main_TnumTana_cDriverEXE)
@@ -220,6 +225,8 @@ $(Main_TnumTana_cDriverEXE): $(OBJ_DIR)/$(Main_TnumTana_cDriver).o $(LIBAF)
 	$(CompC) $(CFLAGS) -o $(Main_TnumTana_cDriverEXE) $(OBJ_DIR)/$(Main_TnumTana_cDriver).o $(LIBAF) $(FLIB) -lgfortran -lm
 $(Main_TnumTana_FDriverEXE): $(OBJ_DIR)/$(Main_TnumTana_FDriver).o $(LIBAF)
 	$(FFC)   $(FFLAGS) -o $(Main_TnumTana_FDriverEXE) $(OBJ_DIR)/$(Main_TnumTana_FDriver).o $(LIBAF) $(FLIB)
+$(Main_X2QEXE): $(OBJ_DIR)/$(Main_X2Q).o $(LIBAF)
+	$(FFC)   $(FFLAGS) -o $(Main_X2QEXE) $(OBJ_DIR)/$(Main_X2Q).o $(LIBAF) $(FLIB)
 #
 # MCTDH Tnum-Tana
 #
@@ -244,7 +251,7 @@ $(TNUM_MiddasCppEXE):  $(OBJ_DIR)/$(TNUM_MiddasCppMAIN).o $(LIBAF)
 	$(FFC) $(FFLAGS) -o $(TNUM_MiddasCppEXE) $(OBJ_DIR)/$(TNUM_MiddasCppMAIN).o $(LIBAF) $(FLIB)
 #
 .PHONY: all
-all: lib Tnum-dist Tnum_MCTDH Tnum_MidasCpp Tnum_FDriver Tnum_cDriver
+all: lib Tnum-dist Tnum_MCTDH Tnum_MidasCpp Tnum_FDriver Tnum_cDriver X2Q
 	@echo "All executables"
 #===============================================
 #===============================================
@@ -252,7 +259,7 @@ all: lib Tnum-dist Tnum_MCTDH Tnum_MidasCpp Tnum_FDriver Tnum_cDriver
 #===============================================
 #
 .PHONY: ut UT_Tnum ut_Tnum UT_tnum ut_tnum
-ut UT_Tnum ut_Tnum UT_tnum ut_tnum: Tnum
+ut UT_Tnum ut_Tnum UT_tnum ut_tnum: Tnum Tnum_MidasCpp
 	@echo "---------------------------------------"
 	@echo "Unitary tests for the Tnum"
 	@cd TESTS ; ./run_tests_WithoutComp
@@ -307,16 +314,20 @@ SRC/sub_pot/sub_system.$(extf): SRC_NotUsed/sub_pot/sub_system_save.$(extf)
 clean:
 	rm -f  $(OBJ_DIR)/*.o
 	rm -f *.log
-#	rm -f SRC/sub_pot/sub_system.f SRC/sub_pot/sub_system.f90
 	rm -f TEST*.x
 	@echo "  done cleaning"
-
+#
 cleanall : clean clean_extlib
 	rm -fr obj/* build
 	rm -f lib*.a
 	rm -f *.exe
 	cd TESTS ; ./clean
+	cd TEST_MCTDH ; ./clean
 	@echo "  done all cleaning"
+#
+cleanlocextlib: cleanall
+	cd $(MAIN_path)/Ext_Lib ; rm -rf *_loc
+	@echo "  done remove all local library directories (..._loc)"
 #===============================================
 #================ zip and copy the directory ===
 ExtLibSAVEDIR := /Users/lauvergn/git/Ext_Lib
@@ -414,6 +425,7 @@ $(OBJ_DIR)/$(TNUMMAIN).o:      				$(LIBA) | $(EXTLib)
 $(OBJ_DIR)/$(TNUMOOPMAIN).o:   				$(LIBA) | $(EXTLib) 
 $(OBJ_DIR)/$(TNUMMCTDHMAIN).o:      		$(LIBA) | $(EXTLib) 
 $(OBJ_DIR)/$(TNUM_MiddasCppMAIN).o:   		$(LIBA) | $(EXTLib)
-$(OBJ_DIR)/$(Main_TnumTana_FDriver).o:   	$(LIBA) | $(EXTLib) 
+$(OBJ_DIR)/$(Main_TnumTana_FDriver).o:   	$(LIBA) | $(EXTLib)
+$(OBJ_DIR)/$(Main_X2Q).o:   	            $(LIBA) | $(EXTLib) 
 $(OBJ_DIR)/$(Main_TnumTana_cDriver).o:   	$(LIBA) | $(EXTLib) 
 
