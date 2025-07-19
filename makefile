@@ -288,7 +288,7 @@ clean:
 	rm -f *.log 
 	rm -f vib.exe
 	@echo "  done cleaning"
-
+#
 cleanall : clean clean_extlib
 	rm -fr obj/* build
 	rm -f lib*.a
@@ -299,6 +299,10 @@ cleanall : clean clean_extlib
 	cd Working_tests ; ./clean
 	cd $(ARPACK_DIR) ; make clean
 	@echo "  done all cleaning"
+#
+cleanlocextlib: cleanall
+	cd $(MAIN_path)/Ext_Lib ; rm -rf *_loc
+	@echo "  done remove all local library directories (..._loc)"
 #===============================================
 #================ zip and copy the directory ===
 ExtLibSAVEDIR := /Users/lauvergn/git/Ext_Lib
