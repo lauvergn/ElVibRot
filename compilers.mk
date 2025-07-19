@@ -1,7 +1,7 @@
 #=================================================================================
 # gfortran (osx and linux)
 #=================================================================================
-ifeq ($(FFC),gfortran)
+ifeq ($(FFC),$(filter $(FFC),gfortran gfortran-15 gfortran-11))
 
   # optimization management (default without optimization)
   ifeq ($(OOPT),1)
