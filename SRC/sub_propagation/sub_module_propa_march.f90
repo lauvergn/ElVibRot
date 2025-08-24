@@ -1998,22 +1998,22 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       microT = ZERO
 
       IF(MPI_id==0) THEN
-      DO it=1,para_propa%nb_micro
-
-        microT = microT + microdeltaT
-        phase = phase + microphase
-
-        rtj = cmplx(ONE,ZERO,kind=Rkind)
-        cdot = psi0Hkpsi0(0)
-        DO j=1,j_exit
-
-          rt_tmp =  cmplx(ZERO,-microT/real(j,kind=Rkind),kind=Rkind)
-          rtj = rt_tmp * rtj
-          cdot = cdot + psi0Hkpsi0(j) * rtj
+        DO it=1,para_propa%nb_micro
+        
+          microT = microT + microdeltaT
+          phase = phase + microphase
+        
+          rtj = cmplx(ONE,ZERO,kind=Rkind)
+          cdot = psi0Hkpsi0(0)
+          DO j=1,j_exit
+        
+            rt_tmp =  cmplx(ZERO,-microT/real(j,kind=Rkind),kind=Rkind)
+            rtj = rt_tmp * rtj
+            cdot = cdot + psi0Hkpsi0(j) * rtj
+          END DO
+          cdot = cdot * cmplx( cos(phase),-sin(phase),kind=Rkind)
+          CALL Write_AutoCorr(no,T+microT,cdot)
         END DO
-        cdot = cdot * cmplx( cos(phase),-sin(phase),kind=Rkind)
-        CALL Write_AutoCorr(no,T+microT,cdot)
-      END DO
       ENDIF
 
       IF(keep_MPI) THEN

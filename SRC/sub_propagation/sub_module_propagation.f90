@@ -557,6 +557,7 @@ PUBLIC :: SaveWP_restart,ReadWP_restart
       complex (kind=Rkind) :: cdot
 
       write(no,*) 'AutoCor ',T,real(cdot,kind=Rkind),aimag(cdot),abs(cdot)
+      flush(no)
 
       END SUBROUTINE Write_AutoCorr
       SUBROUTINE Read_AutoCorr(no,T,cdot)
