@@ -1,5 +1,5 @@
 name = "ElVibRot"
-version = "201.0"
+version = "201.0.1"
 license = "MIT"
 author = "David Lauvergnat"
 maintainer = "david.lauvergnat@universite-paris-saclay.fr"
@@ -12,7 +12,7 @@ main="EVR-T.f90"
 
 
 [build]
-link = ["blas", "lapack"]
+link = ["blas", "lapack","RKIND=real64"]
 auto-executables = false
 auto-examples = false
 auto-tests = false

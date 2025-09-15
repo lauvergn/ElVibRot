@@ -1,20 +1,21 @@
-fich='exa*/*.f exa*/*/*.f'
 
-fich='*.f90 sub*/*.f90 sub*/*/*.f90 sub*/*.f ' 
+list1=$1
+fich='SRC/*f90 SRC/*/*f90 Source*/*/*/*f90 SRC/*f SRC/*/*f SRC/*/*/*f APP/*f90'
 
-list1=' ifix idint float sngl dble aint dint anint dnint nint idnint iabs dabs cabs amod dmod isign dsign idim ddim max0 amax1 dmax1 amax0 max1  min0 amin1 dmin1 min1 amin0 '
+#fich='exa*/*.f exa*/*/*.f'
+
+#list1=' ifix idint float sngl dble aint dint anint dnint nint idnint iabs dabs cabs amod dmod isign dsign idim ddim max0 amax1 dmax1 amax0 max1  min0 amin1 dmin1 min1 amin0 '
 #list3=' imag conjg'
- list2=' dsqrt csqrt dexp cexp alog clog dlog dsin csin dcos ccos dtan dasin dacos datan catan dsinh dcosh dtanh '
-list1=' 0\.d0 1\.d0 2\.d0 0\.5d0'
-list1=' kind\ =\ 8 '
+#list2=' dsqrt csqrt dexp cexp alog clog dlog dsin csin dcos ccos dtan dasin dacos datan catan dsinh dcosh dtanh '
+#list1=' 0\.d0 1\.d0 2\.d0 0\.5d0'
+#list1=' kind\ =\ 8 '
 
- list1=$1
 
 for i in $list1
 do
- echo ========================
- echo $i
- egrep -i "$i" $fich
+echo ========================
+echo $i
+egrep -i "$i" $fich
 done
 
 exit

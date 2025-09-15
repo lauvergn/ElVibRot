@@ -1390,7 +1390,7 @@ END SUBROUTINE MakeResidual_Davidson
      IF(keep_MPI) psi(ndim+1) = ZERO
 
      SELECT CASE (para_Davidson%NewVec_type)
-     CASE (1) ! just the residual: equivament to Lanczos
+     CASE (1) ! just the residual: equivalent to Lanczos
 
        IF(openmpi) THEN
          CALL MakeResidual_Davidson_j_MPI3(j,psi(ndim+1),psi,Hpsi,Ene,Vec)
@@ -1767,6 +1767,16 @@ END SUBROUTINE sub_NewVec_Davidson
    END IF
  END IF
 
+  IF (count(Ene(1:ndim) < min_Ene) > 0) THEN
+    write(out_unit,*) '-------------------------------------'
+    write(out_unit,*) '-------- WARNING --------------------'
+    write(out_unit,*) 'Some state(s) are lower than min_Ene',min_Ene
+    DO i=1,ndim
+      IF (Ene(i) < min_Ene) write(out_unit,*) 'i,Ene(i)<min_Ene',i,Ene(i)
+    END DO
+    write(out_unit,*) '-------------------------------------'
+  END IF
+  
  IF (para_Davidson%lower_states) THEN
    IF (para_Davidson%Hmax_propa) THEN
      VecToBeIncluded(:) = .FALSE.
@@ -1774,9 +1784,15 @@ END SUBROUTINE sub_NewVec_Davidson
    ELSE
      VecToBeIncluded(:) = .FALSE.
      IF (para_Davidson%all_lower_states) THEN
+      IF (debug) write(out_unit,*) 'min_Ene,ZPE',min_Ene,ZPE
       DO i=1,ndim
         VecToBeIncluded(i) =(Ene(i) >= min_Ene .AND. Ene(i)-ZPE <= para_Davidson%Max_ene)
+        IF (debug) THEN
+          write(out_unit,*) 'i,Ene(i),Ene(i)-ZPE',i,Ene(i),Ene(i)-ZPE,(Ene(i) >= min_Ene),(Ene(i)-ZPE <= para_Davidson%Max_ene)
+          write(out_unit,*) 'i,VecToBeIncluded(i)',i,VecToBeIncluded(i)
+        END IF
       END DO
+
      ELSE
       DO i=1,ndim
         VecToBeIncluded(i) =(Ene(i) >= min_Ene .AND. count(VecToBeIncluded) < nb_diago )

@@ -17,6 +17,12 @@ ARPACK = 0
 ## force the default integer (without kind) during the compillation.
 ## default 4: , INT=8 (for kind=8)
 INT = 4
+## change the real kind
+## default real64: , possibilities, real32, real64, real128
+RKIND = real64
+# For some compilers (like lfortran), real128 (quadruple precision) is not implemented
+# WITHRK16 = 1 (0) compilation with (without) real128
+WITHRK16 = 
 ## extension for the "sub_system." file. Possible values: f; f90
 extf = f
 #
@@ -34,20 +40,69 @@ ifeq ($(OPT),)
 else
   OOPT      := $(OPT)
 endif
+ifneq ($(OOPT),$(filter $(OOPT),0 1))
+  $(info *********** OPT (optimisation):        $(OOPT))
+  $(info Possible values: 0, 1)
+  $(error ERROR: Incompatible options)
+endif
 ifeq ($(OMP),)
   OOMP      := 1
 else
   OOMP      := $(OMP)
+endif
+ifneq ($(OOMP),$(filter $(OOMP),0 1))
+  $(info *********** OMP (openmp):        $(OOMP))
+  $(info Possible values: 0, 1)
+  $(error ERROR: Incompatible options)
 endif
 ifeq ($(LAPACK),)
   LLAPACK      := 1
 else
   LLAPACK      := $(LAPACK)
 endif
+ifneq ($(LLAPACK),$(filter $(LLAPACK),0 1))
+  $(info *********** LAPACK:        $(LLAPACK))
+  $(info Possible values: 0, 1)
+  $(error ERROR: Incompatible options)
+endif
 ifeq ($(ARPACK),)
   AARPACK      := 0
 else
   AARPACK      := $(ARPACK)
+endif
+ifneq ($(AARPACK),$(filter $(AARPACK),0 1))
+  $(info *********** LAPACK:        $(AARPACK))
+  $(info Possible values: 0, 1)
+  $(error ERROR: Incompatible options)
+endif
+ifeq ($(WITHRK16),)
+  WWITHRK16      :=$(shell $(FFC) -o scripts/testreal128.exe scripts/testreal128.f90 &>comp.log ; ./scripts/testreal128.exe ; rm scripts/testreal128.exe)
+else
+  WWITHRK16      := $(WITHRK16)
+endif
+ifneq ($(WWITHRK16),$(filter $(WWITHRK16),0 1))
+  $(info *********** WITHRK16 (compilation with real128):        $(WWITHRK16))
+  $(info Possible values: 0, 1)
+  $(error ERROR: Incompatible options)
+endif
+ifneq ($(INT),$(filter $(INT),4 8))
+  $(info *********** INT (change default integer):        $(INT))
+  $(info Possible values: 4, 8)
+  $(error ERROR: Incompatible options)
+endif
+ifneq ($(RKIND),$(filter $(RKIND),real32 real64 real128))
+  $(info *********** RKIND (select the real kind):        $(RKIND))
+  $(info Possible values (case sensitive): real32 real64 real128)
+  $(error ERROR: Incompatible options)
+endif
+#=================================================================================
+ifeq ($(RKIND),real128)
+  ifeq ($(WWITHRK16),0)
+    $(info "Incompatible options:")
+    $(info ***********RKIND:        $(RKIND))
+    $(info ***********WITHRK16:     $(WWITHRK16))
+    $(error ERROR: Incompatible options)
+  endif
 endif
 #===============================================================================
 #
@@ -79,20 +134,28 @@ ifeq ($(FFC),mpifort)
 endif
 
 # Extension for the object directory and the library
-ext_obj:=_$(FFC)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT)
+ext_obj    :=_$(FFC)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT)_$(RKIND)
 ifeq ($(FFC),mpifort)
-  extlibwi_obj:=_$(FFC)_$(MPICORE)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT)
+  extlibwi_obj    :=_$(FFC)_$(MPICORE)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT)_$(RKIND)
+  extlibwiold_obj :=_$(FFC)_$(MPICORE)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT)
 else
-  extlibwi_obj:=$(ext_obj)
+  extlibwi_obj    :=_$(FFC)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT)_$(RKIND)
+  extlibwiold_obj :=_$(FFC)_opt$(OOPT)_omp$(OOMP)_lapack$(LLAPACK)_int$(INT)
 endif
 
-OBJ_DIR = obj/obj$(extlibwi_obj)
+
+OBJ_DIR    := OBJ/obj$(extlibwi_obj)
+OBJOLD_DIR := OBJ/obj$(extlibwiold_obj)
 $(info ***********OBJ_DIR:            $(OBJ_DIR))
+$(info ***********OBJOLD_DIR:         $(OBJOLD_DIR))
 $(shell [ -d $(OBJ_DIR) ] || mkdir -p $(OBJ_DIR))
 MOD_DIR=$(OBJ_DIR)
 #
 # library name
-LIBA=libEVR$(extlibwi_obj).a
+LIBA      := libEVR$(extlibwi_obj).a
+LIBAOLD   := libEVR$(extlibwiold_obj).a
+$(info ***********LIBA:         $(LIBA))
+$(info ***********LIBAOLD:      $(LIBAOLD))
 #=================================================================================
 #
 #===============================================================================
@@ -119,20 +182,20 @@ QMLMOD_DIR = $(QML_DIR)/OBJ/obj$(ext_obj)
 QMLLIBA    = $(QML_DIR)/libQMLib$(ext_obj).a
 
 nDindex_DIR    = $(ExtLibDIR)/nDindex
-nDindexMOD_DIR = $(nDindex_DIR)/obj/obj$(ext_obj)
+nDindexMOD_DIR = $(nDindex_DIR)/OBJ/obj$(ext_obj)
 nDindexLIBA    = $(nDindex_DIR)/libnDindex$(ext_obj).a
 
 EVRTdnSVM_DIR    = $(ExtLibDIR)/EVRT_dnSVM
-EVRTdnSVMMOD_DIR = $(EVRTdnSVM_DIR)/obj/obj$(ext_obj)
+EVRTdnSVMMOD_DIR = $(EVRTdnSVM_DIR)/OBJ/obj$(ext_obj)
 EVRTdnSVMLIBA    = $(EVRTdnSVM_DIR)/libEVRT_dnSVM$(ext_obj).a
 
 FOREVRT_DIR    = $(ExtLibDIR)/FOR_EVRT
-FOREVRTMOD_DIR = $(FOREVRT_DIR)/obj/obj$(extlibwi_obj)
+FOREVRTMOD_DIR = $(FOREVRT_DIR)/OBJ/obj$(extlibwi_obj)
 FOREVRTLIBA    = $(FOREVRT_DIR)/libFOR_EVRT$(extlibwi_obj).a
 
 
 TNUMTANA_DIR      = $(ExtLibDIR)/Tnum-Tana
-TNUMTANAMOD_DIR   = $(TNUMTANA_DIR)/obj/obj$(extlibwi_obj)
+TNUMTANAMOD_DIR   = $(TNUMTANA_DIR)/OBJ/obj$(extlibwi_obj)
 TNUMTANALIBA      = $(TNUMTANA_DIR)/libTnum-Tana$(extlibwi_obj).a
 # AARPACK library
 ARPACK_DIR        = $(ExtLibDIR)/ARPACK_EVR
@@ -163,18 +226,21 @@ else
 endif
 #=================================================================================
 # cpp preprocessing
-EVR_ver:=$(shell awk '/EVR/ {print $$3}' $(MAIN_path)/version-EVR)
+EVR_ver=$(shell awk '/version/ {print $$3}' fpm.toml | head -1)
 ArpackFLAGS := $(FFLAGS)
 ArpackFLAGS += -fallow-argument-mismatch
-FFLAGS += -D__COMPILE_DATE="\"$(shell date +"%a %e %b %Y - %H:%M:%S")\"" \
-          -D__COMPILE_HOST="\"$(shell hostname -s)\"" \
-          -D__EVRTPATH="'$(MAIN_path)'" \
-          -D__EVR_VER="'$(EVR_ver)'" \
-          -D__ARPACK="$(AARPACK)"
+CPPSHELL += -D__COMPILE_DATE="\"$(shell date +"%a %e %b %Y - %H:%M:%S")\"" \
+            -D__COMPILE_HOST="\"$(shell hostname -s)\"" \
+            -D__EVRTPATH="'$(MAIN_path)'" \
+            -D__EVR_VER="'$(EVR_ver)'" \
+            -D__RKIND="$(RKIND)" -D__WITHRK16="$(WWITHRK16)" \
+            -D__LAPACK="$(LLAPACK)" \
+            -D__ARPACK="$(AARPACK)"
 #
 #===============================================================================
 #===============================================================================
 $(info ************************************************************************)
+$(info ***********ElVibRot Version: $(EVR_ver))
 $(info ***********OS:               $(OS))
 $(info ***********COMPILER:         $(FFC))
 $(info ***********OPTIMIZATION:     $(OOPT))
@@ -183,6 +249,8 @@ ifeq ($(FFC),mpifort)
 $(info ***********COMPILED with:    $(MPICORE))
 endif
 $(info ***********OpenMP:           $(OOMP))
+$(info ***********RKIND:            $(RKIND))
+$(info ***********WITHRK16:         $(WWITHRK16))
 $(info ***********Lapack:           $(LLAPACK))
 $(info ***********Arpack:           $(AARPACK))
 $(info ***********Arpack lib:       $(ARPACKLIBA))
@@ -247,7 +315,7 @@ $(VIBEXE): $(OBJ_DIR)/$(VIBMAIN).o $(OBJ_EXT) $(LIBA) | $(EXTLib)
 #============= TESTS ===========================
 #===============================================
 .PHONY: ut UT
-ut Ut:
+ut Ut: lib
 	@echo "Unitary test"
 	@cd UnitTests/HCN-WP_UT ; ./run_tests
 	@cd UnitTests/HCN_UT    ; ./run_tests
@@ -255,9 +323,17 @@ ut Ut:
 #===============================================
 #============= Library: lib_FOR_EVRT.a  ========
 #===============================================
+.PHONY: lib
+lib: $(LIBA)
+#
 $(LIBA): $(OBJ) | $(EXTLib)
 	@echo "  LIBA from OBJ files"
 	ar -cr $(LIBA) $(OBJ)
+	rm -f  $(OBJOLD_DIR)
+	cd OBJ ; ln -s obj$(extlibwi_obj) obj$(extlibwiold_obj)
+	rm -f  $(LIBAOLD)
+	ln -s  $(LIBA) $(LIBAOLD)
+	@echo "  done Library: "$(LIBAOLD)
 	@echo "  done Library: "$(LIBA)
 #
 #===============================================
@@ -304,14 +380,6 @@ cleanlocextlib: cleanall
 	cd $(MAIN_path)/Ext_Lib ; rm -rf *_loc
 	@echo "  done remove all local library directories (..._loc)"
 #===============================================
-#================ zip and copy the directory ===
-ExtLibSAVEDIR := /Users/lauvergn/git/Ext_Lib
-BaseName := EVR
-.PHONY: zip
-zip: cleanall
-	test -d $(ExtLibSAVEDIR) || (echo $(ExtLibDIR) "does not exist" ; exit 1)
-	$(ExtLibSAVEDIR)/makezip.sh $(BaseName)
-	@echo "  done zip"
 #===============================================
 #=== external libraries ========================
 # QDUtilLib AD_dnSVM ConstPhys QuantumModelLib nDindex EVRT_dnSVM FOR_EVRT
@@ -390,12 +458,6 @@ clean_extlib:
 .PHONY: fpm
 fpm: getlib
 ##
-#=======================================================================================
-#=======================================================================================
-#add dependence for parallelization
-#	@echo "OBJ with EXTLib"
-$(OBJ) : | $(EXTLib)
-
 #===============================================
 #===============================================
 #============= make dependencies =============
@@ -404,4 +466,10 @@ $(OBJ) : | $(EXTLib)
 dependencies.mk fortranlist.mk dep:
 	./scripts/dependency.sh
 #===============================================
+#=======================================================================================
+#=======================================================================================
+# Add dependencies
+$(OBJ) : | $(EXTLib)
+$(OBJ_DIR)/sub_system.o: $(OBJ_DIR)/mod_system.o
+
 include ./dependencies.mk

@@ -474,8 +474,10 @@
   ! force Grid_maxth to Grid_maxth_init to be able to tune it several times
   Grid_maxth = Grid_maxth_init
 
+  IF (debug) write(out_unit,*) 'old print_level',print_level
   print_level_save = print_level
   CALL set_print_level(-1,force=.TRUE.)
+  IF (debug) write(out_unit,*) 'new print_level',print_level
 
   IF (para_AllOp%tab_Op(1)%nb_qa < 8*Grid_maxth) THEN
     write(out_unit,*) 'The number of grid points is too small, no Tunning'
@@ -556,10 +558,14 @@
   END DO
 
   CALL set_print_level(print_level_save,force=.TRUE.)
+  IF (debug) write(out_unit,*) 'print_level (old?)',print_level
 
   Grid_maxth = opt_Grid_maxth
   write(out_unit,*) 'Optimal threads: ',Grid_maxth,' Elapsed Real Time',RealTime(Grid_maxth)
   write(out_unit,*) '    => Speed-up: ',RealTime(1)/RealTime(Grid_maxth)
+  write(out_unit,*) ' Full grid calculation, estimation of the Elapsed Real Time (s): ',RealTime(Grid_maxth)*para_AllOp%tab_Op(1)%nb_qa/max_nq
+  write(out_unit,*) ' Full grid calculation, estimation of the Elapsed Real Time    : ',  &
+                    conv_seconds(RealTime(Grid_maxth)*para_AllOp%tab_Op(1)%nb_qa/max_nq)
   write(out_unit,*) '============================================'
 
   !-------------------------------------------------------------------
