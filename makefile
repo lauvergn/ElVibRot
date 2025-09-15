@@ -174,7 +174,7 @@ ADMOD_DIR = $(AD_DIR)/OBJ/obj$(ext_obj)
 ADLIBA    = $(AD_DIR)/libAD_dnSVM$(ext_obj).a
 
 CONSTPHYS_DIR    = $(ExtLibDIR)/ConstPhys
-CONSTPHYSMOD_DIR = $(CONSTPHYS_DIR)/obj/obj$(extlibwi_obj)
+CONSTPHYSMOD_DIR = $(CONSTPHYS_DIR)/OBJ/obj$(extlibwi_obj)
 CONSTPHYSLIBA    = $(CONSTPHYS_DIR)/libPhysConst$(extlibwi_obj).a
 
 QML_DIR    = $(ExtLibDIR)/QuantumModelLib
@@ -296,7 +296,7 @@ VIBMAIN = EVR-T
 
 #make all : EVR
 .PHONY: all evr EVR libEVR libevr lib
-evr EVR all :obj vib $(VIBEXE)
+evr EVR all :OBJ vib $(VIBEXE)
 	@echo "EVR OK"
 lib libEVR libevr: $(LIBA)
 	@echo $(LIBA) " OK"
@@ -366,7 +366,7 @@ clean:
 	@echo "  done cleaning"
 #
 cleanall : clean clean_extlib
-	rm -fr obj/* build
+	rm -fr OBJ/* build
 	rm -f lib*.a
 	rm -f *.exe
 	rm -f TESTS/res* TESTS/*log

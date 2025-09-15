@@ -563,7 +563,8 @@
   Grid_maxth = opt_Grid_maxth
   write(out_unit,*) 'Optimal threads: ',Grid_maxth,' Elapsed Real Time',RealTime(Grid_maxth)
   write(out_unit,*) '    => Speed-up: ',RealTime(1)/RealTime(Grid_maxth)
-  write(out_unit,*) ' Full grid calculation, estimation of the Elapsed Real Time (s): ',RealTime(Grid_maxth)*para_AllOp%tab_Op(1)%nb_qa/max_nq
+  write(out_unit,*) ' Full grid calculation, estimation of the Elapsed Real Time (s): ',  &
+                    RealTime(Grid_maxth)*para_AllOp%tab_Op(1)%nb_qa/max_nq
   write(out_unit,*) ' Full grid calculation, estimation of the Elapsed Real Time    : ',  &
                     conv_seconds(RealTime(Grid_maxth)*para_AllOp%tab_Op(1)%nb_qa/max_nq)
   write(out_unit,*) '============================================'

@@ -68,8 +68,8 @@ cleantest:
 
 cleanlib:
 	rm -f *.a
-	( cd $(UTILdir); $(MAKE) clean )
-	( cd $(SRCdir); $(MAKE) clean )
+	( cd $(UTILdir) && $(MAKE) clean )
+	( cd $(SRCdir)  && $(MAKE) clean )
 
 help:
     @$(ECHO) "usage: make ?"

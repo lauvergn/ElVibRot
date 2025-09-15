@@ -170,7 +170,6 @@ $(info ***********FFLAGS:       $(FFLAGS))
 $(info ***********FLIB:         $(FLIB))
 $(info ***********EXTMOD_DIR:   $(EXTMOD_DIR))
 $(info ***********ext_obj:      $(ext_obj))
-$(info ***********QML_path:     $(MAIN_path))
 $(info ***********************************************************************)
 
 VPATH = $(TESTS_DIR) $(MAIN_DIR) $(SRC_DIR)  \

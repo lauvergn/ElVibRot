@@ -26,7 +26,9 @@
 # %--------------------------------------%
 #
 #home = $(HOME)/trav/ARPACK
-home = ~/git/ElVibRot/Ext_Lib/ARPACK_EVR
+#home = ~/git/ElVibRot/Ext_Lib/ARPACK_EVR
+home = ./
+
 #
 #  %--------------------------------------%
 #  | The platform identifier to suffix to |
