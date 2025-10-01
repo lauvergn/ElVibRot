@@ -4,8 +4,6 @@ here=`pwd`
 DIR_vib=../..
 
 cd $DIR_vib
- #rm -f vib.exe /Users/lauvergn/git/Tnum-Tana/lib*.a /Users/lauvergn/git/QuantumModelLib/lib*.a
- #make OPT=1 QML_DIR=/Users/lauvergn/git/QuantumModelLib TNUMTANA_DIR=/Users/lauvergn/git/Tnum-Tana &> $here/comp.log
 
- test -f vib.exe || (echo "vib.exe does not exist => make" ; make &> $here/comp.log)
+ test -f EVR-T.exe || (echo "EVR-T.exe does not exist => make" ; make &> $here/comp.log)
 cd $here

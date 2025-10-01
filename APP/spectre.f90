@@ -46,7 +46,7 @@
 !===========================================================================
 !===========================================================================
 PROGRAM spectre
-  USE, intrinsic :: ISO_FORTRAN_ENV, ONLY : INPUT_UNIT,OUTPUT_UNIT,real32,real64,real128,int32,int64
+  USE, intrinsic :: ISO_FORTRAN_ENV, ONLY : in_unit=>INPUT_UNIT,out_unit=>OUTPUT_UNIT,real32,real64,real128,int32,int64
   implicit none
 
       integer :: npts,nptE

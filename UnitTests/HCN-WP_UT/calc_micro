@@ -13,6 +13,7 @@ compOK=`grep -c 'EVR OK' comp.log `
 echo compOK $compOK
 if [ $compOK = '0' ]
 then
+ echo " ElVibRot compilation: ERROR"
  exit
 fi
 
