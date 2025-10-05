@@ -65,10 +65,6 @@ mod_psi_set_alloc := $(OBJ_DIR)/sub_module_psi_set_alloc.o
 mod_type_ana_psi := $(OBJ_DIR)/sub_module_type_ana_psi.o
 mod_wp0 := $(OBJ_DIR)/sub_module_WP0.o
 #===============================================
-#file+mod_name: APP/EVR-T.f90 
-$(OBJ_DIR)/EVR-T.o : \
-          $(evr_system_m) \
-          $(mod_ndgridfit)
 #file+mod_name: SRC/EVR_system_m.f90 evr_system_m
 $(OBJ_DIR)/EVR_system_m.o : \
           $(qdutil_m) \
@@ -485,18 +481,6 @@ $(OBJ_DIR)/vib.o : \
           $(mod_mpi_aux) \
           $(mod_optimization) \
           $(mod_wp0)
-#file+mod_name: SRC/sub_operator_T/calc_f2_f1Q.f90 
-$(OBJ_DIR)/calc_f2_f1Q.o : \
-          $(evr_system_m) \
-          $(mod_tnum) \
-          $(mod_constant)
-#file+mod_name: SRC/sub_operator_T/Calc_Tab_dnQflex.f90 
-$(OBJ_DIR)/Calc_Tab_dnQflex.o : \
-          $(evr_system_m) \
-          $(mod_dnsvm)
-#file+mod_name: SRC/sub_operator_T/Sub_X_TO_Q_ana.f90 
-$(OBJ_DIR)/Sub_X_TO_Q_ana.o : \
-          $(evr_system_m)
 #file+mod_name: SRC/sub_Operator/sub_lib_Op.f90 
 $(OBJ_DIR)/sub_lib_Op.o : \
           $(evr_system_m) \
@@ -641,14 +625,6 @@ $(OBJ_DIR)/sub_module_SimulatedAnnealing.o : \
           $(mod_basis) \
           $(mod_op) \
           $(mod_auto_basis)
-#file+mod_name: SRC/sub_pot/read_para.f90 
-$(OBJ_DIR)/read_para.o : \
-          $(evr_system_m)
-#file+mod_name: SRC/sub_pot/sub_system.f90 
-$(OBJ_DIR)/sub_system.o : \
-          $(evr_system_m) \
-          $(mod_tnum) \
-          $(mod_dnsvm)
 #file+mod_name: SRC/sub_propagation/sub_control.f90 mod_fullcontrol
 $(OBJ_DIR)/sub_control.o : \
           $(evr_system_m) \

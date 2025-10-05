@@ -1,6 +1,5 @@
 #===============================================
 SRCFILES := \
-EVR-T.f90  \
 EVR_system_m.f90  \
 mod_system.f90  \
 sub_diago_H.f90  \
@@ -59,9 +58,6 @@ EVR_driver.f90  \
 EVR_Module.f90  \
 sub_main_nDfit.f90  \
 vib.f90  \
-calc_f2_f1Q.f90  \
-Calc_Tab_dnQflex.f90  \
-Sub_X_TO_Q_ana.f90  \
 sub_lib_Op.f90  \
 sub_MatOp.f90  \
 sub_module_Op.f90  \
@@ -76,8 +72,6 @@ sub_main_Optimization.f90  \
 sub_module_BFGS.f90  \
 sub_module_Optimization.f90  \
 sub_module_SimulatedAnnealing.f90  \
-read_para.f90  \
-sub_system.f90  \
 sub_control.f90  \
 sub_Hmax_MPI.f90  \
 sub_Hmax.f90  \

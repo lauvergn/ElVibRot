@@ -10,7 +10,8 @@ Source_ElVibRot/sub_Basis/laguerre_integrands.txt
 sub_pot/sub_system.f
 sub_pot/sub_system.f90
 
-obj/*
+OBJ/*
+tempOBJ
 vib
 *.log
 *.exe

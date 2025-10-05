@@ -223,24 +223,25 @@ VPATH   := $(APP_DIR) $(SRC_DIR) $(SRCPATH) sub_pot sub_operator_T
 include scripts/fortranlist.mk
 OBJ := $(SRCFILES:.f90=.o)
 OBJ += QMRPACK_lib.o#it has to be added manually because this source file, QMRPACK_lib.f, has the extension .f and not .f90
-OBJ := $(addprefix $(OBJ_DIR)/, $(OBJ))
-
 ifeq ($(DDEBUG),t)
   $(info ***********SRCPATH:         $(SRCPATH))
   $(info ***********VPATH:           $(VPATH))
   $(info ***********OBJ files:       $(OBJ))
 endif
+OBJ := $(addprefix $(OBJ_DIR)/, $(OBJ))
+
 
 # special files
-#EXT_SRC  := calc_f2_f1Q.f90 Sub_X_TO_Q_ana.f90 Calc_Tab_dnQflex.f90 sub_system.f90 \
-            Module_ForTnumTana_Driver.f90 TnumTana_Lib.f90
-#EXT_OBJ  := $(EXT_SRC:.f90=.o)
-#EXT_OBJ  := $(addprefix $(OBJ_DIR)/,$(EXT_OBJ))
+EXT_SRC  := calc_f2_f1Q.f90 Sub_X_TO_Q_ana.f90 Calc_Tab_dnQflex.f90 read_para.f90
+EXT_OBJ  := $(EXT_SRC:.f90=.o)
+EXT_OBJ  += sub_system.o #it has to be added manually because this source file has the extension .f or .f90
+ifeq ($(DDEBUG),t)
+  $(info ***********EXT_SRC:         $(EXT_SRC))
+  $(info ***********EXT_OBJ files:   $(EXT_OBJ))
+endif
+EXT_OBJ  := $(addprefix $(OBJ_DIR)/,$(EXT_OBJ))
 
-#ifeq ($(DDEBUG),t)
-#  $(info ***********EXT_SRC:         $(EXT_SRC))
-#  $(info ***********EXT_OBJ files:   $(EXT_OBJ))
-#endif
+
 #===============================================
 #================ Mains ========================
 #===============================================
@@ -260,7 +261,7 @@ endif
 #===============================================
 #
 .PHONY: all EVR app
-all: lib app
+all: lib EVR
 #
 app: $(APPEXE)
 	@echo "Application compilation: OK"
@@ -280,22 +281,27 @@ ut: $(APPEXE)
 	@cd UnitTests/HNO3_UT   ; ./run_tests
 	@echo "  done Tests"
 #
+LIBAF := $(LIBA) $(EXTLib)
+#LIBAF := full.a
+EVR-T.exe: $(OBJ_DIR)/EVR-T.o $(EXT_OBJ) $(LIBAF)
+	$(FC) $(FFLAGS) -o $@ $< $(EXT_OBJ) $(LIBAF) $(FLIB)
+	@echo $@ compilation: OK
+#
+spectre.exe: $(OBJ_DIR)/spectre.o $(EXT_OBJ) $(LIBA) $(EXTLib)
+	$(FC) $(FFLAGS) -o $@ $< $(EXT_OBJ) $(LIBA) $(EXTLib) $(FLIB)
+	@echo $@ compilation: OK
 #===============================================
 #===============================================
 #============= compilation =====================
 #===============================================
 #
 $(OBJ_DIR)/%.o: %.f90
-	@echo $@ compilation from $< : ?
+	@echo $@ compilation from $<
 	$(FC) $(FFLAGS) -o $@ -c $<
-	@echo $@ compilation from $< : OK
+#
 $(OBJ_DIR)/%.o: %.f
 	@echo "  compile: " $<
 	$(FFC) $(FFLAGS) -o $@ -c $<
-#
-%.exe: $(OBJ_DIR)/%.o $(LIBAF)
-	$(FC) $(FFLAGS) -o $@ $< $(LIBAF) $(FLIB)
-	@echo $@ compilation: OK
 #
 #===============================================
 #============= make sub_system =================
@@ -320,7 +326,7 @@ $(OBJ_DIR):
 #============= Main library ====================
 #===============================================
 .PHONY: lib
-lib: $(LIBA) $(LIBAF)
+lib: $(LIBA)
 $(LIBA): $(OBJ)
 	ar -cr $(LIBA) $(OBJ)
 	rm -f  $(LIBAOLD)
@@ -329,11 +335,13 @@ $(LIBA): $(OBJ)
 	ln -s  $(LIBA) $(LIBAshort)
 	@echo "  done Library: "$(LIBA)
 #
-$(LIBAF): $(OBJ) $(EXT_OBJ)
-	ar -cr $(LIBAF) $(OBJ) $(EXT_OBJ) $(EXTLibOBJ)
-	rm -f $(LIBAFshort)
-	ln -s $(LIBAF) $(LIBAFshort)
-	@echo "  done Library: "$(LIBAF)
+#$(LIBAF): $(OBJ)
+#	@ls $(OBJ) | grep system
+#	@ls $(EXTLibOBJ) | grep system
+#	ar -cr $(LIBAF) $(OBJ) $(EXTLibOBJ)
+#	rm -f $(LIBAFshort)
+#	ln -s $(LIBAF) $(LIBAFshort)
+#	@echo "  done Library: "$(LIBAF)
 #===============================================
 #===============================================
 #============= External libraries  =============
@@ -350,7 +358,7 @@ clean:
 	rm -f  $(TESTEXE) $(APPEXE)
 	rm -f  *.log
 	rm -fr *.dSYM
-	rm -fr build
+	rm -fr build tempOBJ
 	rm -f $(OBJ_DIR)/*.o $(OBJ_DIR)/*.mod $(OBJ_DIR)/*.MOD
 	@echo "  done cleaning"
 cleanall: clean
