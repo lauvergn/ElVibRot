@@ -32,6 +32,8 @@ extf = f
 ## c compiler for the cDriver
 #CompC = gcc
 CompC := gcc-14
+# external poltential lib
+EXTLib_pot := 
 #=================================================================================
 ifeq ($(FC),)
   override FC := gfortran
@@ -284,7 +286,7 @@ ut: $(APPEXE)
 LIBAF := $(LIBA) $(EXTLib)
 #LIBAF := full.a
 EVR-T.exe: $(OBJ_DIR)/EVR-T.o $(EXT_OBJ) $(LIBAF)
-	$(FC) $(FFLAGS) -o $@ $< $(EXT_OBJ) $(LIBAF) $(FLIB)
+	$(FC) $(FFLAGS) -o $@ $< $(EXT_OBJ) $(LIBAF) $(FLIB) $(EXTLib_pot)
 	@echo $@ compilation: OK
 #
 spectre.exe: $(OBJ_DIR)/spectre.o $(EXT_OBJ) $(LIBA) $(EXTLib)
