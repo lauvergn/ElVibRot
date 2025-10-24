@@ -1,0 +1,95 @@
+test=f
+
+here=`pwd`
+DIR_vib=$here/../..
+
+DIR_pot=$DIR_vib/sub_pot
+VIBEXE=vib
+
+#
+# You should get:
+# Table I and Table II             M. Xu et al J. Chem. Phys. 128, 244715 2008
+#
+#
+
+
+LB=5
+LG=6
+B=2
+BYlm=2
+
+
+R=0.750902458653675
+
+
+RES="res_5DxyzRot-LF_SGtype4_Ylm_LB"$LB"-B"$B"-"$BYlm"_LG"$LG
+# export OMP_NUM_THREADS=1
+
+$DIR_vib/$VIBEXE << ** > $RES
+ &system EVR=t printlevel=2 /
+ &constantes /
+ &variables
+         nrho=2 Cart_type='LF'
+         Old_Qtransfo=f
+         nb_Qtransfo=2
+ /
+
+ &Coord_transfo name_transfo='zmat' nat=2 cos_beta=f /
+H
+H 1
+
+ &Coord_transfo name_transfo='active' /
+100 1 1 1  1 1
+
+ &minimum pot0=0.d0  read_Qdyn0=t pot_cart=t unit='bohr' /
+R $R Angs
+alpha 0. °
+beta 90. °
+xCOM 2.0
+yCOM 2.0
+zCOM 2.0
+
+ &basis_nD nb_basis=4 name="direct_prod" L_SparseBasis=$LB L_SparseGrid=$LG SparseGrid_type=4 /
+   &basis_nD iQdyn=4        name="Hm" Q0=0. scaleQ=2. L_TO_nq_A=1 L_TO_nq_B=$B     /
+   &basis_nD iQdyn=5        name="Hm" Q0=0. scaleQ=2. L_TO_nq_A=1 L_TO_nq_B=$B     /
+   &basis_nD iQdyn=6        name="Hm" Q0=0. scaleQ=2. L_TO_nq_A=1 L_TO_nq_B=$B     /
+   &basis_nD iQdyn(1:2)=3,2 name="Ylm"                L_TO_nq_A=1 L_TO_nq_B=$BYlm  /
+ 
+ &inactives /
+ &actives test=$test direct=2 /
+ &analyse max_ene=500. 'cm-1' /
+ &UnitTest nb_EneRefpot0=1 nb_EneRefE0=7 /
+   EneRefpot0 -447.844
+   EneRefE0 0.00   74.45 74.67 97.54  108.97 119.39 128.12
+**
+
+DAT=$(basename $0)
+echo $DAT
+echo "==================================================="
+REF_EneRefpot0=` awk '/EneRefpot0/ {print $2}' $DAT | head -2 | tail -1`
+EVRT_EneRefpot0=` awk '/lev0:    1 / {print $5}' $RES `
+echo $REF_EneRefpot0
+echo $EVRT_EneRefpot0
+echo $REF_EneRefpot0 > lev_comp
+echo $EVRT_EneRefpot0 >> lev_comp
+CompareLevel.sh $DAT > lev_err
+echo "==================================================="
+
+echo "==================================================="
+REF_EneRefE0=`awk '/EneRefE0/ {print $2 " " $3 " " $4 " " $5 " " $6 " " $7 " " $8}' $DAT | head -2 | tail -1`
+EVRT_EneRefE0=`awk '/lev0:    1 |lev0:    2 |lev0:    3 |lev0:    4 |lev0:    5 |lev0:    6 |lev0:    7 / {print $6}'  $RES`
+
+echo $REF_EneRefE0 
+echo $EVRT_EneRefE0
+
+echo $REF_EneRefE0 > lev_comp
+echo $EVRT_EneRefE0 >> lev_comp
+CompareLevel.sh $DAT >> lev_err
+echo "==================================================="
+
+#echo For \"$file\", the largest relative difference between constants: $d
+epsi=0.4
+DEmax=`awk 'BEGIN {DEmax=0.} /DEmax:/ {DE=$2; if (DE > DEmax) DEmax=DE} END {print DEmax}' lev_err`
+echo The largest difference between levels of $RES is : $DEmax
+echo $DEmax | LANG=C awk -v epsi=$epsi '{if ($1 > epsi) {print "    ERROR,  largest diff > " epsi} else {print "    No PROBLEM, largest diff <= " epsi}}'
+

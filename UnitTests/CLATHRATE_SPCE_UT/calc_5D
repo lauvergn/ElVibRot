@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+./comp.sh &> comp.log
+
+compOK=`grep -c 'EVR OK' comp.log `
+echo compOK $compOK
+if [ $compOK = '0' ]
+then
+ echo " ElVibRot compilation: ERROR"
+ exit
+fi
+
+
+ echo " dat_5DxyzRot_LF_H2Clathrate" > err.log
+
+ ./dat_5DxyzRot_LF_H2Clathrate > err.log 2>&1
+ tail -2 err.log
+ 
