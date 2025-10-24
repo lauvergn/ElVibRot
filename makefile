@@ -278,9 +278,10 @@ EVR: EVR-T.exe
 .PHONY: ut
 ut: $(APPEXE)
 	@echo "Unitary test"
-	@cd UnitTests/HCN-WP_UT ; ./run_tests
-	@cd UnitTests/HCN_UT    ; ./run_tests
-	@cd UnitTests/HNO3_UT   ; ./run_tests
+	@cd UnitTests/CLATHRATE_SPCE_UT  ; ./run_tests
+	@cd UnitTests/HCN-WP_UT         ; ./run_tests
+	@cd UnitTests/HCN_UT            ; ./run_tests
+	@cd UnitTests/HNO3_UT           ; ./run_tests
 	@echo "  done Tests"
 #
 LIBAF := $(LIBA) $(EXTLib)
