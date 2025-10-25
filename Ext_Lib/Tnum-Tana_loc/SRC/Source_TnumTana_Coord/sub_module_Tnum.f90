@@ -140,8 +140,6 @@ MODULE mod_Tnum
           integer                          :: nb_elec      = -1      ! here it is the number of electrons
 
           integer,                 pointer :: Z(:)         => null() ! true pointer
-          character (len=Name_len),pointer :: name_Qdyn(:) => null() ! true pointer
-          character (len=Name_len),pointer :: name_Qact(:) => null() ! true pointer
           character (len=Name_len),pointer :: symbole(:)   => null() ! true pointer
 
           logical                          :: cos_th       = .FALSE.  ! T => coordinate (valence angle) => cos(th)
@@ -162,6 +160,7 @@ MODULE mod_Tnum
           integer                          :: opt_param           =  0
           integer, allocatable             :: opt_Qdyn(:)
 
+          integer                          :: itActive             = -1
           integer                          :: itPrim               = -1
           integer                          :: itNM                 = -1
           integer                          :: itRPH                = -1
@@ -174,12 +173,10 @@ MODULE mod_Tnum
 
           TYPE (CurviRPH_type)               :: CurviRPH
 
-          integer, pointer :: liste_QactTOQsym(:) => null()   ! true pointer
-          integer, pointer :: liste_QsymTOQact(:) => null()   ! true pointer
           integer, pointer :: liste_QactTOQdyn(:) => null()   ! true pointer
           integer, pointer :: liste_QdynTOQact(:) => null()   ! true pointer
-          integer, pointer :: nrho_OF_Qact(:)     => null()   ! enables to define the volume element
-          integer, pointer :: nrho_OF_Qdyn(:)     => null()   ! enables to define the volume element
+          integer, allocatable :: nrho_OF_Qact(:)             ! enables to define the volume element
+          integer, allocatable :: nrho_OF_Qdyn(:)             ! enables to define the volume element
 
 
           integer :: nb_act1   =0
@@ -420,9 +417,10 @@ MODULE mod_Tnum
       write(out_unit,*) '------------------------------------------'
       write(out_unit,*) '------------------------------------------'
       write(out_unit,*) 'tab_Qtransfo'
-      write(out_unit,*) '  itPrim: ',mole%itPrim
-      write(out_unit,*) '  itNM:   ',mole%itNM
-      write(out_unit,*) '  itRPH:  ',mole%itRPH
+      write(out_unit,*) '  itActive: ',mole%itActive
+      write(out_unit,*) '  itPrim:   ',mole%itPrim
+      write(out_unit,*) '  itNM:     ',mole%itNM
+      write(out_unit,*) '  itRPH:    ',mole%itRPH
 
       write(out_unit,*) '------------------------------------------'
       DO it=1,mole%nb_Qtransfo
@@ -527,8 +525,6 @@ MODULE mod_Tnum
         mole%multiplicity = -1
         mole%nb_elec      = -1
 
-        nullify(mole%name_Qdyn) ! true pointer
-        nullify(mole%name_Qact) ! true pointer
         nullify(mole%Z)         ! true pointer
         nullify(mole%symbole)   ! true pointer
         nullify(mole%masses)    ! true pointer
@@ -542,6 +538,7 @@ MODULE mod_Tnum
         mole%Cart_transfo    = .FALSE.
 
         mole%nb_Qtransfo     = -1
+        mole%itActive        = -1
         mole%itNM            = -1
         mole%itRPH           = -1
         mole%itPrim          = -1
@@ -578,18 +575,14 @@ MODULE mod_Tnum
                           'mole%RPHTransfo_inact2n',name_sub)
       END IF
 
-        nullify(mole%liste_QactTOQsym)   ! true pointer
-        nullify(mole%liste_QsymTOQact)   ! true pointer
         nullify(mole%liste_QactTOQdyn)   ! true pointer
         nullify(mole%liste_QdynTOQact)   ! true pointer
 
-        IF (associated(mole%nrho_OF_Qact))  THEN
-          CALL dealloc_array(mole%nrho_OF_Qact,                         &
-                            "mole%nrho_OF_Qact",name_sub)
+        IF (allocated(mole%nrho_OF_Qact))  THEN
+          CALL dealloc_NParray(mole%nrho_OF_Qact,"mole%nrho_OF_Qact",name_sub)
         END IF
-        IF (associated(mole%nrho_OF_Qdyn))  THEN
-          CALL dealloc_array(mole%nrho_OF_Qdyn,                         &
-                            "mole%nrho_OF_Qdyn",name_sub)
+        IF (allocated(mole%nrho_OF_Qdyn))  THEN
+          CALL dealloc_NParray(mole%nrho_OF_Qdyn,"mole%nrho_OF_Qdyn",name_sub)
         END IF
 
         mole%nb_act1     = 0
@@ -1076,6 +1069,7 @@ MODULE mod_Tnum
               write(out_unit,*) ' Check your data !!'
               STOP
             ELSE
+              mole%itActive      = it
               mole%ActiveTransfo => mole%tab_Qtransfo(it)%ActiveTransfo
             END IF
 
@@ -1135,17 +1129,12 @@ MODULE mod_Tnum
         END IF
         !=======================================================================
 
+        mole%liste_QactTOQdyn => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QactTOQdyn
+        mole%liste_QdynTOQact => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact
 
-        mole%liste_QactTOQsym => mole%ActiveTransfo%list_QactTOQdyn
-        mole%liste_QactTOQdyn => mole%ActiveTransfo%list_QactTOQdyn
-        mole%liste_QsymTOQact => mole%ActiveTransfo%list_QdynTOQact
-        mole%liste_QdynTOQact => mole%ActiveTransfo%list_QdynTOQact
-
-        mole%name_Qdyn        => mole%tab_Qtransfo(nb_Qtransfo)%name_Qout
-
-        CALL alloc_array(mole%nrho_OF_Qact,[mole%nb_var],"mole%nrho_OF_Qact",name_sub)
+        CALL alloc_NParray(mole%nrho_OF_Qact,[mole%nb_var],"mole%nrho_OF_Qact",name_sub)
         mole%nrho_OF_Qact(:) = 0
-        CALL alloc_array(mole%nrho_OF_Qdyn,[mole%nb_var],"mole%nrho_OF_Qdyn",name_sub)
+        CALL alloc_NParray(mole%nrho_OF_Qdyn,[mole%nb_var],"mole%nrho_OF_Qdyn",name_sub)
         mole%nrho_OF_Qdyn(:) = 0
 
         IF (mole%tab_Qtransfo(nb_Qtransfo)%nb_Qin /= mole%nb_var) THEN
@@ -1165,8 +1154,6 @@ MODULE mod_Tnum
           write(out_unit,*) ' RPHTransfo and type 21 or 22 coordinates are not compatible anymore'
           STOP
         END IF
-
-        mole%name_Qact => mole%tab_Qtransfo(nb_Qtransfo)%name_Qin
 
         IF (mole%nb_act < 1) THEN
            write(out_unit,*) ' ERROR in ',name_sub
@@ -1385,34 +1372,26 @@ MODULE mod_Tnum
         mole%tab_Qtransfo(it)%name_Qout => mole%tab_Qtransfo(it-1)%name_Qin
 
 
-        CALL alloc_array(mole%tab_Qtransfo(it)%ActiveTransfo,           &
-                        "mole%tab_Qtransfo(it)%ActiveTransfo",name_sub)
+        CALL alloc_array(mole%tab_Qtransfo(it)%ActiveTransfo,"mole%tab_Qtransfo(it)%ActiveTransfo",name_sub)
         mole%tab_Qtransfo(it)%ActiveTransfo%QMLib            = QMLib
-        CALL Read_ActiveTransfo(mole%tab_Qtransfo(it)%ActiveTransfo,    &
-                                mole%nb_var)
+        CALL Read_ActiveTransfo(mole%tab_Qtransfo(it)%ActiveTransfo,mole%nb_var)
 
+        mole%itActive      = it
         mole%ActiveTransfo => mole%tab_Qtransfo(it)%ActiveTransfo
 
         mole%ActiveTransfo%With_Tab_dnQflex = With_Tab_dnQflex
         mole%ActiveTransfo%QMLib            = QMLib
 
-        mole%liste_QactTOQsym => mole%ActiveTransfo%list_QactTOQdyn
-        mole%liste_QactTOQdyn => mole%ActiveTransfo%list_QactTOQdyn
-        mole%liste_QsymTOQact => mole%ActiveTransfo%list_QdynTOQact
-        mole%liste_QdynTOQact => mole%ActiveTransfo%list_QdynTOQact
+        mole%liste_QactTOQdyn => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QactTOQdyn
+        mole%liste_QdynTOQact => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact
 
-        mole%name_Qdyn        => mole%tab_Qtransfo(it)%name_Qout
-
-        CALL alloc_array(mole%nrho_OF_Qact,[mole%nb_var],             &
-                        "mole%nrho_OF_Qact",name_sub)
+        CALL alloc_NParray(mole%nrho_OF_Qact,[mole%nb_var],"mole%nrho_OF_Qact",name_sub)
         mole%nrho_OF_Qact(:) = 0
 
-        CALL alloc_array(mole%nrho_OF_Qdyn,[mole%nb_var],             &
-                        "mole%nrho_OF_Qdyn",name_sub)
+        CALL alloc_NParray(mole%nrho_OF_Qdyn,[mole%nb_var],"mole%nrho_OF_Qdyn",name_sub)
         mole%nrho_OF_Qdyn(:) = 0
 
         CALL type_var_analysis_OF_CoordType(mole)
-        mole%name_Qact        => mole%tab_Qtransfo(it)%name_Qin
 
         flush(out_unit)
 
@@ -1440,21 +1419,15 @@ MODULE mod_Tnum
         allocate(mole%ActiveTransfo)
         CALL alloc_ActiveTransfo(mole%ActiveTransfo,nb_var)
 
-        mole%liste_QactTOQsym => mole%ActiveTransfo%list_QactTOQdyn
         mole%liste_QactTOQdyn => mole%ActiveTransfo%list_QactTOQdyn
-        mole%liste_QsymTOQact => mole%ActiveTransfo%list_QdynTOQact
         mole%liste_QdynTOQact => mole%ActiveTransfo%list_QdynTOQact
 
         mole%ActiveTransfo%list_QactTOQdyn(:) = 1
 
-        IF (.NOT. associated(mole%name_Qdyn)) THEN
-          CALL alloc_array(mole%name_Qdyn,[nb_var],"mole%name_Qdyn",name_sub)
-        END IF
-
         DO i=1,nb_var
           mole%ActiveTransfo%list_QactTOQdyn(i) = i
           mole%ActiveTransfo%list_QdynTOQact(i) = i
-          CALL make_nameQ(mole%name_Qdyn(i),'Qf2ana',i,0)
+          CALL make_nameQ(mole%tab_Qtransfo(mole%nb_Qtransfo)%name_Qout(i),'Qf2ana',i,0)
         END DO
 
         write(out_unit,*) '================================================='
@@ -1471,8 +1444,7 @@ MODULE mod_Tnum
       IF (mole%nb_Qtransfo /= -1) THEN
         CALL alloc_array(mole%d0sm,[mole%ncart],"mole%d0sm",name_sub)
 
-        CALL alloc_array(mole%active_masses,[mole%ncart],             &
-                        "mole%active_masses",name_sub)
+        CALL alloc_array(mole%active_masses,[mole%ncart],"mole%active_masses",name_sub)
         mole%active_masses(:) = 1
 
         mole%d0sm(:)   = sqrt(mole%masses(:))
@@ -1654,8 +1626,8 @@ MODULE mod_Tnum
     USE mod_Qtransfo,         ONLY : set_name_Qtransfo,get_name_Qtransfo
 
     ! for the CoordType and Tnum --------------------------------------
-    CLASS (CoordType), intent(inout) :: mole1
-    TYPE (CoordType),  intent(in)    :: mole2
+    CLASS (CoordType), intent(inout), target :: mole1
+    TYPE (CoordType),  intent(in)            :: mole2
 
     integer :: it
 
@@ -1714,6 +1686,7 @@ MODULE mod_Tnum
       mole1%Old_Qtransfo     = mole2%Old_Qtransfo
       mole1%Cart_transfo     = mole2%Cart_transfo
       mole1%nb_Qtransfo      = mole2%nb_Qtransfo
+      mole1%itActive         = mole2%itActive
       mole1%itNM             = mole2%itNM
       mole1%itRPH            = mole2%itRPH
       mole1%itPrim           = mole2%itPrim
@@ -1789,28 +1762,21 @@ MODULE mod_Tnum
       END IF
 
 
-      ! the 6 tables are true pointers
+      ! the 2 tables are true pointers
       IF (.NOT. associated(mole1%ActiveTransfo)) &
         STOP 'ERROR in CoordType2_TO_CoordType1: mole1%ActiveTransfo is not associated'
-      IF (.NOT. associated(mole1%ActiveTransfo%list_QactTOQdyn)) &
+      IF (.NOT. allocated(mole1%ActiveTransfo%list_QactTOQdyn)) &
         STOP 'ERROR in CoordType2_TO_CoordType1: mole1%ActiveTransfo%list_QactTOQdyn is not associated'
-      IF (.NOT. associated(mole1%ActiveTransfo%list_QdynTOQact)) &
+      IF (.NOT. allocated(mole1%ActiveTransfo%list_QdynTOQact)) &
         STOP 'ERROR in CoordType2_TO_CoordType1: mole1%ActiveTransfo%list_QdynTOQact is not associated'
 
-      mole1%liste_QactTOQsym => mole1%ActiveTransfo%list_QactTOQdyn
       mole1%liste_QactTOQdyn => mole1%ActiveTransfo%list_QactTOQdyn
-      mole1%liste_QsymTOQact => mole1%ActiveTransfo%list_QdynTOQact
       mole1%liste_QdynTOQact => mole1%ActiveTransfo%list_QdynTOQact
 
-      mole1%name_Qact        => mole1%tab_Qtransfo(mole1%nb_Qtransfo)%name_Qin
-      mole1%name_Qdyn        => mole1%tab_Qtransfo(mole1%nb_Qtransfo)%name_Qout
-
-      CALL alloc_array(mole1%nrho_OF_Qact,[mole1%nb_var],             &
-                      "mole1%nrho_OF_Qact",name_sub)
+      CALL alloc_NParray(mole1%nrho_OF_Qact,[mole1%nb_var],"mole1%nrho_OF_Qact",name_sub)
       mole1%nrho_OF_Qact(:)  = mole2%nrho_OF_Qact(:)
 
-      CALL alloc_array(mole1%nrho_OF_Qdyn,[mole1%nb_var],             &
-                      "mole1%nrho_OF_Qdyn",name_sub)
+      CALL alloc_NParray(mole1%nrho_OF_Qdyn,[mole1%nb_var],"mole1%nrho_OF_Qdyn",name_sub)
       mole1%nrho_OF_Qdyn(:)  = mole2%nrho_OF_Qdyn(:)
 
       mole1%nb_act1          = mole2%nb_act1
@@ -2006,7 +1972,7 @@ MODULE mod_Tnum
       IF (debug) write(out_unit,*) 'BEGINNING ',name_sub
       IF (print_loc) THEN
          write(out_unit,*) '-analysis of the variable type ---'
-         write(out_unit,*) '  mole%list_act_OF_Qdyn',                  &
+         write(out_unit,*) '  mole%ActiveTransfo%list_act_OF_Qdyn',      &
                                      mole%ActiveTransfo%list_act_OF_Qdyn
       END IF
 
