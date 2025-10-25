@@ -89,3 +89,5 @@ fi
 
 
 rm \$name_file " >> vib
+
+chmod a+x vib

@@ -39,7 +39,7 @@ H
 H 1
 
  &Coord_transfo name_transfo='active' /
-100 1 1 1  1 1
+0 1 1 1  1 1
 
  &minimum pot0=0.d0  read_Qdyn0=t pot_cart=t unit='bohr' /
 R $R Angs
@@ -57,7 +57,7 @@ zCOM 2.0
  
  &inactives /
  &actives test=$test direct=2 /
- &analyse max_ene=500. 'cm-1' /
+ &analyse max_ene=150. 'cm-1' /
  &UnitTest nb_EneRefpot0=1 nb_EneRefE0=7 /
    EneRefpot0 -447.844
    EneRefE0 0.00   74.45 74.67 97.54  108.97 119.39 128.12
