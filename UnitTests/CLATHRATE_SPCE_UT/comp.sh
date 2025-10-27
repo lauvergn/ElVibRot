@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 here=`pwd`
 DIR_vib=$here/../..
@@ -12,11 +12,13 @@ grep "Alavi" $DIR_pot/sub_system.f
 
 
 cd $DIR_vib
- make OPT=0
+ make OPT=0 &> $here/comp.log
 cd $here
 
 compOK=`grep -c 'EVR OK' comp.log `
-if [ $compOK = '1' ]
+echo $compOK
+
+if [ "$compOK" = "1" ]
 then
  echo " ElVibRot compilation: OK"
 else

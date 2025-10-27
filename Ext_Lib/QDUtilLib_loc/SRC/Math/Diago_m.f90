@@ -850,7 +850,7 @@ CONTAINS
 12        CONTINUE
           M=N
 2         IF(M /= L)THEN
-            IF(ITER == 30) STOP 'too many iterations'
+            IF(ITER == 100) STOP 'too many iterations'
             ITER=ITER+1
             G=(D(L+1)-D(L))/(TWO*E(L))
             R=SQRT(G**2+ONE)

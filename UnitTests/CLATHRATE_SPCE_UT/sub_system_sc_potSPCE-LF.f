@@ -22,16 +22,22 @@ c----- for the Tnum --------------------------------------
       logical           :: calc_ScalOp,pot_cplx
       real (kind=Rkind) :: mat_V(nb_be,nb_be),mat_imV(nb_be,nb_be)
       real (kind=Rkind) :: mat_ScalOp(nb_be,nb_be,nb_ScalOp)
-      real (kind=Rkind) :: Qcart(nb_cart)
+      real (kind=Rkind), target :: Qcart(nb_cart)
 
       real (kind=Rkind) :: pot0,im_pot0
+      !real (kind=Rkind), pointer :: H2xyz(:,:) => null()
+      real (kind=Rkind) :: H2xyz(3,2)
 
 
       !write(6,*) 'size Qcart',size(Qcart),nb_cart
 
 
       IF (nb_be == 1 ) THEN
-        call sc_sp(reshape(Qcart(1:6),(/3,2/)),mat_V(1,1))
+        !H2xyz(1:3,1:2) => Qcart(1:6)
+        H2xyz(:,:) = reshape(Qcart(1:6),shape=[3,2])
+        write(6,*) 'H2xyz',H2xyz ; flush(6)
+        call sc_sp(H2xyz,mat_V(1,1))
+        !call sc_sp(reshape(Qcart(1:6),(/3,2/)),mat_V(1,1))
         mat_V(1,1) = mat_V(1,1) / 219474.63d0 ! the conversion factor comes from the sc_sp subroutine
         mat_V(1,1) = min(mat_V(1,1),ONE)
         !mat_V(1,1) = ZERO
@@ -39,6 +45,7 @@ c----- for the Tnum --------------------------------------
         IF (calc_ScalOp) THEN
           CALL sub_dipole(mat_ScalOp(1,1,:),Qcart,mole)
         END IF
+        !nullify(H2xyz)
       ELSE
         write(6,*) ' ERROR in calc_op'
         write(6,*) ' more than ONE electronic surface is impossible'
@@ -46,7 +53,6 @@ c----- for the Tnum --------------------------------------
         STOP
       END IF
 
-      RETURN
       END
 C=======================================================================
 C    sub hessian

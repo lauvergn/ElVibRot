@@ -276,6 +276,12 @@ CONTAINS
       !--------------------------------------------------------------------------------
       ! loop for davidson with maximum iter number para_Davidson%max_it
       !--------------------------------------------------------------------------------
+      IF (.NOT. openmpi) THEN ! we add this allocation for nagfor
+        allocate(H_overlap(1,1))
+        allocate(S_overlap(1,1))
+      END IF
+
+
       DO it=0,para_Davidson%max_it
 
         IF(MPI_id==0) THEN
@@ -1087,60 +1093,60 @@ CONTAINS
  END IF
  
  IF(openmpi) THEN
-!   CALL MPI_BCAST(ndim, size1_MPI,Int_MPI,root_MPI,MPI_COMM_WORLD,MPI_err)
-!   CALL MPI_BCAST(ndim0,size1_MPI,Int_MPI,root_MPI,MPI_COMM_WORLD,MPI_err)
-   IF(MPI_scheme/=1) THEN
-     CALL MPI_BCAST_(ndim, size1_MPI,root_MPI)
-     CALL MPI_BCAST_(ndim0,size1_MPI,root_MPI)
-   ENDIF
+  !CALL MPI_BCAST(ndim, size1_MPI,Int_MPI,root_MPI,MPI_COMM_WORLD,MPI_err)
+  !CALL MPI_BCAST(ndim0,size1_MPI,Int_MPI,root_MPI,MPI_COMM_WORLD,MPI_err)
+  IF(MPI_scheme/=1) THEN
+    CALL MPI_BCAST_(ndim, size1_MPI,root_MPI)
+    CALL MPI_BCAST_(ndim0,size1_MPI,root_MPI)
+  ENDIF
 
-   CALL allocate_array(H,1,ndim,1,ndim)
-!   IF(allocated(H)) CALL dealloc_NParray(H,"H",name_sub)
-!   CALL alloc_NParray(H,[ndim,ndim],"H",name_sub)
-   H(1:ndim,1:ndim)=H_overlap(1:ndim,1:ndim)
+  CALL allocate_array(H,1,ndim,1,ndim)
+  !IF(allocated(H)) CALL dealloc_NParray(H,"H",name_sub)
+  !CALL alloc_NParray(H,[ndim,ndim],"H",name_sub)
+  H(1:ndim,1:ndim)=H_overlap(1:ndim,1:ndim)
  ELSE
 
- !----------------------------------------------------------
- !- First save H in H0
- IF (debug) write(out_unit,*) 'H mat',it,ndim,ndim0
- IF (debug) write(out_unit,*) 'shape H mat',it,shape(H)
+  !----------------------------------------------------------
+  !- First save H in H0
+  IF (debug) write(out_unit,*) 'H mat',it,ndim,ndim0
+  IF (debug) write(out_unit,*) 'shape H mat',it,shape(H)
 
- IF (debug) flush(out_unit)
+  IF (debug) flush(out_unit)
 
- !block 1,1: ndim0*ndim0
- IF (ndim0 > 0) THEN
-   CALL alloc_NParray(H0,[ndim0,ndim0],"H0",name_sub)
-   H0(:,:) = H(:,:)
+  !block 1,1: ndim0*ndim0
+  IF (ndim0 > 0) THEN
+    CALL alloc_NParray(H0,[ndim0,ndim0],"H0",name_sub)
+    H0(:,:) = H(:,:)
 
 
-   CALL dealloc_NParray(H,"H",name_sub)
-   CALL alloc_NParray(H,[ndim,ndim],"H",name_sub)
-   H(:,:) = ZERO
+    CALL dealloc_NParray(H,"H",name_sub)
+    CALL alloc_NParray(H,[ndim,ndim],"H",name_sub)
+    H(:,:) = ZERO
 
-   H(1:ndim0,1:ndim0) = H0(:,:)
+    H(1:ndim0,1:ndim0) = H0(:,:)
 
-   CALL dealloc_NParray(H0,"H0",name_sub)
- ELSE
-   CALL alloc_NParray(H,[ndim,ndim],"H",name_sub)
-   H(:,:) = ZERO
- END IF
+    CALL dealloc_NParray(H0,"H0",name_sub)
+  ELSE
+    CALL alloc_NParray(H,[ndim,ndim],"H",name_sub)
+    H(:,:) = ZERO
+  END IF
 
- !block: 2,1 (ndim0-ndim)*ndim0
- DO i=1,ndim0
- DO j=ndim0+1,ndim
-   CALL Overlap_psi1_psi2(Overlap,psi(j),Hpsi(i),With_Grid=para_Davidson%With_Grid)
-   H(j,i) = real(Overlap,kind=Rkind)
- END DO
- END DO
+  !block: 2,1 (ndim0-ndim)*ndim0
+  DO i=1,ndim0
+  DO j=ndim0+1,ndim
+    CALL Overlap_psi1_psi2(Overlap,psi(j),Hpsi(i),With_Grid=para_Davidson%With_Grid)
+    H(j,i) = real(Overlap,kind=Rkind)
+  END DO
+  END DO
 
- !blocks: 1,2 ndim0*(ndim0-ndim) + 2,2: (ndim0-ndim)*(ndim0-ndim)
- DO i=ndim0+1,ndim
- DO j=1,ndim
-   CALL Overlap_psi1_psi2(Overlap,psi(j),Hpsi(i),With_Grid=para_Davidson%With_Grid)
-   !write(out_unit,*) 'H,i,j',i,j,Overlap
-   H(j,i) = real(Overlap,kind=Rkind)
- END DO
- END DO
+  !blocks: 1,2 ndim0*(ndim0-ndim) + 2,2: (ndim0-ndim)*(ndim0-ndim)
+  DO i=ndim0+1,ndim
+  DO j=1,ndim
+    CALL Overlap_psi1_psi2(Overlap,psi(j),Hpsi(i),With_Grid=para_Davidson%With_Grid)
+    !write(out_unit,*) 'H,i,j',i,j,Overlap
+    H(j,i) = real(Overlap,kind=Rkind)
+  END DO
+  END DO
 
  ENDIF ! for openmpi
 
