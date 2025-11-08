@@ -1931,7 +1931,7 @@ END SUBROUTINE sub_NewVec_Davidson
 !#if(run_MPI)
 ! CALL MPI_Bcast(VecToBeIncluded,ndim,MPI_Logical,root_MPI,MPI_COMM_WORLD,MPI_err) 
 !#endif
- IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(VecToBeIncluded,ndim,root_MPI)
+ IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(VecToBeIncluded,int(ndim,kind=MPI_INTEGER_KIND),root_MPI)
 
  CALL Sort_VecToBeIncluded_Davidson(Ene,Vec,VecToBeIncluded)
 
@@ -2050,7 +2050,7 @@ END SUBROUTINE sub_NewVec_Davidson
 !#if(run_MPI)
 ! CALL MPI_Bcast(VecToBeIncluded,ndim,MPI_Logical,root_MPI,MPI_COMM_WORLD,MPI_err) 
 !#endif
- IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(VecToBeIncluded,ndim,root_MPI)
+ IF(openmpi .AND. MPI_scheme/=1) CALL MPI_Bcast_(VecToBeIncluded,int(ndim,kind=MPI_INTEGER_KIND),root_MPI)
 
  CALL Sort_VecToBeIncluded_Davidson(Ene,Vec,VecToBeIncluded)
 

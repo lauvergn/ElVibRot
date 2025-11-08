@@ -312,7 +312,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna,info)
     IF (.NOT. present(PsiAna)) write(out_unit,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop
   END IF
 
-  ! for propo and not props
+  ! for propa and not propa
 
   IF (present(PsiAna)) THEN
     !$OMP  CRITICAL (sub_analyze_psi_CRIT)
@@ -2665,10 +2665,13 @@ END IF
      END DO
   END IF
 
+#if(run_MPI)
   IF(openmpi .AND. keep_MPI .AND. MPI_scheme/=2) THEN
     CALL MPI_Reduce_sum_matrix(tab_WeightChannels,1,nb_bi,1,nb_be,root_MPI,MS=MPI_scheme)
     CALL MPI_Bcast_matrix(tab_WeightChannels,1,nb_bi,1,nb_be,root_MPI,MS=MPI_scheme)
   ENDIF
+#endif
+
   CALL dealloc_NParray(wrho,'wrho',name_sub)
 !------------------------------------------------------
   IF (debug) THEN
@@ -2793,10 +2796,12 @@ END SUBROUTINE Channel_weight_SG4_grid
      END DO
   END IF
 
+#if(run_MPI)
   IF(openmpi .AND. keep_MPI .AND. MPI_scheme/=2) THEN
     CALL MPI_Reduce_sum_matrix(tab_WeightChannels,1,nb_bi,1,nb_be,root_MPI,MS=MPI_scheme)
     CALL MPI_Bcast_matrix(tab_WeightChannels,1,nb_bi,1,nb_be,root_MPI,MS=MPI_scheme)
   ENDIF
+#endif
 
   CALL dealloc_SmolyakRep(WSRep)
 
