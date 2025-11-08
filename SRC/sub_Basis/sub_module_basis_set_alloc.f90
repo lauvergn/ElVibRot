@@ -3055,6 +3055,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
                 write(out_unit,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
                 write(out_unit,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
                 CALL RecWriteMiniMini_basis(basis_set%tab_PbasisSG(i_SG)%Pbasis)
+                IF (i_SG > 100) EXIT
               END DO
               deallocate(tab_l)
             ELSE
@@ -3065,6 +3066,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
                 CALL ADD_ONE_TO_nDindex(basis_set%para_SGType2%nDind_SmolyakRep,tab_l,iG=i_SG)
                 write(out_unit,*) Rec_line,'iSG,tab_l(:)',i_SG,':',tab_l
                 write(out_unit,*) Rec_line,'iSG,WeightSG:',i_SG,basis_set%WeightSG(i_SG)
+                IF (i_SG > 100) EXIT
               END DO
               deallocate(tab_l)
             END IF

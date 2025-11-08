@@ -202,7 +202,7 @@
       END IF
       IF (print_level > 1 ) write(out_unit,*) 'nrho in ',name_sub,para_AllBasis%BasisnD%nrho(:)
       IF (print_level > -1) write(out_unit,*) '==================================================='
-      CALL RecWriteMiniMini_basis(para_AllBasis%BasisnD)
+      IF (print_level > 1 ) CALL RecWriteMiniMini_basis(para_AllBasis%BasisnD)
 
       END SUBROUTINE Auto_basis
 !=======================================================================================
@@ -516,8 +516,8 @@
 !-------------------------------------------------------------------------
 
 !----- for debuging --------------------------------------------------
-      !logical, parameter :: debug = .FALSE.
-      logical, parameter :: debug = .TRUE.
+      logical, parameter :: debug = .FALSE.
+      !logical, parameter :: debug = .TRUE.
       character (len=*), parameter :: name_sub = 'RecSet_EneH0'
 !---------------------------------------------------------------------
       rec = rec + 1
