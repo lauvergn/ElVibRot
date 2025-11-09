@@ -8,7 +8,7 @@ ls $DIR_pot
 cp sub_system_sc_potSPCE-LF.f $DIR_pot/sub_system.f
 cp calc_f2_f1Q.f90            $DIR_vib/sub_operator_T/
 
-grep "Alavi" $DIR_pot/sub_system.f
+#grep "Alavi" $DIR_pot/sub_system.f
 
 
 cd $DIR_vib
