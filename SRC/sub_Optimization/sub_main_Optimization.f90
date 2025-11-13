@@ -161,7 +161,7 @@
       write(out_unit,*) '============ FINAL ANLYSIS =================='
 
       allocate(Qact(mole%nb_var))
-      CALL get_Qact0(Qact,mole%ActiveTransfo)
+      CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
       Qact(1:para_Optimization%nb_Opt) = Qopt
       IF (para_Optimization%FinalEnergy) THEN
         write(out_unit,*) '============ ENERGY:'
@@ -214,7 +214,7 @@
 
 
         CALL alloc_NParray(Qdyn,[mole%nb_var],'Qdyn',name_sub)
-        CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn,mole%ActiveTransfo)
+        CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
         write(out_unit,*) 'Qdyn geometry:'
         DO i=1,size(Qdyn)
           write(out_unit,*) Qdyn(i)

@@ -288,7 +288,7 @@ c---------------------------------------------------------------------
       END IF
 
 c---------------------------------------------------------------------
-      Qact(1) = Qdyn(mole%liste_QactTOQsym(1))
+      Qact(1) = Qdyn(mole%liste_QactTOQdyn(1))
 
       d0g(:)     = ZERO
       d1g(:,:)   = ZERO
@@ -343,7 +343,7 @@ c---------------------------------------------------------------------
       END IF
 c---------------------------------------------------------------------
 
-      c_act = Qdyn(mole%liste_QactTOQsym(1))
+      c_act = Qdyn(mole%liste_QactTOQdyn(1))
  
       IF (deriv) THEN
         write(out_unit,*) 'ERROR in d0d1d2_h'
@@ -540,11 +540,11 @@ c---------------------------------------------------------------------
 c---------------------------------------------------------------------
 
 c---------------------------------------------------------------------
-      c_act = Qdyn(mole%liste_QactTOQsym(1))
+      c_act = Qdyn(mole%liste_QactTOQdyn(1))
 
       CALL get_CurviRPH( (/ c_act /),mole%CurviRPH,Q21=Q21)
 
-      i_Qact = mole%liste_QsymTOQact(i_Qdyn) - mole%nb_act1
+      i_Qact = mole%liste_QdynTOQact(i_Qdyn) - mole%nb_act1
       d0req  = Q21(i_Qact)
 c---------------------------------------------------------------------
 

@@ -40,11 +40,11 @@ C================================================================
 C    fonction pot0(x) 1 D (avec x=cos(theta))
 c    pour une tri atomique en jacobie
 C================================================================
-      FUNCTION pot0(Qsym0)
+      FUNCTION pot0(Qdyn0)
       USE EVR_system_m
       IMPLICIT NONE
        real (kind=Rkind) :: pot0
-       real (kind=Rkind) :: Qsym0(1)
+       real (kind=Rkind) :: Qdyn0(1)
 
        real (kind=Rkind) :: z ! pot0
        real (kind=Rkind) :: poly_legendre ! function
@@ -74,7 +74,7 @@ c$OMP    END CRITICAL (pot0_CRIT)
 c      END initialization
 c---------------------------------------------------------------
 
-       c_act = Qsym0(1)
+       c_act = Qdyn0(1)
        z = ZERO
        DO kl=1,nn
          z = z + F(kl) * poly_legendre(c_act,kl,0)
@@ -82,7 +82,7 @@ c---------------------------------------------------------------
 
        pot0 = z
 
-c      write(out_unit,*) 'pot0',Qsym0(1),c_act,z
+c      write(out_unit,*) 'pot0',Qdyn0(1),c_act,z
 
        END
 C================================================================
@@ -104,18 +104,18 @@ C================================================================
 C================================================================
 C    fonction im_pot0(x)
 C================================================================
-      FUNCTION im_pot0(Qsym0)
+      FUNCTION im_pot0(Qdyn0)
       USE EVR_system_m
       IMPLICIT NONE
       real (kind=Rkind) :: im_pot0
 
 
-       real (kind=Rkind) :: Qsym0(1)
+       real (kind=Rkind) :: Qdyn0(1)
        real (kind=Rkind) :: z
        real (kind=Rkind), parameter :: a=ONETENTH, Q0=0.9_Rkind
 
        z = ZERO
-       IF (Qsym0(1) > Q0) z = -a * (Qsym0(1) - Q0)**2
+       IF (Qdyn0(1) > Q0) z = -a * (Qdyn0(1) - Q0)**2
 
        im_pot0 = z
 
@@ -202,7 +202,7 @@ c---------------------------------------------------------------------
       END IF
 
 c---------------------------------------------------------------------
-      Qact(1) = Qdyn(mole%liste_QactTOQsym(1))
+      Qact(1) = Qdyn(mole%liste_QactTOQdyn(1))
 
       d0g(:)     = ZERO
       d1g(:,:)   = ZERO
@@ -281,8 +281,8 @@ c$OMP CRITICAL (d0d1d2_h_CRIT)
         DO i=1,mole%nb_inact2n
         DO j=i,mole%nb_inact2n
 
-          iv = mole%liste_QactTOQsym(mole%nb_act1+i)
-          jv = mole%liste_QactTOQsym(mole%nb_act1+j)
+          iv = mole%liste_QactTOQdyn(mole%nb_act1+i)
+          jv = mole%liste_QactTOQdyn(mole%nb_act1+j)
           IF (iv > jv) THEN
             nom=nom_ii('inter12h__',jv,iv)
           ELSE
@@ -312,7 +312,7 @@ c     END initialization
 c---------------------------------------------------------------------
 c---------------------------------------------------------------------
 
-      c_act = Qdyn(mole%liste_QactTOQsym(1))
+      c_act = Qdyn(mole%liste_QactTOQdyn(1))
  
       IF (deriv) THEN
         write(out_unit,*) 'ERROR in d0d1d2_h'
@@ -571,7 +571,7 @@ c---------------------------------------------------------------------
 c---------------------------------------------------------------------
 
 c---------------------------------------------------------------------
-       c_act = Qdyn(mole%liste_QactTOQsym(1))
+       c_act = Qdyn(mole%liste_QactTOQdyn(1))
 c---------------------------------------------------------------------
 
 

@@ -313,7 +313,7 @@ SUBROUTINE sub_ExactFact_analysis_gV(psi,para_H,Tmax,deltaT)
     IF (associated(para_H%para_Tnum%Gref)) THEN
       d0GG = para_H%para_Tnum%Gref(1:psi%nb_act1,1:psi%nb_act1)
     ELSE
-      CALL get_Qact0(Qact,para_H%mole%ActiveTransfo)
+      CALL get_Qact0(Qact,para_H%mole%tab_Qtransfo(para_H%mole%itActive)%ActiveTransfo)
       CALL get_d0GG(Qact,para_H%para_Tnum,para_H%mole,d0GG,def=.TRUE.)
     END IF
     write(nio,*) ' metric Tensor (nb_act1 x nb_act1)',psi%nb_act1
@@ -560,7 +560,7 @@ SUBROUTINE sub_ExactFact_analysis_v1(T,psi,ana_psi,para_H,Tmax,deltaT,para_field
     IF (associated(para_H%para_Tnum%Gref)) THEN
       d0GG = para_H%para_Tnum%Gref(1:psi%nb_act1,1:psi%nb_act1)
     ELSE
-      CALL get_Qact0(Qact,para_H%mole%ActiveTransfo)
+      CALL get_Qact0(Qact,para_H%mole%tab_Qtransfo(para_H%mole%itActive)%ActiveTransfo)
       CALL get_d0GG(Qact,para_H%para_Tnum,para_H%mole,d0GG,def=.TRUE.)
     END IF
     write(nio,*) ' metric Tensor (nb_act1 x nb_act1)',psi%nb_act1

@@ -32,9 +32,9 @@ c    R1 = R_CH
 c    R2 = R_CN
 c    R3 = R_HN
       IF (nb_be == 1 ) THEN
-         write(6,*) 'C',Qcart(1:3)
-         write(6,*) 'N',Qcart(4:6)
-         write(6,*) 'H',Qcart(7:9)
+        !write(6,*) 'C',Qcart(1:3)
+        !write(6,*) 'N',Qcart(4:6)
+        !write(6,*) 'H',Qcart(7:9)
         V1(:) = Qcart(7:9)-Qcart(1:3) !C-H
         V2(:) = Qcart(4:6)-Qcart(1:3) !C-N
         V3(:) = Qcart(7:9)-Qcart(4:6) !N-H
@@ -303,7 +303,7 @@ c---------------------------------------------------------------------
       END IF
 
 c---------------------------------------------------------------------
-      Qact(1) = Qdyn(mole%liste_QactTOQsym(1))
+      Qact(1) = Qdyn(mole%liste_QactTOQdyn(1))
 
       d0g(:)     = ZERO
       d1g(:,:)   = ZERO
@@ -382,8 +382,8 @@ c$OMP CRITICAL (d0d1d2_h_CRIT)
         DO i=1,mole%nb_inact2n
         DO j=i,mole%nb_inact2n
 
-          iv = mole%liste_QactTOQsym(mole%nb_act1+i)
-          jv = mole%liste_QactTOQsym(mole%nb_act1+j)
+          iv = mole%liste_QactTOQdyn(mole%nb_act1+i)
+          jv = mole%liste_QactTOQdyn(mole%nb_act1+j)
           IF (iv > jv) THEN
             nom=nom_ii('inter12h__',jv,iv)
           ELSE
@@ -413,7 +413,7 @@ c     END initialization
 c---------------------------------------------------------------------
 c---------------------------------------------------------------------
 
-      c_act = Qdyn(mole%liste_QactTOQsym(1))
+      c_act = Qdyn(mole%liste_QactTOQdyn(1))
  
       IF (deriv) THEN
         write(out_unit,*) 'ERROR in d0d1d2_h'
@@ -672,7 +672,7 @@ c---------------------------------------------------------------------
 c---------------------------------------------------------------------
 
 c---------------------------------------------------------------------
-       c_act = Qdyn(mole%liste_QactTOQsym(1))
+       c_act = Qdyn(mole%liste_QactTOQdyn(1))
 c---------------------------------------------------------------------
 
 

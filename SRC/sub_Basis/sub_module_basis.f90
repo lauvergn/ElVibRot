@@ -3864,13 +3864,13 @@ END SUBROUTINE pack_basis_old
   END IF
 
   DO j=1,BasisnD%ndim
-    j_act = mole%ActiveTransfo%list_QdynTOQact(BasisnD%iQdyn(j))
+    j_act = mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact(BasisnD%iQdyn(j))
     Qact(j_act) = x(j)
   END DO
 
   ! Adding the inactive coordinates must be done after setting Qact
   IF (size(Qact) > BasisnD%ndim .AND. size(Qact) == mole%nb_var) THEN
-    CALL Adding_InactiveCoord_TO_Qact(Qact,mole%ActiveTransfo)
+    CALL Adding_InactiveCoord_TO_Qact(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
   ELSE IF (size(Qact) > BasisnD%ndim .AND. size(Qact) /= mole%nb_var) THEN
     write(out_unit,*) 'ERROR in ',name_sub
     write(out_unit,*) 'size(Qact)   ',size(Qact)
@@ -3943,7 +3943,7 @@ END SUBROUTINE pack_basis_old
        ix = 0
        DO ib=1,size(tab_l)
          DO i=1,tab_ba(tab_l(ib),ib)%ndim
-           i_act = mole%ActiveTransfo%list_QdynTOQact(tab_ba(tab_l(ib),ib)%iQdyn(i))
+           i_act = mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact(tab_ba(tab_l(ib),ib)%iQdyn(i))
            ix = ix + 1
            Qact(i_act) = x(ix)
          END DO
@@ -3953,7 +3953,7 @@ END SUBROUTINE pack_basis_old
 
   ! Adding the inactive coordinates must be done after setting Qact
   IF (size(Qact) > ndim .AND. size(Qact) == mole%nb_var) THEN
-    CALL Adding_InactiveCoord_TO_Qact(Qact,mole%ActiveTransfo)
+    CALL Adding_InactiveCoord_TO_Qact(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
   ELSE IF (size(Qact) > ndim .AND. size(Qact) /= mole%nb_var) THEN
     write(out_unit,*) 'ERROR in ',name_sub
     write(out_unit,*) 'size(Qact)   ',size(Qact)
@@ -4015,7 +4015,7 @@ END SUBROUTINE pack_basis_old
     CALL Rec_x(x,tab_ba(tab_l(ib),ib),tab_iq(ib))
 
     DO i=1,tab_ba(tab_l(ib),ib)%ndim
-      i_act = mole%ActiveTransfo%list_QdynTOQact(tab_ba(tab_l(ib),ib)%iQdyn(i))
+      i_act = mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact(tab_ba(tab_l(ib),ib)%iQdyn(i))
       Qact(i_act) = x(i)
     END DO
 
@@ -4025,7 +4025,7 @@ END SUBROUTINE pack_basis_old
 
   ! Adding the inactive coordinates must be done after setting Qact
   IF (size(Qact) > ndim_tot .AND. size(Qact) == mole%nb_var) THEN
-    CALL Adding_InactiveCoord_TO_Qact(Qact,mole%ActiveTransfo)
+    CALL Adding_InactiveCoord_TO_Qact(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
   ELSE IF (size(Qact) > ndim .AND. size(Qact) /= mole%nb_var) THEN
     write(out_unit,*) 'ERROR in ',name_sub
     write(out_unit,*) 'size(Qact)       ',size(Qact)
@@ -4095,7 +4095,7 @@ END SUBROUTINE pack_basis_old
        ix = 0
        DO ib=1,size(tab_l)
          DO i=1,tab_ba(tab_l(ib),ib)%ndim
-           i_act = mole%ActiveTransfo%list_QdynTOQact(tab_ba(tab_l(ib),ib)%iQdyn(i))
+           i_act = mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact(tab_ba(tab_l(ib),ib)%iQdyn(i))
            ix = ix + 1
            Qact(i_act) = x(ix)
          END DO
@@ -4647,7 +4647,7 @@ END SUBROUTINE pack_basis_old
          IF (allocated(para_AllBasis%BasisnD%nrho)) THEN
            DO iQbasis=1,para_AllBasis%BasisnD%ndim
              iQdyn = para_AllBasis%BasisnD%iQdyn(iQbasis)
-             iQact = mole%ActiveTransfo%list_QdynTOQact(iQdyn)
+             iQact = mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact(iQdyn)
              nrho = para_AllBasis%BasisnD%nrho(iQbasis)
              mole%nrho_OF_Qdyn(iQdyn) = nrho
              mole%nrho_OF_Qact(iQact) = nrho
@@ -4658,7 +4658,7 @@ END SUBROUTINE pack_basis_old
          IF (allocated(para_AllBasis%Basis2n%nrho)) THEN
            DO iQbasis=1,para_AllBasis%Basis2n%ndim
              iQdyn = para_AllBasis%Basis2n%iQdyn(iQbasis)
-             iQact = mole%ActiveTransfo%list_QdynTOQact(iQdyn)
+             iQact = mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact(iQdyn)
              nrho = para_AllBasis%Basis2n%nrho(iQbasis)
              mole%nrho_OF_Qdyn(iQdyn) = nrho
              mole%nrho_OF_Qact(iQact) = nrho

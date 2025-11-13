@@ -127,7 +127,7 @@
 
         iQ = mole%nb_act1 + i
         Basis2n%tab_Pbasis(i)%Pbasis%iQdyn(1) =                         &
-                                  mole%ActiveTransfo%list_QactTOQdyn(iQ)
+            mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QactTOQdyn(iQ)
         CALL alloc_NParray(Basis2n%tab_Pbasis(i)%Pbasis%Tabder_Qdyn_TO_Qbasis, &
              [mole%nb_var],"...%Tabder_Qdyn_TO_Qbasis",name_sub,[0])
         Basis2n%tab_Pbasis(i)%Pbasis%Tabder_Qdyn_TO_Qbasis(:) = 0

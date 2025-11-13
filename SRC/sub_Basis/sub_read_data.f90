@@ -51,18 +51,26 @@
 !
 !       type_basis_set,n_contrac,A,B ...
 !================================================================
+MODULE ReadBasis_m
+  IMPLICIT NONE
+
+  PRIVATE
+  PUBLIC :: read_basis5
+CONTAINS
+
       SUBROUTINE read_basis5(BasisnD,mole)
       USE EVR_system_m
       USE mod_basis
-      use mod_Coord_KEO, only: CoordType
+      use mod_Coord_KEO, only: CoordType, Type_ActiveTransfo
       IMPLICIT NONE
 
       !----- for the active basis set ------------------------------------
       TYPE (basis)               :: BasisnD
 
       !-- for Tnum and mole ----------------------------------------------
-      TYPE (CoordType), intent(in) :: mole
+      TYPE (CoordType), intent(in), target :: mole
 
+      TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo ! true pointer
 
       integer       :: i,i0,i1,nb_act1_test,i_Qdyn,i_Qbasis
       integer       :: liste_var_basis(mole%nb_var)
@@ -81,6 +89,8 @@
         write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
+      ActiveTransfo => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo
+
       CALL alloc_array(BasisnD_loc%tab_Pbasis,[mole%nb_act1+1],     &
                       'BasisnD_loc%tab_Pbasis',name_sub)
       DO i=1,size(BasisnD_loc%tab_Pbasis)
@@ -157,12 +167,12 @@
 
       check_ba = .TRUE.
       DO i=1,mole%nb_var
-        IF (mole%ActiveTransfo%list_act_OF_Qdyn(i) == 1 .AND.           &
+        IF (ActiveTransfo%list_act_OF_Qdyn(i) == 1 .AND.           &
                                            liste_var_basis(i) /= 1) THEN
           check_ba = .FALSE.
           write(out_unit,*) ' ERROR in ',name_sub
           write(out_unit,*) ' NO basis set for the ACTIVE coordinate',i
-          write(out_unit,*) '   list_act_OF_Qdyn',mole%ActiveTransfo%list_act_OF_Qdyn(:)
+          write(out_unit,*) '   list_act_OF_Qdyn',ActiveTransfo%list_act_OF_Qdyn(:)
           write(out_unit,*) '   liste_var_basis',liste_var_basis
           write(out_unit,*) ' CHECK your DATA'
         END IF
@@ -339,12 +349,16 @@
       SUBROUTINE read5_basis_nD(basis_temp,mole)
       USE EVR_system_m
       use mod_Constant
-      use mod_Coord_KEO, only: CoordType
+      use mod_Coord_KEO, only: CoordType, Type_ActiveTransfo
       USE mod_basis
       IMPLICIT NONE
 
-      TYPE (basis),     intent(inout)  :: basis_temp
-      TYPE (CoordType), intent(inout)  :: mole
+      TYPE (basis),     intent(inout)         :: basis_temp
+      TYPE (CoordType), intent(inout), target :: mole
+
+      TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo ! true pointer
+      TYPE (Type_NMTransfo),    pointer :: NMTransfo ! true pointer
+
 
 !----- for the active basis set ---------------------------------------
       integer              :: nb,nq,nq_extra,nbc,nqc
@@ -437,6 +451,12 @@
         write(out_unit,*) 'BEGINNING ',name_sub
       END IF
 !---------------------------------------------------------------------
+      ActiveTransfo => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo
+      IF (mole%itNM > 0) THEN
+        NMTransfo => mole%tab_Qtransfo(mole%itNM)%NMTransfo
+      ELSE
+        nullify(NMTransfo)
+      END IF
 
 !---------------------------------------------------------------------
 !------- read the namelist --------------------------------------
@@ -570,7 +590,7 @@
       IF (ndim == 0) THEN
         ndim = count(iQdyn(:) > 0)
         DO i=1,ndim
-          iQact(i) = mole%ActiveTransfo%list_QdynTOQact(iQdyn(i))
+          iQact(i) = ActiveTransfo%list_QdynTOQact(iQdyn(i))
         END DO
       END IF
       ! Here only iQact(:) is set-up
@@ -692,7 +712,8 @@
         write(out_unit,*) '  Check your data'
         STOP
       ELSE IF (count(Li_SparseGrid < huge(1)) == 0) THEN
-        Li_SparseGrid(1:2) = [L1_SparseGrid,L2_SparseGrid]
+        Li_SparseGrid(1) = L1_SparseGrid
+        IF (size(Li_SparseGrid) > 1) Li_SparseGrid(2) = L2_SparseGrid
       END IF
 
       !write(out_unit,*) 'Li_SparseBasis',Li_SparseBasis
@@ -705,7 +726,8 @@
         write(out_unit,*) '  Check your data'
         STOP
       ELSE IF (count(Li_SparseBasis < huge(1)) == 0) THEN
-        Li_SparseBasis(1:2) = [L1_SparseBasis,L2_SparseBasis]
+        Li_SparseBasis(1) = L1_SparseBasis
+        IF (size(Li_SparseBasis) > 1) Li_SparseBasis(2) = L2_SparseBasis
       END IF
 
       IF (count(Li_SparseBasis < huge(1)) /= count(Li_SparseGrid < huge(1))) THEN
@@ -724,11 +746,10 @@
       nbLi = count(Li_SparseGrid < huge(1))
       basis_temp%para_SGType2%Li_SparseGrid  = Li_SparseGrid(1:nbLi)
 
-      !write(out_unit,*) 'Li_SparseBasis',Li_SparseBasis
-      !write(out_unit,*) 'Li_SparseGrid ',Li_SparseGrid
-      write(out_unit,*) 'para_SGType2%Li_SparseBasis',basis_temp%para_SGType2%Li_SparseBasis
-      write(out_unit,*) 'para_SGType2%Li_SparseGrid ',basis_temp%para_SGType2%Li_SparseGrid
-
+      IF (debug) THEN
+        write(out_unit,*) 'para_SGType2%Li_SparseBasis',basis_temp%para_SGType2%Li_SparseBasis
+        write(out_unit,*) 'para_SGType2%Li_SparseGrid ',basis_temp%para_SGType2%Li_SparseGrid
+      END IF
       !IF (Num_OF_Lmax < 0 .OR. Num_OF_Lmax > 2) Num_OF_Lmax = 0 ! the condition (Num_OF_Lmax > 2) is not possible anymore
       IF (Num_OF_Lmax < 0) Num_OF_Lmax = 0
       basis_temp%para_SGType2%Num_OF_Lmax    = Num_OF_Lmax
@@ -867,7 +888,7 @@
         basis_temp%nDindB%packed          = basis_temp%packed .OR. (Type_OF_nDindB == 0)
         ! now basis_temp%iQdyn(:)
         DO i=1,ndim
-          basis_temp%iQdyn(i) = mole%ActiveTransfo%list_QactTOQdyn(iQact(i))
+          basis_temp%iQdyn(i) = ActiveTransfo%list_QactTOQdyn(iQact(i))
           IF (basis_temp%iQdyn(i) > mole%nb_var) THEN
             write(out_unit,*) ' ERROR in ',name_sub
             write(out_unit,*) ' iQdyn(i) is larger than nb_var',               &
@@ -941,12 +962,12 @@
         END DO
 
         basis_temp%auto_basis = (auto_basis .AND. ndim == 1)
-        IF (auto_basis .AND. ndim == 1 .AND. associated(mole%NMTransfo)) THEN
+        IF (auto_basis .AND. ndim == 1 .AND. mole%itNM > 0) THEN
           IF (.NOT. mole%tab_Qtransfo(mole%itNM)%skip_transfo) THEN
-          IF (associated(mole%NMTransfo%Q0_HObasis) .AND. associated(mole%NMTransfo%scaleQ_HObasis)) THEN
+          IF (allocated(NMTransfo%Q0_HObasis) .AND. allocated(NMTransfo%scaleQ_HObasis)) THEN
 
-            basis_temp%Q0(1)     = mole%NMTransfo%Q0_HObasis(basis_temp%iQdyn(1))
-            basis_temp%scaleQ(1) = mole%NMTransfo%scaleQ_HObasis(basis_temp%iQdyn(1))
+            basis_temp%Q0(1)     = NMTransfo%Q0_HObasis(basis_temp%iQdyn(1))
+            basis_temp%scaleQ(1) = NMTransfo%scaleQ_HObasis(basis_temp%iQdyn(1))
             write(out_unit,*) 'Q0,scaleQ (from auto_basis): ',basis_temp%Q0,basis_temp%scaleQ
             basis_temp%auto_basis = .FALSE.
           ELSE
@@ -959,9 +980,9 @@
             !STOP
           END IF
           END IF
-        ELSE IF (auto_basis .AND. ndim == 1 .AND. .NOT. associated(mole%NMTransfo)) THEN
+        ELSE IF (auto_basis .AND. ndim == 1 .AND. .NOT. mole%itNM > 0) THEN
           write(out_unit,*) ' WARNING in ',name_sub
-          write(out_unit,*) '  auto_basis=t and mole%NMTransfo is not associated'
+          write(out_unit,*) '  auto_basis=t and NMTransfo is not defined'
           write(out_unit,*) ' CHECK your data'
           !write(out_unit,basis_nD)
           !STOP
@@ -996,47 +1017,4 @@
       flush(out_unit)
 !---------------------------------------------------------------------
       end subroutine read5_basis_nD
-!================================================================
-!       analysis of a string
-!       output : nb_word,word (the i th word of name)
-!================================================================
-      SUBROUTINE analysis_name(name,word,i,nb_word)
-      USE EVR_system_m
-      IMPLICIT NONE
-
-
-!     - analysis of the basis name --------------------------
-      character (len=*)  :: word,name
-      character          :: ch
-      integer            :: i,nb_word
-      integer            :: iw,ic,icw
-      logical            :: blank
-
-
-      iw = 0
-      icw = 0
-      blank = .TRUE.
-!     write(out_unit,*) 'analysis_name: ',name,len(name)
-      DO ic=1,len(name)
-        ch = name(ic:ic)
-        IF (ch .EQ. " ") THEN
-          IF (.NOT. blank) THEN
-            iw = iw + 1
-            blank = .TRUE.
-          END IF
-        ELSE
-          IF (iw .EQ. i-1) THEN
-            icw = icw + 1
-            word(icw:icw) = ch
-          END IF
-          blank = .FALSE.
-        END IF
-!       write(out_unit,*) 'analysis_name: ',ic,ch,blank,iw
-      END DO
-
-      nb_word = iw
-!     write(out_unit,*) 'analysis_name: ',name,':',nb_word
-!     write(out_unit,*) 'analysis_name: ',i,word
-
-
-      end subroutine analysis_name
+END MODULE ReadBasis_m

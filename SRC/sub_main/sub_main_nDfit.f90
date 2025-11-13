@@ -225,7 +225,7 @@ SUBROUTINE sub_nDGrid_nDfit()
 
 
       CALL alloc_NParray(Qact0,[mole%nb_var],'Qact0',name_sub)
-      CALL get_Qact0(Qact0,mole%ActiveTransfo)
+      CALL get_Qact0(Qact0,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
 
 !=====================================================================
         name_Grid = "Grid_FOR_Fit"
@@ -530,7 +530,7 @@ SUBROUTINE sub_nDGrid_nDfit()
         write(out_unit,*) "======================================"
         write(out_unit,*) "======================================"
         iGPtot = 0
-        CALL get_Qact0(Qact,mole%ActiveTransfo)
+        CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
         DO iGP=1,para_nDGrid%nDindG%Max_nDI
           nb_couplings=count(para_nDGrid%nDindG%Tab_nDval(:,iGP) > 0)
           IF (nb_couplings < MinCoupling) CYCLE
@@ -1341,7 +1341,7 @@ END FUNCTION ValGridPoint
         write(out_unit,*) "======================================"
         write(out_unit,*) "======================================"
         iGPtot = 0
-        CALL get_Qact0(Qact,mole%ActiveTransfo)
+        CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
         DO iGP=1,para_nDGrid%nDindG%Max_nDI
           nb_couplings=count(para_nDGrid%nDindG%Tab_nDval(:,iGP) > 0)
           IF (nb_couplings < MinCoupling) CYCLE
@@ -1468,7 +1468,7 @@ END FUNCTION ValGridPoint
 !-----------------------------------------------------------
        auTOenergy = get_Conv_au_TO_unit('E',' ',WorkingUnit=.FALSE.)
 
-       CALL get_Qact0(Qact,mole%ActiveTransfo)
+       CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
 
 
        CALL alloc_NParray(para_nDGrid%Q0,[mole%nb_act],                 &

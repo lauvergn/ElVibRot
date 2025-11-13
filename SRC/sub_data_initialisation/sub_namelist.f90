@@ -62,16 +62,20 @@
       USE EVR_system_m
       USE mod_nDindex
       USE mod_Constant,  only: REAL_WU, convRWU_TO_R_WITH_WorkingUnit
-      use mod_Coord_KEO, only: CoordType, alloc_array, dealloc_array,   &
+      use mod_Coord_KEO, only: CoordType, Type_RPHTransfo, Type_ActiveTransfo, &
+                               alloc_NParray, dealloc_NParray,   &
                                set_rphtransfo, Tnum, Init_degenerate_freq
       USE mod_basis
       USE mod_Op
       IMPLICIT NONE
 
 !----- for the basis set ----------------------------------------------
-      TYPE (param_AllBasis), intent(inout) :: para_AllBasis
-      TYPE (CoordType),      intent(inout) :: mole
-      logical,               intent(in)    :: QMLib_in
+      TYPE (param_AllBasis), intent(inout)         :: para_AllBasis
+      TYPE (CoordType),      intent(inout), target :: mole
+      logical,               intent(in)            :: QMLib_in
+
+      TYPE (Type_RPHTransfo),   pointer  :: RPHTransfo => null() ! it'll point on tab_Qtransfo
+      TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo ! true pointer
 
 !-----------------------------------------------------------
 
@@ -115,15 +119,22 @@
       logical, parameter :: debug=.FALSE.
       character (len=*), parameter :: name_sub='read_inactive'
 !      -----------------------------------------------------------------
+      ActiveTransfo => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo
+      IF (mole%itRPH > 0) THEN
+        RPHTransfo => mole%tab_Qtransfo(mole%itRPH)%RPHTransfo
+      ELSE
+        nullify(RPHTransfo)
+      END IF
+
       write(out_unit,*) 'INACTIVES PARAMETERS'
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING ',name_sub
         write(out_unit,*) 'QMLib_in',QMLib_in
       END IF
 
-      ! get nb_inact21 from mole%nb_inact2n or mole%RPHTransfo%nb_inact21
-      IF (associated(mole%RPHTransfo)) THEN
-        nb_inact21 = mole%RPHTransfo%nb_inact21
+      ! get nb_inact21 from mole%nb_inact2n or RPHTransfo%nb_inact21
+      IF (mole%itRPH > 0) THEN
+        nb_inact21 = RPHTransfo%nb_inact21
       ELSE
         nb_inact21 = mole%nb_inact2n
       END IF
@@ -177,7 +188,7 @@
       END IF
 
 
-      IF (.NOT. associated(mole%RPHTransfo)) THEN
+      IF (.NOT. mole%itRPH > 0) THEN
 
         max_ene_h_val = convRWU_TO_R_WITH_WorkingUnit(max_ene_h)
 
@@ -258,38 +269,38 @@
         END IF
       END IF
 
-      IF (nb_inact21 > 0 .AND. .NOT. associated(mole%RPHTransfo)) THEN
+      IF (nb_inact21 > 0 .AND. .NOT. mole%itRPH > 0) THEN
         ! here it is for the HADA/cHAC models (not RPH)
-        IF (associated(mole%RPHTransfo_inact2n)) THEN
-          CALL dealloc_array(mole%RPHTransfo_inact2n,                   &
-                            'mole%RPHTransfo_inact2n',name_sub)
+        IF (allocated(mole%RPHTransfo_inact2n)) THEN
+          CALL dealloc_NParray(mole%RPHTransfo_inact2n,                   &
+                              'mole%RPHTransfo_inact2n',name_sub)
         END IF
 
-        CALL alloc_array(mole%RPHTransfo_inact2n,                       &
-                        'mole%RPHTransfo_inact2n',name_sub)
+        CALL alloc_NParray(mole%RPHTransfo_inact2n,                       &
+                          'mole%RPHTransfo_inact2n',name_sub)
 
         CALL Set_RPHTransfo(mole%RPHTransfo_inact2n,                    &
-                            mole%ActiveTransfo%list_act_OF_Qdyn,        &
+                            ActiveTransfo%list_act_OF_Qdyn,        &
                             gradTOpot0,diabatic_freq,step,              &
                             H0_sym,H0_sym,Qinact2n_sym(1:nb_inact21),   &
                             Qinact2n_eq(1:nb_inact21,1:nb_inact21),     &
-                            QMLib=QMLib,list_QMLMapping=mole%ActiveTransfo%list_QMLMapping)
+                            QMLib=QMLib,list_QMLMapping=ActiveTransfo%list_QMLMapping)
 
         CALL Init_degenerate_freq(mole%RPHTransfo_inact2n%degenerate_freq,nb_inact21)
 
-      ELSE IF (nb_inact21 > 0 .AND. associated(mole%RPHTransfo)) THEN
+      ELSE IF (nb_inact21 > 0 .AND. mole%itRPH > 0) THEN
         STOP 'In read_inactive: this option is not used anymore ?'
 
-        IF (mole%RPHTransfo%option == 0) THEN
+        IF (RPHTransfo%option == 0) THEN
           ! here we do not set up the list_act_OF_Qdyn because it is already
           !     done in type_var_analysis
 
-          CALL Set_RPHTransfo(mole%RPHTransfo,                          &
+          CALL Set_RPHTransfo(RPHTransfo,                          &
             gradTOpot0=gradTOpot0,diabatic_freq=diabatic_freq,step=step,&
                                     purify_hess=H0_sym,eq_hess=H0_sym,  &
                               Qinact2n_sym=Qinact2n_sym(1:nb_inact21),  &
                      Qinact2n_eq=Qinact2n_eq(1:nb_inact21,1:nb_inact21),&
-                     QMLib=QMLib,list_QMLMapping=mole%ActiveTransfo%list_QMLMapping)
+                     QMLib=QMLib,list_QMLMapping=ActiveTransfo%list_QMLMapping)
         END IF
       END IF
 

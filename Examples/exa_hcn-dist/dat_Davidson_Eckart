@@ -18,13 +18,14 @@ cd $here
 
 
 nice $DIR_vib/vib << ** >res
- &system PGrid_omp=1 Write_QMotions=f /
+ &system PGrid_omp=1 /
  &constantes /
  &variables 
          zmat=T
          nat=4
          sym=T
          nrho=2
+         Write_QMotions=f
          Cart_Transfo=t
  /
 C

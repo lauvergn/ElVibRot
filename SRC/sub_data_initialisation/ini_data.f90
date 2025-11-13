@@ -70,13 +70,14 @@
       use EVR_system_m
       USE mod_dnSVM,     only : Type_dnMat
       USE mod_Constant,  only : constant, sub_constantes, REAL_WU
-      USE mod_Coord_KEO, only : CoordType, Tnum, get_Qact0, read_RefGeom
+      USE mod_Coord_KEO, only : CoordType, Tnum, get_Qact0, read_RefGeom, Type_ActiveTransfo
       USE mod_PrimOp,    only : write_typeop, param_typeop,init_typeop, &
                                 Finalize_tnumtana_coord_primop,         &
                                 derive_termqact_to_derive_termqdyn,     &
                                 param_otf, PrimOp_t, write_PrimOp
       USE mod_CAP,       only : Read_CAP
       USE mod_basis
+      USE ReadBasis_m
       USE mod_Set_paraRPH
       USE ReadOp_m
       USE mod_Op
@@ -89,8 +90,10 @@
       TYPE (constant)        :: const_phys
 
 !----- for the CoordType and Tnum --------------------------------------
-      TYPE (CoordType) :: mole
-      TYPE (Tnum)      :: para_Tnum
+      TYPE (CoordType), target :: mole
+      TYPE (Tnum)              :: para_Tnum
+
+      TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo ! true pointer
 
 !----- variables for the active and inactive namelists ----------------
 
@@ -159,12 +162,13 @@
       CALL read_RefGeom(mole,para_Tnum)
 !---------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-!--------------------- TO finalize the coordinates (NM) and the KEO ----
-!     If needed, Tana must be done after auto_basis, otherwise nrho(:) could be wrong
+      !-----------------------------------------------------------------------
+      !--------------------- TO finalize the coordinates (NM) and the KEO ----
+      !     If needed, Tana must be done after auto_basis, otherwise nrho(:) could be wrong
       CALL Finalize_TnumTana_Coord_PrimOp(para_Tnum,mole,para_ReadOp%PrimOp_t,  &
                                           Tana=.FALSE.,KEO_only=.FALSE.)
-!-----------------------------------------------------------------------
+      !-----------------------------------------------------------------------
+      ActiveTransfo => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo
 
       IF(MPI_id==0) THEN
         write(out_unit,*) "============================================================"
@@ -270,7 +274,7 @@
       !---------------------------------------------------------------------
       !------- read the parameter to analyze wave functions ----------------
       CALL alloc_NParray(Qana,[mole%nb_var],"Qana",name_sub)
-      CALL get_Qact0(Qana,mole%ActiveTransfo)
+      CALL get_Qact0(Qana,ActiveTransfo)
 
       CALL read_analyse(para_ana,Qana,mole)
 
@@ -461,7 +465,7 @@
 
       IF (para_Tnum%Tana) THEN
         CALL alloc_NParray(Qact,[mole%nb_var],"Qact",name_sub)
-        CALL get_Qact0(Qact,mole%ActiveTransfo)
+        CALL get_Qact0(Qact,ActiveTransfo)
         CALL nrho_Basis_TO_nhro_Tnum(para_AllBasis,mole)
         CALL compute_analytical_KEO(para_Tnum%TWOxKEO,mole,para_Tnum,Qact)
         CALL comparison_G_FROM_Tnum_Tana(para_Tnum%ExpandTWOxKEO,mole,para_Tnum,Qact)
@@ -583,7 +587,7 @@
       CALL derive_termQact_TO_derive_termQdyn(                          &
                               para_AllOp%tab_Op(iOp)%derive_termQdyn,   &
                               para_AllOp%tab_Op(iOp)%derive_termQact,   &
-                              mole%ActiveTransfo%list_QactTOQdyn)
+                              ActiveTransfo%list_QactTOQdyn)
       para_AllOp%tab_Op(iOp)%symab    = 0 ! totally symmetric
       para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
       nb_Op = iOp
@@ -602,7 +606,7 @@
         CALL derive_termQact_TO_derive_termQdyn(                        &
                               para_AllOp%tab_Op(iOp)%derive_termQdyn,   &
                               para_AllOp%tab_Op(iOp)%derive_termQact,   &
-                              mole%ActiveTransfo%list_QactTOQdyn)
+                              ActiveTransfo%list_QactTOQdyn)
 
         para_AllOp%tab_Op(iOp)%symab    = -1  ! the symmetry is not used
         para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
@@ -623,7 +627,7 @@
         CALL derive_termQact_TO_derive_termQdyn(                        &
                               para_AllOp%tab_Op(iOp)%derive_termQdyn,   &
                               para_AllOp%tab_Op(iOp)%derive_termQact,   &
-                              mole%ActiveTransfo%list_QactTOQdyn)
+                              ActiveTransfo%list_QactTOQdyn)
 
         para_AllOp%tab_Op(iOp)%symab    = -1  ! the symmetry is not used
         para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
@@ -646,7 +650,7 @@
         CALL derive_termQact_TO_derive_termQdyn(                        &
                               para_AllOp%tab_Op(iOp)%derive_termQdyn,   &
                               para_AllOp%tab_Op(iOp)%derive_termQact,   &
-                              mole%ActiveTransfo%list_QactTOQdyn)
+                              ActiveTransfo%list_QactTOQdyn)
 
         para_AllOp%tab_Op(iOp)%symab    = -1  ! the symmetry is not used
         para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
@@ -670,7 +674,7 @@
           CALL derive_termQact_TO_derive_termQdyn(                        &
                                 para_AllOp%tab_Op(iOp)%derive_termQdyn,   &
                                 para_AllOp%tab_Op(iOp)%derive_termQact,   &
-                                mole%ActiveTransfo%list_QactTOQdyn)
+                                ActiveTransfo%list_QactTOQdyn)
 
           para_AllOp%tab_Op(iOp)%symab    = -1  ! the symmetry is not used
           para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
@@ -688,7 +692,7 @@
           CALL derive_termQact_TO_derive_termQdyn(                        &
                                 para_AllOp%tab_Op(iOp)%derive_termQdyn,   &
                                 para_AllOp%tab_Op(iOp)%derive_termQact,   &
-                                mole%ActiveTransfo%list_QactTOQdyn)
+                                ActiveTransfo%list_QactTOQdyn)
 
           para_AllOp%tab_Op(iOp)%symab    = -1  ! the symmetry is not used
           para_AllOp%tab_Op(iOp)%spectral = para_ana%Spectral_ScalOp
@@ -748,7 +752,7 @@
         write(out_unit,*)
       ENDIF
 
-      IF (associated(mole%RPHTransfo)) THEN
+      IF (mole%itRPH > 0) THEN
         CALL Set_paraPRH(mole,para_Tnum,para_AllBasis%BasisnD)
       END IF
 

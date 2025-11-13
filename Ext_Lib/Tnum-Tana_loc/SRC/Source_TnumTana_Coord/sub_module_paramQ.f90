@@ -145,11 +145,11 @@ CONTAINS
 
     write(out_unit,*) 'BEGINNING ',name_sub
 
-    IF (.NOT. associated(mole%tab_Qtransfo(mole%nb_Qtransfo)%name_Qout))  THEN
+    IF (.NOT. allocated(mole%tab_Qtransfo(mole%nb_Qtransfo)%name_Qout))  THEN
       write(out_unit,*) ' ERROR in ',name_sub
-      write(out_unit,*) ' mole%tab_Qtransfo(mole%nb_Qtransfo)%name_Qout is not associated in mole!!'
+      write(out_unit,*) ' mole%tab_Qtransfo(mole%nb_Qtransfo)%name_Qout is not allocated in mole!!'
       write(out_unit,*) ' Check the source !'
-      STOP 'ERROR in read_RefGeom. Fortran error: mole%tab_Qtransfo(mole%nb_Qtransfo)%name_Qout is not associated'
+      STOP 'ERROR in read_RefGeom. Fortran error: mole%tab_Qtransfo(mole%nb_Qtransfo)%name_Qout is not allocated'
     END IF
 
     IF (print_level > 1) THEN
@@ -176,7 +176,7 @@ CONTAINS
     pot_act              = .FALSE.
     pot_cart             = .FALSE.
     pot_itQtransfo       = -1
-    IF (associated(mole%RPHTransfo)) THEN
+    IF (mole%itRPH > 0) THEN
       HarD               = .FALSE.
     ELSE
       HarD               = .TRUE.
@@ -227,7 +227,7 @@ CONTAINS
     mole%opt_Qdyn(:) = 0
     IF (opt) THEN
        DO i=1,mole%nb_var
-        IF (mole%ActiveTransfo%list_act_OF_Qdyn(i) == 1) THEN
+        IF (mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_act_OF_Qdyn(i) == 1) THEN
           mole%opt_Qdyn(i) = 1
         END IF
       END DO
@@ -450,7 +450,7 @@ CONTAINS
       ! ----------------------------------------------
 
       CALL sub_QinRead_TO_Qact(Qread,Qact,mole,read_itQtransfo_OF_Qin0)
-      CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn,mole%ActiveTransfo)
+      CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
 
  111  format(a,1x,f15.6)
       IF(MPI_id==0) write(out_unit,*) 'Qdyn0 coordinates (not transformed): [bohr]/[rad or cos(angle)]'
@@ -545,7 +545,7 @@ CONTAINS
 
             ELSE
 
-              IF (.NOT. associated(mole%tab_Cart_transfo(1)%CartesianTransfo%Qxyz)) THEN
+              IF (.NOT. allocated(mole%tab_Cart_transfo(1)%CartesianTransfo%Qxyz)) THEN
                 STOP 'CartesianTransfo%Qxyz NOT allocated'
               END IF
               CALL sub_QactTOdnx(Qact,dnx,mole,0,Gcenter=.FALSE.,Cart_Transfo=.FALSE.)
@@ -954,7 +954,7 @@ CONTAINS
 !     -----------------------------------------------------------------
 
       IF (.NOT. mole%Cart_transfo) RETURN
-      IF (.NOT. associated(mole%tab_Cart_transfo)) RETURN
+      IF (.NOT. allocated(mole%tab_Cart_transfo)) RETURN
 
 
       VT(:) = ZERO
@@ -1490,14 +1490,14 @@ CONTAINS
 
     CALL alloc_dnSVM(dnx,mole%ncart,mole%nb_act,nderiv=1)
 
-    Qact = mole%ActiveTransfo%Qact0
+    Qact = mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%Qact0
     CALL sub_QactTOdnx(Qact,dnx,mole,nderiv=1,Gcenter=.TRUE.)
 
 
     file_freq%name='freq.xyz'
     CALL file_open(file_freq,niofreq)
     ! loop on all the coordinates (active order)
-    IF (debug) write(out_unit,*) 0,'Qact0',mole%ActiveTransfo%Qact0
+    IF (debug) write(out_unit,*) 0,'Qact0',mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%Qact0
 
     DO iQ=1,mole%nb_act
       IF (debug) write(out_unit,*) iQ,'Qact',Qact(:)
@@ -1531,133 +1531,6 @@ CONTAINS
     END IF
     !-----------------------------------------------------------------
   END SUBROUTINE sub_QplusDQ_TO_Cart
-  SUBROUTINE sub_QplusDQ_TO_Cart_old(Qact,mole)
-    USE TnumTana_system_m
-    USE mod_dnSVM
-    USE mod_Tnum
-    IMPLICIT NONE
-
-    TYPE (CoordType) :: mole
-    real (kind=Rkind), intent(inout) :: Qact(:)
-    TYPE (Type_dnVec) :: dnx0
-    TYPE (Type_dnVec) :: dnx
-
-    real (kind=Rkind) :: a0,Norm
-    integer           :: Z_act(mole%nat)
-
-    integer           :: i,iZ,iQ,niofreq
-    TYPE (File_t) :: file_freq
-
-
-    !-----------------------------------------------------------------
-    integer :: nderiv_debug = 0
-    logical, parameter :: debug = .FALSE.
-    !logical, parameter :: debug = .TRUE.
-    character (len=*), parameter :: name_sub='sub_QplusDQ_TO_Cart_old'
-    !-----------------------------------------------------------------
-    !-----------------------------------------------------------------
-    IF (debug) THEN
-      write(out_unit,*)
-      write(out_unit,*) 'BEGINNING ',name_sub
-    END IF
-    !-----------------------------------------------------------------
-
-    !-----------------------------------------------------------------
-    ! Some initializations
-    !-----------------------------------------------------------------
-    Z_act(:) = -1
-    iZ = 0
-    DO i=1,mole%nat
-      IF (mole%Z(i) > 0) THEN
-        iZ = iZ + 1
-        Z_act(iZ) = mole%Z(i)
-      END IF
-    END DO
-    a0 = get_Conv_au_TO_unit("L","Angs")
-    !-----------------------------------------------------------------
-    !-----------------------------------------------------------------
-
-    CALL alloc_dnSVM(dnx0,mole%ncart,mole%nb_act,0)
-    CALL alloc_dnSVM(dnx,mole%ncart,mole%nb_act,0)
-
-    Qact = mole%ActiveTransfo%Qact0
-    CALL sub_QactTOdnx(Qact,dnx0,mole,0,Gcenter=.TRUE.)
-
-    write(out_unit,*) '=============================================='
-    write(out_unit,*) '= XYZ format (reference geometry) ============'
-    write(out_unit,*) mole%nat_act
-    write(out_unit,*)
-
-    iZ = 0
-    DO i=1,mole%ncart_act,3
-      iZ = iZ + 1
-      write(out_unit,112) Z_act(iZ),dnx0%d0(i:i+2)*a0
- 112  format(2x,i5,3(2x,f12.5))
-    END DO
-
-    write(out_unit,*) '= END XYZ format ============================='
-    write(out_unit,*) '=============================================='
-
-    file_freq%name='freq.xyz'
-    CALL file_open(file_freq,niofreq)
-    ! loop on all the coordinates (active order)
-    IF (debug) write(out_unit,*) 0,'Qact0',mole%ActiveTransfo%Qact0
-
-    DO iQ=1,mole%nb_var
-      ! for valence angle (or u) close to 0 or pi (1 or -1), the step could be too large.
-      ! There we are going to test the coordinate type (3 or -3)
-      Qact = mole%ActiveTransfo%Qact0
-      IF (debug) write(out_unit,*) 'in ',name_sub,':',iQ,mole%tab_Qtransfo(mole%nb_QTransfo)%type_Qin(iQ),Qact(iQ)
-      SELECT CASE(mole%tab_Qtransfo(mole%nb_QTransfo)%type_Qin(iQ))
-      CASE (-3)
-        IF (Qact(iQ) < ZERO) THEN
-          Qact(iQ) = Qact(iQ) + ONETENTH
-        ELSE
-          Qact(iQ) = Qact(iQ) - ONETENTH
-        END IF
-      CASE(3)
-        IF (Qact(iQ) < PI/TWO) THEN
-          Qact(iQ) = Qact(iQ) + ONETENTH
-        ELSE
-          Qact(iQ) = Qact(iQ) - ONETENTH
-        END IF
-      CASE default
-        Qact(iQ) = Qact(iQ) + ONETENTH
-      END SELECT
-      IF (debug) write(out_unit,*) iQ,'Qact',Qact(:)
-      CALL sub_QactTOdnx(Qact,dnx,mole,0,Gcenter=.TRUE.)
-      IF (debug) write(out_unit,*) iQ,'d0x', dnx%d0
-
-      dnx%d0 = dnx%d0 - dnx0%d0 ! dxyz
-      IF (debug) write(out_unit,*) iQ,'Delta d0x', dnx%d0
-
-      Norm = sqrt(dot_product(dnx%d0,dnx%d0))
-      IF (debug) write(out_unit,*) iQ,'Norm of Delta d0x',Norm
-
-      IF (Norm > ONETENTH**4) dnx%d0 = dnx%d0/Norm
-      IF (debug) write(out_unit,*) iQ,'Delta d0x (renorm)', dnx%d0
-
-      write(niofreq,*) mole%nat_act
-      write(niofreq,*) '  Coord: ',iQ
-
-      iZ = 0
-      DO i=1,mole%ncart_act,3
-        iZ = iZ + 1
-        write(niofreq,113) Z_act(iZ),dnx0%d0(i:i+2)*a0,0,dnx%d0(i:i+2)*a0
- 113    format(2x,i5,3(2x,f12.5),i5,3(2x,f12.5))
-      END DO
-    END DO
-    CALL file_close(file_freq)
-
-    Qact = mole%ActiveTransfo%Qact0
-
-    !-----------------------------------------------------------------
-    IF (debug) THEN
-      write(out_unit,*)
-      write(out_unit,*) 'END ',name_sub
-    END IF
-    !-----------------------------------------------------------------
-  END SUBROUTINE sub_QplusDQ_TO_Cart_old
   !================================================================
   !       conversion d0Q (zmat,poly, bunch ...) => d0x (mass weighted)
   ! This subroutine is called to get the metric tensor.
@@ -2043,9 +1916,9 @@ CONTAINS
         END IF
         ibeta = dnx%nb_var_vec-3
       END IF
-      IF (debug) write(6,*) 'coucou euler',euler
-      IF (debug) write(6,*) 'coucou ibeta',ibeta
-      IF (debug) write(6,*) 'coucou type_Qout(ibeta)',mole%tab_Qtransfo(1)%type_Qout(ibeta)
+      IF (debug) write(6,*) 'euler',euler
+      IF (debug) write(6,*) 'ibeta',ibeta
+      IF (debug) write(6,*) 'type_Qout(ibeta)',mole%tab_Qtransfo(1)%type_Qout(ibeta)
       CALL dnxBF_TO_dnxSF(dnCart_OF_dnSt,dnAlpha,dnTBeta,dnGamma,mole%tab_Qtransfo(1)%type_Qout(ibeta),euler)
 
       ix = 0
@@ -2078,9 +1951,9 @@ CONTAINS
       END DO
 
       allocate(dnCOM_OF_dnSt(3))
-      CALL sub_dnVec_TO_dnSt(dnX,dnCOM_OF_dnSt(3),dnx%nb_var_vec-0)
-      CALL sub_dnVec_TO_dnSt(dnX,dnCOM_OF_dnSt(2),dnx%nb_var_vec-1)
-      CALL sub_dnVec_TO_dnSt(dnX,dnCOM_OF_dnSt(1),dnx%nb_var_vec-2)
+      CALL sub_dnVec_TO_dnSt(dnX,dnCOM_OF_dnSt(3),dnx%nb_var_vec-0)  !z
+      CALL sub_dnVec_TO_dnSt(dnX,dnCOM_OF_dnSt(2),dnx%nb_var_vec-1)  !y
+      CALL sub_dnVec_TO_dnSt(dnX,dnCOM_OF_dnSt(1),dnx%nb_var_vec-2)  !x
 
       IF (debug) THEN
         write(out_unit,*) ' dnCOM'
@@ -2331,7 +2204,7 @@ CONTAINS
     ELSE
       Cart_Transfo_loc = mole%Cart_transfo
     END IF
-    IF (.NOT. associated(mole%tab_Cart_transfo)) Cart_Transfo_loc = .FALSE.
+    IF (.NOT. allocated(mole%tab_Cart_transfo)) Cart_Transfo_loc = .FALSE.
 
     IF (debug) write(out_unit,*) 'Cart_Transfo_loc, mole%Cart_transfo',Cart_Transfo_loc,mole%Cart_transfo
 

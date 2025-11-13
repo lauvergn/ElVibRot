@@ -1153,9 +1153,11 @@
         TYPE (constant)  :: const_phys
   
   !----- for the CoordType and Tnum --------------------------------------------------------
-        TYPE (CoordType) :: mole,mole_100
+        TYPE (CoordType), target :: mole,mole_100
         TYPE (Tnum)      :: para_Tnum
   
+        TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo ! true pointer
+        TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo_100 ! true pointer
   !----- variables for the construction of H ---------------------------------------------
         TYPE (param_AllOp), target  :: para_AllOp
         TYPE (param_Op),    pointer :: para_H      => null()
@@ -1248,6 +1250,8 @@
   
         !CALL system_mem_usage(memory_RSS,'after ini_data')
         para_H => para_AllOp%tab_Op(1)
+        ActiveTransfo => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo
+
   
         write(out_unit,*)
         CALL time_perso('ini_data end')
@@ -1306,10 +1310,10 @@
     CALL alloc_NParray(hess_TS,[para_Optimization%nb_Opt,para_Optimization%nb_Opt],'hess',name_sub)
     CALL alloc_NParray(d0G_TS,[para_Optimization%nb_Opt,para_Optimization%nb_Opt],'d0G_TS',name_sub)
 
-    CALL get_Qact0(Qact,mole%ActiveTransfo)
+    CALL get_Qact0(Qact,ActiveTransfo)
     Qact(1:para_Optimization%nb_Opt) = QTS(:)
     write(out_unit,*) 'Qact_TS',Qact
-    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_TS,mole%ActiveTransfo) ! here with mole_100
+    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_TS,ActiveTransfo) ! here with mole_100
     write(out_unit,*) 'Qdyn_TS',Qdyn_TS
 
     CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,para_H%para_ReadOp%PrimOp_t)
@@ -1328,15 +1332,17 @@
     write(out_unit,*) '======= Reactif geometry optimisation ============================'
     write(out_unit,*) '=================================================================='
     ! optimisation for CAP (iOp_CAPR) (without s)
-    CALL get_Qact0(Qact,mole%ActiveTransfo)
-    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,mole%ActiveTransfo) ! here with mole
+    CALL get_Qact0(Qact,ActiveTransfo)
+    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,ActiveTransfo) ! here with mole
     Qdyn_R(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%Q0
 
     IF (mole%nb_act > 1) THEN
       mole_100 = mole
-      mole_100%ActiveTransfo%list_act_OF_Qdyn(iQdyns) = 100
+      ActiveTransfo_100 => mole_100%tab_Qtransfo(mole_100%itActive)%ActiveTransfo
+
+      ActiveTransfo_100%list_act_OF_Qdyn(iQdyns) = 100
       mole_100%opt_Qdyn(iQdyns) = 0
-      mole_100%ActiveTransfo%Qdyn0(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%Q0
+      ActiveTransfo_100%Qdyn0(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(1)%Q0
       CALL type_var_analysis_OF_CoordType(mole_100,print_lev=.FALSE.)
 
       CALL dealloc_param_Optimization(para_Optimization)
@@ -1348,7 +1354,7 @@
       CALL Read_param_Optimization(para_Optimization,mole_100,para_AllBasis%BasisnD,read_nml=.FALSE.)
       IF (debug) CALL Write_param_Optimization(para_Optimization)
 
-      CALL get_Qact0(Qact,mole_100%ActiveTransfo)
+      CALL get_Qact0(Qact,ActiveTransfo_100)
       QR = Qact(1:mole_100%nb_act)
       IF (debug) write(out_unit,*) 'QR (initial value)',QR
 
@@ -1356,9 +1362,9 @@
                             QR,para_Optimization)
       write(out_unit,*) 'QR (optimized)',QR
       Qact(1:mole_100%nb_act) = QR(:)
-      CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,mole_100%ActiveTransfo) ! here with mole_100
+      CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_R,ActiveTransfo_100) ! here with mole_100
     END IF
-    CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Qdyn_R,Qact,mole%ActiveTransfo)  !    then with mole
+    CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Qdyn_R,Qact,ActiveTransfo)  !    then with mole
     write(out_unit,*) 'Qact_R',Qact
     write(out_unit,*) 'Qdyn_R',Qdyn_R
 
@@ -1381,15 +1387,15 @@
     write(out_unit,*) '=================================================================='
     write(out_unit,*) '======= Product geometry optimisation ============================'
     write(out_unit,*) '=================================================================='
-    CALL get_Qact0(Qact,mole%ActiveTransfo)
-    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,mole%ActiveTransfo) ! here with mole
+    CALL get_Qact0(Qact,ActiveTransfo)
+    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,ActiveTransfo) ! here with mole
     Qdyn_P(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(2)%Q0
 
     IF (mole%nb_act > 1) THEN
-      mole_100%ActiveTransfo%Qdyn0(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(2)%Q0
+      ActiveTransfo_100%Qdyn0(iQdyns) = para_AllOp%tab_Op(iOp_CAPR)%para_ReadOp%tab_CAP(2)%Q0
       CALL type_var_analysis_OF_CoordType(mole_100,print_lev=.FALSE.)
 
-      CALL get_Qact0(Qact,mole_100%ActiveTransfo)
+      CALL get_Qact0(Qact,ActiveTransfo_100)
       QP = Qact(1:mole_100%nb_act)
       IF (debug) write(out_unit,*) 'QP (initial value)',QP
 
@@ -1397,10 +1403,10 @@
                             QP,para_Optimization)
       write(out_unit,*) 'QP',QP
       Qact(1:mole_100%nb_act) = QP(:)
-      CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,mole_100%ActiveTransfo) ! here with mole_100
+      CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn_P,ActiveTransfo_100) ! here with mole_100
     END IF
 
-    CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Qdyn_P,Qact,mole%ActiveTransfo)  !    then with mole
+    CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Qdyn_P,Qact,ActiveTransfo)  !    then with mole
     write(out_unit,*) 'Qact_P',Qact
     write(out_unit,*) 'Qdyn_P',Qdyn_P
 
