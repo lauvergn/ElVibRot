@@ -1,19 +1,23 @@
 #!/bin/bash
 
+if [ -f "../../EVR-T.exe" ]; then
+   echo " EVR-T.exe exists => No compilation"
+else
+  ./comp.sh &> comp.log
 
-./comp.sh &> comp.log
-
-compOK=`grep -c 'EVR OK' comp.log `
-echo compOK $compOK
-if [ $compOK = '0' ]
-then
- echo " ElVibRot compilation: ERROR"
- exit
+  compOK=`grep -c 'EVR OK' comp.log `
+  echo compOK $compOK
+  if [ $compOK = '0' ]
+  then
+   echo " ElVibRot compilation: ERROR"
+   exit
+  fi
 fi
 
 
- echo " dat_5DxyzRot_LF_H2Clathrate" > err.log
-
- ./dat_5DxyzRot_LF_H2Clathrate > err.log 2>&1
+ echo " dat_5DxyzRot_LF_H2Clathrate (LB=3)" > err.log
+ ./dat_5DxyzRot_LF_H2Clathrate_Small >> err.log 2>&1
+ echo " dat_5DxyzRot_LF_H2Clathrate (LB=5)" >> err.log
+ ./dat_5DxyzRot_LF_H2Clathrate >> err.log 2>&1
  tail -2 err.log
  

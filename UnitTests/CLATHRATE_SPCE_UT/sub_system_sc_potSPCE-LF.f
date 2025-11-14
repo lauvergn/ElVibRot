@@ -35,7 +35,7 @@ c----- for the Tnum --------------------------------------
       IF (nb_be == 1 ) THEN
         !H2xyz(1:3,1:2) => Qcart(1:6)
         H2xyz(:,:) = reshape(Qcart(1:6),shape=[3,2])
-        write(6,*) 'H2xyz',H2xyz ; flush(6)
+        !write(6,*) 'H2xyz',H2xyz ; flush(6)
         call sc_sp(H2xyz,mat_V(1,1))
         !call sc_sp(reshape(Qcart(1:6),(/3,2/)),mat_V(1,1))
         mat_V(1,1) = mat_V(1,1) / 219474.63d0 ! the conversion factor comes from the sc_sp subroutine
