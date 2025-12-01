@@ -56,7 +56,7 @@ PROGRAM TEST_model
   logical                        :: Lerr
   integer                        :: err
 
-  CALL Initialize_Test(test_var,test_name='QModel_ExtModel')
+  CALL Initialize_Test(test_var,test_name='QModel_H2_H2On')
 
   nderiv = 0
   write(out_unit,*) '---------------------------------------------'
@@ -98,7 +98,7 @@ PROGRAM TEST_model
   write(out_unit,*) 'Energy (Hartree)'
   CALL Write_dnMat(PotVal,nio=out_unit)
 
-  !CALL QModel%QM%Test_QModel(err,dnMatV=PotValref,nderiv=nderiv)
+  !CALL QModel%QM%Ref_FOR_Test_QModel(err,dnMatV=PotValref,nderiv=nderiv)
   !dnErr = PotValref-PotVal
   !Lerr  = Check_dnMat_IS_ZERO(dnErr)
   
@@ -115,6 +115,6 @@ PROGRAM TEST_model
 
 
 
-  !CALL Finalize_Test(test_var)
+  CALL Finalize_Test(test_var)
 
 END PROGRAM TEST_model
