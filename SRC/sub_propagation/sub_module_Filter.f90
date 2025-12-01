@@ -290,9 +290,9 @@ DO
     P1_cheby = P2_cheby
   END DO
 
-  DO k=1,nq
-    write(66,*) x_cheby(k),wfl(k),wfl_cheby(k),log10(abs(wfl(k)-wfl_cheby(k)))
-  END DO
+  !DO k=1,nq
+  !  write(66,*) x_cheby(k),wfl(k),wfl_cheby(k),log10(abs(wfl(k)-wfl_cheby(k)))
+  !END DO
 
   filter_err = sum(abs(f(nb-3:nb,1)))/THREE
 
@@ -1123,8 +1123,8 @@ STOP
            DO k=1,para_propa%para_Davidson%M_filter
              ff_filter = ff_filter + f(k,l) * cos(real(k,kind=Rkind)*acEj)
            END DO
-           write(66,*) cos(acEj),f_filter_gauss(cos(acEj),El,sigma),    &
-             ff_filter,log10(abs(ff_filter-f_filter_gauss(cos(acEj),El,sigma)))
+           !write(66,*) cos(acEj),f_filter_gauss(cos(acEj),El,sigma),    &
+            ! ff_filter,log10(abs(ff_filter-f_filter_gauss(cos(acEj),El,sigma)))
          END DO
          STOP
        END DO

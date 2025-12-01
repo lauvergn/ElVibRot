@@ -252,7 +252,8 @@
         CALL alloc_dnb_OF_basis(SparseBasis%tab_Pbasis(ib)%Pbasis)
 
         iQ = mole%nb_act1 + ib
-        SparseBasis%tab_Pbasis(ib)%Pbasis%iQdyn(1) = mole%ActiveTransfo%list_QactTOQdyn(iQ)
+        SparseBasis%tab_Pbasis(ib)%Pbasis%iQdyn(1) = &
+           mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QactTOQdyn(iQ)
         CALL alloc_NParray(                                              &
               SparseBasis%tab_Pbasis(ib)%Pbasis%Tabder_Qdyn_TO_Qbasis, &
                                                     [mole%nb_var], &

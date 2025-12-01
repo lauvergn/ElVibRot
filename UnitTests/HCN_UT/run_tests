@@ -2,6 +2,8 @@
 
 test_size=$1
 
+./clean
+
 if [ -z $test_size ]
 then
   test_size=small
@@ -24,7 +26,6 @@ then
  echo " Big tests" > run_tests.log
 fi
 
-./clean
 
  ./calc_1D   $test_size >> run_tests.log
  ./calc_1+2D $test_size >> run_tests.log
@@ -36,6 +37,7 @@ if [ $nb_err -eq 0 ]
 then
   echo "NO ERROR in HCN-EVR UT"
 else
+  grep "ERROR" run_tests.log
   echo $nb_err " ERROR(S) in HCN-EVR UT"
   echo  " check the output files and run_tests.log in UnitTests/HCN_UT."
 fi

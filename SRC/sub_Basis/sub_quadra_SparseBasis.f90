@@ -952,22 +952,20 @@
       real(kind=Rkind)      :: SG4_Mat_size,Mat_size
 
 
-      TYPE (IntVec_t), allocatable :: tab_i_TO_l(:)
-      real (kind=Rkind),  allocatable :: wrho(:)
-      logical,            allocatable :: skip_deltaL(:,:)
-      integer       :: tab_l(basis_SG%nb_basis)
-      integer       :: tab_nb(basis_SG%nb_basis)
-      integer       :: tab_ib(basis_SG%nb_basis)
-      integer       :: tab_nq(basis_SG%nb_basis)
+      TYPE (IntVec_t),   allocatable :: tab_i_TO_l(:)
+      real (kind=Rkind), allocatable :: wrho(:)
+      logical,           allocatable :: skip_deltaL(:,:)
+      integer                        :: tab_l(basis_SG%nb_basis)
+      integer                        :: tab_nb(basis_SG%nb_basis)
+      integer                        :: tab_ib(basis_SG%nb_basis)
+      integer                        :: tab_nq(basis_SG%nb_basis)
 
-      integer       :: nDNum_OF_Lmax(basis_SG%nb_basis)
-      integer       :: L1maxB,L2maxB,L1maxG,L2maxG
-      !integer, parameter       :: max_bf_print = huge(1)
-      integer, parameter       :: max_bf_print = 100
+      integer                        :: nDNum_OF_Lmax(basis_SG%nb_basis)
+      integer, allocatable           :: LimaxB(:),LimaxG(:)
+      integer, parameter             :: max_bf_print = 100
 
-
-      logical               :: Print_basis
-      TYPE (basis)          :: basis_temp
+      logical                        :: Print_basis
+      TYPE (basis)                   :: basis_temp
 
       character (len=:), allocatable :: fformat
 !----- for debuging --------------------------------------------------
@@ -998,10 +996,8 @@
         write(out_unit,*) '================================================='
         write(out_unit,*) '- Sparse Grid, packed   :',basis_SG%packed
         write(out_unit,*) '- Sparse Grid, Lmin,Lmax:',Lmin,Lmax
-        write(out_unit,*) '- L1_SparseBasis        :',basis_SG%para_SGType2%L1_SparseBasis
-        write(out_unit,*) '- L1_SparseGrid         :',basis_SG%para_SGType2%L1_SparseGrid
-        write(out_unit,*) '- L2_SparseBasis        :',basis_SG%para_SGType2%L2_SparseBasis
-        write(out_unit,*) '- L2_SparseGrid         :',basis_SG%para_SGType2%L2_SparseGrid
+        write(out_unit,*) '- Li_SparseBasis(:)     :',basis_SG%para_SGType2%Li_SparseBasis
+        write(out_unit,*) '- Li_SparseGrid(:)      :',basis_SG%para_SGType2%Li_SparseGrid
       END IF
 
       DO ib=1,basis_SG%nb_basis
@@ -1130,10 +1126,8 @@
         write(out_unit,*) '============ Set nDindB'
         flush(out_unit)
       END IF
-      L1maxB = basis_SG%para_SGType2%L1_SparseBasis
-      L2maxB = basis_SG%para_SGType2%L2_SparseBasis
-      L1maxG = basis_SG%para_SGType2%L1_SparseGrid
-      L2maxG = basis_SG%para_SGType2%L2_SparseGrid
+      LimaxB = basis_SG%para_SGType2%Li_SparseBasis
+      LimaxG = basis_SG%para_SGType2%Li_SparseGrid
       CALL dealloc_SGType2(basis_SG%para_SGType2) !! why ???
       basis_SG%para_SGType2%nb0 = 1
 
@@ -1143,9 +1137,9 @@
         nDNum_OF_Lmax(ib) = basis_SG%tab_Pbasis(ib)%Pbasis%para_SGType2%Num_OF_Lmax
       END DO
       IF(MPI_id==0) THEN
-        write(out_unit,*) 'L1maxB, L2maxB (basis)',L1maxB,L2maxB
-        write(out_unit,*) 'L1maxG, L2maxG (Grid)',L1maxG,L2maxG
         write(out_unit,*) 'nDNum_OF_Lmax',nDNum_OF_Lmax
+        write(out_unit,*) 'LimaxB',LimaxB
+        flush(out_unit)
       END IF
 
       allocate(tab_i_TO_l(basis_SG%nb_basis))
@@ -1169,14 +1163,14 @@
         basis_SG%nDindB%packed = .TRUE. ! with false the mapping is too long !!
         CALL init_nDindexPrim(basis_SG%nDindB,basis_SG%nb_basis,nDsize, &
                               type_OF_nDindex=5,Lmax=LB,                &
-                             MaxCoupling=basis_SG%MaxCoupling_OF_nDindB,&
+                              MaxCoupling=basis_SG%MaxCoupling_OF_nDindB,&
                               tab_i_TO_l=tab_i_TO_l)
       ELSE
         basis_SG%nDindB%packed = .TRUE.
         CALL init_nDindexPrim(basis_SG%nDindB,                          &
-                             basis_SG%nb_basis,nDsize,type_OF_nDindex=5,&
+                             basis_SG%nb_basis,nDsize,type_OF_nDindex=6,&
                              Lmax=LB,nDNum_OF_Lmax=nDNum_OF_Lmax,       &
-                             L1max=L1maxB,L2max=L2maxB,                 &
+                             LiMax=LimaxB,&
                              MaxCoupling=basis_SG%MaxCoupling_OF_nDindB,&
                              tab_i_TO_l=tab_i_TO_l )
       END IF
@@ -1246,17 +1240,16 @@
                               MaxCoupling=basis_SG%MaxCoupling_OF_nDindB,       &
                               nDinit=[ (0,i=1,basis_SG%nb_basis) ] )
       ELSE
-        IF (MPI_id==0) write(out_unit,*) 'L1maxG, L2maxG (grid)',L1maxG,L2maxG
+        IF (MPI_id==0)  write(out_unit,*) 'LimaxG',LimaxG
 
         basis_SG%para_SGType2%nDind_SmolyakRep%packed = .TRUE.
         CALL init_nDindexPrim(basis_SG%para_SGType2%nDind_SmolyakRep,           &
-                              basis_SG%nb_basis,nDsize,type_OF_nDindex=-5,      &
+                              basis_SG%nb_basis,nDsize,type_OF_nDindex=-6,      &
                               Lmin=0,Lmax=Lmax,nDNum_OF_Lmax=nDNum_OF_Lmax,     &
-                              L1max=L1maxG,L2max=L2maxG,                        &
+                              LiMax=LimaxG,        &
                               MaxCoupling=basis_SG%MaxCoupling_OF_nDindB,       &
                               !skip_li=skip_deltaL,                              &
                               nDinit=[ (0,i=1,basis_SG%nb_basis) ] )
-
       END IF
 
 
@@ -1278,7 +1271,7 @@
         write(out_unit,*) '============ Set nDind_SmolyakRep: done'
         flush(out_unit)
       END IF
-!STOP
+
       IF (Print_basis) THEN
         write(out_unit,*) '============ Set para_SGType2%nDind_DPG and para_SGType2%nDind_DPB'
         write(out_unit,*) 'nb_SG:',basis_SG%nb_SG
@@ -1431,4 +1424,3 @@
       END IF
 !-----------------------------------------------------------
       END SUBROUTINE RecSparseGrid_ForDP_type4
-!=======================================================================================

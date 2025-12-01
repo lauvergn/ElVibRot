@@ -31,7 +31,7 @@ done
 
 cat > \$name_file
 
-nice $DIR_EVRT/vib.exe --input \$name_file
+nice $DIR_EVRT/EVR-T.exe --input \$name_file
 
 if (diff $DIR_pot/sub_system_save.$extf $DIR_pot/sub_system.$extf >/dev/null)
 then
@@ -89,3 +89,5 @@ fi
 
 
 rm \$name_file " >> vib
+
+chmod a+x vib

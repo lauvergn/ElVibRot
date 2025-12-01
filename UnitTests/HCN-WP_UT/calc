@@ -8,13 +8,18 @@ list_propa="Cheby nOD RK4 ModMidPoint Bulirsch-Stoer SIL SIP Spectral"
 
 #echo $list_propa
 
-./comp.sh &> comp.log
+if [ -f "../../EVR-T.exe" ]; then
+   echo " EVR-T.exe exists => No compilation"
+else
+  ./comp.sh &> comp.log
 
-compOK=`grep -c 'EVR OK' comp.log `
-echo compOK $compOK
-if [ $compOK = '0' ]
-then
- exit
+  compOK=`grep -c 'EVR OK' comp.log `
+  echo compOK $compOK
+  if [ $compOK = '0' ]
+  then
+   echo " ElVibRot compilation: ERROR"
+   exit
+  fi
 fi
 
 for propa in $list_propa

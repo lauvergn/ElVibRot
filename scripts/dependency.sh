@@ -1,30 +1,39 @@
 #!/bin/bash
 
-name_dep=dependencies.mk
-SRCFile=fortranlist.mk
+name_dep=scripts/dependencies.mk
+SRCFile=scripts/fortranlist.mk
 
-list=`ls SRC/*.f90 SRC/*/*.f90 SRC/*/*/*.f90 APP/*f90`
-#ExcludeList='Gauss_numlH.f90 spectre.f90 sub_rotation.f90 temp.f90'
-ExcludeList=' spectre.f90'
+#list=`find SRC  -name "*.f90"`
+list=`ls SRC/*.f90 SRC/*/*.f90 SRC/*/*/*.f90`
+ExcludeList=' read_para.f90 sub_system.f90 calc_f2_f1Q.f90 Calc_Tab_dnQflex.f90 Sub_X_TO_Q_ana.f90 OneDTransfo_m.f90 '
 
 echo "#===============================================" > $name_dep
 echo "#===============================================" > $SRCFile
-echo "SRCFILES= \\" >> $SRCFile
+echo "SRCFILES := \\" >> $SRCFile
 
 for ff90 in $list
 do
-   ff=`awk '{name=$1 ; n=split(name,tab,"/") ; if (n > 0) {l=length(tab[n]) ; print tab[n]}}' <<< $ff90`
+   ff=`basename $ff90`
    #echo $ff
    if grep -vq $ff <<< $ExcludeList;  then
      echo $ff " \\" >> $SRCFile
      awk -f scripts/mod2file.awk $ff90 >> $name_dep
    fi
+
 done
+
 echo "#===============================================" >> $name_dep
 for ff90 in $list
 do
-   ff=`awk '{name=$1 ; n=split(name,tab,"/") ; if (n > 0) {l=length(tab[n]) ; print tab[n]}}' <<< $ff90`
+   ff=`basename $ff90`
+   #echo $ff
+   #echo '# '$ff >> $name_dep
    if grep -vq $ff <<< $ExcludeList;  then
-     awk -f scripts/dep2.awk $ff90 >> $name_dep
+     mname=`awk -f scripts/get_modname.awk $ff90`
+     #echo "#mname: '"$mname"'"
+     #echo "#mname: " $mname >> $name_dep
+     awk -v mod_name=$mname -f scripts/dep2.awk $ff90 >> $name_dep
+     #test -z $mname || awk -v mod_name=$mname -f scripts/dep2.awk $ff90 >> $name_dep
+     #test -z $mname && echo $ff exluded!
    fi
 done

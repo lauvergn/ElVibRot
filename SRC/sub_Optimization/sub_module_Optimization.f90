@@ -103,7 +103,7 @@ CONTAINS
     character (len=*), parameter :: name_sub = 'Read_param_Optimization'
 
     CALL alloc_NParray(Qact,[mole%nb_var],'Qact',name_sub)
-    CALL get_Qact0(Qact,mole%ActiveTransfo)
+    CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
     CALL Set_ALL_para_FOR_optimization(mole,BasisnD,Qact,0)
 
     para_Optimization%nb_Opt = para_FOR_optimization%nb_OptParam

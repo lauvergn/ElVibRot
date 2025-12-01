@@ -141,7 +141,7 @@
                       para_AllOp%tab_Op(1)%para_AllBasis%BasisnD,iq,    &
                       mole,OldPara)
       ELSE
-        CALL get_Qact0(Qact,mole%ActiveTransfo) ! rigid, flexible coordinates
+        CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo) ! rigid, flexible coordinates
       END IF
       !-----------------------------------------------------------
       !-----------------------------------------------------------
@@ -362,7 +362,7 @@
       IF ( .NOT. freq_only .AND. iq > 0 .AND. .NOT. test) THEN
         CALL alloc_NParray(Qdyn,[mole%nb_var],'Qdyn',name_sub)
 
-        CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn,mole%ActiveTransfo)
+        CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Qact,Qdyn,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
 
         CALL sub_Save_GridFile_AllOp(iq,d0MatOp,para_AllOp%nb_Op,       &
                                      Qdyn,mole%nb_var,Qact,mole%nb_act1,&
@@ -752,7 +752,7 @@
 
 !       -- merge Qact(nb_var) (active and rigid) and Qinact(nb_inact2n)
 !       ---here only nb_inact2n variables have been modified --------
-        CALL Qinact2n_TO_Qact_FROM_ActiveTransfo(Qinact,Qact,mole%ActiveTransfo)
+        CALL Qinact2n_TO_Qact_FROM_ActiveTransfo(Qinact,Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
 
 !#if(run_MPI)
 !        IF(Grid_allco) THEN

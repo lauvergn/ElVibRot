@@ -1009,7 +1009,7 @@
        ! in Rec_d0d1d2bnD, the derivatives are in basis order
        CALL Rec_d0d1d2bnD(d0b_loc,d1b_loc,d2b_loc,BasisnD,iq,ib)
 
-       iQact(:) = mole%ActiveTransfo%list_QdynTOQact(BasisnD%iQdyn(:))
+       iQact(:) = mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%list_QdynTOQact(BasisnD%iQdyn(:))
 
        ! Put the derivatives in Qact order
        d0b      = d0b_loc

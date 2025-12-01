@@ -4,9 +4,9 @@ here=`pwd`
 DIR_vib=$here/../..
 DIR_pot=$DIR_vib/sub_pot
 
-if [ -e $DIR_vib/vib.exe ] 
+if [ -e $DIR_vib/EVR-T.exe ] 
 then
-  echo " No compilation vib.exe exist"
+  echo " No compilation EVR-T.exe exist"
   echo " EVR OK" #for the test in calc and calc_micro
   exit
 fi

@@ -202,7 +202,7 @@
       END IF
       IF (print_level > 1 ) write(out_unit,*) 'nrho in ',name_sub,para_AllBasis%BasisnD%nrho(:)
       IF (print_level > -1) write(out_unit,*) '==================================================='
-      CALL RecWriteMiniMini_basis(para_AllBasis%BasisnD)
+      IF (print_level > 1 ) CALL RecWriteMiniMini_basis(para_AllBasis%BasisnD)
 
       END SUBROUTINE Auto_basis
 !=======================================================================================
@@ -516,8 +516,8 @@
 !-------------------------------------------------------------------------
 
 !----- for debuging --------------------------------------------------
-      !logical, parameter :: debug = .FALSE.
-      logical, parameter :: debug = .TRUE.
+      logical, parameter :: debug = .FALSE.
+      !logical, parameter :: debug = .TRUE.
       character (len=*), parameter :: name_sub = 'RecSet_EneH0'
 !---------------------------------------------------------------------
       rec = rec + 1
@@ -1421,9 +1421,10 @@
       real(kind=Rkind),               intent(inout), optional :: pot_Qref
 
 !----- for the CoordType and Tnum --------------------------------------
-      TYPE (CoordType),               intent(in)  :: mole
-      TYPE (Tnum),                    intent(in)  :: para_Tnum
+      TYPE (CoordType),               intent(in), target :: mole
+      TYPE (Tnum),                    intent(in)         :: para_Tnum
 
+      TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo ! true pointer
 !----- for the basis set ----------------------------------------------
       TYPE (basis),                   intent(in)  :: basis_Set
 
@@ -1433,7 +1434,7 @@
 
 !----- local variables -----------------------------------------------
 !----- Operators and para_ReadOp ----------------
-      TYPE (ReadOp_t)         :: ReadOp_AutoBasis
+      TYPE (ReadOp_t)             :: ReadOp_AutoBasis
       TYPE (param_AllOp)          :: para_AllOp_loc
 !----- for the basis set ----------------------------------------------
       TYPE (param_AllBasis)       :: para_AllBasis_loc
@@ -1457,6 +1458,7 @@
         !CALL RecWrite_basis(basis_Set,write_all=.FALSE.)
       END IF
 !---------------------------------------------------------------------
+      ActiveTransfo => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo
 
       ! modification of mole => mole_loc and Tnum => Tnum_loc
       para_Tnum_loc                   = para_Tnum
@@ -1503,7 +1505,7 @@
       CALL derive_termQact_TO_derive_termQdyn(                                  &
                             para_AllOp_loc%tab_Op(i)%derive_termQdyn,           &
                             para_AllOp_loc%tab_Op(i)%derive_termQact,           &
-                              mole_loc%ActiveTransfo%list_QactTOQdyn)
+                            ActiveTransfo%list_QactTOQdyn)
 
       !---------------------------------------------------------------
       ! make the Grid
@@ -1699,8 +1701,9 @@
       IMPLICIT NONE
 
 !----- for the CoordType and Tnum --------------------------------------
-      TYPE (CoordType) :: mole
+      TYPE (CoordType), target :: mole
 
+      TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo ! true pointer
 !----- for the basis set ----------------------------------------------
       TYPE (basis)          :: basis_temp
       TYPE (param_AllBasis) :: AllBasis
@@ -1725,21 +1728,23 @@
 
       END IF
 !---------------------------------------------------------------------
+      ActiveTransfo => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo
+
       DO i=1,mole%nb_var
-        IF (mole%ActiveTransfo%list_act_OF_Qdyn(i) == 1)                &
-            mole%ActiveTransfo%list_act_OF_Qdyn(i) =                    &
+        IF (ActiveTransfo%list_act_OF_Qdyn(i) == 1)                &
+            ActiveTransfo%list_act_OF_Qdyn(i) =                    &
                                         basis_temp%auto_contrac_type1_TO
-        IF (mole%ActiveTransfo%list_act_OF_Qdyn(i) == 21)               &
-            mole%ActiveTransfo%list_act_OF_Qdyn(i) =                    &
+        IF (ActiveTransfo%list_act_OF_Qdyn(i) == 21)               &
+            ActiveTransfo%list_act_OF_Qdyn(i) =                    &
                                        basis_temp%auto_contrac_type21_TO
-        IF (mole%ActiveTransfo%list_act_OF_Qdyn(i) == 22)               &
-            mole%ActiveTransfo%list_act_OF_Qdyn(i) =                    &
+        IF (ActiveTransfo%list_act_OF_Qdyn(i) == 22)               &
+            ActiveTransfo%list_act_OF_Qdyn(i) =                    &
                                        basis_temp%auto_contrac_type21_TO
       END DO
 
         DO i=1,basis_temp%ndim
           isym = basis_temp%iQdyn(i)
-          mole%ActiveTransfo%list_act_OF_Qdyn(isym) = 1
+          ActiveTransfo%list_act_OF_Qdyn(isym) = 1
         END DO
 
         CALL type_var_analysis_OF_CoordType(mole)
@@ -1785,6 +1790,7 @@
       TYPE (CoordType),target :: mole
       TYPE (Tnum),     target :: para_Tnum
 
+      TYPE(Type_ActiveTransfo), pointer :: ActiveTransfo ! true pointer
 !----- for the basis set ----------------------------------------------
       TYPE (param_AllBasis),target :: para_AllBasis
 
@@ -1804,6 +1810,7 @@
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING ',name_sub
       END IF
+      ActiveTransfo => mole%tab_Qtransfo(mole%itActive)%ActiveTransfo
 
 
 !---------------------------------------------------------------------
@@ -1882,7 +1889,7 @@
                        direct_ScalOp=para_ReadOp%direct_ScalOp)
 
       CALL derive_termQact_TO_derive_termQdyn(para_H%derive_termQdyn,   &
-              para_H%derive_termQact,mole%ActiveTransfo%list_QactTOQdyn)
+              para_H%derive_termQact,ActiveTransfo%list_QactTOQdyn)
 
       para_H%sym_Hamil = .NOT. (Para_Tnum%nrho == 0 .OR. para_H%type_Op == 10)
 

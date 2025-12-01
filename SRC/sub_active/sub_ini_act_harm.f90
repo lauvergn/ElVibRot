@@ -69,6 +69,7 @@
 !------ working variables ---------------------------------
       integer :: i,j,iq,iqf,nb_thread,nb_Qtransfo
       integer :: iOp,iterm,id1,id2,i_e
+      integer :: itRPH
       logical :: lformatted,freq_only
 
       TYPE (OldParam) :: OldPara
@@ -386,20 +387,21 @@
       !-------------------------------------------------------------------
 
       ! write dnTError
-      IF (associated(para_AllOp%tab_Op(1)%mole%tab_Cart_transfo)) THEN
+      IF (allocated(para_AllOp%tab_Op(1)%mole%tab_Cart_transfo)) THEN
       IF (para_AllOp%tab_Op(1)%mole%tab_Cart_transfo(1)%CartesianTransfo%check_dnT) THEN
-        IF(MPI_id==0) write(out_unit,*) ' Error det(dnT-1) ?',                        &
-                para_AllOp%tab_Op(1)%mole%tab_Cart_transfo(1)%CartesianTransfo%dnTErr(:)
+        IF(MPI_id==0) write(out_unit,*) ' Error det(dnT-1) ?',dnTErr(:)
+                !para_AllOp%tab_Op(1)%mole%tab_Cart_transfo(1)%CartesianTransfo%dnTErr(:)
       END IF
       END IF
       !-------------------------------------------------------------------
 
       !-------------------------------------------------------------------
       ! test the number of elements for the RPH transfo
-      IF (associated(para_AllOp%tab_Op(1)%mole%RPHTransfo) .AND. MPI_id==0) THEN
+      itRPH = para_AllOp%tab_Op(1)%mole%itRPH
+      IF (itRPH > 0 .AND. MPI_id==0) THEN
         write(out_unit,*) '------------------------------'
         write(out_unit,*) 'Number of RPH points (active coordinates)', &
-          size(para_AllOp%tab_Op(1)%mole%RPHTransfo%tab_RPHpara_AT_Qact1)
+          size(para_AllOp%tab_Op(1)%mole%tab_Qtransfo(itRPH)%RPHTransfo%tab_RPHpara_AT_Qact1)
         write(out_unit,*) '------------------------------'
       END IF
       !-------------------------------------------------------------------

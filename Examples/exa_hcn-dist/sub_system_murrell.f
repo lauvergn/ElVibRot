@@ -290,7 +290,7 @@ c---------------------------------------------------------------------
       END IF
 
 c---------------------------------------------------------------------
-      Qact(1) = Qdyn(mole%liste_QactTOQsym(1))
+      Qact(1) = Qdyn(mole%liste_QactTOQdyn(1))
 
       d0g(:)     = ZERO
       d1g(:,:)   = ZERO
@@ -369,8 +369,8 @@ c$OMP CRITICAL (d0d1d2_h_CRIT)
         DO i=1,mole%nb_inact2n
         DO j=i,mole%nb_inact2n
 
-          iv = mole%liste_QactTOQsym(mole%nb_act1+i)
-          jv = mole%liste_QactTOQsym(mole%nb_act1+j)
+          iv = mole%liste_QactTOQdyn(mole%nb_act1+i)
+          jv = mole%liste_QactTOQdyn(mole%nb_act1+j)
           IF (iv > jv) THEN
             !nom = 'inter12h___' // TO_String(jv) // '_' TO_String(iv)
             nom=nom_ii('inter12h__',jv,iv)
@@ -402,7 +402,7 @@ c     END initialization
 c---------------------------------------------------------------------
 c---------------------------------------------------------------------
 
-      c_act = Qdyn(mole%liste_QactTOQsym(1))
+      c_act = Qdyn(mole%liste_QactTOQdyn(1))
  
       IF (deriv) THEN
         write(out_unit,*) 'ERROR in d0d1d2_h'
@@ -663,7 +663,7 @@ c---------------------------------------------------------------------
 c---------------------------------------------------------------------
 
 c---------------------------------------------------------------------
-       c_act = Qdyn(mole%liste_QactTOQsym(1))
+       c_act = Qdyn(mole%liste_QactTOQdyn(1))
 c---------------------------------------------------------------------
 
 

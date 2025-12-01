@@ -312,7 +312,7 @@ SUBROUTINE sub_analyze_psi(psi,ana_psi,adia,Write_psi,PsiAna,info)
     IF (.NOT. present(PsiAna)) write(out_unit,lformat) ana_psi%num_psi,Dominant_Channel(2),psi%convAvOp,E,DE,pop
   END IF
 
-  ! for propo and not props
+  ! for propa and not propa
 
   IF (present(PsiAna)) THEN
     !$OMP  CRITICAL (sub_analyze_psi_CRIT)
@@ -1838,7 +1838,7 @@ END SUBROUTINE sub_analyze_psi
     real (kind=Rkind)    :: a
 
     integer          :: i,ie,ii,ib,ibie,iq,ibiq,n,ii_baie,if_baie
-    integer          :: max_dim
+    integer          :: max_dim,ndim
     integer          :: max_indGr(psi%BasisnD%nDindB%ndim)
     integer          :: ndim_AT_ib(psi%BasisnD%nDindB%ndim)
     integer          :: nDval(psi%BasisnD%nDindB%ndim)
@@ -1943,12 +1943,13 @@ END SUBROUTINE sub_analyze_psi
       !write(out_unit,*) 'ndim_AT_ib',ndim_AT_ib(:)
       IF (print_w .OR. debug) THEN
         DO iq=1,psi%BasisnD%nDindB%ndim
-          IF (sum(weight1Dact(iq,1:ndim_AT_ib(iq)))-ONE > ONETENTH**7) THEN
+          ndim = ndim_AT_ib(iq)
+          IF (sum(weight1Dact(iq,1:ndim))-ONE > ONETENTH**7) THEN
             CALL ADD_TO_string(PsiAna,state_name,' Sum(RD)/=1',trim(info),' ', &
                  TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(T,'e10.3'),new_line('nl'))
           END IF
           CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
-               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,:),'e10.3'),new_line('nl'))
+               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,1:ndim),'e10.3'),new_line('nl'))
 
           !---- RD analysis --------------------------------------------
           ! RD analysis
@@ -1959,14 +1960,13 @@ END SUBROUTINE sub_analyze_psi
             if_baie = ii_baie -1 + psi%nb_ba
 
             IF (psi%cplx) THEN
-              CALL calc_CRD(para_RD(iq),psi%CvecB(ii_baie:if_baie),     &
-                                           CRD=CRD,CRDcontrac=CRDcontrac)
+              CALL calc_CRD(para_RD(iq),psi%CvecB(ii_baie:if_baie),CRD=CRD,CRDcontrac=CRDcontrac)
 
               IF (allocated(CRD)) THEN
                 n = min(ndim_AT_ib(iq),size(CRD,dim=1))
                 weight1Dact(iq,1:n) = real([(CRD(i,i),i=1,n)],kind=Rkind)
                 CALL ADD_TO_string(PsiAna,state_name,' new',trim(info),' ', &
-                    TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,:),'e10.3'),new_line('nl'))
+                    TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n),'e10.3'),new_line('nl'))
                 
                 CALL dealloc_NParray(CRD,'CRD',name_sub)
               END IF
@@ -1976,7 +1976,7 @@ END SUBROUTINE sub_analyze_psi
                 weight1Dact(iq,1:n) = real([(CRDcontrac(i,i),i=1,n)],kind=Rkind)
 
                 CALL ADD_TO_string(PsiAna,state_name,' c',trim(info),' ', &
-                  TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,:),'e10.3'),new_line('nl'))
+                  TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n),'e10.3'),new_line('nl'))
 
                 CALL dealloc_NParray(CRDcontrac,'CRDcontrac',name_sub)
               END IF
@@ -1996,7 +1996,7 @@ END SUBROUTINE sub_analyze_psi
                 weight1Dact(iq,1:n) = [(RDcontrac(i,i),i=1,n)]
 
                 CALL ADD_TO_string(PsiAna,state_name,' c',trim(info),' ', &
-                TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,:),'e10.3'),new_line('nl'))
+                TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n),'e10.3'),new_line('nl'))
 
                 CALL dealloc_NParray(RDcontrac,'RDcontrac',name_sub)
               END IF
@@ -2665,10 +2665,13 @@ END IF
      END DO
   END IF
 
+#if(run_MPI)
   IF(openmpi .AND. keep_MPI .AND. MPI_scheme/=2) THEN
     CALL MPI_Reduce_sum_matrix(tab_WeightChannels,1,nb_bi,1,nb_be,root_MPI,MS=MPI_scheme)
     CALL MPI_Bcast_matrix(tab_WeightChannels,1,nb_bi,1,nb_be,root_MPI,MS=MPI_scheme)
   ENDIF
+#endif
+
   CALL dealloc_NParray(wrho,'wrho',name_sub)
 !------------------------------------------------------
   IF (debug) THEN
@@ -2793,10 +2796,12 @@ END SUBROUTINE Channel_weight_SG4_grid
      END DO
   END IF
 
+#if(run_MPI)
   IF(openmpi .AND. keep_MPI .AND. MPI_scheme/=2) THEN
     CALL MPI_Reduce_sum_matrix(tab_WeightChannels,1,nb_bi,1,nb_be,root_MPI,MS=MPI_scheme)
     CALL MPI_Bcast_matrix(tab_WeightChannels,1,nb_bi,1,nb_be,root_MPI,MS=MPI_scheme)
   ENDIF
+#endif
 
   CALL dealloc_SmolyakRep(WSRep)
 

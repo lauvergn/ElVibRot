@@ -91,7 +91,7 @@
 !---------------------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) ' BEGINNING ',name_sub
-        write(out_unit,*) '  Qdyn0',mole%ActiveTransfo%Qdyn0
+        write(out_unit,*) '  Qdyn0',mole%tab_Qtransfo(mole%itActive)%ActiveTransfo%Qdyn0
         write(out_unit,*) '  nb_inact2n',mole%nb_inact2n
         write(out_unit,*) '  nb_var',mole%nb_var
       END IF
@@ -106,7 +106,7 @@
       END IF
 !------------------------------------------------------------
 
-      CALL get_Qact0(Qact,mole%ActiveTransfo)
+      CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
 
       CALL alloc_RPHpara_AT_Qact1(RPHpara_AT_Qact1,mole%nb_act1,        &
                                                mole%nb_inact2n,nderiv=0)

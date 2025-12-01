@@ -374,10 +374,12 @@ SUBROUTINE get_TnumRefGeom_Q0_new(Q0,nb_Q0,Qdyn0)
   logical,          intent(in)    :: Qdyn0
 
 
-  integer :: ith
+  integer :: ith,itActive
 
   ith=1
   !$ ith=OMP_GET_THREAD_NUM()+1
+
+  itActive = tab_EVRT(ith)%mole%itActive
 
   IF (nb_Q0 /= tab_EVRT(ith)%mole%nb_var) THEN
     write(out_unit,*) ' ERROR in get_TnumRefGeom_Q0'
@@ -388,9 +390,9 @@ SUBROUTINE get_TnumRefGeom_Q0_new(Q0,nb_Q0,Qdyn0)
   END IF
 
   IF (Qdyn0) THEN
-    Q0(:) = tab_EVRT(ith)%mole%ActiveTransfo%Qdyn0(:)
+    Q0(:) = tab_EVRT(ith)%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qdyn0(:)
   ELSE ! Qact order
-    Q0(:) = tab_EVRT(ith)%mole%ActiveTransfo%Qact0(:)
+    Q0(:) = tab_EVRT(ith)%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qact0(:)
   END IF
 
 END SUBROUTINE get_TnumRefGeom_Q0_new
@@ -406,11 +408,13 @@ SUBROUTINE Modify_TnumRefGeom_Q0_new(Q0,nb_Q0,Qdyn0)
 
   ! local variables
   real(kind=Rkind) :: Q1(nb_Q0)
-  integer          :: ith
+  integer          :: ith,itActive
 
 
   ith=1
   !$ ith=OMP_GET_THREAD_NUM()+1
+
+  itActive = tab_EVRT(ith)%mole%itActive
 
   IF (nb_Q0 /= tab_EVRT(ith)%mole%nb_var) THEN
     write(out_unit,*) ' ERROR in Modify_TnumRefGeom_Q0_new'
@@ -421,13 +425,13 @@ SUBROUTINE Modify_TnumRefGeom_Q0_new(Q0,nb_Q0,Qdyn0)
   END IF
 
   IF (Qdyn0) THEN
-    tab_EVRT(ith)%mole%ActiveTransfo%Qdyn0(:) =  Q0(:)
-    CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Q0,Q1,tab_EVRT(ith)%mole%ActiveTransfo)
-    tab_EVRT(ith)%mole%ActiveTransfo%Qact0(:) =  Q1(:)
+    tab_EVRT(ith)%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qdyn0(:) =  Q0(:)
+    CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Q0,Q1,tab_EVRT(ith)%mole%tab_Qtransfo(itActive)%ActiveTransfo)
+    tab_EVRT(ith)%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qact0(:) =  Q1(:)
   ELSE
-    tab_EVRT(ith)%mole%ActiveTransfo%Qact0(:) =  Q0(:)
-    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Q0,Q1,tab_EVRT(ith)%mole%ActiveTransfo)
-    tab_EVRT(ith)%mole%ActiveTransfo%Qdyn0(:) =  Q1(:)
+    tab_EVRT(ith)%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qact0(:) =  Q0(:)
+    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Q0,Q1,tab_EVRT(ith)%mole%tab_Qtransfo(itActive)%ActiveTransfo)
+    tab_EVRT(ith)%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qdyn0(:) =  Q1(:)
   END IF
 
 END SUBROUTINE Modify_TnumRefGeom_Q0_new
@@ -1423,6 +1427,9 @@ SUBROUTINE get_TnumRefGeom_Q0(Q0,nb_Q0,Qdyn0)
   real(kind=Rkind), intent(inout) :: Q0(nb_Q0)
   logical,          intent(in)    :: Qdyn0
 
+  integer :: itActive
+
+  itActive = para_EVRT%mole%itActive
 
   IF (nb_Q0 /= para_EVRT%mole%nb_var) THEN
     write(out_unit,*) ' ERROR in get_TnumRefGeom_Q0'
@@ -1433,9 +1440,9 @@ SUBROUTINE get_TnumRefGeom_Q0(Q0,nb_Q0,Qdyn0)
   END IF
 
   IF (Qdyn0) THEN
-    Q0(:) = para_EVRT%mole%ActiveTransfo%Qdyn0(:)
+    Q0(:) = para_EVRT%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qdyn0(:)
   ELSE ! Qact order
-    Q0(:) = para_EVRT%mole%ActiveTransfo%Qact0(:)
+    Q0(:) = para_EVRT%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qact0(:)
   END IF
 
 END SUBROUTINE get_TnumRefGeom_Q0
@@ -1451,6 +1458,9 @@ SUBROUTINE Modify_TnumRefGeom_Q0(Q0,nb_Q0,Qdyn0)
   ! local variables
   real(kind=Rkind) :: Q1(nb_Q0)
 
+  integer :: itActive
+
+  itActive = para_EVRT%mole%itActive
 
   IF (nb_Q0 /= para_EVRT%mole%nb_var) THEN
     write(out_unit,*) ' ERROR in Modify_TnumRefGeom_Q0'
@@ -1461,13 +1471,13 @@ SUBROUTINE Modify_TnumRefGeom_Q0(Q0,nb_Q0,Qdyn0)
   END IF
 
   IF (Qdyn0) THEN
-    para_EVRT%mole%ActiveTransfo%Qdyn0(:) =  Q0(:)
-    CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Q0,Q1,para_EVRT%mole%ActiveTransfo)
-    para_EVRT%mole%ActiveTransfo%Qact0(:) =  Q1(:)
+    para_EVRT%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qdyn0(:) =  Q0(:)
+    CALL Qdyn_TO_Qact_FROM_ActiveTransfo(Q0,Q1,para_EVRT%mole%tab_Qtransfo(itActive)%ActiveTransfo)
+    para_EVRT%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qact0(:) =  Q1(:)
   ELSE
-    para_EVRT%mole%ActiveTransfo%Qact0(:) =  Q0(:)
-    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Q0,Q1,para_EVRT%mole%ActiveTransfo)
-    para_EVRT%mole%ActiveTransfo%Qdyn0(:) =  Q1(:)
+    para_EVRT%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qact0(:) =  Q0(:)
+    CALL Qact_TO_Qdyn_FROM_ActiveTransfo(Q0,Q1,para_EVRT%mole%tab_Qtransfo(itActive)%ActiveTransfo)
+    para_EVRT%mole%tab_Qtransfo(itActive)%ActiveTransfo%Qdyn0(:) =  Q1(:)
   END IF
 
 END SUBROUTINE Modify_TnumRefGeom_Q0

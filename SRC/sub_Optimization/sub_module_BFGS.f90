@@ -703,7 +703,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
    write(out_unit,*) '=== Current geometry (not recenter) ==========='
    CALL alloc_dnSVM(dnx,mole%ncart,mole%nb_act,nderiv=0)
 
-   CALL get_Qact0(Qact,mole%ActiveTransfo)
+   CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
    CALL sub_QactTOdnx(Qact,dnx,mole,nderiv=0,Gcenter=.FALSE.,WriteCC=.TRUE.)
 
    CALL dealloc_dnSVM(dnx)
@@ -853,7 +853,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         write(out_unit,*) '=================================================='
         DO it=0,para_BFGS%max_iteration
 
-          CALL get_Qact0(Qact,mole%ActiveTransfo)
+          CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
           Qact(1:nb_Opt) = Qopt(:)
           IF (debug) write(out_unit,*) 'Qact',Qact
           CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp)

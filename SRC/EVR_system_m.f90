@@ -188,7 +188,48 @@ CONTAINS
     nom_ii=nom2
   
   END FUNCTION nom_ii
+  !================================================================
+  !       analysis of a string
+  !       output : nb_word,word (the i th word of name)
+  !================================================================
+  SUBROUTINE analysis_name(name,word,i,nb_word)
+    IMPLICIT NONE
 
+    !- analysis of the basis name --------------------------
+    character (len=*)  :: word,name
+    character          :: ch
+    integer            :: i,nb_word
+    integer            :: iw,ic,icw
+    logical            :: blank
+
+
+    iw = 0
+    icw = 0
+    blank = .TRUE.
+    !write(out_unit,*) 'analysis_name: ',name,len(name)
+    DO ic=1,len(name)
+      ch = name(ic:ic)
+      IF (ch .EQ. " ") THEN
+        IF (.NOT. blank) THEN
+          iw = iw + 1
+          blank = .TRUE.
+        END IF
+      ELSE
+        IF (iw .EQ. i-1) THEN
+          icw = icw + 1
+          word(icw:icw) = ch
+        END IF
+        blank = .FALSE.
+      END IF
+     !write(out_unit,*) 'analysis_name: ',ic,ch,blank,iw
+    END DO
+
+    nb_word = iw
+    !write(out_unit,*) 'analysis_name: ',name,':',nb_word
+    !write(out_unit,*) 'analysis_name: ',i,word
+
+
+  END SUBROUTINE analysis_name
   FUNCTION make_EVRTInternalFileName(FileName,FPath) RESULT(make_FileName)
     USE QDUtil_m, ONLY : err_FileName
     IMPLICIT NONE

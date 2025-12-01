@@ -57,6 +57,9 @@ IMPLICIT NONE
   PRIVATE
 
   TYPE param_SGType2
+    integer, allocatable         :: Li_SparseGrid(:)
+    integer, allocatable         :: Li_SparseBasis(:)
+
     integer                      :: L1_SparseGrid = huge(1)
     integer                      :: L2_SparseGrid = huge(1)
 
@@ -167,6 +170,11 @@ character (len=*), parameter :: name_sub='Write_SGType2'
 
   write(out_unit,*) 'BEGINNING ',name_sub
 
+  IF (allocated(SGType2%Li_SparseGrid)) &
+  write(out_unit,*) 'Li_SparseGrid ',SGType2%Li_SparseGrid
+  IF (allocated(SGType2%Li_SparseBasis)) &
+  write(out_unit,*) 'Li_SparseBasis ',SGType2%Li_SparseBasis
+
   write(out_unit,*) 'L1_SparseGrid ',SGType2%L1_SparseGrid
   write(out_unit,*) 'L2_SparseGrid ',SGType2%L2_SparseGrid
   write(out_unit,*) 'L1_SparseBasis ',SGType2%L1_SparseBasis
@@ -204,65 +212,66 @@ character (len=*), parameter :: name_sub='Write_SGType2'
 END SUBROUTINE Write_SGType2
 
 SUBROUTINE dealloc_SGType2(SGType2)
+  TYPE (param_SGType2), intent(inout) :: SGType2
 
-TYPE (param_SGType2), intent(inout) :: SGType2
+  character (len=*), parameter :: name_sub='dealloc_SGType2'
 
-character (len=*), parameter :: name_sub='dealloc_SGType2'
+  IF (allocated(SGType2%Li_SparseGrid)) deallocate(SGType2%Li_SparseGrid)
+  IF (allocated(SGType2%Li_SparseBasis)) deallocate(SGType2%Li_SparseBasis)
 
-SGType2%L1_SparseGrid = huge(1)
-SGType2%L2_SparseGrid = huge(1)
-SGType2%Num_OF_Lmax   = 0 ! use normal L_SparseGrid
+  SGType2%L1_SparseGrid = huge(1)
+  SGType2%L2_SparseGrid = huge(1)
+  SGType2%Num_OF_Lmax   = 0 ! use normal L_SparseGrid
 
-SGType2%nb_SG = 0
-SGType2%nb0   = 0
+  SGType2%nb_SG = 0
+  SGType2%nb0   = 0
 
-CALL dealloc_nDindex(SGType2%nDind_SmolyakRep)
+  CALL dealloc_nDindex(SGType2%nDind_SmolyakRep)
 
-IF (allocated(SGType2%nDind_DPG)) THEN
-  CALL dealloc_NParray(SGType2%nDind_DPG,'SGType2%nDind_DPG',name_sub)
-END IF
+  IF (allocated(SGType2%nDind_DPG)) THEN
+    CALL dealloc_NParray(SGType2%nDind_DPG,'SGType2%nDind_DPG',name_sub)
+  END IF
 
-IF (allocated(SGType2%nDind_DPB)) THEN
-  CALL dealloc_NParray(SGType2%nDind_DPB,'SGType2%nDind_DPB',name_sub)
-END IF
+  IF (allocated(SGType2%nDind_DPB)) THEN
+    CALL dealloc_NParray(SGType2%nDind_DPB,'SGType2%nDind_DPB',name_sub)
+  END IF
 
-IF (allocated(SGType2%tab_iB_OF_SRep_TO_iB)) THEN
-  CALL dealloc_NParray(SGType2%tab_iB_OF_SRep_TO_iB,        &
-                      'SGType2%tab_iB_OF_SRep_TO_iB',name_sub)
-END IF
+  IF (allocated(SGType2%tab_iB_OF_SRep_TO_iB)) THEN
+    CALL dealloc_NParray(SGType2%tab_iB_OF_SRep_TO_iB,        &
+                        'SGType2%tab_iB_OF_SRep_TO_iB',name_sub)
+  END IF
 
-IF (allocated(SGType2%tab_Sum_nq_OF_SRep)) THEN
-  CALL dealloc_NParray(SGType2%tab_Sum_nq_OF_SRep,        &
-                      'SGType2%tab_Sum_nq_OF_SRep',name_sub)
-END IF
-IF (allocated(SGType2%tab_nq_OF_SRep)) THEN
-  CALL dealloc_NParray(SGType2%tab_nq_OF_SRep,             &
-                      'SGType2%tab_nq_OF_SRep',name_sub)
-END IF
+  IF (allocated(SGType2%tab_Sum_nq_OF_SRep)) THEN
+    CALL dealloc_NParray(SGType2%tab_Sum_nq_OF_SRep,        &
+                        'SGType2%tab_Sum_nq_OF_SRep',name_sub)
+  END IF
+  IF (allocated(SGType2%tab_nq_OF_SRep)) THEN
+    CALL dealloc_NParray(SGType2%tab_nq_OF_SRep,             &
+                        'SGType2%tab_nq_OF_SRep',name_sub)
+  END IF
 
-IF (allocated(SGType2%tab_Sum_nb_OF_SRep)) THEN
-  CALL dealloc_NParray(SGType2%tab_Sum_nb_OF_SRep,        &
-                      'SGType2%tab_Sum_nb_OF_SRep',name_sub)
-END IF
-IF (allocated(SGType2%tab_nb_OF_SRep)) THEN
-  CALL dealloc_NParray(SGType2%tab_nb_OF_SRep,        &
-                      'SGType2%tab_nb_OF_SRep',name_sub)
-END IF
+  IF (allocated(SGType2%tab_Sum_nb_OF_SRep)) THEN
+    CALL dealloc_NParray(SGType2%tab_Sum_nb_OF_SRep,        &
+                        'SGType2%tab_Sum_nb_OF_SRep',name_sub)
+  END IF
+  IF (allocated(SGType2%tab_nb_OF_SRep)) THEN
+    CALL dealloc_NParray(SGType2%tab_nb_OF_SRep,        &
+                        'SGType2%tab_nb_OF_SRep',name_sub)
+  END IF
 
+  SGType2%nb_threads = 0
 
-SGType2%nb_threads = 0
+  IF (allocated(SGType2%nDval_init)) THEN
+    CALL dealloc_NParray(SGType2%nDval_init,'SGType2%nDval_init',name_sub)
+  END IF
 
-IF (allocated(SGType2%nDval_init)) THEN
-  CALL dealloc_NParray(SGType2%nDval_init,'SGType2%nDval_init',name_sub)
-END IF
+  IF (allocated(SGType2%iG_th)) THEN
+    CALL dealloc_NParray(SGType2%iG_th,'SGType2%iG_th',name_sub)
+  END IF
 
-IF (allocated(SGType2%iG_th)) THEN
-  CALL dealloc_NParray(SGType2%iG_th,'SGType2%iG_th',name_sub)
-END IF
-
-IF (allocated(SGType2%fG_th)) THEN
-  CALL dealloc_NParray(SGType2%fG_th,'SGType2%fG_th',name_sub)
-END IF
+  IF (allocated(SGType2%fG_th)) THEN
+    CALL dealloc_NParray(SGType2%fG_th,'SGType2%fG_th',name_sub)
+  END IF
 
 END SUBROUTINE dealloc_SGType2
 
@@ -275,6 +284,8 @@ integer :: i
 
 character (len=*), parameter :: name_sub='SGType2_2TOSGType2_1'
 
+  IF (allocated(SGType2_2%Li_SparseGrid))  SGType2_1%Li_SparseGrid  = SGType2_2%Li_SparseGrid
+  IF (allocated(SGType2_2%Li_SparseBasis)) SGType2_1%Li_SparseBasis = SGType2_2%Li_SparseBasis
 
 SGType2_1%L1_SparseGrid = SGType2_2%L1_SparseGrid
 SGType2_1%L2_SparseGrid = SGType2_2%L2_SparseGrid
@@ -762,10 +773,6 @@ END SUBROUTINE SGType2_2TOSGType2_1
 
       TYPE (Type_nDindex),             intent(in)    :: nDind_SmolyakRep
       real (kind=Rkind),               intent(inout) :: WeightSG(nDind_SmolyakRep%Max_nDI)
-
-!---------------------------------------------------------------------
-      !real (kind=Rkind) :: binomial ! function in QDUtil lib
-!---------------------------------------------------------------------
 
       integer             :: i,i_SG,i_SGm,DeltaL,max_print
       integer             :: tab_l(nDind_SmolyakRep%ndim)
