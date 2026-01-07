@@ -66,7 +66,6 @@
       integer  :: PCRP_omp,PCRP_maxth,PAna_omp,PAna_maxth
       logical  :: PTune_SG4_omp,PTune_Grid_omp
       integer  :: PSG4_omp,PSG4_maxth
-      logical  :: Print_OpPsiSG4
       integer (kind=ILkind)  :: max_mem
       integer  :: printlevel,err
       logical  :: test,EVR,cart,nDfit,nDGrid,Opt_CAP_Basis,mem_debug
@@ -155,7 +154,7 @@
         PSG4_omp           = 1
         PSG4_maxth         = maxth
 
-        Print_OpPsiSG4     = .TRUE.
+        Print_OpPsiSG4     = .FALSE.
 
         max_mem          = 4000000000_ILkind/Rkind ! 4GO
         mem_debug        = .FALSE.
@@ -335,8 +334,6 @@
         Ana_maxth_init          = Ana_maxth
         SG4_maxth_init          = SG4_maxth
 
-        OpPsiSG4_print          = Print_OpPsiSG4
-
         write(out_unit,*) '========================================='
         write(out_unit,*) 'OpenMP parameters:',openmp
         write(out_unit,*) 'Max number of threads:           ',maxth
@@ -348,7 +345,7 @@
         write(out_unit,*) 'Ana_omp,        Ana_maxth        ',Ana_omp,Ana_maxth
         write(out_unit,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
         write(out_unit,*) '========================================='
-        write(out_unit,*) 'Print_OpPsiSG4                   ',OpPsiSG4_print
+        write(out_unit,*) 'Print_OpPsiSG4 (value could change)',Print_OpPsiSG4
         write(out_unit,*) '========================================='
 
         write(out_unit,*) '========================================='

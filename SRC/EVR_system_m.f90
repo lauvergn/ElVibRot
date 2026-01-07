@@ -90,7 +90,7 @@ MODULE EVR_system_m
 
   logical :: Tune_SG4_omp   = .FALSE.
   logical :: Tune_Grid_omp  = .FALSE.
-  logical :: OpPsiSG4_print = .TRUE.
+  logical :: Print_OpPsiSG4 = .TRUE.
 
   integer (kind=ILkind) :: nb_mult_BTOG  = 0
   integer (kind=ILkind) :: nb_mult_GTOB  = 0

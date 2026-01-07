@@ -771,7 +771,7 @@ nb_thread = 1
   RPsi0%RvecB(:) = Real(Psi0%CvecB(:),kind=Rkind)
   IPsi0%RvecB(:) = Aimag(Psi0%CvecB(:))
 
- IF (OpPsiSG4_print) THEN
+ IF (Print_OpPsiSG4) THEN
    write(out_unit,'(a)')              'OpPsi SG4 (%): [--0-10-20-30-40-50-60-70-80-90-100]'
    write(out_unit,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
    flush(out_unit)
@@ -930,7 +930,7 @@ nb_thread = 1
    CALL dealloc_TypeRVec(Rw2(1))
    CALL dealloc_TypeRVec(Iw2(1))
 
-   IF (OpPsiSG4_print .AND. mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
+   IF (Print_OpPsiSG4 .AND. mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
      write(out_unit,'(a)',ADVANCE='no') '---'
      flush(out_unit)
    END IF
@@ -951,7 +951,7 @@ nb_thread = 1
  CALL dealloc_NParray(tab_nb,'tab_nb',name_sub)
  CALL dealloc_NParray(tab_nq,'tab_nq',name_sub)
 
- IF (OpPsiSG4_print) THEN
+ IF (Print_OpPsiSG4) THEN
    IF(MPI_id==0) write(out_unit,'(a)',ADVANCE='yes') '----]'
  END IF
  flush(out_unit)

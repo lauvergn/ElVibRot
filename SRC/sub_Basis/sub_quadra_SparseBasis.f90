@@ -1360,7 +1360,7 @@
         flush(out_unit)
       END IF
 
-      OpPsiSG4_print = OpPsiSG4_print .AND. (print_level > 0 .AND. basis_SG%para_SGType2%nb_SG > 10**4)
+      Print_OpPsiSG4 = Print_OpPsiSG4 .AND. (print_level > 0 .AND. basis_SG%para_SGType2%nb_SG > 10**4)
 
       IF(MPI_id==0) THEN
         write(out_unit,*) 'nbb          (Smolyak Rep)',nbb
@@ -1368,8 +1368,8 @@
         write(out_unit,*) 'SG4_Mat_size (Smolyak Rep)',SG4_Mat_size
         write(out_unit,*) '    Mat_size (Smolyak Rep)',Mat_size
         write(out_unit,*) 'Mat_size/SG4_Mat_size     ',Mat_size/SG4_Mat_size
-        write(out_unit,*) 'OpPsiSG4_print',OpPsiSG4_print
-        IF (OpPsiSG4_print) THEN
+        write(out_unit,*) 'Print_OpPsiSG4',Print_OpPsiSG4
+        IF (Print_OpPsiSG4) THEN
           write(out_unit,*) 'print Op.Psi computing progression'
         ELSE
           write(out_unit,*) 'do not print Op.Psi computing progression'
