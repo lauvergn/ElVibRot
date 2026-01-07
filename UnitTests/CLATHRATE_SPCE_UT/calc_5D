@@ -14,6 +14,8 @@ else
   fi
 fi
 
+#export OMP_NUM_THREADS=1
+
 
  echo " dat_5DxyzRot_LF_H2Clathrate (LB=3)" > err.log
  ./dat_5DxyzRot_LF_H2Clathrate_Small >> err.log 2>&1

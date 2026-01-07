@@ -389,10 +389,10 @@ CONTAINS
       IF (SGtype4) THEN
         IF(Psi%SRB_MPI) THEN
 
-        IF(openmpi) THEN
-          CALL sub_TabOpPsi_FOR_SGtype4_SRB_MPI([Psi],RROpPsi,para_Op)
-          OpPsi=RROpPsi(1)  ! find a way to avoid it
-        ENDIF
+          IF(openmpi) THEN
+            CALL sub_TabOpPsi_FOR_SGtype4_SRB_MPI([Psi],RROpPsi,para_Op)
+            OpPsi=RROpPsi(1)  ! find a way to avoid it
+          ENDIF
 
         ELSE IF (Psi%cplx) THEN
 
@@ -402,7 +402,6 @@ CONTAINS
             CALL sub_TabOpPsi_FOR_SGtype4_MPI(RCPsi,RCOpPsi,para_Op)
           ELSE
             CALL sub_TabOpPsi_FOR_SGtype4(RCPsi,RCOpPsi,para_Op)
-
           ENDIF
           IF(keep_MPI) OpPsi = RCOpPsi
 
