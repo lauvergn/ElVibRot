@@ -90,6 +90,7 @@
                           PCRP_omp,PCRP_maxth,                          &
                           PAna_omp,PAna_maxth,                          &
                           PTune_SG4_omp,PTune_Grid_omp,                 &
+                          Print_OpPsiSG4,                               &
 
                           RMatFormat,CMatFormat,EneFormat,              &
 
@@ -152,6 +153,8 @@
 
         PSG4_omp           = 1
         PSG4_maxth         = maxth
+
+        Print_OpPsiSG4     = .FALSE.
 
         max_mem          = 4000000000_ILkind/Rkind ! 4GO
         mem_debug        = .FALSE.
@@ -341,6 +344,8 @@
         write(out_unit,*) 'CRP_omp,        CRP_maxth        ',CRP_omp,CRP_maxth
         write(out_unit,*) 'Ana_omp,        Ana_maxth        ',Ana_omp,Ana_maxth
         write(out_unit,*) 'SG4_omp,        SG4_maxth        ',SG4_omp,SG4_maxth
+        write(out_unit,*) '========================================='
+        write(out_unit,*) 'Print_OpPsiSG4 (value could change)',Print_OpPsiSG4
         write(out_unit,*) '========================================='
 
         write(out_unit,*) '========================================='

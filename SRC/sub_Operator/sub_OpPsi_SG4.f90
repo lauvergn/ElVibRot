@@ -128,7 +128,7 @@ CONTAINS
  OpPsi           = Psi ! for the allocation. It has to be changed!
  OpPsi%RvecB(:)  = ZERO
 
- IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4 ) THEN
+ IF (Print_OpPsiSG4) THEN
    write(out_unit,'(a)')              'OpPsi SG4 (%): [-10-20-30-40-50-60-70-80-90-100]'
    write(out_unit,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
    flush(out_unit)
@@ -153,8 +153,7 @@ CONTAINS
      CALL dealloc_TypeRVec(PsiR)
 
 
-     IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
-         mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0) THEN
+     IF (Print_OpPsiSG4 .AND. mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0) THEN
        write(out_unit,'(a)',ADVANCE='no') '---'
        flush(out_unit)
      END IF
@@ -169,7 +168,7 @@ CONTAINS
    !$OMP parallel                                                &
    !$OMP default(none)                                           &
    !$OMP shared(Psi,OpPsi)                                       &
-   !$OMP shared(para_Op,BasisnD,print_level,out_unit,MPI_id)    &
+   !$OMP shared(para_Op,BasisnD,print_level,out_unit,MPI_id,Print_OpPsiSG4)    &
    !$OMP private(iG,iiG,tab_l,PsiR,ith)                          &
    !$OMP num_threads(BasisnD%para_SGType2%nb_threads)
 
@@ -202,8 +201,7 @@ CONTAINS
      CALL dealloc_TypeRVec(PsiR)
 
 
-     IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
-         mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0) THEN
+     IF (Print_OpPsiSG4 .AND. mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0) THEN
        write(out_unit,'(a)',ADVANCE='no') '---'
        flush(out_unit)
      END IF
@@ -214,7 +212,7 @@ CONTAINS
   !$OMP   END PARALLEL
 END IF
 
- IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4) THEN
+ IF (Print_OpPsiSG4) THEN
    write(out_unit,'(a)',ADVANCE='yes') '-]'
  END IF
  flush(out_unit)
@@ -715,7 +713,6 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
   integer, allocatable                 :: tab_l(:)
   logical                              :: not_init
 
-
   !----- for debuging ----------------------------------------------
   character (len=*), parameter :: name_sub='sub_TabOpPsi_FOR_SGtype4'
   logical, parameter :: debug = .FALSE.
@@ -726,16 +723,18 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
     write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
     write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
     write(out_unit,*) 'nb_var',para_Op%mole%nb_var
+    write(out_unit,*) 'Print_OpPsiSG4',Print_OpPsiSG4
     !flush(out_unit)
     !CALL write_param_Op(para_Op)
     write(out_unit,*)
-    write(out_unit,*) 'PsiBasisRep'
+    !write(out_unit,*) 'PsiBasisRep'
     !DO itab=1,size(Psi)
       !CALL ecri_psi(Psi=Psi(itab))
     !END DO
     flush(out_unit)
   END IF
   !-----------------------------------------------------------------------------
+
   mole    => para_Op%mole
   BasisnD => para_Op%BasisnD
 
@@ -753,7 +752,6 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
       STOP ' ERROR in sub_TabOpPsi_FOR_SGtype4: Psi(1) is complex'
     END IF
   ENDIF
-  !IF (para_Op%nb_bie /= 1) STOP 'nb_bie /= 1 in sub_TabOpPsi_FOR_SGtype4'
 
   !-----------------------------------------------------------------------------
   IF (SG4_omp == 0) THEN
@@ -771,8 +769,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
     END DO
   ENDIF
 
-
-  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4 ) THEN
+  IF (Print_OpPsiSG4) THEN
     write(out_unit,'(a)')              'OpPsi SG4 (%): [-10-20-30-40-50-60-70-80-90-100]'
     write(out_unit,'(a)',ADVANCE='no') 'OpPsi SG4 (%): ['
     flush(out_unit)
@@ -813,8 +810,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
         END DO
         deallocate(PsiR)
 
-        IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND.    &
-            mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
+        IF (Print_OpPsiSG4 .AND. mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
           write(out_unit,'(a)',ADVANCE='no') '---'
           flush(out_unit)
         END IF
@@ -822,12 +818,11 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
       END DO
 
     ELSE IF (allocated(BasisnD%para_SGType2%nDind_SmolyakRep%Tab_nDval)) THEN
-
       packet_size=max(1,BasisnD%para_SGType2%nb_SG/SG4_maxth/10)
       !$OMP   PARALLEL DEFAULT(NONE)                              &
       !$OMP   SHARED(Psi,OpPsi)                                   &
       !$OMP   SHARED(para_Op,BasisnD)                             &
-      !$OMP   SHARED(print_level,out_unit,SG4_maxth,packet_size) &
+      !$OMP   SHARED(out_unit,SG4_maxth,packet_size,Print_OpPsiSG4) &
       !$OMP   SHARED(MPI_id)                                      &
       !$OMP   PRIVATE(iG,itab,PsiR)                               &
       !$OMP   NUM_THREADS(SG4_maxth)
@@ -857,8 +852,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
           CALL dealloc_TypeRVec(PsiR(itab))
         END DO
 
-        IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
-            mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
+        IF (Print_OpPsiSG4 .AND. mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
           write(out_unit,'(a)',ADVANCE='no') '---'
           flush(out_unit)
         END IF
@@ -890,7 +884,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
       !$OMP parallel                                                &
       !$OMP default(none)                                           &
       !$OMP shared(Psi,OpPsi)                                       &
-      !$OMP shared(para_Op,BasisnD,print_level,out_unit,MPI_id)    &
+      !$OMP shared(para_Op,BasisnD,out_unit,MPI_id,Print_OpPsiSG4)  &
       !$OMP private(itab,iG,iiG,tab_l,PsiR,ith)                     &
       !$OMP num_threads(BasisnD%para_SGType2%nb_threads)
 
@@ -932,8 +926,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
         END DO
         deallocate(PsiR)
 
-        IF (print_level > 0  .AND. BasisnD%para_SGType2%nb_SG > 10**4 .AND. &
-            mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
+        IF (Print_OpPsiSG4 .AND.  mod(iG,max(1,BasisnD%para_SGType2%nb_SG/10)) == 0 .AND. MPI_id==0) THEN
           write(out_unit,'(a)',ADVANCE='no') '---'
           flush(out_unit)
         END IF
@@ -946,7 +939,7 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
     END IF
 !  ENDIF ! for openmpi
 
-  IF (print_level > 0 .AND. BasisnD%para_SGType2%nb_SG > 10**4) THEN
+  IF (Print_OpPsiSG4) THEN
     write(out_unit,'(a)',ADVANCE='yes') '-]'
   END IF
   flush(out_unit)
@@ -1553,8 +1546,8 @@ SUBROUTINE sub_TabOpPsi_FOR_SGtype4(Psi,OpPsi,para_Op)
    CASE (10) !10: H: d^1 G d^1 +V
      CALL alloc_NParray(PsiRj, [nq,mole%nb_act1],'PsiRj',       name_sub)
      CALL alloc_NParray(PsiRi,       [nq],       'PsiRi',       name_sub)
-     CALL alloc_NParray(VPsi,  [nq,nb0],           'VPsi',        name_sub)
-     CALL alloc_NParray(OpPsiR,[nq],               'OpPsiR',      name_sub)
+     CALL alloc_NParray(VPsi,  [nq,nb0],         'VPsi',        name_sub)
+     CALL alloc_NParray(OpPsiR,[nq],             'OpPsiR',      name_sub)
 
 
      CALL get_OpGrid_type10_OF_ONEDP_FOR_SG4(iG,tab_l,para_Op,V,GGiq,sqRhoOVERJac,Jac)

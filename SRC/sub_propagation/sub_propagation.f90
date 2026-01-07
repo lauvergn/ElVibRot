@@ -128,7 +128,7 @@ CONTAINS
         write(out_unit,*)
         CALL write_param_Op(para_H)
         write(out_unit,*)
-        CALL Write_ana_psi(para_propa%ana_psi)
+        !CALL Write_ana_psi(para_propa%ana_psi)
       END IF
 !-----------------------------------------------------------
       para_propa%ana_psi%propa     = .TRUE.
@@ -174,7 +174,7 @@ CONTAINS
 
 
 
-      CALL Write_ana_psi(para_propa%ana_psi)
+      IF (debug) CALL Write_ana_psi(para_propa%ana_psi)
 
       SELECT CASE (para_propa%type_WPpropa)
 
@@ -921,9 +921,9 @@ CONTAINS
                           RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.), &
                           ', Elapsed Real time (ms): ',int(10**3*RealTime)
          ELSE
-           write(out_unit,'(a,a,a,i0)') 'At T: ',                              &
+           write(out_unit,'(a,a,a,f0.3)') 'At T: ',                              &
                           RWU_Write(RWU_T,WithUnit=.TRUE.,WorkingUnit=.FALSE.), &
-                          ', Elapsed Real time (s): ',int(RealTime)
+                          ', Elapsed Real time (s): ',RealTime
          END IF
          flush(out_unit)
 

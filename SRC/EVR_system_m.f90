@@ -88,8 +88,9 @@ MODULE EVR_system_m
   integer :: CRP_omp,CRP_maxth,CRP_maxth_init
   integer :: Ana_omp,Ana_maxth,Ana_maxth_init
 
-  logical :: Tune_SG4_omp  = .FALSE.
-  logical :: Tune_Grid_omp = .FALSE.
+  logical :: Tune_SG4_omp   = .FALSE.
+  logical :: Tune_Grid_omp  = .FALSE.
+  logical :: Print_OpPsiSG4 = .TRUE.
 
   integer (kind=ILkind) :: nb_mult_BTOG  = 0
   integer (kind=ILkind) :: nb_mult_GTOB  = 0
