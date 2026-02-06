@@ -86,13 +86,14 @@
 
       real (kind=Rkind) :: max_step
       real (kind=Rkind) :: RMS_step
+      real (kind=Rkind) :: largest_step
       logical           :: calc_hessian,read_hessian,calc_hessian_always
       integer           :: nb_neg
       real (kind=Rkind) :: Norm2,TS_vector(nb_Opt)
 
 
       integer :: err_io
-      NAMELIST /BFGS/ max_iteration,max_grad,RMS_grad,max_step,RMS_step,        &
+      NAMELIST /BFGS/ max_iteration,max_grad,RMS_grad,max_step,RMS_step,largest_step, &
                       calc_hessian,read_hessian,calc_hessian_always,nb_neg,     &
                       TS_vector,max_Q_ForPrinting
 
@@ -105,6 +106,7 @@
 
         max_step            = 0.000060_Rkind
         RMS_step            = 0.000040_Rkind
+        largest_step        = 0.5_Rkind
         calc_hessian        = .FALSE.
         read_hessian        = .FALSE.
         calc_hessian_always = .FALSE.
@@ -148,6 +150,8 @@
 
         para_BFGS%max_step            = max_step
         para_BFGS%RMS_step            = RMS_step
+
+        para_BFGS%largest_step        = largest_step
 
         para_BFGS%calc_hessian        = calc_hessian
         para_BFGS%read_hessian        = read_hessian
@@ -468,8 +472,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
  write(out_unit,*) ' p = ', p
  write(out_unit,*) ' Energy = ',fp
 
- call proescvec(g,g,xxxg,n)
- xxxg=sqrt(xxxg/n)
+ xxxg=sqrt(dot_product(g,g)/n)
 !!!!!!!!!!!!!!
   test=ZERO            ! Test of convergence on zero gradient
   den=max(fp,ONE)
@@ -493,7 +496,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
  END IF
 
  xi=-g
- call proescvec(p,p,sum,n)
+ sum = dot_product(p,p)
  stpmax=STPMX*max(sqrt(sum),real(n,kind=Rkind))
  do its=1,ITMAX                 ! Main loop over the iterations.
   call lnsrch(n,p,fp,g,xi,pnew,fret,stpmax,check,dnMatOp,mole,PrimOp,para_Tnum)
@@ -517,8 +520,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
    temp=abs(g(i))*max(abs(p(i)),ONE)/den
    if (temp > test) test=temp
   end do
-  call proescvec(g,g,xxxg,n)
-  xxxg=sqrt(xxxg/n)
+  xxxg=sqrt(dot_product(g,g)/n)
 
   write(out_unit,*)
   write(out_unit,'(a,i4)') ' Iteration= ',its
@@ -549,12 +551,13 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 !
   dg=g-dg          ! Compute difference of gradient
   do i=1,n         ! and difference times current matrix.
-   call proescvec(hessin(:,i),dg,hdg(i),n)
+    hdg(i) = dot_product(hessin(:,i),dg)
   end do
-  call proescvec(dg,xi,fac,n)  ! Calculate dot products for the denominators.
-  call proescvec(dg,hdg,fae,n)
-  call proescvec(dg,dg,sumdg,n)
-  call proescvec(xi,xi,sumxi,n)
+  fac   = dot_product(dg,xi) ! Calculate dot products for the denominators.
+  fae   = dot_product(dg,hdg)
+  sumdg = dot_product(dg,dg)
+  sumxi = dot_product(xi,xi)
+
   if (fac**2 > EPS*sumdg*sumxi) then ! Skip update if fac is not
    fac=ONE/fac                        ! sufficiently positive.
    fad=ONE/fae
@@ -568,7 +571,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
    end do
   end if
   do i=1,n          ! Now calculate the next direction to go,
-   call proescvec(hessin(:,i),g,xi(i),n)
+    xi(i) = dot_product(hessin(:,i),g)
   end do
   xi=-xi
  end do             ! and go back for another iteration.
@@ -606,17 +609,16 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
  TYPE (Tnum)          :: para_Tnum
 !
  check=.false.
- call proescvec(p,p,sum,n)
- sum=sqrt(sum)
+ sum=sqrt(dot_product(p,p))
 !
 ! write(out_unit,*) 'sum=', sum, 'stpmax=', stpmax
 !
- if(sum.gt.stpmax)then
+ if (sum > stpmax) then
   do i=1,n
    p(i)=p(i)*(stpmax/sum)
   end do
  endif
- call proescvec(g,p,slope,n)
+ slope = dot_product(g,p)
  test=ZERO
  do i=1,n
   temp=abs(p(i))/max(abs(xold(i)),ONE)
@@ -747,27 +749,6 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
   !flush(out_unit)
 
  END SUBROUTINE dfunc
-! ------------------------------------------------------------------------
-      subroutine proescvec(vec1,vec2,ps,ndim)
-! ------------------------------------------------------------------------
-!     producte escalar vec1*vec2
-!
-      implicit none
-      integer :: ndim, i
-      real(kind=Rkind) :: vec1(ndim),vec2(ndim)
-      real(kind=Rkind) :: ps
-!
-      intent (in) ndim,vec1,vec2
-      intent (inout) ps
-!
-      ps=ZERO
-      do i=1,ndim
-       ps=ps+vec1(i)*vec2(i)
-      end do
-!
-      return
-  end subroutine
-!
 
   SUBROUTINE Sub_Newton(BasisnD,xOpt_min,SQ,nb_Opt,para_Tnum,mole,PrimOp,Qopt,para_BFGS)
 

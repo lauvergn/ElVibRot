@@ -180,14 +180,8 @@ CONTAINS
 
       CASE (1,2,5,6,7,8,9,10)
 
-        IF (SGtype4 .AND. direct_KEO) THEN
-          !CALL sub_propagation11_SG4(WP0,WP,1,para_H,para_propa)
-          CALL sub_propagation11(WP0,WP,1,para_AllOp%tab_Op,para_propa)
-        ELSE
-          CALL sub_propagation11(WP0,WP,1,para_AllOp%tab_Op,para_propa)
-        END IF
-
-        IF(keep_MPI) CALL TF_autocorr(para_propa)
+        CALL sub_propagation11(WP0,WP,1,para_AllOp%tab_Op,para_propa)
+        !IF(keep_MPI) CALL TF_autocorr(para_propa)
 
       CASE (-3,3)
 

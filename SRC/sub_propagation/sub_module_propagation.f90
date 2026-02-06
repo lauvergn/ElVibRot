@@ -1675,12 +1675,13 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
       integer           :: max_poly
       real (kind=Rkind) :: poly_tol
       logical           :: Op_Transfo
+      real (kind=Rkind) :: thresh_project
 
       namelist /davidson/num_resetH,num_checkS,                         &
                         read_WP,nb_readWP,read_listWP,nb_readWP_OF_List,&
                          precond,precond_tol,NewVec_type,               &
                          name_file_readWP,formatted_file_readWP,        &
-                         lower_states,one_residue,project_wp0,          &
+                         lower_states,one_residue,project_wp0,thresh_project, &
                          residual_max_nb,one_by_one,                    &
                          all_lower_states,Max_ene,num_LowestWP,         &
                          conv_ene,conv_resi,symab,                      &
@@ -1723,6 +1724,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
       one_residue       = .FALSE. ! T => increase H with ONE residue (largest)
       one_by_one        = .FALSE. ! T => converge vector one by one
       residual_max_nb   = huge(1) ! the number maximal of residual
+      thresh_project    = 0.8_Rkind ! threshold for the projection (project_WP0=t)
 
       Max_ene           = REAL_WU(FIVE*TEN**3,'cm-1','E')  ! 5000 cm-1
 
@@ -1847,6 +1849,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
       para_Davidson%Max_ene               = convRWU_TO_R_WITH_WorkingUnit(Max_ene)
 
       para_Davidson%project_WP0           = project_WP0
+      para_Davidson%thresh_project        = thresh_project
       para_Davidson%residual_max_nb       = residual_max_nb
       para_Davidson%one_by_one            = one_by_one
       para_Davidson%NewVec_type           = NewVec_type

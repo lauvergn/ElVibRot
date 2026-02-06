@@ -4,6 +4,7 @@
 ifeq ($(FFC),$(filter $(FFC),gfortran gfortran-11 gfortran-12 gfortran-13 gfortran-14 gfortran-15))
 
   # optimization management (default without optimization)
+  FDUMP := -fdump-fortran-global -fdump-fortran-optimized -fdump-fortran-original -fdump-parse-tree -save-temps 
   ifeq ($(OOPT),1)
     FFLAGS = -O5 -g -fbacktrace -funroll-loops -ftree-vectorize -falign-loops=16
     CFLAGS = -O5 -g             -funroll-loops -ftree-vectorize -falign-loops=16

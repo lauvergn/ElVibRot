@@ -1241,7 +1241,7 @@ END SUBROUTINE get_Vinact_AT_Qact_HarD
          write(out_unit,*) 'Qact',Qact
          write(out_unit,*) 'stepOp',PrimOp%stepOp
          write(out_unit,*) 'nb_elec',PrimOp%nb_elec
-
+         write(out_unit,*) 'OnTheFly',PrimOp%OnTheFly
          flush(out_unit)
        END IF
 !-----------------------------------------------------------
