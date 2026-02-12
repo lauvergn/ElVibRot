@@ -150,7 +150,8 @@ CONTAINS
 STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
       CASE ('bfgs')
         CALL Read_param_BFGS(para_Optimization%para_BFGS,para_Optimization%nb_Opt)
-
+      CASE ('newton')
+        CALL Read_param_BFGS(para_Optimization%para_BFGS,para_Optimization%nb_Opt)
       CASE DEFAULT
         write(out_unit,*) 'ERROR in ',name_sub
         write(out_unit,*) 'Wrong Optimization_method: ',para_Optimization%Optimization_method
@@ -258,7 +259,7 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
     SELECT CASE (para_Optimization%Optimization_method)
     CASE ('simulatedannealing','sa')
       CALL Write_param_SimulatedAnnealing(para_Optimization%para_SimulatedAnnealing)
-    CASE ('bfgs')
+    CASE ('bfgs','newton')
       CALL Write_param_BFGS(para_Optimization%para_BFGS)
     CASE DEFAULT
       write(out_unit,*) 'WARNING in Write_param_param_Optimization'
@@ -348,6 +349,11 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
       END DO
       write(out_unit,*) 'Norm_min',i,Norm_min
 
+    CASE ('newton')
+      CALL Sub_Newton(BasisnD,para_Optimization%xOpt_min,para_Optimization%SQ, &
+                      para_Optimization%nb_Opt,para_Tnum,mole,   &
+                      PrimOp,Qopt,                 &
+                      para_Optimization%para_BFGS)
     CASE ('bfgs')
       IF (para_Optimization%para_BFGS%calc_hessian_always) THEN
         CALL Sub_Newton(BasisnD,para_Optimization%xOpt_min,para_Optimization%SQ, &

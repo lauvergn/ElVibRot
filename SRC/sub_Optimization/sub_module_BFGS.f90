@@ -796,9 +796,9 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         logical :: TS_Vector
 
         real (kind=Rkind), intent(inout) :: xOpt_min(nb_Opt),SQ(nb_Opt)
-        real (kind=Rkind), allocatable :: grad(:),hess(:,:),diag(:),Vec(:,:),Vec_ext(:,:),tVec(:,:),mDQit(:)
-        real (kind=Rkind) :: Ene
-        real (kind=Rkind) :: max_grad,RMS_grad,max_disp,RMS_disp,norm_disp,Norm2
+        real (kind=Rkind), allocatable :: grad(:),hess(:,:),hess0(:,:),diag(:),Vec(:,:),Vec_ext(:,:),tVec(:,:),mDQit(:)
+        real (kind=Rkind) :: Ene,Ene0,sc_mDQit
+        real (kind=Rkind) :: max_grad,RMS_grad,max_step,RMS_step,norm_disp,Norm2
         logical :: conv
         integer :: it,iq,iqq,its
         !---------- working variables ----------------------------------------
@@ -822,7 +822,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           flush(out_unit)
         END IF
         !---------------------------------------------------------------------
-        
+        !Ene0 = huge(ONE)
         Qopt(1:nb_Opt) = xopt_min(:)
         !write(out_unit,*) 'Qopt',Qopt
 
@@ -837,14 +837,21 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
           Qact(1:nb_Opt) = Qopt(:)
           IF (debug) write(out_unit,*) 'Qact',Qact
-          CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp)
+          IF (para_BFGS%calc_hessian_always .OR. mod(it,10) == 0) THEN
+            CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=2)
+            CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess,dnMatOp) ! for the ground state
+            IF (debug) CALL Write_Mat_MPI(hess, out_unit, 5, info='hess')
+            IF (mod(it,10) == 0) hess0 = hess
+          ELSE
+            CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=1)
+            hess = hess0
+          END IF
         
           !IF (debug) CALL Write_Tab_OF_dnMatOp(dnMatOp)
           CALL Get_Grad_FROM_Tab_OF_dnMatOp(grad,dnMatOp)  
           IF (debug) CALL Write_Vec_MPI(grad, out_unit, 5, info='grad')
-          CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess,dnMatOp) ! for the ground state
-          IF (debug) CALL Write_Mat_MPI(hess, out_unit, 5, info='hess')
           Ene = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
+          IF (it ==0) Ene0 = Ene
 
           IF (allocated(para_BFGS%TS_Vector)) THEN
             TS_Vector = ( para_BFGS%nb_neg == 1 .AND. dot_product(para_BFGS%TS_Vector,para_BFGS%TS_Vector) > HALF )
@@ -885,6 +892,12 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
             IF (debug) write(out_unit,*) 'diag',diag ; flush(out_unit)
           
             IF (para_BFGS%nb_neg == 0) THEN
+              IF (count(diag < ZERO) /= 0) THEN 
+                write(out_unit,*) 'WARNING: some hessian eigenvalues are negative!'
+                DO iq=1,nb_Opt
+                  IF (diag(iq) < ZERO) write(out_unit,*) 'negative eigenvalue',iq,diag(iq)
+                END DO
+              END IF
               tvec = transpose(vec)
               DO iq=1,nb_Opt
                 Vec(:,iq) = Vec(:,iq) * abs(diag(iq))
@@ -907,23 +920,23 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         
           max_grad = maxval(abs(grad))
           RMS_grad = sqrt(dot_product(grad,grad)/nb_Opt)
-          max_disp = maxval(abs(mDQit))
-          RMS_disp = sqrt(dot_product(mDQit,mDQit)/nb_Opt)
+          max_step = maxval(abs(mDQit))
+          RMS_step = sqrt(dot_product(mDQit,mDQit)/nb_Opt)
         
         
           write(out_unit,*) '--------------------------------------------------'
           write(out_unit,*) 'it,E',it,Ene
 
-          IF (debug) THEN
+          !IF (debug) THEN
             conv = (max_grad <= para_BFGS%max_grad)
             write(out_unit,*) 'max_grad,treshold',max_grad,para_BFGS%max_grad,conv
             conv = (RMS_grad <= para_BFGS%RMS_grad)
             write(out_unit,*) 'RMS_grad,treshold',RMS_grad,para_BFGS%RMS_grad,conv
-            conv = (max_disp <= para_BFGS%max_step)
-            write(out_unit,*) 'max_disp,treshold',max_disp,para_BFGS%max_step,conv
-            conv = (RMS_disp <= para_BFGS%RMS_step)
-            write(out_unit,*) 'RMS_disp,treshold',RMS_disp,para_BFGS%RMS_step,conv
-          END IF
+            conv = (max_step <= para_BFGS%max_step)
+            write(out_unit,*) 'max_step,treshold',max_step,para_BFGS%max_step,conv
+            conv = (RMS_step <= para_BFGS%RMS_step)
+            write(out_unit,*) 'RMS_step,treshold',RMS_step,para_BFGS%RMS_step,conv
+          !END IF
         
           norm_disp = sqrt(dot_product(mDQit,mDQit))
           IF (norm_disp > para_BFGS%Largest_step) THEN
@@ -940,12 +953,37 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
         
           conv = (max_grad <= para_BFGS%max_grad) .AND.                               &
                  (RMS_grad <= para_BFGS%RMS_grad) .AND.                               &
-                 (max_disp <= para_BFGS%max_step) .AND.                               &
-                 (RMS_disp <= para_BFGS%RMS_step)
+                 (max_step <= para_BFGS%max_step) .AND.                               &
+                 (RMS_step <= para_BFGS%RMS_step)
         
-          Qopt(1:nb_Opt) = Qopt(1:nb_Opt)-mDQit
         
-          IF (conv) EXIT
+          IF (conv) THEN 
+            Qopt(1:nb_Opt) = Qopt(1:nb_Opt)-mDQit
+            EXIT
+          END IF
+
+          IF (para_BFGS%nb_neg == 0) THEN
+            sc_mDQit = ONE
+            DO
+              CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
+              Qact(1:nb_Opt) = Qopt(:)-sc_mDQit*mDQit
+              IF (debug) write(out_unit,*) 'Qact',Qact
+              CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=0)
+              Ene = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
+              write(out_unit,*) 'sc_mDQit,Ene,Ene0',sc_mDQit,Ene,Ene0
+              IF (Ene < Ene0) THEN
+                Qopt(:) = Qact(1:nb_Opt)
+                Ene0 = Ene
+                EXIT
+              END IF
+              sc_mDQit = sc_mDQit * HALF
+            END DO
+          ELSE
+            Qopt(1:nb_Opt) = Qopt(1:nb_Opt)-mDQit
+          END IF
+
+
+
         END DO
         IF (para_BFGS%max_iteration > 0) THEN
           write(out_unit,*) 'Geometry optimization is converged?',conv
