@@ -52,23 +52,26 @@
 
       TYPE param_BFGS
 
-      integer           :: max_iteration       = 10
+      integer           :: max_iteration        = 10
 
-      real (kind=Rkind) :: max_grad            = 0.000015_Rkind
-      real (kind=Rkind) :: RMS_grad            = 0.000010_Rkind
+      real (kind=Rkind) :: max_grad             = 0.000015_Rkind
+      real (kind=Rkind) :: RMS_grad             = 0.000010_Rkind
 
-      real (kind=Rkind) :: max_step            = 0.000060_Rkind
-      real (kind=Rkind) :: RMS_step            = 0.000040_Rkind
-      real (kind=Rkind) :: largest_step        = 0.5_Rkind
+      real (kind=Rkind) :: max_step             = 0.000060_Rkind
+      real (kind=Rkind) :: RMS_step             = 0.000040_Rkind
+      real (kind=Rkind) :: largest_step         = 0.5_Rkind
 
-      logical           :: calc_hessian        = .FALSE.
-      logical           :: read_hessian        = .FALSE.
-      logical           :: calc_hessian_always = .FALSE.
-      integer           :: nb_neg              = 0 ! number of negative hessian eigenvalues (calc_hessian_always=t)
-      integer           :: max_Q_ForPrinting   = 11
+      logical           :: calc_hessian         = .FALSE.
+      logical           :: read_hessian         = .FALSE.
+      logical           :: calc_hessian_always  = .FALSE.
+      integer           :: calc_hessian_every_n = huge(1)
+      real (kind=Rkind), allocatable :: hessian_inv_init(:,:)
+
+
+      integer           :: nb_neg               = 0 ! number of negative hessian eigenvalues (calc_hessian_always=t)
+      integer           :: max_Q_ForPrinting    = 11
 
       real (kind=Rkind), allocatable :: TS_vector(:)
-      real (kind=Rkind), allocatable :: hessian_inv_init(:,:)
 
 
       END TYPE param_BFGS
@@ -88,14 +91,15 @@
       real (kind=Rkind) :: RMS_step
       real (kind=Rkind) :: largest_step
       logical           :: calc_hessian,read_hessian,calc_hessian_always
+      integer           :: calc_hessian_every_n
       integer           :: nb_neg
       real (kind=Rkind) :: Norm2,TS_vector(nb_Opt)
 
 
       integer :: err_io
       NAMELIST /BFGS/ max_iteration,max_grad,RMS_grad,max_step,RMS_step,largest_step, &
-                      calc_hessian,read_hessian,calc_hessian_always,nb_neg,     &
-                      TS_vector,max_Q_ForPrinting
+                      calc_hessian,read_hessian,calc_hessian_every_n,calc_hessian_always, &
+                      nb_neg,TS_vector,max_Q_ForPrinting
 
         max_iteration       = 10
         nb_neg              = 0
@@ -110,6 +114,7 @@
         calc_hessian        = .FALSE.
         read_hessian        = .FALSE.
         calc_hessian_always = .FALSE.
+        calc_hessian_every_n = -1
         max_Q_ForPrinting   = 11
 
         read(in_unit,BFGS,IOSTAT=err_io)
@@ -120,7 +125,7 @@
            write(out_unit,*) ' Check your data !!'
            STOP ' ERROR in Read_param_BFGS while reading the "BFGS" namelist'
         END IF
-        IF (err_io < 0) THEN
+        IF (err_io > 0) THEN
           write(out_unit,*) ' ERROR in Read_param_BFGS'
           write(out_unit,*) '  while reading the "BFGS" namelist'
           write(out_unit,*) ' Probably you are using a wrong keyword'
@@ -129,19 +134,42 @@
        END IF
         IF (print_level > 1) write(out_unit,BFGS)
 
-        IF (nb_neg > 0 .AND. .NOT. calc_hessian_always) THEN
+        IF (calc_hessian_every_n == 0) THEN
           write(out_unit,*) ' ERROR in Read_param_BFGS'
-          write(out_unit,*) '  for nb_neg > 0, calc_hessian_always MUST be .TRUE.'
+          write(out_unit,*) '  calc_hessian_every_n MUST be > 0'
+          write(out_unit,*) '  calc_hessian_every_n ',calc_hessian_every_n
+          write(out_unit,*) ' Check your data !!'
+          STOP 'STOP in Read_param_BFGS: calc_hessian_every_n MUST be > 0'
+        END IF
+        IF (calc_hessian_always) THEN
+          IF (calc_hessian_every_n > 1) THEN
+            write(out_unit,*) ' ERROR in Read_param_BFGS'
+            write(out_unit,*) '  Inconsistent parameters values:'
+            write(out_unit,*) '  calc_hessian_always',calc_hessian_always
+            write(out_unit,*) '  calc_hessian_every_n > 1',calc_hessian_every_n
+            write(out_unit,*) ' Check your data !!'
+            STOP 'STOP in Read_param_BFGS: Inconsistent parameters values, calc_hessian_always and calc_hessian_every_n'
+          ELSE ! IF (calc_hessian_every_n < 0) THEN
+            calc_hessian_every_n = 1
+          END IF
+        ELSE
+          IF (calc_hessian_every_n < 0) calc_hessian_every_n = huge(1)
+        END IF
+
+        IF (nb_neg > 0 .AND. calc_hessian_every_n /= 1) THEN
+          write(out_unit,*) ' ERROR in Read_param_BFGS'
+          write(out_unit,*) '  For nb_neg > 0, calc_hessian_always MUST be .TRUE. or calc_hessian_every_n=1'
           write(out_unit,*) '  nb_neg             ',nb_neg
           write(out_unit,*) '  calc_hessian_always',calc_hessian_always
+          write(out_unit,*) '  calc_hessian_every_n',calc_hessian_every_n
           write(out_unit,*) ' Check your data !!'
-          STOP
+          STOP 'STOP in Read_param_BFGS: inconsistent calc_hessian_every_n and nb_neg values.'
         END IF
         IF (calc_hessian .AND. read_hessian) THEN
           write(out_unit,*) ' ERROR in Read_param_BFGS'
           write(out_unit,*) '  Both calc_hessian and read_hessian are .TRUE., it not possible'
           write(out_unit,*) ' Check your data !!'
-          STOP
+          STOP 'STOP in Read_param_BFGS:  Both calc_hessian and read_hessian are .TRUE., it not possible.'
         END IF
         para_BFGS%max_iteration       = max_iteration
 
@@ -153,9 +181,12 @@
 
         para_BFGS%largest_step        = largest_step
 
+
         para_BFGS%calc_hessian        = calc_hessian
         para_BFGS%read_hessian        = read_hessian
-        para_BFGS%calc_hessian_always = calc_hessian_always
+        para_BFGS%calc_hessian_every_n = calc_hessian_every_n
+        !para_BFGS%calc_hessian_always = calc_hessian_always
+
         para_BFGS%nb_neg              = nb_neg
 
         Norm2 = dot_product(TS_Vector,TS_Vector)
@@ -171,7 +202,7 @@
       SUBROUTINE Write_param_BFGS(para_BFGS)
       TYPE (param_BFGS), intent(in)   :: para_BFGS
 
-      write(out_unit,*) '  WRITE param_BFGS'
+      write(out_unit,*) 'WRITE param_BFGS'
       write(out_unit,*)
       write(out_unit,*) '  max_iteration  ',para_BFGS%max_iteration
       write(out_unit,*)
@@ -179,30 +210,37 @@
       write(out_unit,*) '  RMS_grad       ',para_BFGS%RMS_grad
       write(out_unit,*) '  max_step       ',para_BFGS%max_step
       write(out_unit,*) '  RMS_step       ',para_BFGS%RMS_step
-      write(out_unit,*)
-      write(out_unit,*) '  calc_hessian_always',para_BFGS%calc_hessian_always
-      IF (para_BFGS%calc_hessian_always)  write(out_unit,*) ' true Newton-Raphson'
+      write(out_unit,*) '  largest_step   ',para_BFGS%largest_step
 
-      write(out_unit,*) '  END WRITE param_BFGS'
+      write(out_unit,*)
+      write(out_unit,*) '  calc_hessian (initialization)',para_BFGS%calc_hessian
+      write(out_unit,*) '  read_hessian (initialization)',para_BFGS%read_hessian
+      write(out_unit,*) '  calc_hessian_every_n',para_BFGS%calc_hessian_every_n
+      write(out_unit,*) '  calc_hessian_always ',(para_BFGS%calc_hessian_every_n == 1)
+      IF (para_BFGS%calc_hessian_every_n == 1)  write(out_unit,*) '  BFGS procedure is forced to Newton-Raphson one'
+
+      write(out_unit,*) '  nb_neg (=1 => TS)',para_BFGS%nb_neg
+      write(out_unit,*) 'END WRITE param_BFGS'
 
   END SUBROUTINE Write_param_BFGS
   SUBROUTINE dealloc_param_BFGS(para_BFGS)
         TYPE (param_BFGS), intent(inout)   :: para_BFGS
   
-        para_BFGS%max_iteration       = 10
+        para_BFGS%max_iteration        = 10
 
-        para_BFGS%max_grad            = 0.000015_Rkind
-        para_BFGS%RMS_grad            = 0.000010_Rkind
+        para_BFGS%max_grad             = 0.000015_Rkind
+        para_BFGS%RMS_grad             = 0.000010_Rkind
+        para_BFGS%max_step             = 0.000060_Rkind
+        para_BFGS%RMS_step             = 0.000040_Rkind
+        para_BFGS%largest_step         = 0.5_Rkind
   
-        para_BFGS%max_step            = 0.000060_Rkind
-        para_BFGS%RMS_step            = 0.000040_Rkind
-        para_BFGS%largest_step        = 0.5_Rkind
-  
-        para_BFGS%calc_hessian        = .FALSE.
-        para_BFGS%read_hessian        = .FALSE.
-        para_BFGS%calc_hessian_always = .FALSE.
-        para_BFGS%nb_neg              = 0 ! number of negative hessian eigenvalues (calc_hessian_always=t)
-        para_BFGS%max_Q_ForPrinting   = 11
+        para_BFGS%calc_hessian         = .FALSE.
+        para_BFGS%read_hessian         = .FALSE.
+        para_BFGS%calc_hessian_always  = .FALSE.
+        para_BFGS%calc_hessian_every_n = huge(1)
+
+        para_BFGS%nb_neg               = 0 ! number of negative hessian eigenvalues (calc_hessian_always=t)
+        para_BFGS%max_Q_ForPrinting    = 11
 
         IF (allocated(para_BFGS%TS_vector))        deallocate(para_BFGS%TS_vector)
         IF (allocated(para_BFGS%hessian_inv_init)) deallocate(para_BFGS%hessian_inv_init)
@@ -236,8 +274,8 @@
       logical          :: calc_scalar_Op
 
 !----- variables for the construction of H ---------------------------
-      TYPE (ReadOp_t)         :: para_ReadOp
-      logical                     :: Save_FileGrid,Save_MemGrid
+      TYPE (ReadOp_t) :: para_ReadOp
+      logical         :: Save_FileGrid,Save_MemGrid
 
 
 !----- local variables -----------------------------------------------
@@ -837,11 +875,11 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
           Qact(1:nb_Opt) = Qopt(:)
           IF (debug) write(out_unit,*) 'Qact',Qact
-          IF (para_BFGS%calc_hessian_always .OR. mod(it,10) == 0) THEN
+          IF (mod(it,para_BFGS%calc_hessian_every_n) == 0) THEN
             CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=2)
             CALL Get_Hess_FROM_Tab_OF_dnMatOp(hess,dnMatOp) ! for the ground state
             IF (debug) CALL Write_Mat_MPI(hess, out_unit, 5, info='hess')
-            IF (mod(it,10) == 0) hess0 = hess
+            hess0 = hess
           ELSE
             CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=1)
             hess = hess0
@@ -927,21 +965,19 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           write(out_unit,*) '--------------------------------------------------'
           write(out_unit,*) 'it,E',it,Ene
 
-          !IF (debug) THEN
-            conv = (max_grad <= para_BFGS%max_grad)
-            write(out_unit,*) 'max_grad,treshold',max_grad,para_BFGS%max_grad,conv
-            conv = (RMS_grad <= para_BFGS%RMS_grad)
-            write(out_unit,*) 'RMS_grad,treshold',RMS_grad,para_BFGS%RMS_grad,conv
-            conv = (max_step <= para_BFGS%max_step)
-            write(out_unit,*) 'max_step,treshold',max_step,para_BFGS%max_step,conv
-            conv = (RMS_step <= para_BFGS%RMS_step)
-            write(out_unit,*) 'RMS_step,treshold',RMS_step,para_BFGS%RMS_step,conv
-          !END IF
+          conv = (max_grad <= para_BFGS%max_grad)
+          write(out_unit,*) 'it,max_grad,treshold',it,max_grad,para_BFGS%max_grad,conv
+          conv = (RMS_grad <= para_BFGS%RMS_grad)
+          write(out_unit,*) 'it,RMS_grad,treshold',it,RMS_grad,para_BFGS%RMS_grad,conv
+          conv = (max_step <= para_BFGS%max_step)
+          write(out_unit,*) 'it,max_step,treshold',it,max_step,para_BFGS%max_step,conv
+          conv = (RMS_step <= para_BFGS%RMS_step)
+          write(out_unit,*) 'it,RMS_step,treshold',it,RMS_step,para_BFGS%RMS_step,conv
         
           norm_disp = sqrt(dot_product(mDQit,mDQit))
           IF (norm_disp > para_BFGS%Largest_step) THEN
             write(out_unit,*) ' The displacements are too large.'
-            write(out_unit,*) ' The displacements:',-mDQit
+            IF (print_level > 1) write(out_unit,*) ' The displacements:',-mDQit
             write(out_unit,*) ' Its norm:',norm_disp
             write(out_unit,*) '  => They are scaled by ',para_BFGS%Largest_step/norm_disp
             mDQit = mDQit * para_BFGS%Largest_step/norm_disp
