@@ -928,7 +928,8 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
           ELSE
             CALL diagonalization(hess,diag,Vec,nb_Opt)
             IF (debug) write(out_unit,*) 'diag',diag ; flush(out_unit)
-          
+            write(out_unit,*) ' Number hessian negative eigenvalue(s): ',count(diag < ZERO)
+
             IF (para_BFGS%nb_neg == 0) THEN
               IF (count(diag < ZERO) /= 0) THEN 
                 write(out_unit,*) 'WARNING: some hessian eigenvalues are negative!'

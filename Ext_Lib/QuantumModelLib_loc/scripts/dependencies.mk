@@ -50,13 +50,15 @@ qml_ph4jo_m := $(OBJ_DIR)/PH4Jo_m.o
 adiachannels_makehinact_m := $(OBJ_DIR)/MakeHinact_m.o
 adiachannels_basis_m := $(OBJ_DIR)/Basis_m.o
 model_m := $(OBJ_DIR)/Model_m.o
+qmlvalues_m := $(OBJ_DIR)/QMLValues_m.o
 irc_m := $(OBJ_DIR)/IRC_m.o
 opt_m := $(OBJ_DIR)/Opt_m.o
 #===============================================
 #file+mod_name: SRC/QMLLib/FiniteDiff_m.f90 qmllib_finitediff_m
 $(OBJ_DIR)/FiniteDiff_m.o : \
           $(qdutil_numparameters_m) \
-          $(addnsvm_m)
+          $(addnsvm_m) \
+          $(qmlvalues_m)
 #file+mod_name: SRC/QMLLib/UtilLib_m.f90 qmllib_utillib_m
 $(OBJ_DIR)/UtilLib_m.o : \
           $(qdutil_numparameters_m) \
@@ -130,7 +132,8 @@ $(OBJ_DIR)/OneD_Photons2_m.o : \
 $(OBJ_DIR)/Poly1D_m.o : \
           $(qdutil_numparameters_m) \
           $(qml_empty_m) \
-          $(addnsvm_m)
+          $(addnsvm_m) \
+          $(qdutil_m)
 #file+mod_name: SRC/QML/LinearHBond_m.f90 qml_linearhbond_m
 $(OBJ_DIR)/LinearHBond_m.o : \
           $(qdutil_numparameters_m) \
@@ -420,8 +423,14 @@ $(OBJ_DIR)/Model_m.o : \
           $(qml_oned_photons_m) \
           $(qml_oned_photons2_m) \
           $(addnsvm_m) \
+          $(qmlvalues_m) \
           $(qmllib_finitediff_m) \
           $(qdutil_test_m)
+#file+mod_name: SRC/QMLValues_m.f90 qmlvalues_m
+$(OBJ_DIR)/QMLValues_m.o : \
+          $(qdutil_numparameters_m) \
+          $(addnsvm_m) \
+          $(qdutil_m)
 #file+mod_name: SRC/Opt/IRC_m.f90 irc_m
 $(OBJ_DIR)/IRC_m.o : \
           $(qdutil_numparameters_m) \

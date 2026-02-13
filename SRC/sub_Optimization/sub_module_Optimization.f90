@@ -355,7 +355,7 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
                       PrimOp,Qopt,                 &
                       para_Optimization%para_BFGS)
     CASE ('bfgs')
-      IF (para_Optimization%para_BFGS%calc_hessian_always) THEN
+      IF (para_Optimization%para_BFGS%calc_hessian_every_n == 1) THEN
         CALL Sub_Newton(BasisnD,para_Optimization%xOpt_min,para_Optimization%SQ, &
                         para_Optimization%nb_Opt,para_Tnum,mole,   &
                         PrimOp,Qopt,                 &

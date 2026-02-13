@@ -103,7 +103,7 @@
 !----- variables divers ----------------------------------------------
       TYPE (param_Optimization)      :: para_Optimization
       real (kind=Rkind)              :: Energ,P1,Norm_min
-      integer                        :: err_io,i,i0,i1,iOpt,nb_Opt,n,ib
+      integer                        :: err_io,i,i0,i1,iOpt,n,ib
       real (kind=Rkind), allocatable :: xOpt_min(:),SQ(:),SQini(:),QA(:),QB(:)
 
       real (kind=Rkind), allocatable :: freq(:),grad(:)
@@ -170,6 +170,7 @@
                                      para_Tnum,mole,                    &
                                      para_H%para_ReadOp%PrimOp_t,Qact)
         write(out_unit,*) 'Optimal param',para_Optimization%xOpt_min,' Energy',Energ
+        !write(out_unit,*) 'Qact         ',Qact
 
       END IF
       IF (para_Optimization%Freq) THEN
@@ -182,13 +183,11 @@
 
       IF (para_Optimization%Grad) THEN
         write(out_unit,*) '============ GRAD:'
-        CALL alloc_NParray(Grad,[nb_Opt],'Grad',name_sub)
+        CALL alloc_NParray(Grad,[para_Optimization%nb_Opt],'Grad',name_sub)
 
-        CALL Init_Tab_OF_dnMatOp(dnMatOp,mole%nb_act,                   &
-                           para_H%para_ReadOp%PrimOp_t%nb_elec,nderiv=1)
+        CALL Init_Tab_OF_dnMatOp(dnMatOp,mole%nb_act,para_H%para_ReadOp%PrimOp_t%nb_elec,nderiv=1)
 
-        CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,           &
-                                 para_H%para_ReadOp%PrimOp_t)
+        CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,para_H%para_ReadOp%PrimOp_t)
 
         CALL Get_Grad_FROM_Tab_OF_dnMatOp(Grad,dnMatOp) ! for the first electronic state
         write(out_unit,*) 'Grad: size, RMS',size(grad),sqrt(sum(grad**2)/size(grad))
