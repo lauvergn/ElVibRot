@@ -993,30 +993,31 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
                  (max_step <= para_BFGS%max_step) .AND.                               &
                  (RMS_step <= para_BFGS%RMS_step)
         
-        
-          IF (conv) THEN 
-            Qopt(1:nb_Opt) = Qopt(1:nb_Opt)-mDQit
-            EXIT
-          END IF
+          IF (para_BFGS%max_iteration > 0) THEN
+            IF (conv) THEN 
+              Qopt(1:nb_Opt) = Qopt(1:nb_Opt)-mDQit
+              EXIT
+            END IF
 
-          IF (para_BFGS%nb_neg == 0) THEN
-            sc_mDQit = ONE
-            DO
-              CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
-              Qact(1:nb_Opt) = Qopt(:)-sc_mDQit*mDQit
-              IF (debug) write(out_unit,*) 'Qact',Qact
-              CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=0)
-              Ene = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
-              write(out_unit,*) 'sc_mDQit,Ene,Ene0',sc_mDQit,Ene,Ene0
-              IF (Ene < Ene0) THEN
-                Qopt(:) = Qact(1:nb_Opt)
-                Ene0 = Ene
-                EXIT
-              END IF
-              sc_mDQit = sc_mDQit * HALF
-            END DO
-          ELSE
-            Qopt(1:nb_Opt) = Qopt(1:nb_Opt)-mDQit
+            IF (para_BFGS%nb_neg == 0) THEN
+              sc_mDQit = ONE
+              DO
+                CALL get_Qact0(Qact,mole%tab_Qtransfo(mole%itActive)%ActiveTransfo)
+                Qact(1:nb_Opt) = Qopt(:)-sc_mDQit*mDQit
+                IF (debug) write(out_unit,*) 'Qact',Qact
+                CALL get_dnMatOp_AT_Qact(Qact,dnMatOp,mole,para_Tnum,PrimOp,nderiv=0)
+                Ene = Get_Scal_FROM_Tab_OF_dnMatOp(dnMatOp)
+                write(out_unit,*) 'sc_mDQit,Ene,Ene0',sc_mDQit,Ene,Ene0
+                IF (Ene <= Ene0 .OR. sc_mDQit < ONETENTH**3) THEN
+                  Qopt(:) = Qact(1:nb_Opt)
+                  Ene0 = Ene
+                  EXIT
+                END IF
+                sc_mDQit = sc_mDQit * HALF
+              END DO
+            ELSE
+              Qopt(1:nb_Opt) = Qopt(1:nb_Opt)-mDQit
+            END IF
           END IF
 
 
