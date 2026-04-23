@@ -1,20 +1,23 @@
 
-nom=/Users/lauvergn/trav/EVR-old/ElVibRot_f90-v181.3-Tnum40.9-Tana11.5
+nom=/Users/lauvergn/Desktop/pb_Matheo_16-04-2026/For_David/ElVibRot-main
 #nom=$1
-moi=`pwd`
+here=`pwd`
 
-rm rdif
+rm -f rdif
 
 if test -s $nom
   then
 
     echo le repertoire $nom existe !!
-
-    for i in . Source*
+    for lib in . Ext_Lib/*_loc
     do
-
-      for f in makefile $i/*.f90 $i/*/*.f90 $i/*/*/*.f90
+      echo =========== $lib ==================================
+      echo =================================================== >> rdif
+      echo =========== $lib ================================== >> rdif
+      echo =================================================== >> rdif
+      for f in makefile $lib/SRC/*.f90 $lib/SRC/*/*.f90 $lib/SRC/*/*/*.f90
       do
+        test -e "$f" || continue
         echo ========================================================= >> rdif
         echo $f  $nom/$f >> rdif
         if diff $f $nom/$f >> rdif
@@ -25,13 +28,11 @@ if test -s $nom
            echo 'fichier diff',$f
            echo 'fichier diff',$f >> rdif
 #          cp $f $nom/$f
-           cp $nom/$f $f
+#          cp $nom/$f $f
         fi
         echo ========================================================= >> rdif
       done
-
     done
-
   else
     echo le repertoire $nom n existe pas
 fi
