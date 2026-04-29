@@ -52,7 +52,7 @@
       PUBLIC :: sub_read_psi0
       CONTAINS
 
-      SUBROUTINE sub_read_psi0(psi0,para_WP0,max_WP,symab,ortho)
+      SUBROUTINE sub_read_psi0(psi0,para_WP0,max_WP,symab,orthog)
         USE EVR_system_m
         USE mod_psi_set_alloc
         USE mod_ana_psi
@@ -66,7 +66,7 @@
         TYPE (param_WP0),    intent(inout)            :: para_WP0
         TYPE (param_psi),    intent(inout)            :: psi0(max_WP)
         integer,             intent(in),   optional   :: symab
-        logical,             intent(in),   optional   :: ortho
+        logical,             intent(in),   optional   :: orthog
       
       !------ working parameters --------------------------------
         logical                  :: cplx,ortho_loc
@@ -115,8 +115,8 @@
           symab_loc = -1
         END IF
       
-        IF (present(ortho)) THEN
-          ortho_loc = ortho
+        IF (present(orthog)) THEN
+          ortho_loc = orthog
         ELSE
           ortho_loc = .FALSE.
         END IF

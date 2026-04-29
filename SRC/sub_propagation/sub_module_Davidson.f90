@@ -821,7 +821,7 @@ CONTAINS
    para_WP0%file_WP0%formatted  = para_Davidson%formatted_file_readWP
 
    CALL sub_read_psi0(psi,para_WP0,max_diago,                      &
-                      symab=para_Davidson%symab,ortho=.TRUE.)
+                      symab=para_Davidson%symab,orthog=.TRUE.)
 
    nb_diago = para_WP0%nb_WP0
    para_Davidson%nb_WP0 = para_WP0%nb_WP0
