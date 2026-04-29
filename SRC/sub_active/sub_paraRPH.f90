@@ -121,10 +121,10 @@ CONTAINS
       END DO
 
       ! for tab_RPHpara_AT_Qact1
-      IF (.NOT. associated(RPHTransfo%tab_RPHpara_AT_Qact1)) THEN
+      IF (.NOT. allocated(RPHTransfo%tab_RPHpara_AT_Qact1)) THEN
         IF (debug) write(out_unit,*) ' tab_RPHpara_AT_Qact1'
-        CALL alloc_array(RPHTransfo%tab_RPHpara_AT_Qact1,[0],      &
-                        'RPHTransfo%tab_RPHpara_AT_Qact1',name_sub,[0])
+        CALL alloc_NParray(RPHTransfo%tab_RPHpara_AT_Qact1,[0],      &
+                          'RPHTransfo%tab_RPHpara_AT_Qact1',name_sub,[0])
 
         CALL get_Qact0(Qact,ActiveTransfo) ! rigid, flexible coordinates
         CALL Set_RPHpara_AT_Qact1(RPHTransfo%tab_RPHpara_AT_Qact1(0), &
@@ -362,16 +362,16 @@ CONTAINS
 
       !----------------------------------------------------------------
       !---- allocation of tab_RPHpara_AT_Qact1 ------------------------
-      IF (associated(RPHTransfo%tab_RPHpara_AT_Qact1)) THEN
+      IF (allocated(RPHTransfo%tab_RPHpara_AT_Qact1)) THEN
         CALL RPHpara1_AT_Qact1_TO_RPHpara2_AT_Qact1(                    &
                                RPHTransfo%tab_RPHpara_AT_Qact1(0), &
                                Type_RPHpara_AT_Qref)
-        CALL dealloc_array(RPHTransfo%tab_RPHpara_AT_Qact1,        &
+        CALL dealloc_NParray(RPHTransfo%tab_RPHpara_AT_Qact1,        &
                           'RPHTransfo%tab_RPHpara_AT_Qact1',name_sub)
       END IF
       RPHTransfo%nb_Qa = size(List_Qact1,dim=2)
-      CALL alloc_array(RPHTransfo%tab_RPHpara_AT_Qact1,[RPHTransfo%nb_Qa],&
-                      'RPHTransfo%tab_RPHpara_AT_Qact1',name_sub,[0])
+      CALL alloc_NParray(RPHTransfo%tab_RPHpara_AT_Qact1,[RPHTransfo%nb_Qa],&
+                        'RPHTransfo%tab_RPHpara_AT_Qact1',name_sub,[0])
       IF (Type_RPHpara_AT_Qref%init_done > 0) THEN
         CALL RPHpara1_AT_Qact1_TO_RPHpara2_AT_Qact1(Type_RPHpara_AT_Qref,&
                                RPHTransfo%tab_RPHpara_AT_Qact1(0))
@@ -554,8 +554,8 @@ CONTAINS
       !----------------------------------------------------------------
       !---- allocation of tab_RPHpara_AT_Qact1 ------------------------
       RPHTransfo%nb_Qa = size(List_Qact1,dim=2)
-      CALL alloc_array(RPHTransfo%tab_RPHpara_AT_Qact1,[RPHTransfo%nb_Qa],&
-                      'RPHTransfo%tab_RPHpara_AT_Qact1',name_sub)
+      CALL alloc_NParray(RPHTransfo%tab_RPHpara_AT_Qact1,[RPHTransfo%nb_Qa],&
+                        'RPHTransfo%tab_RPHpara_AT_Qact1',name_sub)
       !----------------------------------------------------------------
 
 

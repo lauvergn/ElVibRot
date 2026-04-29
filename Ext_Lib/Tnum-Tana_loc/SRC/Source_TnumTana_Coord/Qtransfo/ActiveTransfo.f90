@@ -34,7 +34,7 @@
 !===========================================================================
 MODULE mod_ActiveTransfo
       use TnumTana_system_m
-      use mod_dnSVM, only: alloc_array, dealloc_array, type_dnvec,   &
+      use mod_dnSVM, only: type_dnvec,   &
                            type_dns, write_dnsvm, alloc_dnsvm,       &
                            set_zero_to_dnsvm, sub_dns_to_dnvec,      &
                            dealloc_dnsvm, sub_dnS1_TO_dnS2
@@ -74,12 +74,6 @@ MODULE mod_ActiveTransfo
           GENERIC,   PUBLIC  :: assignment(=) => ActiveTransfo2_TO_ActiveTransfo1
       END TYPE Type_ActiveTransfo
 
-      INTERFACE alloc_array
-        MODULE PROCEDURE alloc_array_OF_ActiveTransfodim0
-      END INTERFACE
-      INTERFACE dealloc_array
-        MODULE PROCEDURE dealloc_array_OF_ActiveTransfodim0
-      END INTERFACE
       INTERFACE alloc_NParray
         MODULE PROCEDURE alloc_NParray_OF_ActiveTransfodim0
       END INTERFACE
@@ -188,55 +182,6 @@ CONTAINS
 
     END SUBROUTINE dealloc_ActiveTransfo
 
-    SUBROUTINE alloc_array_OF_ActiveTransfodim0(tab,name_var,name_sub)
-      IMPLICIT NONE
-
-      TYPE (Type_ActiveTransfo), pointer, intent(inout) :: tab
-
-      character (len=*), intent(in) :: name_var,name_sub
-
-      integer, parameter :: ndim=0
-      logical :: memory_test
-
-!----- for debuging --------------------------------------------------
-      character (len=*), parameter :: name_sub_alloc = 'alloc_array_OF_ActiveTransfodim0'
-      integer :: err_mem,memory
-      logical,parameter :: debug=.FALSE.
-!      logical,parameter :: debug=.TRUE.
-!----- for debuging --------------------------------------------------
-
-
-       IF (associated(tab))                                             &
-             CALL Write_error_NOT_null(name_sub_alloc,name_var,name_sub)
-
-       memory = 1
-       allocate(tab,stat=err_mem)
-       CALL error_memo_allo(err_mem,memory,name_var,name_sub,'Type_ActiveTransfo')
-
-      END SUBROUTINE alloc_array_OF_ActiveTransfodim0
-      SUBROUTINE dealloc_array_OF_ActiveTransfodim0(tab,name_var,name_sub)
-      IMPLICIT NONE
-
-      TYPE (Type_ActiveTransfo), pointer, intent(inout) :: tab
-      character (len=*), intent(in) :: name_var,name_sub
-
-!----- for debuging --------------------------------------------------
-      character (len=*), parameter :: name_sub_alloc = 'dealloc_array_OF_ActiveTransfodim0'
-      integer :: err_mem,memory
-      logical,parameter :: debug=.FALSE.
-!      logical,parameter :: debug=.TRUE.
-!----- for debuging --------------------------------------------------
-
-       !IF (.NOT. associated(tab)) RETURN
-       IF (.NOT. associated(tab))                                       &
-             CALL Write_error_null(name_sub_alloc,name_var,name_sub)
-
-       memory = 1
-       deallocate(tab,stat=err_mem)
-       CALL error_memo_allo(err_mem,-memory,name_var,name_sub,'Type_ActiveTransfo')
-       nullify(tab)
-
-      END SUBROUTINE dealloc_array_OF_ActiveTransfodim0
     SUBROUTINE alloc_NParray_OF_ActiveTransfodim0(tab,name_var,name_sub)
       IMPLICIT NONE
 
@@ -309,6 +254,7 @@ CONTAINS
         STOP
       END IF
 
+      flex = .FALSE.
       DO i=1,nb_Qin
         flex = ActiveTransfo%list_act_OF_Qdyn(i) == 20  .OR.                  &
                ActiveTransfo%list_act_OF_Qdyn(i) == 200 .OR.                  &
@@ -316,7 +262,6 @@ CONTAINS
         IF (flex) EXIT
       END DO
 
-      !write(6,*) 'ActiveTransfo%QMLib,flex',ActiveTransfo%QMLib,flex
       IF (ActiveTransfo%QMLib .AND. flex) THEN
         read(in_unit,*,IOSTAT=err) ActiveTransfo%list_QMLMapping(:)
         IF (err /= 0) THEN

@@ -1468,7 +1468,7 @@
       mole_loc                        = mole
       mole_loc%Cart_transfo           = .FALSE.
       ! If needed, change RPH transfo in flexible transfo
-      CALL CoordTypeRPH_TO_CoordTypeFlex(mole_loc)
+      IF (mole%itRPH > 1) CALL CoordTypeRPH_TO_CoordTypeFlex(mole_loc)
 
       CALL basis_TO_Allbasis(basis_Set,para_AllBasis_loc,mole_loc)
       !CALL RecWrite_basis(para_AllBasis_loc%BasisnD,write_all=.FALSE.)

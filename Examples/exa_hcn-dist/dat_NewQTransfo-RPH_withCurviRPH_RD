@@ -9,7 +9,7 @@ DIR_pot=$DIR_vib/sub_pot
  cp $SYSTEM $DIR_pot/sub_system.f
 
 cd $DIR_vib
- make extf=f
+ make OPT=0 extf=f
 cd $here
 
  x1=0.538516066

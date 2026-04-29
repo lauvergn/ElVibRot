@@ -296,7 +296,7 @@ STOP   'Compilation pb in Read_param_Optimization: !!! ?????'
   SUBROUTINE Sub_Optimization(BasisnD,para_Tnum,mole,PrimOp,Qopt,para_Optimization)
     USE EVR_system_m
     USE mod_dnSVM
-    use mod_Coord_KEO, only: CoordType, Tnum, alloc_array, dealloc_array
+    use mod_Coord_KEO, only: CoordType, Tnum
     USE mod_PrimOp
     USE mod_basis
     USE mod_Op

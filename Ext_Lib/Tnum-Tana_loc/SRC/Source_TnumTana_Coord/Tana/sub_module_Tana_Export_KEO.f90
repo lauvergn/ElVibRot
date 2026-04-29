@@ -592,8 +592,6 @@
        Cn_new = TWOxKEO%Cn(i) * get_coeff_OF_OpnD(TWOxKEO%sum_prod_op1d(i)) * CHALF
 
        write(i_out, '(A)') '     & ' // (get_Coef_name(Cn_new,With_format=.TRUE.) // FnDname) // ' \\'
-
-       !write(6,*) 'coucou: Op term',i,'coef',Cn_new,get_Coef_name(Cn_new,With_format=.TRUE.)
      END DO
 
      !  vep
@@ -798,12 +796,17 @@
     logical, parameter :: debug = .FALSE.
     !logical, parameter :: debug = .TRUE.
     character (len = Name_longlen) :: routine_name='write_keo_mctdh_form'
-
     IF (debug) THEN
-       write(out_unit,*) 'BEGINNING ',routine_name
-       flush(out_unit)
-       CALL write_op(keo,header=.TRUE.)
-       flush(out_unit)
+      write(out_unit,*) 'BEGINNING ',routine_name
+      flush(out_unit)
+      CALL write_op(keo,header=.TRUE.)
+
+      IF (allocated(mole%liste_QactTOQdyn)) THEN 
+        write(out_unit,*) 'mole%liste_QactTOQdyn ',mole%liste_QactTOQdyn
+      ELSE
+        write(out_unit,*) 'mole%liste_QactTOQdyn is not allocated'
+      END IF
+      flush(out_unit)
     END IF
 
     allocate(tab_Qname(size(tab_VarName)))

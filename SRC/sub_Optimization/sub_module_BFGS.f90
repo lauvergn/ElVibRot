@@ -246,12 +246,11 @@
         IF (allocated(para_BFGS%hessian_inv_init)) deallocate(para_BFGS%hessian_inv_init)
 
   END SUBROUTINE dealloc_param_BFGS
-  SUBROUTINE Sub_BFGS(BasisnD,xOpt_min,SQ,nb_Opt,                   &
-                          para_Tnum,mole,PrimOp,Qact,para_BFGS)
+  SUBROUTINE Sub_BFGS(BasisnD,xOpt_min,SQ,nb_Opt,para_Tnum,mole,PrimOp,Qact,para_BFGS)
 
       USE EVR_system_m
       USE mod_dnSVM
-      use mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array
+      use mod_Coord_KEO, only: CoordType, Tnum
       USE mod_PrimOp
       USE mod_basis
       USE mod_Op
@@ -458,7 +457,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 !---------------------------------------------------------------------------
 !
  USE EVR_system_m
- use mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array
+ use mod_Coord_KEO, only: CoordType, Tnum
  USE mod_PrimOp
  USE mod_basis
  USE mod_Op
@@ -627,7 +626,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 !---------------------------------------------------------------------
 !
  USE EVR_system_m
- USE mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array
+ USE mod_Coord_KEO, only: CoordType, Tnum
  USE mod_PrimOp
  USE mod_basis
  USE mod_Op
@@ -710,7 +709,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 !---------------------------------------------------------------------------
  USE EVR_system_m
  USE mod_dnSVM
- USE mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array,get_Qact0,sub_QactTOdnx
+ USE mod_Coord_KEO, only: CoordType, tnum,get_Qact0,sub_QactTOdnx
  USE mod_PrimOp
  USE mod_basis
  USE mod_Op
@@ -792,7 +791,7 @@ SUBROUTINE dfpmin_new(Qact,dnMatOp,mole,PrimOp,para_Tnum,para_BFGS,    &
 
         USE EVR_system_m
         USE mod_dnSVM
-        use mod_Coord_KEO, only: CoordType, tnum, alloc_array, dealloc_array
+        use mod_Coord_KEO, only: CoordType, Tnum
         USE mod_PrimOp
         USE mod_basis
         USE mod_Op

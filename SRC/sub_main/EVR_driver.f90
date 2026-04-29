@@ -2170,9 +2170,6 @@ SUBROUTINE Finalize_EVR()
       CALL dealloc_table_at(para_EVRT%const_phys%mendeleev)
 
       CALL dealloc_CoordType(para_EVRT%mole)
-      IF (associated(para_EVRT%para_Tnum%Gref)) THEN
-        CALL dealloc_array(para_EVRT%para_Tnum%Gref,"para_Tnum%Gref","vib")
-      END IF
       CALL dealloc_Tnum(para_EVRT%para_Tnum)
 
       CALL dealloc_para_AllOp(para_EVRT%para_AllOp)

@@ -1085,9 +1085,6 @@
       CALL dealloc_table_at(const_phys%mendeleev)
 
       CALL dealloc_CoordType(mole)
-      IF (associated(para_Tnum%Gref)) THEN
-        CALL dealloc_array(para_Tnum%Gref,"para_Tnum%Gref","vib")
-      END IF
       CALL dealloc_Tnum(para_Tnum)
 
       CALL dealloc_para_AllOp(para_AllOp)
@@ -1977,9 +1974,6 @@ para_mem%mem_debug = .FALSE.
       CALL dealloc_table_at(const_phys%mendeleev)
 
       CALL dealloc_CoordType(mole)
-      IF (associated(para_Tnum%Gref)) THEN
-        CALL dealloc_array(para_Tnum%Gref,"para_Tnum%Gref","vib")
-      END IF
       CALL dealloc_Tnum(para_Tnum)
 
       CALL dealloc_para_AllOp(para_AllOp)

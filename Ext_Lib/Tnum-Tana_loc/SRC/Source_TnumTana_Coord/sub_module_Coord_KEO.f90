@@ -47,7 +47,6 @@ MODULE mod_Coord_KEO
                                   Qdyn_TO_Qact_FROM_ActiveTransfo,       &
                                   Qinact2n_TO_Qact_FROM_ActiveTransfo
   USE mod_RPHTransfo,      ONLY : Type_RPHpara_AT_Qact1,Type_RPHTransfo, &
-                                  alloc_array,dealloc_array,             &
                                   alloc_NParray,dealloc_NParray,         &
                                   alloc_rphpara_at_qact1,switch_rph,     &
                                   write_rphtransfo,set_rphtransfo,       &
@@ -67,6 +66,7 @@ MODULE mod_Coord_KEO
                                   type_var_analysis_of_coordtype,       &
                                   CoordTypeRPH_TO_CoordTypeFlex,        &
                                   Set_OptimizationPara_FROM_CoordType
+  !USE mod_Tnum,             ONLY: CoordType2_TO_CoordType1
 
   USE mod_paramQ,          ONLY : sub_dnFCC_TO_dnFcurvi,sub_QactTOdnx,  &
                                   sub_QactTOQit,sub_QplusdQ_TO_cart,    &

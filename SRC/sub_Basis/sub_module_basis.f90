@@ -1107,8 +1107,8 @@ MODULE mod_basis
 
       IF (basis_set%dnRGB%alloc) THEN
         nderiv = 0
-        IF (associated(basis_set%dnRGB%d1)) nderiv = 1
-        IF (associated(basis_set%dnRGB%d2)) nderiv = 2
+        IF (allocated(basis_set%dnRGB%d1)) nderiv = 1
+        IF (allocated(basis_set%dnRGB%d2)) nderiv = 2
 
         dnRGBuncontract = basis_set%dnRGB
 
@@ -1374,13 +1374,13 @@ MODULE mod_basis
               basis_set%tab_ndim_index(:,ib) = basis_set%tab_ndim_index(:,jb)
               basis_set%tab_ndim_index(:,jb) = ni(:)
             END IF
-            IF (associated(basis_set%dnRGB%d0)) THEN
+            IF (allocated(basis_set%dnRGB%d0)) THEN
               bi(:)                    = basis_set%dnRGB%d0(:,ib)
               basis_set%dnRGB%d0(:,ib) = basis_set%dnRGB%d0(:,jb)
               basis_set%dnRGB%d0(:,jb) = bi(:)
             END IF
 
-            IF (associated(basis_set%dnRGB%d1)) THEN
+            IF (allocated(basis_set%dnRGB%d1)) THEN
               DO i=1,basis_set%ndim
                 bi(:)                      = basis_set%dnRGB%d1(:,ib,i)
                 basis_set%dnRGB%d1(:,ib,i) = basis_set%dnRGB%d1(:,jb,i)
@@ -1398,7 +1398,7 @@ MODULE mod_basis
               END DO
             END IF
 
-            IF (associated(basis_set%dnRGB%d2)) THEN
+            IF (allocated(basis_set%dnRGB%d2)) THEN
               DO i=1,basis_set%ndim
               DO j=1,basis_set%ndim
                 bi(:)                        = basis_set%dnRGB%d2(:,ib,i,j)
@@ -2213,12 +2213,12 @@ MODULE mod_basis
           flush(out_unit)
         END IF
 
-        IF (.NOT. associated(basis_set%dnRGB%d1) .OR.                   &
-                              .NOT. associated(basis_set%dnRGB%d2)) THEN
+        IF (.NOT. allocated(basis_set%dnRGB%d1) .OR.                   &
+                              .NOT. allocated(basis_set%dnRGB%d2)) THEN
           write(out_unit,*) 'ERROR in ',name_sub
           write(out_unit,*) '  dnRGB%d1 or dnRGB%d2',                  &
-            associated(basis_set%dnRGB%d1),associated(basis_set%dnRGB%d2)
-          write(out_unit,*) '  dnRGB%d1 or dnRGB%d2 are not associated!!'
+            allocated(basis_set%dnRGB%d1),allocated(basis_set%dnRGB%d2)
+          write(out_unit,*) '  dnRGB%d1 or dnRGB%d2 are not allocated!!'
           STOP
         END IF
 
@@ -4325,7 +4325,7 @@ END SUBROUTINE pack_basis_old
        IF (BasisnD%packed_done) THEN
          d0b      = BasisnD%dnRGB%d0(iq,ib)
 
-         IF (associated(BasisnD%dnRGB%d1) .AND. associated(BasisnD%dnRGB%d2)) THEN
+         IF (allocated(BasisnD%dnRGB%d1) .AND. allocated(BasisnD%dnRGB%d2)) THEN
            d1b(:)   = BasisnD%dnRGB%d1(iq,ib,:)
            d2b(:,:) = BasisnD%dnRGB%d2(iq,ib,:,:)
          ELSE

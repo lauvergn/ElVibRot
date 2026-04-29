@@ -5,7 +5,7 @@ here=`pwd`
 DIR_vib=$here/../..
 
 cd $DIR_vib
- make
+ make OPT=0
 cd $here
 
  x1=0.538516066

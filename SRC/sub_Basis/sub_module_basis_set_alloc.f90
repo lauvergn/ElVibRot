@@ -49,8 +49,8 @@ MODULE mod_basis_set_alloc
   use EVR_system_m
 
   use mod_dnSVM,   only: type_dnmat,type_dncplxmat,          &
-                         alloc_array, alloc_dncplxmat, alloc_dnmat,      &
-                         dealloc_dnmat, dealloc_dncplxmat, dealloc_array,&
+                         alloc_NParray, alloc_dncplxmat, alloc_dnmat,      &
+                         dealloc_dnmat, dealloc_dncplxmat, dealloc_NParray,&
                          write_dnsvm, write_dnmat, write_dncplxmat
   use mod_nDindex, only: type_ndindex, write_ndindex, dealloc_ndindex,  &
                          alloc_array, alloc_nparray,                    &
@@ -1505,13 +1505,13 @@ CONTAINS
          IF (basis_set%dnBBRep_done) THEN
 
            write(out_unit,*) 'clean d1b, d2b, d1cb, d2cb'
-           IF (associated(basis_set%dnRGB%d1)) THEN
-             CALL dealloc_array(basis_set%dnRGB%d1,'basis_set%dnRGB%d1',name_sub)
+           IF (allocated(basis_set%dnRGB%d1)) THEN
+             CALL dealloc_NParray(basis_set%dnRGB%d1,'basis_set%dnRGB%d1',name_sub)
              basis_set%dnRGB%nderiv = 0
            END IF
 
-           IF (associated(basis_set%dnRGB%d2)) THEN
-             CALL dealloc_array(basis_set%dnRGB%d2,'basis_set%dnRGB%d2',name_sub)
+           IF (allocated(basis_set%dnRGB%d2)) THEN
+             CALL dealloc_NParray(basis_set%dnRGB%d2,'basis_set%dnRGB%d2',name_sub)
              basis_set%dnRGB%nderiv = 0
            END IF
 
@@ -2292,7 +2292,7 @@ END SUBROUTINE Get2_MATdnPara_OF_RBB
     complex (kind=Rkind), intent(in)           :: B(:)
     complex (kind=Rkind), intent(inout)        :: G(:)
   
-    TYPE (basis),         intent(in)           :: base
+    TYPE (basis),         intent(in), target   :: base
     integer,              intent(in), optional :: der(2)
 
 
