@@ -2131,7 +2131,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
                               para_propa%WPdeltaT,j-1,With_diago=.TRUE.)
         IF (debug) write(out_unit,*) j-1,'abs(UPsiOnKrylov(j-1)',abs(UPsiOnKrylov(j-1))
         IF (abs(UPsiOnKrylov(j-1)) < para_propa%para_poly%poly_tol .OR. &
-            j == para_propa%para_poly%npoly+1) THEN
+            j == para_propa%para_poly%npoly+1 .OR. j == para_H%nb_tot) THEN
           n = j-1
           write(out_unit,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(j-1))
           EXIT
@@ -2162,7 +2162,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
       END DO
 
 
-      IF (abs(UPsiOnKrylov(n)) > para_propa%para_poly%poly_tol) THEN
+      IF (abs(UPsiOnKrylov(n)) > para_propa%para_poly%poly_tol .AND. j < para_H%nb_tot) THEN
         write(out_unit,*) ' ERROR in ',name_sub
         write(out_unit,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
         write(out_unit,*) '    abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
@@ -2340,7 +2340,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
                         j-1,With_diago=.TRUE.)
         !IF (debug) write(out_unit,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
         IF (abs(UPspectral_n) < para_propa%para_poly%poly_tol .OR. &
-            j == para_propa%para_poly%npoly+1) THEN
+            j == para_propa%para_poly%npoly+1 .OR. j == para_H%nb_tot) THEN
           n = j-1
           write(out_unit,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
           EXIT
@@ -2348,7 +2348,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       END DO
 
-      IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol) THEN
+      IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol .AND. j < para_H%nb_tot) THEN
         write(out_unit,*) ' ERROR in ',name_sub
         write(out_unit,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
         write(out_unit,*) '    abs(UPspectral_n)',abs(UPspectral_n)
@@ -2546,7 +2546,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
                         j-1,With_diago=.TRUE.)
         !IF (debug) write(out_unit,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
         IF (abs(UPspectral_n) < para_propa%para_poly%poly_tol .OR. &
-            j == para_propa%para_poly%npoly+1) THEN
+            j == para_propa%para_poly%npoly+1 .OR. j == para_H%nb_tot) THEN
           n = j-1
           write(out_unit,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
           EXIT
@@ -2554,7 +2554,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       END DO
 
-      IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol) THEN
+      IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol .AND. j < para_H%nb_tot) THEN
         write(out_unit,*) ' ERROR in ',name_sub
         write(out_unit,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
         write(out_unit,*) '    abs(UPspectral_n)',abs(UPspectral_n)
@@ -2809,7 +2809,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
                         j-1,With_diago=.TRUE.)
         !IF (debug) write(out_unit,*) j-1,'abs(UPspectral_n)',abs(UPspectral_n)
         IF (abs(UPspectral_n) < para_propa%para_poly%poly_tol .OR. &
-            j == para_propa%para_poly%npoly+1) THEN
+            j == para_propa%para_poly%npoly+1 .OR. j == para_H%nb_tot) THEN
           n = j-1
           write(out_unit,*) n,'abs(UPspectral_n)',abs(UPspectral_n)
           EXIT
@@ -2817,7 +2817,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
 
       END DO
 
-      IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol) THEN
+      IF (abs(UPspectral_n) > para_propa%para_poly%poly_tol .AND. j < para_H%nb_tot) THEN
         write(out_unit,*) ' ERROR in ',name_sub
         write(out_unit,*) ' The last vector, UPsiOnKrylov(n), coefficient is TOO large'
         write(out_unit,*) '    abs(UPspectral_n)',abs(UPspectral_n)
@@ -3007,7 +3007,7 @@ END SUBROUTINE Make_SMatrix_WITH_TDParam
                                   para_propa%WPdeltaT,k,With_diago=.TRUE.)
           !write(out_unit,*) k,'abs(UPsiOnKrylov(k)',abs(UPsiOnKrylov(k))
           IF (abs(UPsiOnKrylov(k)) < para_propa%para_poly%poly_tol .OR. &
-            k == para_propa%para_poly%npoly) THEN
+            k == para_propa%para_poly%npoly .OR. k == para_H%nb_tot) THEN
             n = k
             write(out_unit,*) n,'abs(UPsiOnKrylov(n)',abs(UPsiOnKrylov(n))
             !EXIT

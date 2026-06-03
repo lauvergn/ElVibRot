@@ -1323,7 +1323,6 @@ END SUBROUTINE sub_OpBasis_OneCBF
       logical, intent(in) :: pot_only
 
       integer          :: n
-
       integer          :: iOp
 
       !----- variables for the WP --------------------------------------
@@ -1332,14 +1331,11 @@ END SUBROUTINE sub_OpBasis_OneCBF
       real (kind=Rkind), allocatable       :: RG1(:)
       complex (kind=Rkind), allocatable    :: CG1(:)
 
-
       !----- working variables -----------------------------------------
       integer :: i1_bi,i2_bi
       integer :: i_qa,iqi1,fqi1,iqi2,fqi2
       integer :: i,ki,k
-
-      integer                  :: nio,error,iterm
-
+      integer :: nio,error,iterm
 
       !----- for debuging ----------------------------------------------
       integer :: err_mem,memory
@@ -1354,6 +1350,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
         write(out_unit,*) 'nb_act1',para_Op%mole%nb_act1
         write(out_unit,*) 'nb_var',para_Op%mole%nb_var
         write(out_unit,*) 'para_Op...%Save_MemGrid_done',para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
+        write(out_unit,*) 'para_Op%cplx',para_Op%cplx
         !flush(out_unit)
         !CALL write_param_Op(para_Op)
         write(out_unit,*)
