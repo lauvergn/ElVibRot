@@ -1,0 +1,7 @@
+
+file_auto=$1
+
+
+spectre.exe <<  **
+&param  Emin=4500. Emax=10000. dE=1. conv_E=219474.631443 file_auto='$file_auto' /
+**
