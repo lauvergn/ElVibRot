@@ -1843,15 +1843,16 @@ END SUBROUTINE sub_analyze_psi
     integer          :: ndim_AT_ib(psi%BasisnD%nDindB%ndim)
     integer          :: nDval(psi%BasisnD%nDindB%ndim)
 
-    character (len=:), allocatable :: state_name
+    character (len=:),    allocatable :: state_name
 
     real (kind=Rkind)                 :: r2
     real (kind=Rkind),    allocatable :: RDcontrac(:,:)   ! reduced density matrix with the contracted basis set (nbc,nbc)
     real (kind=Rkind),    allocatable :: RD(:,:)          ! reduced density matrix (nb,nb)
     complex (kind=Rkind), allocatable :: CRDcontrac(:,:)  ! reduced density matrix with the contracted basis set (nbc,nbc)
     complex (kind=Rkind), allocatable :: CRD(:,:)         ! reduced density matrix (nb,nb)
+    real (kind=Rkind),    allocatable :: RNumber(:,:,:),Avib(:,:,:) ! matrix as function of number of basis and vibrational, electronic channels
 
-    TYPE (param_RD),   allocatable :: para_RD(:) ! it is allocated only for BasisnD. The size is nb_basis
+    TYPE (param_RD),      allocatable :: para_RD(:) ! it is allocated only for BasisnD. The size is nb_basis
 
 !----- for debuging --------------------------------------------------
     character (len=*), parameter :: name_sub='calc_1Dweight_act1'
@@ -1898,6 +1899,8 @@ END SUBROUTINE sub_analyze_psi
     END IF
 
     ibie = 0
+    allocate(RNumber(psi%BasisnD%nDindB%ndim,psi%nb_bi,psi%nb_be))
+    allocate(Avib(psi%BasisnD%nDindB%ndim,psi%nb_bi,psi%nb_be))
     DO ie=1,psi%nb_be
     DO ii=1,psi%nb_bi
       weight1Dact(:,:) = ZERO
@@ -1944,6 +1947,12 @@ END SUBROUTINE sub_analyze_psi
       IF (print_w .OR. debug) THEN
         DO iq=1,psi%BasisnD%nDindB%ndim
           ndim = ndim_AT_ib(iq)
+          RNumber(iq,ii,ie) = ZERO
+          Avib(iq,ii,ie)    = ZERO
+          DO i=1,ndim
+            RNumber(iq,ii,ie) = RNumber(iq,ii,ie) + weight1Dact(iq,i) * real(i-1,kind=Rkind)
+            Avib(iq,ii,ie)    = Avib(iq,ii,ie)    + weight1Dact(iq,i) * real(i,kind=Rkind)
+          END DO
           IF (sum(weight1Dact(iq,1:ndim))-ONE > ONETENTH**7) THEN
             CALL ADD_TO_string(PsiAna,state_name,' Sum(RD)/=1',trim(info),' ', &
                  TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(T,'e10.3'),new_line('nl'))
@@ -1951,6 +1960,10 @@ END SUBROUTINE sub_analyze_psi
           CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
                TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,1:ndim),'e10.3'),new_line('nl'))
 
+          CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
+               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib-1>=<N> ',TO_string(RNumber(iq,ii,ie),'f9.6'),new_line('nl'))
+          CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
+               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib>       ',TO_string(Avib(iq,ii,ie),'f9.6'),new_line('nl'))
           !---- RD analysis --------------------------------------------
           ! RD analysis
           IF (allocated(para_RD)) THEN
@@ -2030,8 +2043,17 @@ END SUBROUTINE sub_analyze_psi
     END DO
     END DO
 
+    DO iq=1,psi%BasisnD%nDindB%ndim
+      CALL ADD_TO_string(PsiAna,'all channels ',trim(info),' ', &
+               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib-1>=<N> ',TO_string(sum(RNumber(iq,:,:)),'f9.6'),new_line('nl'))
+      CALL ADD_TO_string(PsiAna,'all channels ',trim(info),' ', &
+               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib>       ',TO_string(sum(Avib(iq,:,:)),'f9.6'),new_line('nl'))
+    END DO
+
     CALL dealloc_NParray(weight1Dact,"weight1Dact",name_sub)
     CALL dealloc_tab_RD(para_RD)
+    deallocate(RNumber)
+    deallocate(Avib)
 
 !-----------------------------------------------------------
     IF (debug) THEN

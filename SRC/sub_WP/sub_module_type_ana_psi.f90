@@ -101,6 +101,7 @@
       logical                        :: AvHiterm      = .FALSE.   ! Average value of H term by term
       logical                        :: AvPi          = .FALSE.   ! Average value of Pi operators
       logical                        :: AvOp          = .FALSE.   ! Average value of all operators (except H and S)
+      logical                        :: AvNum         = .FALSE.   ! Average value of number operators
 
       
       ! For quantum coherence Mij = Int [rho_i(Q)*rho_j(Q)/rho(Q) dQ]
@@ -150,7 +151,7 @@
                             Write_psi_Grid,Write_psi_Basis,     &
                             Write_psi,                          &
                             AvQ_Order,Qtransfo_type,            &
-                            AvScalOp,AvHiterm,AvPi,AvOp,        &
+                            AvScalOp,AvHiterm,AvPi,AvOp,AvNum,  &
                             coherence,coherence_epsi,           &
                             ExactFact,                          &
                             Rho1D,Rho2D,Weight_Rho,Qana_Weight, &
@@ -172,7 +173,7 @@
     logical,                        optional :: Write_psi_Grid,Write_psi_Basis
     logical,                        optional :: Write_psi
 
-    logical,                        optional :: AvScalOp,AvHiterm,AvPi,AvOp
+    logical,                        optional :: AvScalOp,AvHiterm,AvPi,AvOp,AvNum
     integer,                        optional :: AvQ_Order
     integer,           allocatable, optional :: Qtransfo_type(:)     ! type of the transformation
 
@@ -307,7 +308,8 @@
     IF (present(AvPi))             ana_psi%AvPi             = AvPi
     ana_psi%AvOp     = .FALSE.
     IF (present(AvOp))             ana_psi%AvOp             = AvOp
-    
+    ana_psi%AvNum    = .FALSE.
+    IF (present(AvNum))            ana_psi%AvNum            = AvNum
 
     !------------------------------------------------------------
 
@@ -365,8 +367,8 @@
                             Write_psi2_Grid,Write_psi2_Basis,   &
                             Write_psi_Grid,Write_psi_Basis,     &
                             Write_psi,                          &
-                            AvQ_Order,Qtransfo_type,                  &
-                            AvScalOp,AvHiterm,AvPi,AvOp,        &
+                            AvQ_Order,Qtransfo_type,            &
+                            AvScalOp,AvHiterm,AvPi,AvOp,AvNum,  &
                             coherence,coherence_epsi,           &
                             ExactFact,                          &
                             Rho1D,Rho2D,Weight_Rho,Qana_Weight, &
@@ -387,7 +389,7 @@
     logical,                        optional :: Write_psi_Grid,Write_psi_Basis
     logical,                        optional :: Write_psi
 
-    logical,                        optional :: AvScalOp,AvHiterm,AvPi,AvOp
+    logical,                        optional :: AvScalOp,AvHiterm,AvPi,AvOp,AvNum
     integer,                        optional :: AvQ_Order
     integer,           allocatable, optional :: Qtransfo_type(:)     ! type of the transformation
 
@@ -501,6 +503,7 @@
     IF (present(AvHiterm))         ana_psi%AvHiterm         = AvHiterm
     IF (present(AvPi))             ana_psi%AvPi             = AvPi
     IF (present(AvOp))             ana_psi%AvOp             = AvOp
+    IF (present(AvNum))            ana_psi%AvNum            = AvNum
     !------------------------------------------------------------
 
 
@@ -616,6 +619,7 @@
     ana_psi1%AvHiterm      = ana_psi2%AvHiterm
     ana_psi1%AvPi          = ana_psi2%AvPi
     ana_psi1%AvOp          = ana_psi2%AvOp
+    ana_psi1%AvNum         = ana_psi2%AvNum
 
 
     ana_psi1%adia          = ana_psi2%adia
@@ -731,6 +735,7 @@
     write(out_unit,*) 'AvPi',ana_psi%AvPi
     write(out_unit,*) 'Average over operators (except H and S):'
     write(out_unit,*) 'AvOp',ana_psi%AvOp
+    write(out_unit,*) 'AvNum',ana_psi%AvNum
 
     write(out_unit,*)
     write(out_unit,*) 'Coherence:?'
