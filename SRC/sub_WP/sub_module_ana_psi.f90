@@ -1851,6 +1851,7 @@ END SUBROUTINE sub_analyze_psi
     complex (kind=Rkind), allocatable :: CRDcontrac(:,:)  ! reduced density matrix with the contracted basis set (nbc,nbc)
     complex (kind=Rkind), allocatable :: CRD(:,:)         ! reduced density matrix (nb,nb)
     real (kind=Rkind),    allocatable :: RNumber(:,:,:),Avib(:,:,:) ! matrix as function of number of basis and vibrational, electronic channels
+    character (len=:),    allocatable :: Avib_Fmt
 
     TYPE (param_RD),      allocatable :: para_RD(:) ! it is allocated only for BasisnD. The size is nb_basis
 
@@ -1960,10 +1961,15 @@ END SUBROUTINE sub_analyze_psi
           CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
                TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,1:ndim),'e10.3'),new_line('nl'))
 
+          IF (Avib(iq,ii,ie) > TEN) THEN 
+            Avib_Fmt = 'e11.4'
+          ELSE
+            Avib_Fmt = 'f9.6'
+          END IF
           CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
-               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib-1>=<N> ',TO_string(RNumber(iq,ii,ie),'f9.6'),new_line('nl'))
+               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib-1>=<N> ',TO_string(RNumber(iq,ii,ie),Avib_Fmt),new_line('nl'))
           CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
-               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib>       ',TO_string(Avib(iq,ii,ie),'f9.6'),new_line('nl'))
+               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib>       ',TO_string(Avib(iq,ii,ie),Avib_Fmt),new_line('nl'))
           !---- RD analysis --------------------------------------------
           ! RD analysis
           IF (allocated(para_RD)) THEN
@@ -2043,12 +2049,19 @@ END SUBROUTINE sub_analyze_psi
     END DO
     END DO
 
-    DO iq=1,psi%BasisnD%nDindB%ndim
-      CALL ADD_TO_string(PsiAna,'all channels ',trim(info),' ', &
-               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib-1>=<N> ',TO_string(sum(RNumber(iq,:,:)),'f9.6'),new_line('nl'))
-      CALL ADD_TO_string(PsiAna,'all channels ',trim(info),' ', &
-               TO_string(iq),' ',TO_string(T,'f17.4'),' <ib>       ',TO_string(sum(Avib(iq,:,:)),'f9.6'),new_line('nl'))
-    END DO
+    IF (size(Avib(1,:,:)) > 1) THEN
+      DO iq=1,psi%BasisnD%nDindB%ndim
+        IF (sum(Avib(iq,:,:)) > TEN) THEN 
+          Avib_Fmt = 'e11.4'
+        ELSE
+          Avib_Fmt = 'f9.6'
+        END IF
+        CALL ADD_TO_string(PsiAna,'all channels ',trim(info),' ', &
+                 TO_string(iq),' ',TO_string(T,'f17.4'),' <ib-1>=<N> ',TO_string(sum(RNumber(iq,:,:)),Avib_Fmt),new_line('nl'))
+        CALL ADD_TO_string(PsiAna,'all channels ',trim(info),' ', &
+                 TO_string(iq),' ',TO_string(T,'f17.4'),' <ib>       ',TO_string(sum(Avib(iq,:,:)),Avib_Fmt),new_line('nl'))
+      END DO
+    END IF
 
     CALL dealloc_NParray(weight1Dact,"weight1Dact",name_sub)
     CALL dealloc_tab_RD(para_RD)
