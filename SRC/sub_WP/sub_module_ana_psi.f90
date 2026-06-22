@@ -1834,7 +1834,7 @@ END SUBROUTINE sub_analyze_psi
     integer,                        intent(in)    :: max_1D
 
 
-    real (kind=Rkind), allocatable :: weight1Dact(:,:)
+    real (kind=Rkind), allocatable :: weight1Dact(:,:,:,:)
     real (kind=Rkind)    :: a
 
     integer          :: i,ie,ii,ib,ibie,iq,ibiq,n,ii_baie,if_baie
@@ -1875,7 +1875,8 @@ END SUBROUTINE sub_analyze_psi
     ELSE
       max_dim = maxval(psi%BasisnD%nDindB%nDsize(1:psi%BasisnD%nDindB%ndim))
     END IF
-    CALL alloc_NParray(weight1Dact,[psi%BasisnD%nDindB%ndim,max_dim],"weight1Dact",name_sub)
+    CALL alloc_NParray(weight1Dact,[psi%BasisnD%nDindB%ndim,max_dim,psi%nb_bi,psi%nb_be],"weight1Dact",name_sub)
+    weight1Dact(:,:,:,:) = ZERO
 
     !---- RD analysis (for contrac_analysis=t) -------------------------
     ! initialization for RD analysis
@@ -1883,9 +1884,7 @@ END SUBROUTINE sub_analyze_psi
       allocate(para_RD(psi%BasisnD%nb_basis))
 
       DO ib=1,size(para_RD)
-        para_RD(ib)%RD_analysis =                                       &
-                      psi%BasisnD%tab_Pbasis(ib)%Pbasis%contrac_analysis
-
+        para_RD(ib)%RD_analysis = psi%BasisnD%tab_Pbasis(ib)%Pbasis%contrac_analysis
         !para_RD(ib)%RD_analysis = .TRUE.
 
         para_RD(ib)%basis_index = ib
@@ -1904,7 +1903,6 @@ END SUBROUTINE sub_analyze_psi
     allocate(Avib(psi%BasisnD%nDindB%ndim,psi%nb_bi,psi%nb_be))
     DO ie=1,psi%nb_be
     DO ii=1,psi%nb_bi
-      weight1Dact(:,:) = ZERO
       ndim_AT_ib(:)    = 0
       IF (ie == 1 .AND. ii == 1) THEN
         CALL SET_string(state_name,'Grd Channel')
@@ -1924,7 +1922,7 @@ END SUBROUTINE sub_analyze_psi
             ibiq = nDval(iq)
             ndim_AT_ib(iq) = max(ibiq,ndim_AT_ib(iq))
             !write(out_unit,*) 'calc_1Dweight',iq,ibiq,ib
-            weight1Dact(iq,ibiq) = weight1Dact(iq,ibiq) + a
+            weight1Dact(iq,ibiq,ii,ie) = weight1Dact(iq,ibiq,ii,ie) + a
           END DO
         END DO
       ELSE
@@ -1939,7 +1937,7 @@ END SUBROUTINE sub_analyze_psi
             ibiq = nDval(iq)
             ndim_AT_ib(iq) = max(ibiq,ndim_AT_ib(iq))
             !write(out_unit,*) 'calc_1Dweight',iq,ibiq,ib
-            weight1Dact(iq,ibiq) = weight1Dact(iq,ibiq) + a
+            weight1Dact(iq,ibiq,ii,ie) = weight1Dact(iq,ibiq,ii,ie) + a
           END DO
         END DO
       END IF
@@ -1951,15 +1949,15 @@ END SUBROUTINE sub_analyze_psi
           RNumber(iq,ii,ie) = ZERO
           Avib(iq,ii,ie)    = ZERO
           DO i=1,ndim
-            RNumber(iq,ii,ie) = RNumber(iq,ii,ie) + weight1Dact(iq,i) * real(i-1,kind=Rkind)
-            Avib(iq,ii,ie)    = Avib(iq,ii,ie)    + weight1Dact(iq,i) * real(i,kind=Rkind)
+            RNumber(iq,ii,ie) = RNumber(iq,ii,ie) + weight1Dact(iq,i,ii,ie) * real(i-1,kind=Rkind)
+            Avib(iq,ii,ie)    = Avib(iq,ii,ie)    + weight1Dact(iq,i,ii,ie) * real(i,kind=Rkind)
           END DO
-          IF (sum(weight1Dact(iq,1:ndim))-ONE > ONETENTH**7) THEN
+          IF (sum(weight1Dact(iq,1:ndim,ii,ie))-ONE > ONETENTH**7) THEN
             CALL ADD_TO_string(PsiAna,state_name,' Sum(RD)/=1',trim(info),' ', &
                  TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(T,'e10.3'),new_line('nl'))
           END IF
           CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
-               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,1:ndim),'e10.3'),new_line('nl'))
+               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,1:ndim,ii,ie),'e10.3'),new_line('nl'))
 
           IF (Avib(iq,ii,ie) > TEN) THEN 
             Avib_Fmt = 'e11.4'
@@ -1983,19 +1981,19 @@ END SUBROUTINE sub_analyze_psi
 
               IF (allocated(CRD)) THEN
                 n = min(ndim_AT_ib(iq),size(CRD,dim=1))
-                weight1Dact(iq,1:n) = real([(CRD(i,i),i=1,n)],kind=Rkind)
+                weight1Dact(iq,1:n,ii,ie) = real([(CRD(i,i),i=1,n)],kind=Rkind)
                 CALL ADD_TO_string(PsiAna,state_name,' new',trim(info),' ', &
-                    TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n),'e10.3'),new_line('nl'))
+                    TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n,ii,ie),'e10.3'),new_line('nl'))
                 
                 CALL dealloc_NParray(CRD,'CRD',name_sub)
               END IF
 
               IF (allocated(CRDcontrac)) THEN
                 n = min(ndim_AT_ib(iq),size(CRDcontrac,dim=1))
-                weight1Dact(iq,1:n) = real([(CRDcontrac(i,i),i=1,n)],kind=Rkind)
+                weight1Dact(iq,1:n,ii,ie) = real([(CRDcontrac(i,i),i=1,n)],kind=Rkind)
 
                 CALL ADD_TO_string(PsiAna,state_name,' c',trim(info),' ', &
-                  TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n),'e10.3'),new_line('nl'))
+                  TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n,ii,ie),'e10.3'),new_line('nl'))
 
                 CALL dealloc_NParray(CRDcontrac,'CRDcontrac',name_sub)
               END IF
@@ -2012,10 +2010,10 @@ END SUBROUTINE sub_analyze_psi
 
               IF (allocated(RDcontrac)) THEN
                 n = min(ndim_AT_ib(iq),size(RDcontrac,dim=1))
-                weight1Dact(iq,1:n) = [(RDcontrac(i,i),i=1,n)]
+                weight1Dact(iq,1:n,ii,ie) = [(RDcontrac(i,i),i=1,n)]
 
                 CALL ADD_TO_string(PsiAna,state_name,' c',trim(info),' ', &
-                TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n),'e10.3'),new_line('nl'))
+                TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n,ii,ie),'e10.3'),new_line('nl'))
 
                 CALL dealloc_NParray(RDcontrac,'RDcontrac',name_sub)
               END IF
@@ -2025,7 +2023,7 @@ END SUBROUTINE sub_analyze_psi
           END IF
           !---- END RD analysis ----------------------------------------
 
-          max_indGr(iq) = sum(maxloc(weight1Dact(iq,1:ndim_AT_ib(iq))))
+          max_indGr(iq) = sum(maxloc(weight1Dact(iq,1:ndim_AT_ib(iq),ii,ie)))
         END DO
         CALL ADD_TO_string(PsiAna,'max_ind ',state_name ,' at ',trim(info), &
                            ' ',TO_string(max_indGr(1:size(max_indGr))),new_line('nl'))
@@ -2040,7 +2038,7 @@ END SUBROUTINE sub_analyze_psi
         ana_psi%max_RedDensity(iq) = ZERO
         DO ib=1,ndim_AT_ib(iq)
           r2 = real(ndim_AT_ib(iq)-ib,kind=Rkind)**2
-          ana_psi%max_RedDensity(iq) = ana_psi%max_RedDensity(iq) + weight1Dact(iq,ib)*exp(-r2)
+          ana_psi%max_RedDensity(iq) = ana_psi%max_RedDensity(iq) + weight1Dact(iq,ib,ii,ie)*exp(-r2)
         END DO
       END DO
 
@@ -2049,8 +2047,11 @@ END SUBROUTINE sub_analyze_psi
     END DO
     END DO
 
-    IF (size(Avib(1,:,:)) > 1) THEN
+    IF (psi%nb_bi*psi%nb_be > 1) THEN
+
       DO iq=1,psi%BasisnD%nDindB%ndim
+        
+
         IF (sum(Avib(iq,:,:)) > TEN) THEN 
           Avib_Fmt = 'e11.4'
         ELSE
