@@ -1834,7 +1834,7 @@ END SUBROUTINE sub_analyze_psi
     integer,                        intent(in)    :: max_1D
 
 
-    real (kind=Rkind), allocatable :: weight1Dact(:,:,:,:)
+    real (kind=Rkind), allocatable :: weight1Dact(:,:,:,:),weight1D(:)
     real (kind=Rkind)    :: a
 
     integer          :: i,ie,ii,ib,ibie,iq,ibiq,n,ii_baie,if_baie
@@ -2050,7 +2050,20 @@ END SUBROUTINE sub_analyze_psi
     IF (psi%nb_bi*psi%nb_be > 1) THEN
 
       DO iq=1,psi%BasisnD%nDindB%ndim
-        
+        ndim = ndim_AT_ib(iq)
+        allocate(Weight1D(ndim))
+        DO i=1,ndim
+          Weight1D(i) = sum(weight1Dact(iq,i,:,:))
+        END DO
+
+        IF (sum(weight1Dact(iq,1:ndim,:,:))-ONE > ONETENTH**7) THEN
+           CALL ADD_TO_string(PsiAna,'all channels, Sum(RD)/=1',trim(info),' ', &
+                  TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(T,'e10.3'),new_line('nl'))
+        END IF
+        CALL ADD_TO_string(PsiAna,'all channels ',trim(info),' ', &
+               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(Weight1D(:),'e10.3'),new_line('nl'))
+
+        deallocate(Weight1D)
 
         IF (sum(Avib(iq,:,:)) > TEN) THEN 
           Avib_Fmt = 'e11.4'
