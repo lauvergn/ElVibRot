@@ -1838,7 +1838,7 @@ END SUBROUTINE sub_analyze_psi
     real (kind=Rkind)    :: a
 
     integer          :: i,ie,ii,ib,ibie,iq,ibiq,n,ii_baie,if_baie
-    integer          :: max_dim,ndim
+    integer          :: max_dim,ndim,ndim_print
     integer          :: max_indGr(psi%BasisnD%nDindB%ndim)
     integer          :: ndim_AT_ib(psi%BasisnD%nDindB%ndim)
     integer          :: nDval(psi%BasisnD%nDindB%ndim)
@@ -1946,6 +1946,7 @@ END SUBROUTINE sub_analyze_psi
       IF (print_w .OR. debug) THEN
         DO iq=1,psi%BasisnD%nDindB%ndim
           ndim = ndim_AT_ib(iq)
+          ndim_print = min(ndim,ana_psi%max_nb_Weight1D)
           RNumber(iq,ii,ie) = ZERO
           Avib(iq,ii,ie)    = ZERO
           DO i=1,ndim
@@ -1957,7 +1958,7 @@ END SUBROUTINE sub_analyze_psi
                  TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(T,'e10.3'),new_line('nl'))
           END IF
           CALL ADD_TO_string(PsiAna,state_name,' ',trim(info),' ', &
-               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,1:ndim,ii,ie),'e10.3'),new_line('nl'))
+               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(weight1Dact(iq,1:ndim_print,ii,ie),'e12.5'),new_line('nl'))
 
           IF (Avib(iq,ii,ie) > TEN) THEN 
             Avib_Fmt = 'e11.4'
@@ -1981,19 +1982,22 @@ END SUBROUTINE sub_analyze_psi
 
               IF (allocated(CRD)) THEN
                 n = min(ndim_AT_ib(iq),size(CRD,dim=1))
+                ndim_print = min(n,ana_psi%max_nb_Weight1D)
+
                 weight1Dact(iq,1:n,ii,ie) = real([(CRD(i,i),i=1,n)],kind=Rkind)
                 CALL ADD_TO_string(PsiAna,state_name,' new',trim(info),' ', &
-                    TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n,ii,ie),'e10.3'),new_line('nl'))
+                    TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:ndim_print,ii,ie),'e12.5'),new_line('nl'))
                 
                 CALL dealloc_NParray(CRD,'CRD',name_sub)
               END IF
 
               IF (allocated(CRDcontrac)) THEN
                 n = min(ndim_AT_ib(iq),size(CRDcontrac,dim=1))
+                ndim_print = min(n,ana_psi%max_nb_Weight1D)
                 weight1Dact(iq,1:n,ii,ie) = real([(CRDcontrac(i,i),i=1,n)],kind=Rkind)
 
                 CALL ADD_TO_string(PsiAna,state_name,' c',trim(info),' ', &
-                  TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n,ii,ie),'e10.3'),new_line('nl'))
+                  TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:ndim_print,ii,ie),'e12.5'),new_line('nl'))
 
                 CALL dealloc_NParray(CRDcontrac,'CRDcontrac',name_sub)
               END IF
@@ -2010,10 +2014,12 @@ END SUBROUTINE sub_analyze_psi
 
               IF (allocated(RDcontrac)) THEN
                 n = min(ndim_AT_ib(iq),size(RDcontrac,dim=1))
+                ndim_print = min(n,ana_psi%max_nb_Weight1D)
+
                 weight1Dact(iq,1:n,ii,ie) = [(RDcontrac(i,i),i=1,n)]
 
                 CALL ADD_TO_string(PsiAna,state_name,' c',trim(info),' ', &
-                TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:n,ii,ie),'e10.3'),new_line('nl'))
+                TO_string(iq),' ',TO_string(T,'f17.4'),TO_string(weight1Dact(iq,1:ndim_print,ii,ie),'e12.5'),new_line('nl'))
 
                 CALL dealloc_NParray(RDcontrac,'RDcontrac',name_sub)
               END IF
@@ -2051,6 +2057,7 @@ END SUBROUTINE sub_analyze_psi
 
       DO iq=1,psi%BasisnD%nDindB%ndim
         ndim = ndim_AT_ib(iq)
+        ndim_print = min(ndim,ana_psi%max_nb_Weight1D)
         allocate(Weight1D(ndim))
         DO i=1,ndim
           Weight1D(i) = sum(weight1Dact(iq,i,:,:))
@@ -2061,7 +2068,7 @@ END SUBROUTINE sub_analyze_psi
                   TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(T,'e10.3'),new_line('nl'))
         END IF
         CALL ADD_TO_string(PsiAna,'all channels ',trim(info),' ', &
-               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(Weight1D(:),'e10.3'),new_line('nl'))
+               TO_string(iq),' ',TO_string(T,'f17.4'),' ',TO_string(Weight1D(1:ndim_print),'e12.5'),new_line('nl'))
 
         deallocate(Weight1D)
 

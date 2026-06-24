@@ -69,15 +69,16 @@
       real (kind=Rkind)              :: Ene            = -Huge(ONE)   ! Ene
 
       ! population analysis + reduced density
+      integer                        :: max_nb_Weight1D = Huge(1) ! Enable reduce the printing of the Weight1D (default all weights)
       TYPE (File_t)                  :: file_PsiRho
       real (kind=Rkind), allocatable :: max_RedDensity(:)         ! the gaussian weighted (almost the last basis function) reduced density
-      real (kind=Rkind)              :: Psi_norm2     = -ONE      ! norm^2 of psi
-      logical                        :: adia          = .FALSE.   ! To perform special analysis with adiabatic states
-      logical                        :: Rho1D         = .FALSE.   ! reduced densities (1D) along coordinate
-      logical                        :: Rho2D         = .FALSE.   ! reduced densities (2D) along coordinate
+      real (kind=Rkind)              :: Psi_norm2       = -ONE    ! norm^2 of psi
+      logical                        :: adia            = .FALSE. ! To perform special analysis with adiabatic states
+      logical                        :: Rho1D           = .FALSE. ! reduced densities (1D) along coordinate
+      logical                        :: Rho2D           = .FALSE. ! reduced densities (2D) along coordinate
       integer,           allocatable :: Weight_Rho(:)             ! enable to use a weight (0=>constant=1, +/-1=>step ...)
       real (kind=Rkind), allocatable :: Qana_weight(:)            ! geometry (Qact order???) for the analysis (use with Weight_Rho)
-      integer                        :: Rho_type      = 2         ! Change the weight of rho along the coordinates:
+      integer                        :: Rho_type        = 2       ! Change the weight of rho along the coordinates:
                                                                   ! Rho_type=0, without rho(Q).w(Q) => dT=dQ
                                                                   ! Rho_type=1, with    rho(Q).w(Q) => dT=rho(Q).w(Q)dQ (=>sum Rho(Q)=1)
                                                                   ! Rho_type=2, without rho(Q);     => dT=w(Q)dQ
@@ -154,6 +155,7 @@
                             AvScalOp,AvHiterm,AvPi,AvOp,AvNum,  &
                             coherence,coherence_epsi,           &
                             ExactFact,                          &
+                            max_nb_Weight1D,                    &
                             Rho1D,Rho2D,Weight_Rho,Qana_Weight, &
                             Rho_type,                           &
                             psi1D_Q0,psi2D_Q0,Qana,             &
@@ -175,20 +177,21 @@
 
     logical,                        optional :: AvScalOp,AvHiterm,AvPi,AvOp,AvNum
     integer,                        optional :: AvQ_Order
-    integer,           allocatable, optional :: Qtransfo_type(:)     ! type of the transformation
+    integer,           allocatable, optional :: Qtransfo_type(:)   ! type of the transformation
 
-    integer,                        optional :: coherence         ! coherence_tyep (0 non calculation)
-    real (kind=Rkind),              optional :: coherence_epsi    ! To avoid numerical trouble when rho(Q) is almost zero
+    integer,                        optional :: coherence          ! coherence_tyep (0 non calculation)
+    real (kind=Rkind),              optional :: coherence_epsi     ! To avoid numerical trouble when rho(Q) is almost zero
+    integer,                        optional :: ExactFact          ! for the exact factorization analysis
 
-    integer,                        optional ::ExactFact          ! for the exact factorization analysis
+    integer,                        optional :: max_nb_Weight1D    ! Enable reduce the printing of the Weight1D (default all weights)
 
     logical,                        optional :: Rho1D,Rho2D
-    integer,           allocatable, optional :: Weight_Rho(:)        ! enable to use a weight (0=>constant=1, +/-1=>step ...)
-    real (kind=Rkind), allocatable, optional :: Qana_Weight(:)       ! geometry (Qact order) for the analysis (use with Weight_Rho)
+    integer,           allocatable, optional :: Weight_Rho(:)      ! enable to use a weight (0=>constant=1, +/-1=>step ...)
+    real (kind=Rkind), allocatable, optional :: Qana_Weight(:)     ! geometry (Qact order) for the analysis (use with Weight_Rho)
     integer,                        optional :: Rho_type
 
     logical,                        optional :: psi1D_Q0,psi2D_Q0
-    real (kind=Rkind), allocatable, optional :: Qana(:)              ! geometry (Qact order) for the analysis
+    real (kind=Rkind), allocatable, optional :: Qana(:)            ! geometry (Qact order) for the analysis
 
     real (kind=Rkind),              optional :: Ene
 
@@ -231,6 +234,13 @@
     ana_psi%Write_psi = ana_psi%Write_psi2_Grid .OR. ana_psi%Write_psi2_Basis .OR.    &
                         ana_psi%Write_psi_Grid  .OR. ana_psi%Write_psi_Basis
     IF (present(Write_psi))             ana_psi%Write_psi             = Write_psi
+
+    !------------------------------------------------------------
+    ! Weight1D control
+    ana_psi%max_nb_Weight1D = huge(1)       ! default all weights
+    IF (present(max_nb_Weight1D)) ana_psi%max_nb_Weight1D = max_nb_Weight1D
+    !------------------------------------------------------------
+
     !------------------------------------------------------------
     ! for the reduced denstity analysis
     ana_psi%adia     = .FALSE.     ! To perform special analysis with adiabatic states
@@ -371,6 +381,7 @@
                             AvScalOp,AvHiterm,AvPi,AvOp,AvNum,  &
                             coherence,coherence_epsi,           &
                             ExactFact,                          &
+                            max_nb_Weight1D,                    &
                             Rho1D,Rho2D,Weight_Rho,Qana_Weight, &
                             Rho_type,                           &
                             psi1D_Q0,psi2D_Q0,Qana,             &
@@ -391,20 +402,21 @@
 
     logical,                        optional :: AvScalOp,AvHiterm,AvPi,AvOp,AvNum
     integer,                        optional :: AvQ_Order
-    integer,           allocatable, optional :: Qtransfo_type(:)     ! type of the transformation
+    integer,           allocatable, optional :: Qtransfo_type(:)  ! type of the transformation
 
     integer,                        optional :: coherence         ! coherence_tyep (0 non calculation)
     real (kind=Rkind),              optional :: coherence_epsi    ! To avoid numerical trouble when rho(Q) is almost zero
+    integer,                        optional :: ExactFact         ! for the exact factorization analysis
 
-    integer,                        optional ::ExactFact          ! for the exact factorization analysis
+    integer,                        optional :: max_nb_Weight1D   ! Enable reduce the printing of the Weight1D (default all weights)
 
     logical,                        optional :: Rho1D,Rho2D
-    integer,           allocatable, optional :: Weight_Rho(:)        ! enable to use a weight (0=>constant=1, +/-1=>step ...)
-    real (kind=Rkind), allocatable, optional :: Qana_Weight(:)       ! geometry (Qact order) for the analysis (use with Weight_Rho)
+    integer,           allocatable, optional :: Weight_Rho(:)     ! enable to use a weight (0=>constant=1, +/-1=>step ...)
+    real (kind=Rkind), allocatable, optional :: Qana_Weight(:)    ! geometry (Qact order) for the analysis (use with Weight_Rho)
     integer,                        optional :: Rho_type
 
     logical,                        optional :: psi1D_Q0,psi2D_Q0
-    real (kind=Rkind), allocatable, optional :: Qana(:)              ! geometry (Qact order) for the analysis
+    real (kind=Rkind), allocatable, optional :: Qana(:)           ! geometry (Qact order) for the analysis
 
     real (kind=Rkind),              optional :: Ene
 
@@ -438,6 +450,12 @@
 
     IF (present(Eformat)) ana_psi%Eformat=Eformat
     IF (present(Tformat)) ana_psi%Tformat=Tformat
+    !------------------------------------------------------------
+
+    !------------------------------------------------------------
+    ! Weight1D control
+    IF (present(max_nb_Weight1D)) ana_psi%max_nb_Weight1D = max_nb_Weight1D
+    !------------------------------------------------------------
 
     !------------------------------------------------------------
     ! for the reduced denstity analysis
@@ -632,6 +650,8 @@
     IF (allocated(ana_psi2%Tformat)) ana_psi1%Tformat = ana_psi2%Tformat
     IF (allocated(ana_psi2%Eformat)) ana_psi1%Eformat = ana_psi2%Eformat
 
+    ana_psi1%max_nb_Weight1D = ana_psi2%max_nb_Weight1D
+
     IF (allocated(ana_psi2%Qana_Weight)) THEN
       CALL alloc_NParray(ana_psi1%Qana_Weight,shape(ana_psi2%Qana_Weight),&
                         "ana_psi1%Qana_Weight","ana_psi2_TO_ana_psi1")
@@ -692,6 +712,7 @@
 
     write(out_unit,*) 'ana_level',ana_psi%ana_level
     write(out_unit,*) 'num_psi',ana_psi%num_psi
+    write(out_unit,*) 'max_nb_Weight1D',ana_psi%max_nb_Weight1D
     write(out_unit,*) 'Tformat: ',ana_psi%Tformat
     write(out_unit,*) 'Eformat: ',ana_psi%Eformat
     write(out_unit,*) 'GridDone',ana_psi%GridDone
