@@ -49,67 +49,61 @@ MODULE mod_param_WP0
   USE EVR_system_m
   IMPLICIT NONE
 
-        TYPE GWP1D_t
+  TYPE GWP1D_t
 
-        real (kind=Rkind) :: sigma = ONETENTH  !
-        real (kind=Rkind) :: Q0    = ZERO      ! position of WP0
-        real (kind=Rkind) :: imp_k = ZERO      ! impultion for WP0
-        real (kind=Rkind) :: phase = ZERO      ! phase for WP0
-        integer           :: iQact = -1
-        integer           :: iQdyn = -1
+    real (kind=Rkind) :: sigma = ONETENTH  !
+    real (kind=Rkind) :: Q0    = ZERO      ! position of WP0
+    real (kind=Rkind) :: imp_k = ZERO      ! impultion for WP0
+    real (kind=Rkind) :: phase = ZERO      ! phase for WP0
+    integer           :: iQact = -1
+    integer           :: iQdyn = -1
 
-        END TYPE GWP1D_t
+  END TYPE GWP1D_t
 
-        TYPE GWP_t
+  TYPE GWP_t
+    integer                     :: I_ElecChannel  = -1
+    integer                     :: I_HAChannel    = -1
+    complex (kind=Rkind)        :: Coef           = CZERO
 
-          integer                     :: I_ElecChannel  = -1
-          integer                     :: I_HAChannel    = -1
-          complex (kind=Rkind)        :: Coef           = CZERO
+    TYPE (GWP1D_t), allocatable :: tab_GWP1D(:)
+  END TYPE GWP_t
 
-          TYPE (GWP1D_t), allocatable :: tab_GWP1D(:)
+  TYPE param_WP0
+    integer             :: nb_WP0             = 1       ! default: 1
+    logical             :: read_file          = .FALSE. ! default: F
+    logical             :: read_listWP0       = .FALSE. ! default: F
+    logical             :: New_Read_WP0       = .FALSE. ! default: F. if T, use a new subroutine to read the WP0
+    logical             :: WP0restart         = .FALSE. ! restart
+    real (kind=Rkind)   :: Trestart           = ZERO    ! time of the restart (id T0)
+    TYPE (File_t)   :: file_WP0
+    logical             :: WP0cplx            = .TRUE.  ! default = t
+    logical             :: lect_WP0GridRep    = .FALSE. ! read WP0 on the grid
+    logical             :: lect_WP0BasisRep   = .FALSE. ! read WP0 on the basis
+    logical             :: lect_WP0BasisRepall= .TRUE.  ! read WP0 on the basis
+                                                        ! (for some given basis functions index)
+                                                        ! Usefull for spectral paropagation or test
+    integer             :: WP0n_h             = 1       ! index of the harmonic channel for WP0
+    integer             :: WP0nb_elec         = 1       ! index of the electronic channel for WP0
+    integer             :: WP0_DIP            = 0       ! =0 no dipole moment =1,2,3 => mhux,mhuy,mhuy
+    real (kind=Rkind)   :: th_WP0             = ZERO    ! mixing angle between the initial WP0 and Dip.WP0
+                                                        ! so that NewWP0=cos(th_WP0)*Dip.WP0 + sin(th_WP0).WP0
 
+    integer             :: WP0nrho            = -1      ! WP0nrho : define how to normalize WP0
+    logical             :: WP0BasisRep        = .TRUE.  ! calculation of WP0BasisRep with the following parameters
+    integer             :: WP0_nb_CleanChannel= 0       ! remove some adiabatic or electronic channels
+    integer, allocatable:: WP0_CleanChannellist(:)      ! list of adiabatic or electronic channels to be remove
 
-        END TYPE GWP_t
+    integer         ::       nb_act1          = -1      ! nb active dimension
+    !for each variable Qi : exp[-((Q-Qeq)/sigma)2+i*imp_k*(Q-Qeq)]
+    real (kind=Rkind), allocatable :: WP0sigma(:)       ! WP0sigma(nb_act1) : sigma for WP0
+    real (kind=Rkind), allocatable :: WP0Qeq(:)         ! WP0Qeq(nb_act1)   : position of WP0
+    real (kind=Rkind), allocatable :: WP0imp_k(:)       ! WP0imp_k(nb_act1) : impultion for WP0
+    real (kind=Rkind), allocatable :: WP0phase(:)       ! WP0imp_k(nb_act1) : impultion for WP0
 
-        TYPE param_WP0
+    logical                   :: new_GWP0         = .FALSE.
+    TYPE (GWP_t), allocatable :: tab_GWP0(:)
 
-
-        integer             :: nb_WP0             = 1       ! default: 1
-        logical             :: read_file          = .FALSE. ! default: F
-        logical             :: read_listWP0       = .FALSE. ! default: F
-        logical             :: New_Read_WP0       = .FALSE. ! default: F. if T, use a new subroutine to read the WP0
-        logical             :: WP0restart         = .FALSE. ! restart
-        real (kind=Rkind)   :: Trestart           = ZERO    ! time of the restart (id T0)
-        TYPE (File_t)   :: file_WP0
-        logical             :: WP0cplx            = .TRUE.  ! default = t
-        logical             :: lect_WP0GridRep    = .FALSE. ! read WP0 on the grid
-        logical             :: lect_WP0BasisRep   = .FALSE. ! read WP0 on the basis
-        logical             :: lect_WP0BasisRepall= .TRUE.  ! read WP0 on the basis
-                                                            ! (for some given basis functions index)
-                                                            ! Usefull for spectral paropagation or test
-        integer             :: WP0n_h             = 1       ! index of the harmonic channel for WP0
-        integer             :: WP0nb_elec         = 1       ! index of the electronic channel for WP0
-        integer             :: WP0_DIP            = 0       ! =0 no dipole moment =1,2,3 => mhux,mhuy,mhuy
-        real (kind=Rkind)   :: th_WP0             = ZERO    ! mixing angle between the initial WP0 and Dip.WP0
-                                                            ! so that NewWP0=cos(th_WP0)*Dip.WP0 + sin(th_WP0).WP0
-
-        integer             :: WP0nrho            = -1      ! WP0nrho : define how to normalize WP0
-        logical             :: WP0BasisRep        = .TRUE.  ! calculation of WP0BasisRep with the following parameters
-        integer             :: WP0_nb_CleanChannel= 0       ! remove some adiabatic or electronic channels
-        integer, allocatable:: WP0_CleanChannellist(:)      ! list of adiabatic or electronic channels to be remove
-
-        integer         ::       nb_act1          = -1      ! nb active dimension
-        !for each variable Qi : exp[-((Q-Qeq)/sigma)2+i*imp_k*(Q-Qeq)]
-        real (kind=Rkind), allocatable :: WP0sigma(:)       ! WP0sigma(nb_act1) : sigma for WP0
-        real (kind=Rkind), allocatable :: WP0Qeq(:)         ! WP0Qeq(nb_act1)   : position of WP0
-        real (kind=Rkind), allocatable :: WP0imp_k(:)       ! WP0imp_k(nb_act1) : impultion for WP0
-        real (kind=Rkind), allocatable :: WP0phase(:)       ! WP0imp_k(nb_act1) : impultion for WP0
-
-        logical                   :: new_GWP0         = .FALSE.
-        TYPE (GWP_t), allocatable :: tab_GWP0(:)
-
-
-        END TYPE param_WP0
+  END TYPE param_WP0
 
 CONTAINS
 
@@ -119,13 +113,12 @@ CONTAINS
 
     !------ initial WP definition -----------------------------
     !     GWP(Q)=exp[-((Q-Qeq)/sigma)2+i*imp_k*(Q-Qeq)+i*phase]
-    real (kind=Rkind) :: sigma,imp_k,Qeq,phase,k,m,G
+    real (kind=Rkind) :: sigma,imp_k,Qeq,phase,k,m,G,w,m_read
     integer           :: iQact
     integer           :: iQdyn
     integer           :: Rerr
 
-    NAMELIST /defWP0/sigma,Qeq,imp_k,phase,iQact,iQdyn,k,m,G
-
+    NAMELIST /defWP0/sigma,Qeq,imp_k,phase,iQact,iQdyn,k,m,G,w
 
     !----- for debuging --------------------------------------------------
     character (len=*), parameter :: name_sub='Read_GWP1D'
@@ -143,6 +136,7 @@ CONTAINS
     k        = -ONE
     m        = -ONE
     G        = -ONE
+    w        = -ONE
 
     read(in_unit,defWP0,iostat=Rerr)
     IF (Rerr /= 0) THEN
@@ -151,7 +145,7 @@ CONTAINS
       write(out_unit,defWP0)
       STOP 'ERROR in Read_GWP1D: problem while reading the namelist "defWP0"'
     END IF
-
+    m_read = m
 
     IF (iQact > 0 .AND. iQdyn > 0) THEN
       write(out_unit,*) ' ERROR in ',name_sub
@@ -161,24 +155,39 @@ CONTAINS
       STOP 'ERROR in Read_GWP1D: both iQact and iQdyn are defined'
     END IF
 
-    IF ((k > ZERO .OR. m > ZERO .OR. G > ZERO) .AND. sigma > ZERO) THEN
+    IF ((k > ZERO .OR. m > ZERO .OR. G > ZERO .OR. w > ZERO) .AND. sigma > ZERO) THEN
       write(out_unit,*) ' ERROR in ',name_sub
-      write(out_unit,*) ' both sigma and (k or m or G) are defined.'
-      write(out_unit,*) ' You MUST define sigma or (k or m or G)'
-      write(out_unit,*) ' sigma,k,m,G: ',sigma,k,m,G
-      STOP 'ERROR in Read_GWP1D:  both sigma and (k or m or G) are defined'
+      write(out_unit,*) ' both sigma and (k or w or m or G) are defined.'
+      write(out_unit,*) ' You MUST define sigma or a set of (k, m or G), (w, m or G), (k, w)'
+      write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m,G
+      STOP 'ERROR in Read_GWP1D:  both sigma and (k or w or m or G) are defined'
     END IF
     IF (sigma < ZERO) THEN
-      IF (k < ZERO .OR. (m > ZERO .AND. G > ZERO)) THEN
+      IF (m > ZERO .AND. G > ZERO) THEN
         write(out_unit,*) ' ERROR in ',name_sub
         write(out_unit,*) ' sigma is not defined and:'
-        write(out_unit,*) '   k < 0 or '
-        write(out_unit,*) '   m > 0 and H > 0 '
-        write(out_unit,*) ' sigma,k,m,G: ',sigma,k,m,G
-        STOP 'ERROR in Read_GWP1D:  some inconsistencies on k or m or G'
+        write(out_unit,*) '   m > 0 and G > 0 '
+        write(out_unit,*) '   Only one of m or G can be defined!'
+        write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m_read,G
+        STOP 'ERROR in Read_GWP1D: some inconsistencies on k, w or m or G'
+      ELSE IF (m < ZERO .AND. G > ZERO) THEN
+        m = ONE/G
       END IF
-      IF (m > 0) sigma = sqrt(TWO)/sqrt(sqrt(k*m))
-      IF (G > 0) sigma = sqrt(TWO)/sqrt(sqrt(k/G))
+      IF      (k > ZERO .AND. w > ZERO .AND. m <= ZERO) THEN 
+        m = k/w**2
+      ELSE IF (k <= ZERO .AND. w > ZERO .AND. m > ZERO) THEN 
+        k = w**2/m
+      ELSE IF (k > ZERO .AND. w <= ZERO .AND. m > ZERO) THEN
+        CONTINUE
+      ELSE
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' sigma is not defined and it cannot be defined from k,w,m,G'
+        write(out_unit,*) ' You MUST define sigma or a set of (k, m or G), (w, m or G), (k, w)'
+        write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m_read,G
+        STOP 'ERROR in Read_GWP1D:  some inconsistencies on k, w or m or G'
+      END IF
+
+      sigma = sqrt(TWO)/sqrt(sqrt(k*m))
     END IF
     GWP1D = GWP1D_t(sigma,Qeq,imp_k,phase,iQact,iQdyn)
 
@@ -426,6 +435,24 @@ CONTAINS
     END DO
 
   END SUBROUTINE Write_Tab_GWP
+  ! FUNCTION calc_Tab_GWP(tab_GWP,Q) ! wrong because GWP can be on different channels (electronic or vibrational)
+  !   complex (kind=Rkind)           :: calc_Tab_GWP
+  !   TYPE (GWP_t),      intent(in)  :: tab_GWP(:)
+  !   real (kind=Rkind), intent(in)  :: Q(:)
+
+  !   integer :: i
+  !   !----- for debuging --------------------------------------------------
+  !   character (len=*), parameter :: name_sub='calc_Tab_GWP'
+  !   logical, parameter :: debug =.FALSE.
+  !   !logical, parameter :: debug =.TRUE.
+  !   !-----------------------------------------------------------
+
+  !   calc_Tab_GWP = CONE
+  !   DO i=1,size(tab_GWP)
+  !     calc_Tab_GWP = calc_Tab_GWP * calc_GWP(tab_GWP(i),Q)
+  !   END DO
+
+  ! END FUNCTION calc_Tab_GWP
 !================================================================
 !
 !    alloc / dealloc param_WP0
