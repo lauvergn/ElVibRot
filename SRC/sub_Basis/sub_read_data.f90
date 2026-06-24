@@ -404,7 +404,7 @@ CONTAINS
 
       real (kind=Rkind) :: cte(20,mole%nb_act1)
       real (kind=Rkind) :: A(mole%nb_act1),B(mole%nb_act1)
-      real (kind=Rkind) :: Q0(mole%nb_act1),scaleQ(mole%nb_act1)
+      real (kind=Rkind) :: Q0(mole%nb_act1),scaleQ(mole%nb_act1),w_HO(mole%nb_act1)
       real (kind=Rkind) :: k_HO(mole%nb_act1),m_HO(mole%nb_act1),G_HO(mole%nb_act1)
       integer           :: opt_A(mole%nb_act1),opt_B(mole%nb_act1)
       integer           :: opt_Q0(mole%nb_act1),opt_scaleQ(mole%nb_act1)
@@ -417,7 +417,7 @@ CONTAINS
                          nbc,nqc,contrac,contrac_analysis,contrac_RVecOnly,     &
                          cte,cplx,                                              &
                          auto_basis,A,B,opt_A,opt_B,                            &
-                         Q0,scaleQ,opt_Q0,opt_scaleQ,k_HO,m_HO,G_HO,            &
+                         Q0,scaleQ,opt_Q0,opt_scaleQ,k_HO,m_HO,G_HO,w_HO,       &
                          TD_Q0,TD_scaleQ,                                       &
                          symab,index_symab,                                     &
                          L_TO_n_type,                                           &
@@ -486,10 +486,11 @@ CONTAINS
       A(:)                     = ZERO
       B(:)                     = ZERO
       Q0(:)                    = ZERO
-      scaleQ(:)                = ZERO
-      k_HO(:)                  = ZERO
-      m_HO(:)                  = ZERO
-      G_HO(:)                  = ZERO
+      scaleQ(:)                = -ONE
+      k_HO(:)                  = -ONE
+      w_HO(:)                  = -ONE
+      m_HO(:)                  = -ONE
+      G_HO(:)                  = -ONE
 
       opt_A(:)                 = 0
       opt_B(:)                 = 0
@@ -908,12 +909,15 @@ CONTAINS
         basis_temp%scaleQ(:) = ONE
 
         DO i=1,ndim
-          IF (scaleQ(i) == ZERO .AND. k_HO(i) > ZERO .AND. &
-              (m_HO(i) > ZERO .OR. G_HO(i) > ZERO)) THEN
-            IF (m_HO(i) > ZERO) scaleQ(i) = sqrt(sqrt(k_HO(i)*m_HO(i)))
-            IF (G_HO(i) > ZERO) scaleQ(i) = sqrt(sqrt(k_HO(i)/G_HO(i)))
-            write(out_unit,*) ' scaleQ(i)',i,scaleQ(i)
-          END IF
+
+          CALL calc_scaleQ_HO(scaleQ(i),k_HO(i),w_HO(i),m_HO(i),G_HO(i))
+
+          ! IF (scaleQ(i) == ZERO .AND. k_HO(i) > ZERO .AND. &
+          !     (m_HO(i) > ZERO .OR. G_HO(i) > ZERO)) THEN
+          !   IF (m_HO(i) > ZERO) scaleQ(i) = sqrt(sqrt(k_HO(i)*m_HO(i)))
+          !   IF (G_HO(i) > ZERO) scaleQ(i) = sqrt(sqrt(k_HO(i)/G_HO(i)))
+          !   write(out_unit,*) ' scaleQ(i)',i,scaleQ(i)
+          ! END IF
 
           IF (A(i) /= B(i) .AND. scaleQ(i) > ZERO) THEN
             write(out_unit,*) ' ERROR in ',name_sub
@@ -923,14 +927,14 @@ CONTAINS
             write(out_unit,*) ' CHECK your data'
             write(out_unit,basis_nD)
             STOP
-          ELSE IF (A(i) > B(i) .AND. scaleQ(i) == ZERO) THEN
+          ELSE IF (A(i) > B(i) .AND. scaleQ(i) < ZERO) THEN
             write(out_unit,*) ' ERROR in ',name_sub
             write(out_unit,*) ' The range ("A" and "B") is :',A(i),B(i)
             write(out_unit,*) '   "A" MUST be < "B" '
             write(out_unit,*) ' CHECK your data'
             write(out_unit,basis_nD)
             STOP
-          ELSE IF (A(i) /= B(i) .AND. scaleQ(i) == ZERO) THEN
+          ELSE IF (A(i) /= B(i) .AND. scaleQ(i) < ZERO) THEN
             basis_temp%A(i)      = A(i)
             basis_temp%B(i)      = B(i)
             basis_temp%Q0(i)     = ZERO
@@ -944,7 +948,7 @@ CONTAINS
             basis_temp%scaleQ(i)     = scaleQ(i)
             basis_temp%opt_Q0(i)     = opt_Q0(i)
             basis_temp%opt_scaleQ(i) = opt_scaleQ(i)
-          ELSE IF (A(i) == B(i) .AND. scaleQ(i) == ZERO .AND. Q0(i) /= ZERO) THEN
+          ELSE IF (A(i) == B(i) .AND. scaleQ(i) < ZERO .AND. Q0(i) /= ZERO) THEN
             basis_temp%A(i)          = ZERO
             basis_temp%B(i)          = ZERO
             basis_temp%Q0(i)         = Q0(i)
@@ -1017,4 +1021,66 @@ CONTAINS
       flush(out_unit)
 !---------------------------------------------------------------------
       end subroutine read5_basis_nD
+  SUBROUTINE calc_scaleQ_HO(scaleQ,k,w,m,G)
+    USE EVR_system_m
+    IMPLICIT NONE
+
+    real (kind=Rkind), intent(inout) :: scaleQ
+    real (kind=Rkind), intent(in)    :: k,m,G,w
+
+    real (kind=Rkind) :: m_loc,k_loc
+ 
+
+    !----- for debuging --------------------------------------------------
+    character (len=*), parameter :: name_sub='calc_scaleQ_HO'
+    logical, parameter :: debug =.FALSE.
+    !logical, parameter :: debug =.TRUE.
+    !-----------------------------------------------------------
+    IF (k < ZERO .AND. m < ZERO .AND. G < ZERO .AND. w < ZERO .AND. scaleQ < ZERO) THEN 
+      write(out_unit,*) ' In ',name_sub, ' : all paramters < 0 => RETURN'
+      RETURN ! Probably the basis set does not need scaleQ.
+    END IF
+
+    m_loc = m
+    k_loc = k
+
+    IF ((k_loc > ZERO .OR. m_loc > ZERO .OR. G > ZERO .OR. w > ZERO) .AND. scaleQ > ZERO) THEN
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' both scaleQ and (k or w or m or G) are defined.'
+      write(out_unit,*) ' You MUST define scaleQ or a set of (k, m or G), (w, m or G), (k, w)'
+      write(out_unit,*) ' scaleQ,k,w,m,G: ',scaleQ,k,w,m,G
+      STOP 'ERROR in calc_scaleQ_HO:  both scaleQ and (k or w or m or G) are defined'
+    END IF
+    IF (scaleQ < ZERO) THEN
+      IF (m_loc > ZERO .AND. G > ZERO) THEN
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' scaleQ is not defined and:'
+        write(out_unit,*) '   m > 0 and G > 0 '
+        write(out_unit,*) '   Only one of m or G can be defined!'
+        write(out_unit,*) ' scaleQ,k,w,m,G: ',scaleQ,k,w,m,G
+        STOP 'ERROR in Read_GWP1D: some inconsistencies on k, w or m or G'
+      ELSE IF (m_loc <= ZERO .AND. G > ZERO) THEN
+        m_loc = ONE/G
+      END IF
+
+      IF      (k_loc > ZERO .AND. w > ZERO .AND. m_loc <= ZERO) THEN 
+        m_loc = k_loc/w**2
+      ELSE IF (k_loc <= ZERO .AND. w > ZERO .AND. m_loc > ZERO) THEN 
+        k_loc = w**2/m_loc
+      ELSE IF (k_loc > ZERO .AND. w <= ZERO .AND. m_loc > ZERO) THEN
+        write(out_unit,*) ' In ',name_sub, ' : k > 0 and m (or G) > 0'
+        CONTINUE
+      ELSE
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' scaleQ is not defined and it cannot be defined from k,w,m,G'
+        write(out_unit,*) ' You MUST define scaleQ or a set of (k, m or G), (w, m or G), (k, w)'
+        write(out_unit,*) ' scaleQ,k,w,m,G: ',scaleQ,k,w,m,G
+        STOP 'ERROR in Read_GWP1D:  some inconsistencies on k, w or m or G'
+      END IF
+
+      scaleQ = sqrt(sqrt(k_loc*m_loc))
+    END IF
+    write(out_unit,*) ' In ',name_sub, ' : scaleQ=',scaleQ
+
+  END SUBROUTINE calc_scaleQ_HO
 END MODULE ReadBasis_m

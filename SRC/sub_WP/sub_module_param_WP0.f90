@@ -170,7 +170,7 @@ CONTAINS
         write(out_unit,*) '   Only one of m or G can be defined!'
         write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m_read,G
         STOP 'ERROR in Read_GWP1D: some inconsistencies on k, w or m or G'
-      ELSE IF (m < ZERO .AND. G > ZERO) THEN
+      ELSE IF (m <= ZERO .AND. G > ZERO) THEN
         m = ONE/G
       END IF
       IF      (k > ZERO .AND. w > ZERO .AND. m <= ZERO) THEN 
