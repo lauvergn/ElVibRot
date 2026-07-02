@@ -1862,6 +1862,7 @@ END SUBROUTINE sub_analyze_psi
 !---------------------------------------------------------
     IF (debug) THEN
       write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'print_w',print_w
       write(out_unit,*) 'nb_inact2n',psi%Basis2n%nb_basis
       write(out_unit,*) 'nb_bi,nb_be',psi%nb_bi,psi%nb_be
       write(out_unit,*) 'nb_baie,nb_tot',psi%nb_baie,psi%nb_tot
