@@ -58,6 +58,9 @@ MODULE mod_param_WP0
     integer           :: iQact = -1
     integer           :: iQdyn = -1
 
+    logical           :: Read_BasisCoef  = .FALSE.
+    complex(kind=Rkind), allocatable :: BasisCoef(:)
+
   END TYPE GWP1D_t
 
   TYPE GWP_t
@@ -107,8 +110,11 @@ MODULE mod_param_WP0
 
 CONTAINS
 
-  SUBROUTINE Read_GWP1D(GWP1D)
+  SUBROUTINE Read_GWP1D(GWP1D,BasisnD)
+    USE mod_basis_set_alloc
+
     TYPE (GWP1D_t), intent(inout) :: GWP1D
+    TYPE (basis),   intent(in)    :: BasisnD
 
 
     !------ initial WP definition -----------------------------
@@ -117,8 +123,15 @@ CONTAINS
     integer           :: iQact
     integer           :: iQdyn
     integer           :: Rerr
+    logical           :: Read_RealBasisCoef,Read_CmplxBasisCoef
+    integer           :: VectNum
 
-    NAMELIST /defWP0/sigma,Qeq,imp_k,phase,iQact,iQdyn,k,m,G,w
+    integer :: ib,idum
+    real (kind=Rkind),    allocatable :: tempRealCoef(:)
+    complex (kind=Rkind), allocatable :: tempCmplxCoef(:)
+
+
+    NAMELIST /defWP0/sigma,Qeq,imp_k,phase,iQact,iQdyn,k,m,G,w,Read_RealBasisCoef,Read_CmplxBasisCoef,VectNum
 
     !----- for debuging --------------------------------------------------
     character (len=*), parameter :: name_sub='Read_GWP1D'
@@ -126,8 +139,8 @@ CONTAINS
     !logical, parameter :: debug =.TRUE.
     !-----------------------------------------------------------
 
-    iQact = -1
-    iQdyn = -1
+    iQact    = -1
+    iQdyn    = -1
     Qeq      = ZERO
     imp_k    = ZERO
     phase    = ZERO
@@ -137,6 +150,10 @@ CONTAINS
     m        = -ONE
     G        = -ONE
     w        = -ONE
+
+    Read_RealBasisCoef  = .FALSE.
+    Read_CmplxBasisCoef = .FALSE.
+    VectNum             = 1
 
     read(in_unit,defWP0,iostat=Rerr)
     IF (Rerr /= 0) THEN
@@ -155,44 +172,68 @@ CONTAINS
       STOP 'ERROR in Read_GWP1D: both iQact and iQdyn are defined'
     END IF
 
-    IF ((k > ZERO .OR. m > ZERO .OR. G > ZERO .OR. w > ZERO) .AND. sigma > ZERO) THEN
-      write(out_unit,*) ' ERROR in ',name_sub
-      write(out_unit,*) ' both sigma and (k or w or m or G) are defined.'
-      write(out_unit,*) ' You MUST define sigma or a set of (k, m or G), (w, m or G), (k, w)'
-      write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m,G
-      STOP 'ERROR in Read_GWP1D:  both sigma and (k or w or m or G) are defined'
-    END IF
-    IF (sigma < ZERO) THEN
-      IF (m > ZERO .AND. G > ZERO) THEN
-        write(out_unit,*) ' ERROR in ',name_sub
-        write(out_unit,*) ' sigma is not defined and:'
-        write(out_unit,*) '   m > 0 and G > 0 '
-        write(out_unit,*) '   Only one of m or G can be defined!'
-        write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m_read,G
-        STOP 'ERROR in Read_GWP1D: some inconsistencies on k, w or m or G'
-      ELSE IF (m <= ZERO .AND. G > ZERO) THEN
-        m = ONE/G
-      END IF
-      IF      (k > ZERO .AND. w > ZERO .AND. m <= ZERO) THEN 
-        m = k/w**2
-      ELSE IF (k <= ZERO .AND. w > ZERO .AND. m > ZERO) THEN 
-        k = w**2/m
-      ELSE IF (k > ZERO .AND. w <= ZERO .AND. m > ZERO) THEN
-        CONTINUE
+    IF (Read_RealBasisCoef .OR. Read_CmplxBasisCoef) THEN
+      GWP1D = GWP1D_t(Read_BasisCoef=.TRUE.,iQdyn=BasisnD%iQdyn(1))
+      allocate(GWP1D%BasisCoef(BasisnD%nb))
+      allocate(tempCmplxCoef(VectNum))
+
+      IF (Read_RealBasisCoef) THEN
+        allocate(tempRealCoef(VectNum))
+        DO ib=1,BasisnD%nb
+          read(in_unit,*) idum,tempRealCoef(:)
+          GWP1D%BasisCoef(ib) = tempRealCoef(VectNum)
+        END DO
+        deallocate(tempRealCoef)
       ELSE
-        write(out_unit,*) ' ERROR in ',name_sub
-        write(out_unit,*) ' sigma is not defined and it cannot be defined from k,w,m,G'
-        write(out_unit,*) ' You MUST define sigma or a set of (k, m or G), (w, m or G), (k, w)'
-        write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m_read,G
-        STOP 'ERROR in Read_GWP1D:  some inconsistencies on k, w or m or G'
+         allocate(tempCmplxCoef(VectNum))
+        DO ib=1,BasisnD%nb
+          read(in_unit,*) idum,tempCmplxCoef(:)
+          GWP1D%BasisCoef(ib) = tempCmplxCoef(VectNum)
+        END DO
+        deallocate(tempCmplxCoef)
       END IF
+      !write(out_unit,*) 'ReadBcoef: not yet'
+      !STOP 
+    ELSE
+      IF ((k > ZERO .OR. m > ZERO .OR. G > ZERO .OR. w > ZERO) .AND. sigma > ZERO) THEN
+        write(out_unit,*) ' ERROR in ',name_sub
+        write(out_unit,*) ' both sigma and (k or w or m or G) are defined.'
+        write(out_unit,*) ' You MUST define sigma or a set of (k, m or G), (w, m or G), (k, w)'
+        write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m,G
+        STOP 'ERROR in Read_GWP1D:  both sigma and (k or w or m or G) are defined'
+      END IF
+      IF (sigma < ZERO) THEN
+        IF (m > ZERO .AND. G > ZERO) THEN
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' sigma is not defined and:'
+          write(out_unit,*) '   m > 0 and G > 0 '
+          write(out_unit,*) '   Only one of m or G can be defined!'
+          write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m_read,G
+          STOP 'ERROR in Read_GWP1D: some inconsistencies on k, w or m or G'
+        ELSE IF (m <= ZERO .AND. G > ZERO) THEN
+          m = ONE/G
+        END IF
+        IF      (k > ZERO .AND. w > ZERO .AND. m <= ZERO) THEN 
+          m = k/w**2
+        ELSE IF (k <= ZERO .AND. w > ZERO .AND. m > ZERO) THEN 
+          k = w**2/m
+        ELSE IF (k > ZERO .AND. w <= ZERO .AND. m > ZERO) THEN
+          CONTINUE
+        ELSE
+          write(out_unit,*) ' ERROR in ',name_sub
+          write(out_unit,*) ' sigma is not defined and it cannot be defined from k,w,m,G'
+          write(out_unit,*) ' You MUST define sigma or a set of (k, m or G), (w, m or G), (k, w)'
+          write(out_unit,*) ' sigma,k,w,m,G: ',sigma,k,w,m_read,G
+          STOP 'ERROR in Read_GWP1D:  some inconsistencies on k, w or m or G'
+        END IF
 
-      sigma = sqrt(TWO)/sqrt(sqrt(k*m))
+        sigma = sqrt(TWO)/sqrt(sqrt(k*m))
+      END IF
+      GWP1D = GWP1D_t(sigma=sigma,Q0=Qeq,imp_k=imp_k,phase=phase,iQact=iQact,iQdyn=iQdyn)
     END IF
-    GWP1D = GWP1D_t(sigma,Qeq,imp_k,phase,iQact,iQdyn)
 
-    IF (print_level > 0) write(out_unit,*) 'iQact,iQdyn,sigma,Q0,imp_k,phase', &
-                                             iQact,iQdyn,sigma,Qeq,imp_k,phase
+    IF (print_level > 0) write(out_unit,*) 'iQact,iQdyn,sigma,Q0,imp_k,phase,Read_BasisCoef', &
+                                             iQact,iQdyn,sigma,Qeq,imp_k,phase,Read_RealBasisCoef,Read_CmplxBasisCoef
 
 
   END SUBROUTINE Read_GWP1D
@@ -205,35 +246,54 @@ CONTAINS
     !logical, parameter :: debug =.TRUE.
     !-----------------------------------------------------------
 
-    IF (debug) write(out_unit,*) 'iQact,iQdyn,Q0,sigma,imp_k,phase',           &
+    IF (debug) THEN 
+      write(out_unit,*) 'iQact,iQdyn,Q0,sigma,imp_k,phase',           &
            GWP1D%iQact,GWP1D%iQdyn,GWP1D%Q0,GWP1D%sigma,GWP1D%imp_k,GWP1D%phase
-
-    write(out_unit,'(2i6,4f12.6)')                                             &
-           GWP1D%iQact,GWP1D%iQdyn,GWP1D%Q0,GWP1D%sigma,GWP1D%imp_k,GWP1D%phase
+      write(out_unit,*) 'Read_BasisCoef',GWP1D%Read_BasisCoef
+    END IF
+    write(out_unit,'(2i6,4f12.6,l2)')                                             &
+           GWP1D%iQact,GWP1D%iQdyn,GWP1D%Q0,GWP1D%sigma,GWP1D%imp_k,GWP1D%phase,GWP1D%Read_BasisCoef
 
   END SUBROUTINE Write_GWP1D
-  FUNCTION calc_GWP1D(GWP1D,Q)
+  FUNCTION calc_GWP1D(GWP1D,Q,BasisnD)
+    USE mod_basis
+    !USE mod_basis_set_alloc
+
     complex (kind=Rkind)          :: calc_GWP1D
     real (kind=Rkind), intent(in) :: Q
     TYPE (GWP1D_t),    intent(in) :: GWP1D
+    TYPE (basis),      intent(in) :: BasisnD
 
     real (kind=Rkind) :: ze,zk,DQ
+    integer :: ib
     !----- for debuging --------------------------------------------------
     character (len=*), parameter :: name_sub='calc_GWP1D'
     logical, parameter :: debug =.FALSE.
     !logical, parameter :: debug =.TRUE.
     !-----------------------------------------------------------
 
-    DQ = Q-GWP1D%Q0
-    ze = (DQ/GWP1D%sigma)**2
-    zk = mod(DQ*GWP1D%imp_k + GWP1D%phase,TWO*pi)
+    IF (GWP1D%Read_BasisCoef) THEN
+      calc_GWP1D = CZERO
+      DO ib=1,BasisnD%nb
+        calc_GWP1D = calc_GWP1D + GWP1D%BasisCoef(ib)*Rec_d0bnD_AT_Q(BasisnD,ib,[Q])
+      END DO
+    ELSE
+      DQ = Q-GWP1D%Q0
+      ze = (DQ/GWP1D%sigma)**2
+      zk = mod(DQ*GWP1D%imp_k + GWP1D%phase,TWO*pi)
 
-    calc_GWP1D = exp(-ze + EYE*zk) / sqrt(sqrt(pi/TWO)*GWP1D%sigma)
+      calc_GWP1D = exp(-ze + EYE*zk) / sqrt(sqrt(pi/TWO)*GWP1D%sigma)
+    END IF
+
 
   END FUNCTION calc_GWP1D
-  SUBROUTINE Read_GWP(GWP,ndim,nb_bi,nb_elec)
+  SUBROUTINE Read_GWP(GWP,ndim,nb_bi,nb_elec,BasisnD)
+    USE mod_basis_set_alloc
+
     TYPE (GWP_t), intent(inout) :: GWP
     integer,      intent(in)    :: ndim,nb_elec,nb_bi
+    TYPE (basis), intent(in)    :: BasisnD
+
 
 
     !------ initial WP definition -----------------------------
@@ -294,7 +354,11 @@ CONTAINS
 
     allocate(GWP%tab_GWP1D(ndim))
     DO i=1,ndim
-      CALL Read_GWP1D(GWP%tab_GWP1D(i))
+      IF (associated(BasisnD%tab_Pbasis)) THEN
+        CALL Read_GWP1D(GWP%tab_GWP1D(i),BasisnD=BasisnD%tab_Pbasis(i)%Pbasis)
+      ELSE
+        CALL Read_GWP1D(GWP%tab_GWP1D(i),BasisnD=BasisnD)
+      END IF
     END DO
 
     tab_iQact(:) = GWP%tab_GWP1D(:)%iQact
@@ -326,23 +390,31 @@ CONTAINS
     END IF
 
   END SUBROUTINE Read_GWP
-  FUNCTION calc_GWP(GWP,Q)
+  FUNCTION calc_GWP(GWP,Q,BasisnD)
+    USE mod_basis_set_alloc
+
     complex (kind=Rkind)          :: calc_GWP
     real (kind=Rkind), intent(in) :: Q(:)
     TYPE (GWP_t),      intent(in) :: GWP
+    TYPE (basis),      intent(in) :: BasisnD
 
     integer :: i
+    complex (kind=Rkind)          :: GWP1D
     !----- for debuging --------------------------------------------------
     character (len=*), parameter :: name_sub='calc_GWP'
     logical, parameter :: debug =.FALSE.
     !logical, parameter :: debug =.TRUE.
     !-----------------------------------------------------------
 
-    calc_GWP = CONE
+    calc_GWP = GWP%Coef
     DO i=1,size(GWP%tab_GWP1D)
-      calc_GWP = calc_GWP * calc_GWP1D(GWP%tab_GWP1D(i),Q(i))
+      IF (associated(BasisnD%tab_Pbasis)) THEN
+        GWP1D = calc_GWP1D(GWP%tab_GWP1D(i),Q(i),BasisnD=BasisnD%tab_Pbasis(i)%Pbasis)
+      ELSE
+        GWP1D = calc_GWP1D(GWP%tab_GWP1D(i),Q(i),BasisnD=BasisnD)
+      END IF
+      calc_GWP = calc_GWP * GWP1D
     END DO
-    calc_GWP = calc_GWP * GWP%Coef
 
   END FUNCTION calc_GWP
   SUBROUTINE Write_GWP(GWP)
@@ -356,20 +428,22 @@ CONTAINS
     !-----------------------------------------------------------
 
     write(out_unit,*) 'I_HAChannel,I_ElecChannel,Coef',GWP%I_HAChannel,GWP%I_ElecChannel,GWP%Coef
-    write(out_unit,'(a)') ' iQact iQdyn Qeq         sigma       imp_k       phase'
+    write(out_unit,'(a)') ' iQact iQdyn Qeq         sigma       imp_k       phase     Read_BasisCoef'
     DO i=1,size(GWP%tab_GWP1D)
       CALL Write_GWP1D(GWP%tab_GWP1D(i))
     END DO
 
   END SUBROUTINE Write_GWP
 
-  SUBROUTINE Read_tab_GWP(tab_GWP,nb_GWP,mole,nb_bi,nb_elec)
+  SUBROUTINE Read_tab_GWP(tab_GWP,nb_GWP,mole,nb_bi,nb_elec,BasisnD)
     USE mod_Coord_KEO
+    USE mod_basis_set_alloc
 
     TYPE (GWP_t), allocatable, intent(inout) :: tab_GWP(:)
     integer,                   intent(in)    :: nb_GWP,nb_elec,nb_bi
 
     TYPE (CoordType),          intent(in)    :: mole
+    TYPE (basis),              intent(in)    :: BasisnD
 
 
     !------ initial WP definition -----------------------------
@@ -383,7 +457,7 @@ CONTAINS
 
     allocate(tab_GWP(nb_GWP))
     DO i=1,nb_GWP
-      CALL Read_GWP(tab_GWP(i),mole%nb_act1,nb_bi,nb_elec)
+      CALL Read_GWP(tab_GWP(i),mole%nb_act1,nb_bi,nb_elec,BasisnD)
     END DO
 
     ! check if iQact is defined
@@ -400,26 +474,6 @@ CONTAINS
 
 
   END SUBROUTINE Read_tab_GWP
-  SUBROUTINE Read_tab_GWP_v0(tab_GWP,nb_GWP,ndim,nb_bi,nb_elec)
-    TYPE (GWP_t), allocatable, intent(inout) :: tab_GWP(:)
-    integer,                   intent(in)    :: nb_GWP,ndim,nb_elec,nb_bi
-
-
-    !------ initial WP definition -----------------------------
-    integer                     :: i
-
-    !----- for debuging --------------------------------------------------
-    character (len=*), parameter :: name_sub='Read_tab_GWP_v0'
-    logical, parameter :: debug =.FALSE.
-    !logical, parameter :: debug =.TRUE.
-    !-----------------------------------------------------------
-
-    allocate(tab_GWP(nb_GWP))
-    DO i=1,nb_GWP
-      CALL Read_GWP(tab_GWP(i),ndim,nb_bi,nb_elec)
-    END DO
-
-  END SUBROUTINE Read_tab_GWP_v0
   SUBROUTINE Write_Tab_GWP(tab_GWP)
     TYPE (GWP_t), intent(in) :: tab_GWP(:)
 

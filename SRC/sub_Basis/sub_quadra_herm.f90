@@ -65,9 +65,11 @@
       integer                       :: idum,nio,err_io
       real(kind=Rkind)              :: wdum
       logical, parameter            :: WithRead = .TRUE.
+      integer, parameter            :: option = 1 !0 old procedure, 1 new procedure
 
-      real(kind=Rkind), allocatable :: x_loc(:,:),w_loc(:)
-
+      real(kind=Rkind), allocatable :: x_loc(:,:),w_loc(:),S(:,:)
+      TYPE (Quadrature_t) :: xw
+      integer             :: err_grid
 
 !----- for debuging --------------------------------------------------
       character (len=*), parameter :: name_sub='sub_quadra_hermite'
@@ -154,30 +156,58 @@
 
           CALL alloc_NParray(x_loc,[1,nq],'x_loc',name_sub)
           CALL alloc_NParray(w_loc,[nq],  'w_loc',name_sub)
+          CALL hermite_grid_EVR(nq,x_loc,w_loc,option)
+          ! IF (option == 0) THEN
+          !   CALL alloc_NParray(x_loc,[1,nq],'x_loc',name_sub)
+          !   CALL alloc_NParray(w_loc,[nq],  'w_loc',name_sub)
 
-          CALL hercom(nq,x_loc,w_loc)
+          !   CALL hercom(nq,x_loc,w_loc)
 
-          IF (WithRead) THEN
-            herm_file%name = trim(EVRT_path) //                                 &
-              '/Internal_data/HermQuadra/herm' // TO_string(nq) // '.txt'
+          !   IF (WithRead) THEN
+          !     herm_file%name = trim(EVRT_path) //                                 &
+          !       '/Internal_data/HermQuadra/herm' // TO_string(nq) // '.txt'
 
-            write(out_unit,*) 'herm_file%name: ',herm_file%name
-            flush(out_unit)
-            CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
+          !     write(out_unit,*) 'herm_file%name: ',herm_file%name
+          !     flush(out_unit)
+          !     CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
 
-            IF (err_io /= 0) THEN
-              write(out_unit,*) 'WARNNING in ',name_sub
-              write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
-            ELSE
+          !     IF (err_io /= 0) THEN
+          !       write(out_unit,*) 'WARNNING in ',name_sub
+          !       write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
+          !     ELSE
 
-              DO iq=1,nq
-                read(nio,*,iostat=err_io) idum,x_loc(:,iq),wdum,w_loc(iq)
-              END DO
+          !       DO iq=1,nq
+          !         read(nio,*,iostat=err_io) idum,x_loc(:,iq),wdum,w_loc(iq)
+          !       END DO
 
-            END IF
-            CALL file_close(herm_file)
-
-          END IF
+          !     END IF
+          !     CALL file_close(herm_file)
+          !   END IF
+          ! ELSE IF (option == 1) THEN
+          !   IF (print_level > 1) write(out_unit,*) 'New quadrature calculation: Init_Quadrature_HP',nq
+          !   flush(out_unit)
+          !   CALL Init_Quadrature_HP(xw,nq=nq,name='HO',err=err_grid)
+          !   IF (debug) THEN
+          !     CALL Write_Quadrature(xw)
+          !     S = matmul(xw%d0bgw,xw%d0gb)
+          !     CALL Write_Mat(S, nio=out_unit, nbcol=5, info='Overlap')
+          !   END IF
+          !   IF (err_grid /= 0) THEN
+          !     CALL Write_Quadrature(xw)
+          !     write(out_unit,*) 'ERROR in ',name_sub
+          !     write(out_unit,*) ' ERROR with "CALL Init_Quadrature_HP()"'
+          !     STOP 'ERROR in sub_quadra_hermite: with "CALL Init_Quadrature_HP()"'
+          !   END IF
+          !   x_loc = xw%x
+          !   w_loc = xw%w
+          ! ELSE
+          !   write(out_unit,*) 'ERROR in ',name_sub
+          !   write(out_unit,*) ' For not nested quadrature, the possible options are 0 or 1'
+          !   write(out_unit,*) ' option: ',option
+          !   write(out_unit,*) ' 0: old procedure (calculation with hercom or reading the grids)'
+          !   write(out_unit,*) ' 1: new procedure (QDUtil library)'
+          !   STOP 'ERROR in sub_quadra_hermite: For not nested quadrature, the possible options are 0 or 1'
+          ! END IF
         END SELECT
         !base%xPOGridRep_done = .TRUE.
 
@@ -2052,7 +2082,98 @@ end subroutine sub_quadra_hermite_halfLeft
 
       END SUBROUTINE sub_quadra_hermite_cuba_DML
 
-      SUBROUTINE transfo_Q_TO_tQ(base)
+  SUBROUTINE hermite_grid_EVR(nq,x,w,option)
+    USE EVR_system_m
+    IMPLICIT NONE
+
+    integer,          intent(in)    :: nq
+    real(kind=Rkind), intent(inout) :: x(1,nq),w(nq)
+    integer,          intent(in)    :: option !0 old procedure, 1 new procedure
+
+
+      integer                       :: iq
+      TYPE (File_t)                 :: herm_file
+      integer                       :: idum,nio,err_io
+      real(kind=Rkind)              :: wdum
+      logical, parameter            :: WithRead = .TRUE.
+
+      real(kind=Rkind), allocatable :: S(:,:)
+      TYPE (Quadrature_t) :: xw
+      integer             :: err_grid
+
+    !----- for debuging --------------------------------------------------
+    character (len=*), parameter :: name_sub='hermite_grid_EVR'
+    !logical, parameter :: debug = .TRUE.
+    logical, parameter :: debug = .FALSE.
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'nq',nq
+    END IF
+    !-----------------------------------------------------------
+    IF (option == 0) THEN
+
+      CALL hercom(nq,x,w)
+
+      IF (WithRead) THEN
+        herm_file%name = trim(EVRT_path) // '/Internal_data/HermQuadra/herm' // TO_string(nq) // '.txt'
+        write(out_unit,*) 'herm_file%name: ',herm_file%name
+        flush(out_unit)
+        CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
+
+        IF (err_io /= 0) THEN
+          write(out_unit,*) 'WARNNING in ',name_sub
+          write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
+        ELSE
+          DO iq=1,nq
+            read(nio,*,iostat=err_io) idum,x(:,iq),wdum,w(iq)
+          END DO
+        END IF
+        CALL file_close(herm_file)
+      END IF
+
+    ELSE IF (option == 1) THEN
+
+      IF (print_level > 1) write(out_unit,*) 'New quadrature calculation: Init_Quadrature_HP',nq
+      flush(out_unit)
+      CALL Init_Quadrature_HP(xw,nq=nq,name='HO',err=err_grid)
+      IF (debug) THEN
+        CALL Write_Quadrature(xw)
+        S = matmul(xw%d0bgw,xw%d0gb)
+        CALL Write_Mat(S, nio=out_unit, nbcol=5, info='Overlap')
+        deallocate(S)
+      END IF
+      IF (err_grid /= 0) THEN
+        CALL Write_Quadrature(xw)
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) ' ERROR with "CALL Init_Quadrature_HP()"'
+        STOP 'ERROR in hermite_grid_EVR: with "CALL Init_Quadrature_HP()"'
+      END IF
+      x(:,:) = xw%x
+      w(:)   = xw%w
+      CALL dealloc_Quadrature(Quadrature=xw)
+    ELSE
+      write(out_unit,*) 'ERROR in ',name_sub
+      write(out_unit,*) ' For not nested quadrature, the possible options are 0 or 1'
+      write(out_unit,*) ' option: ',option
+      write(out_unit,*) ' 0: old procedure (calculation with hercom or reading the grids)'
+      write(out_unit,*) ' 1: new procedure (QDUtil library)'
+      STOP 'ERROR in hermite_grid_EVR: For not nested quadrature, the possible options are 0 or 1'
+    END IF
+
+
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      DO iq=1,nq
+        write(out_unit,*) iq,x(:,iq),w(iq)
+      END DO
+      write(out_unit,*) 'END ',name_sub
+    END IF
+    !-----------------------------------------------------------
+
+  END SUBROUTINE hermite_grid_EVR
+
+  SUBROUTINE transfo_Q_TO_tQ(base)
       USE EVR_system_m
       USE mod_basis
       USE mod_dnSVM

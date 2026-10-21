@@ -795,13 +795,13 @@ MODULE mod_basis
 
   END SUBROUTINE construct_primitive_basis
 
-      FUNCTION d0b_OF_primitive_basis_AT_Q(basis_temp,ib,Qbasis) result(d0b)
-      IMPLICIT NONE
+  FUNCTION d0b_OF_primitive_basis_AT_Q(basis_temp,ib,Qbasis) result(d0b)
+    IMPLICIT NONE
 
 !----- for the active basis set ---------------------------------------
       real (kind=Rkind)             :: d0b ! result of the function
-      TYPE (basis), intent(inout)   :: basis_temp
-      integer, intent(in)           :: ib
+      TYPE (basis),      intent(in) :: basis_temp
+      integer,           intent(in) :: ib
       real (kind=Rkind), intent(in) :: Qbasis(basis_temp%ndim)
 
 
@@ -877,7 +877,7 @@ MODULE mod_basis
       CASE ("boxab","boxabnosym")
 
        xx = mod(x*real(ib,kind=Rkind),pi+pi)
-       d0b = sin(xx) / sqrt(pi*HALF)
+       d0b = sin(xx) / sqrt(pi*HALF) * sqrt(basis_temp%scaleQ(1))
 
       CASE ("ylm")
         STOP
@@ -905,7 +905,7 @@ MODULE mod_basis
         write(out_unit,*) 'END ',name_sub
       END IF
 !---------------------------------------------------------------------
-      END FUNCTION d0b_OF_primitive_basis_AT_Q
+  END FUNCTION d0b_OF_primitive_basis_AT_Q
 
 
 !=============================================================
@@ -4204,12 +4204,12 @@ END SUBROUTINE pack_basis_old
 !     -------------------------------------------------------
 
       END FUNCTION Rec_d0bnD
-      RECURSIVE FUNCTION Rec_d0bnD_AT_Q(BasisnD,ib,Qbasis) result(d0bnD)
+  RECURSIVE FUNCTION Rec_d0bnD_AT_Q(BasisnD,ib,Qbasis) result(d0bnD)
       USE EVR_system_m
       implicit none
 
 !----- variables for the Basis and quadrature points -----------------
-      TYPE (Basis), intent(inout)   :: BasisnD
+      TYPE (Basis), intent(in)   :: BasisnD
       real (kind=Rkind), intent(in) :: Qbasis(BasisnD%ndim)
       integer, intent(in)           :: ib
       real (kind=Rkind)             :: d0bnD
@@ -4255,7 +4255,7 @@ END SUBROUTINE pack_basis_old
       END IF
 !     -------------------------------------------------------
 
-      END FUNCTION Rec_d0bnD_AT_Q
+  END FUNCTION Rec_d0bnD_AT_Q
 !=====================================================================
 !
 !  calculation of d0bnD d1bnD(:) and d2bnD(:,:)

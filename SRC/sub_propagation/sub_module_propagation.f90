@@ -983,19 +983,20 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 !       for each variable Qi : exp[-((Q-Qeq)/sigma)2+i*imp_k*(Q-Qeq)]
 !
 !================================================================
-      SUBROUTINE read_propagation(para_propa,mole,nb_bi,nb_elec,nb_vp_spec_out)
+      SUBROUTINE read_propagation(para_propa,mole,nb_bi,nb_elec,nb_vp_spec_out,para_AllBasis)
       USE EVR_system_m
       USE mod_psi,     ONLY : alloc_param_WP0,Read_tab_GWP
       USE mod_Coord_KEO
+      USE mod_basis_set_alloc
       IMPLICIT NONE
 
 !------ parameter for the propagation ---------------------
-      TYPE (param_propa), intent(inout) :: para_propa
-      integer,            intent(inout) :: nb_vp_spec_out
-      integer,            intent(in)    :: nb_bi,nb_elec
+      TYPE (param_propa),    intent(inout) :: para_propa
+      integer,               intent(inout) :: nb_vp_spec_out
+      integer,               intent(in)    :: nb_bi,nb_elec
 
-      TYPE (CoordType),   intent(in)    :: mole
-
+      TYPE (CoordType),      intent(in)    :: mole
+      TYPE (param_AllBasis), intent(in)    :: para_AllBasis
 
 !----- physical and mathematical constants ---------------------------
       real (kind=Rkind) :: auTOcm_inv
@@ -1592,8 +1593,13 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
             write(out_unit,*) ' read the WP0 in BasisRep (new way)'
           ELSE IF (new_GWP0) THEN
             write(out_unit,*) ' sum of Gaussian WPs (new way)'
+            IF (.NOT. associated(para_AllBasis%BasisnD)) THEN
+              write(out_unit,*) 'ERROR in ',name_sub
+              write(out_unit,*) '  BasisnD is not associated. Check the Fortran source'
+              STOP 'ERROR in read_propagation: BasisnD is not associated'
+            END IF
             CALL Read_tab_GWP(para_propa%para_WP0%tab_GWP0,                     &
-                              para_propa%para_WP0%nb_WP0,mole,nb_bi,nb_elec)
+                              para_propa%para_WP0%nb_WP0,mole,nb_bi,nb_elec,para_AllBasis%BasisnD)
           ELSE
             write(out_unit,*) ' One Gaussian WP (old way)'
 

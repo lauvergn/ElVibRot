@@ -328,7 +328,7 @@
         para_propa%max_ana = para_ana%max_ana
         nb_bi = get_nb_bi_FROM_AllBasis(para_AllBasis)
         CALL read_propagation(para_propa,mole,nb_bi,                            &
-                              para_ReadOp%nb_elec,nb_vp_specWP)
+                              para_ReadOp%nb_elec,nb_vp_specWP,para_AllBasis)
         spectral_H = (para_propa%type_WPpropa == 10)
 
         IF (para_propa%spectral) THEN
