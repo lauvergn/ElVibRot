@@ -100,6 +100,11 @@ ifneq ($(RKIND),$(filter $(RKIND),real32 real64 real128))
   $(info Possible values (case sensitive): real32 real64 real128)
   $(error ERROR: Incompatible option values)
 endif
+ifeq ($(RKIND),$(filter $(RKIND),real32 real64 real128))
+  RKINDVAL := $(subst real,,$(RKIND))
+  $(info *********** RKIND :        $(RKIND))
+  $(info *********** RKINDVAL :     $(RKINDVAL))
+endif
 ifeq ($(WITHRK16),)
   override WITHRK16 := $(shell $(FFC) -o scripts/testreal128.exe scripts/testreal128.f90 &> /dev/null ; wait ; ./scripts/testreal128.exe ; rm scripts/testreal128.exe)
 endif
@@ -161,7 +166,7 @@ CPPSHELL    = -D__COMPILE_DATE="\"$(shell date +"%a %e %b %Y - %H:%M:%S")\"" \
               -D__COMPILE_HOST="\"$(shell hostname -s)\"" \
               -D__EVRTPATH="'$(MAIN_path)'" \
               -D__EVR_VER="'$(LIB_VERSION)'" \
-              -D__RKIND="$(RKIND)" -D__WITHRK16="$(WITHRK16)" \
+              -D__RKIND="$(RKIND)" -D_RKINDVAL="$(RKINDVAL)" -D__WITHRK16="$(WITHRK16)" \
               -D__LAPACK="$(LAPACK)" \
               -D__ARPACK="$(ARPACK)"
 

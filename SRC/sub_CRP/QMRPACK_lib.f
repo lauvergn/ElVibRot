@@ -2914,10 +2914,15 @@ c     -------------------------------------------------------
       info(4)=0
       write(out_unit,'(a)',advance='no') 'QMR it:'
 
+
 c
 c      write(*,*) 'nlim = ', nlim, ' info(1) = ', info(1), ' N =', N
 c      write(*,*) 'tol = ', tol, ' maxDVRpoints = ', maxDVRpoints
+#if __RKINDVAL == 64
  10   call zscpx(N,N,nlim,vecs,tol,info)
+#else
+ 10   STOP 'ERROR in qm_precon: only double precision (real64) only'
+#endif
 c      write(*,*) 'nlim = ', nlim, ' info(1) = ', info(1), ' N =',N
 c      write(*,*) 'tol = ', tol, ' maxDVRpoints = ', maxDVRpoints
        it = it + 1
