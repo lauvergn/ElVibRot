@@ -1035,7 +1035,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
       logical         ::       restart         !  restart the propagation
 
 
-      logical      :: new_GWP0,New_Read_WP0,read_listWP0,read_file
+      logical      :: new_GWP0,New_Read_WP0,read_listWP0,read_fileWP0
       logical      :: WP0restart,WP0cplx
       logical      :: WP0FBR
       logical      :: Read_WP0GridRep,Read_WP0BasisRep,Read_WP0BasisRepall
@@ -1071,7 +1071,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
                       WP0n_h,WP0nb_elec,WP0_DIP,th_WP0,WP0nrho,         &
                       WP0_nb_CleanChannel,                              &
                       WP0restart,file_WP0,WP0cplx,                      &
-                      nb_WP0,read_listWP0,read_file,                    &
+                      nb_WP0,read_listWP0,read_fileWP0,                 &
                       New_Read_WP0,new_GWP0,                            &
                       DHmax,auto_Hmax,                                  &
                       max_poly,poly_tol,npoly,                          &
@@ -1130,7 +1130,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 
         new_GWP0            = .FALSE.
         nb_WP0              = 1
-        read_file           = .FALSE.
+        read_fileWP0        = .FALSE.
         New_Read_WP0        = .FALSE.
         read_listWP0        = .FALSE.
         WP0restart          = .FALSE.
@@ -1398,7 +1398,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
         para_propa%para_WP0%new_GWP0            = new_GWP0
         para_propa%para_WP0%nb_WP0              = nb_WP0
         para_propa%para_WP0%New_Read_WP0        = New_Read_WP0
-        para_propa%para_WP0%read_file           = read_file
+        para_propa%para_WP0%read_fileWP0        = read_fileWP0
         para_propa%para_WP0%read_listWP0        = read_listWP0
 
         para_propa%para_WP0%Read_WP0GridRep     = Read_WP0GridRep
@@ -1414,7 +1414,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
         para_propa%para_WP0%WP0restart          = WP0restart
         para_propa%para_WP0%WP0cplx             = WP0cplx
         para_propa%para_WP0%file_WP0%name       = make_EVRTFileName(file_WP0)
-        IF (read_file .AND. .NOT.                                       &
+        IF (read_fileWP0 .AND. .NOT.                                       &
             check_file_exist_WITH_FileName(para_propa%para_WP0%file_WP0%name)) THEN
           write(out_unit,*) 'ERROR in ',name_sub
           write(out_unit,*) '  the file_WP0 file does not exist or its file name is empty'
@@ -1422,7 +1422,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
           write(out_unit,*) '  => check your data!!'
           STOP
         END IF
-        IF (read_file) write(out_unit,*) 'Read  WP0 from  a file: ',para_propa%para_WP0%file_WP0%name
+        IF (read_fileWP0) write(out_unit,*) 'Read  WP0 from  a file: ',para_propa%para_WP0%file_WP0%name
 
         para_propa%para_WP0%WP0_nb_CleanChannel = WP0_nb_CleanChannel
         IF (WP0_nb_CleanChannel > 0) THEN

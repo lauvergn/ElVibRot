@@ -2249,7 +2249,7 @@ END SUBROUTINE Tune_SG4threads_HPsi
         END IF
 
         para_WP0%nb_WP0              = 0
-        para_WP0%read_file           = .TRUE.
+        para_WP0%read_fileWP0        = .TRUE.
         para_propa%file_WP%formatted = para_propa%para_Davidson%formatted_file_readWP
         para_WP0%file_WP0            = para_propa%file_WP
         para_WP0%read_listWP0        = para_propa%para_Davidson%read_listWP

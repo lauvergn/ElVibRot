@@ -73,12 +73,12 @@ MODULE mod_param_WP0
 
   TYPE param_WP0
     integer             :: nb_WP0             = 1       ! default: 1
-    logical             :: read_file          = .FALSE. ! default: F
+    logical             :: read_fileWP0       = .FALSE. ! default: F
     logical             :: read_listWP0       = .FALSE. ! default: F
     logical             :: New_Read_WP0       = .FALSE. ! default: F. if T, use a new subroutine to read the WP0
     logical             :: WP0restart         = .FALSE. ! restart
     real (kind=Rkind)   :: Trestart           = ZERO    ! time of the restart (id T0)
-    TYPE (File_t)   :: file_WP0
+    TYPE (File_t)       :: file_WP0
     logical             :: WP0cplx            = .TRUE.  ! default = t
     logical             :: Read_WP0GridRep    = .FALSE. ! read WP0 on the grid
     logical             :: Read_WP0BasisRep   = .FALSE. ! read WP0 on the basis

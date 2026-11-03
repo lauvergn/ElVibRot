@@ -810,11 +810,11 @@ CONTAINS
  !------ read guess vectors ---------------------------------
  IF (nb_diago > 0 .OR. para_Davidson%read_WP) THEN
    para_WP0%nb_WP0              = nb_diago
-   para_WP0%read_file           = para_Davidson%read_WP
+   para_WP0%read_fileWP0        = para_Davidson%read_WP
    IF (para_Davidson%nb_readWP_OF_List > 0) THEN
-     para_WP0%read_listWP0        = .FALSE.
+     para_WP0%read_listWP0      = .FALSE.
    ELSE
-     para_WP0%read_listWP0        = para_Davidson%read_listWP
+     para_WP0%read_listWP0      = para_Davidson%read_listWP
    END IF
    para_WP0%WP0cplx             = cplx
    para_WP0%file_WP0%name       = para_Davidson%name_file_readWP

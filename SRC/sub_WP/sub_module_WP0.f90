@@ -94,7 +94,7 @@
           write(out_unit,*) 'BEGINNING ',name_sub
           write(out_unit,*) ' para_WP0%nb_WP0            ',para_WP0%nb_WP0
           write(out_unit,*) ' para_WP0%read_listWP0      ',para_WP0%read_listWP0
-          write(out_unit,*) ' para_WP0%read_file         ',para_WP0%read_file
+          write(out_unit,*) ' para_WP0%read_fileWP0      ',para_WP0%read_fileWP0
           write(out_unit,*) ' para_WP0%file_WP0          ',trim(adjustl(para_WP0%file_WP0%name))
           write(out_unit,*) ' para_WP0%WP0cplx           ',para_WP0%WP0cplx
           write(out_unit,*) ' para_WP0%file_WP0%formatted',para_WP0%file_WP0%formatted
@@ -124,7 +124,7 @@
       !------ read guess vectors ---------------------------------
         cplx = para_WP0%WP0cplx
       
-        IF (para_WP0%read_file) THEN
+        IF (para_WP0%read_fileWP0) THEN
           CALL file_open(para_WP0%file_WP0,nioWP,                         &
                          lformatted=para_WP0%file_WP0%formatted,old=.TRUE.)
       

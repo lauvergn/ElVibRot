@@ -125,7 +125,7 @@ CONTAINS
 
           IF (para_WP0%Read_WP0GridRep) THEN
             !- read WP0 on the grid ----------------------------
-            IF (para_WP0%read_file) THEN
+            IF (para_WP0%read_fileWP0) THEN
               CALL file_open(para_WP0%file_WP0,nio,lformatted=para_WP0%file_WP0%formatted,old=.TRUE.)
               CALL Read_psi_nDGrid(WP0(1),nioPsi=nio,version=0,WithTime=.TRUE.)
               CALL file_close(para_WP0%file_WP0)

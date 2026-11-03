@@ -68,7 +68,7 @@ dh 0.0
 
         type_WPpropa=1 poly_tol=1.d-12 auto_Hmax=f
 
-        Read_WP0GridRep=t read_file=t file_WP0='Xfile_WP0'
+        Read_WP0GridRep=t read_fileWP0=t file_WP0='Xfile_WP0'
 
         TFnexp2=16 TFmaxE=20000.
  /
