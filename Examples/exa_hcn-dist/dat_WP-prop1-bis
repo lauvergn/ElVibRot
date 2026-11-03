@@ -66,7 +66,7 @@ Weight_Rho  -1    0    0    0   0   0
         type_WPpropa=1 max_poly=5000 npoly=300 poly_tol=1.d-15
         auto_Hmax=t
 
-        WP0n_h=1 lect_WP0FBR=f
+        WP0n_h=1 Read_WP0BasisRep=f
 
         TFnexp2=16 TFmaxE=20000.
  /

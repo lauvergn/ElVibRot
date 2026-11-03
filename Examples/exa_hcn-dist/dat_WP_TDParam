@@ -66,7 +66,7 @@ dh 0.0
         WriteWP_nDeltaT=1 WPpsi2=t WPpsi=f
         name_WPpropa='RKn' npoly=1
         DHmax=0.0d0 auto_Hmax=f
-        WP0n_h=1 lect_WP0FBR=f
+        WP0n_h=1 Read_WP0BasisRep=f
  /
  &defWP0 sigma=0.6 Qeq=3.2 imp_k=0.0 /
  &defWP0 sigma=0.6 Qeq=2.2 imp_k=0.0 /

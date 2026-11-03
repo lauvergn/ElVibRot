@@ -53,6 +53,8 @@
 
       PRIVATE
       PUBLIC :: Read_psi_nDBasis,Write_Psi_nDBasis,sub_save_psi
+      PUBLIC :: Read_psi_nDGrid
+
       PUBLIC :: Write_header_saveFile_psi,Read_header_saveFile_psi
       PUBLIC :: lect_psiBasisRep,lect_psiBasisRepnotall,lect_psiBasisRepnotall_nD
       PUBLIC :: ecri_psiBasisRepnotall_nD
@@ -616,12 +618,123 @@
 
       END SUBROUTINE ecri_psiBasisRepnotall_nD
 !=======================================================================================
+SUBROUTINE Read_psi_nDGrid(Psi,nioPsi,version,WithTime)
+  USE EVR_system_m
+  USE mod_psi_set_alloc
+  IMPLICIT NONE
 
+
+  !----- variables for the WP propagation ----------------------------
+  TYPE (param_psi), intent(inout)   :: Psi
+  integer,          intent(in)      :: nioPsi,version
+  logical,          intent(in)      :: WithTime
+
+  real (kind=Rkind)  :: a,b,T
+  logical            :: lformated_loc
+  character (len=10) :: name_end
+
+  real (kind=Rkind), allocatable :: psiQchannel(:)
+
+  real (kind=Rkind), allocatable :: x(:),x_read(:)
+  real (kind=Rkind)              :: x2,Time
+
+  integer            :: ie,i_qa,i_aie
+  integer            :: Rerr
+ 
+  !----- for debuging --------------------------------------------------
+  character (len=*), parameter :: name_sub='Read_psi_nDGrid'
+  logical, parameter :: debug =.FALSE.
+  !logical, parameter :: debug =.TRUE.
+  !-----------------------------------------------------------
+  IF (debug) THEN
+    write(out_unit,*) 'BEGINNING ',name_sub
+    write(out_unit,*) 'Psi%cplx',Psi%cplx
+    write(out_unit,*) 'nioPsi',nioPsi
+    write(out_unit,*) 'version: ',version
+    flush(out_unit)
+  END IF
+  !-----------------------------------------------------------
+
+  CALL alloc_psi(psi,BasisRep=.FALSE.,GridRep=.TRUE.)
+  Psi = ZERO
+
+  IF (psi%cplx) THEN
+    CALL alloc_NParray(psiQchannel,[2*psi%nb_bi*psi%nb_be],"psiQchannel",name_sub)
+  ELSE
+    CALL alloc_NParray(psiQchannel,[  psi%nb_bi*psi%nb_be],"psiQchannel",name_sub)
+  END IF
+  CALL alloc_NParray(x,     [psi%nb_act1],"x",name_sub)
+  CALL alloc_NParray(x_read,[psi%nb_act1],"x",name_sub)
+
+  DO i_qa=1,psi%nb_qa
+
+    !-x(psi%BasisnD%ndim) calculation -----------------------------------
+    CALL Rec_x(x,psi%BasisnD,i_qa)
+
+    IF (psi%BasisnD%ndim > 1) THEN
+      IF (i_qa == 1) THEN
+        x2 = x(psi%BasisnD%ndim-1)
+      END IF
+      IF (x2 /= x(psi%BasisnD%ndim-1)) THEN
+        x2 = x(psi%nb_act1-1)
+        IF (debug) write(*,*) 'break',i_qa
+        IF (i_qa < psi%nb_qa) read(nioPsi,*)
+      END IF
+    END IF
+
+    IF (WithTime) THEN
+      read(nioPsi,*,iostat=Rerr) Time,x_read(:),psiQchannel(:)
+    ELSE
+      read(nioPsi,*,iostat=Rerr)      x_read(:),psiQchannel(:)
+    END IF
+    IF (Rerr /= 0) THEN
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) '  error while reading the psi at the grid point, i_qa',i_qa
+      STOP 'ERROR in Read_psi_nDGrid: while reading the psi at the grid point'
+    END IF
+
+    IF (any(abs(x-x_read) > ONETENTH**6)) THEN
+      write(out_unit,*) ' ERROR in ',name_sub
+      write(out_unit,*) ' Internal and read grids are different'
+      write(out_unit,*) 'internal grid point',i_qa,x(:)
+      write(out_unit,*) 'read     grid point',i_qa,x_read(:)
+      write(out_unit,*) 'abs diff',i_qa,abs(x-x_read)
+      write(out_unit,*) 'compa',i_qa,(abs(x-x_read) > ONETENTH**6)
+      write(out_unit,*) 'compa2 ',i_qa,any(abs(x-x_read) > ONETENTH**6)
+
+      STOP 'ERROR in Read_psi_nDGrid: internal and read grids are different'
+    END IF
+
+    IF (psi%cplx) THEN
+      DO ie=1,psi%nb_bi*psi%nb_be
+        i_aie = i_qa + (ie-1)*psi%nb_qa
+        psi%CvecG(i_aie) = cmplx(psiQchannel(2*ie-1),psiQchannel(2*ie),kind=Rkind)
+      END DO
+    ELSE
+      DO ie=1,psi%nb_bi*psi%nb_be
+        i_aie = i_qa + (ie-1)*psi%nb_qa
+        psi%RvecG(i_aie) = psiQchannel(ie)
+      END DO
+    END IF
+
+  END DO
+  CALL dealloc_NParray(psiQchannel,"psiQchannel",name_sub)
+  CALL dealloc_NParray(x,          "x",          name_sub)
+  CALL dealloc_NParray(x_read,     "x_read",     name_sub)
+
+  !-----------------------------------------------------------
+  IF (debug) THEN
+    write(out_unit,*) 'PsiGridRep'
+    CALL ecri_psi(T=ZERO,psi=Psi)
+    write(out_unit,*) 'END ',name_sub
+  END IF
+  !-----------------------------------------------------------
+END SUBROUTINE Read_psi_nDGrid
 SUBROUTINE Read_psi_nDBasis(Psi,nioPsi,lformated,version,  &
                             list_nDindBasis1_TO_nDindBasis2,nb_tot)
-USE EVR_system_m
-USE mod_psi_set_alloc
-IMPLICIT NONE
+  USE EVR_system_m
+  USE mod_psi_set_alloc
+  IMPLICIT NONE
 
 
 !----- variables for the WP propagation ----------------------------
@@ -957,7 +1070,7 @@ END SELECT
          write(out_unit,*) 'END ',name_sub
        END IF
 !-----------------------------------------------------------
-      END SUBROUTINE Read_psi_nDBasis
+END SUBROUTINE Read_psi_nDBasis
 
       SUBROUTINE Read_list_nDindBasis1_TO_nDindBasis2(Psi,              &
                list_nDindBasis1_TO_nDindBasis2,nb_tot,nioPsi,lformated, &

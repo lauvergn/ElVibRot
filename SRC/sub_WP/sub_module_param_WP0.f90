@@ -80,9 +80,9 @@ MODULE mod_param_WP0
     real (kind=Rkind)   :: Trestart           = ZERO    ! time of the restart (id T0)
     TYPE (File_t)   :: file_WP0
     logical             :: WP0cplx            = .TRUE.  ! default = t
-    logical             :: lect_WP0GridRep    = .FALSE. ! read WP0 on the grid
-    logical             :: lect_WP0BasisRep   = .FALSE. ! read WP0 on the basis
-    logical             :: lect_WP0BasisRepall= .TRUE.  ! read WP0 on the basis
+    logical             :: Read_WP0GridRep    = .FALSE. ! read WP0 on the grid
+    logical             :: Read_WP0BasisRep   = .FALSE. ! read WP0 on the basis
+    logical             :: Read_WP0BasisRepall= .TRUE.  ! read WP0 on the basis
                                                         ! (for some given basis functions index)
                                                         ! Usefull for spectral paropagation or test
     integer             :: WP0n_h             = 1       ! index of the harmonic channel for WP0
@@ -94,7 +94,7 @@ MODULE mod_param_WP0
     integer             :: WP0nrho            = -1      ! WP0nrho : define how to normalize WP0
     logical             :: WP0BasisRep        = .TRUE.  ! calculation of WP0BasisRep with the following parameters
     integer             :: WP0_nb_CleanChannel= 0       ! remove some adiabatic or electronic channels
-    integer, allocatable:: WP0_CleanChannellist(:)      ! list of adiabatic or electronic channels to be remove
+    integer, allocatable:: WP0_CleanChannelList(:)      ! list of adiabatic or electronic channels to be remove
 
     integer         ::       nb_act1          = -1      ! nb active dimension
     !for each variable Qi : exp[-((Q-Qeq)/sigma)2+i*imp_k*(Q-Qeq)]

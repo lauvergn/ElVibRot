@@ -64,7 +64,7 @@ dh 0.0
  &analyse max_ana=20 max_ene=20000.d0 print=f propa=t /
  &propa
         WriteWP_nDeltaT=1 type_WPpropa=100
-        lect_WP0FBR=f 
+        Read_WP0BasisRep=f 
  /
  &defWP0 sigma=0.6,Qeq=0.9,imp_k=0.0 /
  &defWP0 sigma=3.6,Qeq=0.9,imp_k=0.0 /

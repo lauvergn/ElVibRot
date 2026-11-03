@@ -58,55 +58,54 @@ MODULE mod_psi
 
   PRIVATE :: psi0_gaussGridRep
 CONTAINS
-      SUBROUTINE init_psi0(WP0,para_WP0,mole)
-      USE EVR_system_m
-      USE mod_Coord_KEO
-      USE mod_basis
-      USE mod_psi_set_alloc
-      USE mod_psi_Op
-      USE mod_psi_B_TO_G
-      USE mod_param_WP0
-      USE mod_ana_psi
-      USE mod_psi_io
-      USE mod_WP0
-      USE mod_MPI_aux
-      IMPLICIT NONE
+  SUBROUTINE init_psi0(WP0,para_WP0,mole)
+    USE EVR_system_m
+    USE mod_Coord_KEO
+    USE mod_basis
+    USE mod_psi_set_alloc
+    USE mod_psi_Op
+    USE mod_psi_B_TO_G
+    USE mod_param_WP0
+    USE mod_ana_psi
+    USE mod_psi_io
+    USE mod_WP0
+    USE mod_MPI_aux
+    IMPLICIT NONE
 
-!----- variables for the WP propagation ----------------------------
-      TYPE (param_WP0), intent(inout) :: para_WP0
-      TYPE (param_psi), intent(inout) :: WP0(1)
+    !----- variables for the WP propagation ----------------------------
+    TYPE (param_WP0), intent(inout) :: para_WP0
+    TYPE (param_psi), intent(inout) :: WP0(1)
 
-!----- for the CoordType and Tnum --------------------------------------
-      TYPE (CoordType), intent(in)    :: mole
+    !----- for the CoordType and Tnum --------------------------------------
+    TYPE (CoordType), intent(in)    :: mole
 
-!------ working variables ---------------------------------
-      integer  :: nio,nb_WPdum
-      integer  :: ecri_numi,ecri_nume
+    !------ working variables ---------------------------------
+    integer  :: nio,nb_WPdum
+    integer  :: ecri_numi,ecri_nume
 
-!----- for debuging --------------------------------------------------
-      logical, parameter :: debug = .FALSE.
-      !logical, parameter :: debug = .TRUE.
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unit,*) 'BEGINNING init_psi0'
-        write(out_unit,*) 'WP0n_h,WP0nb_elec',para_WP0%WP0n_h,para_WP0%WP0nb_elec
-        write(out_unit,*)
-        write(out_unit,*) 'WP0(:)%symab',WP0(:)%symab
+    !----- for debuging --------------------------------------------------
+    logical, parameter :: debug = .FALSE.
+    !logical, parameter :: debug = .TRUE.
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unit,*) 'BEGINNING init_psi0'
+      write(out_unit,*) 'WP0n_h,WP0nb_elec',para_WP0%WP0n_h,para_WP0%WP0nb_elec
+      write(out_unit,*)
+      write(out_unit,*) 'WP0(:)%symab',WP0(:)%symab
 
-        CALL ecri_init_psi(WP0(1))
+      CALL ecri_init_psi(WP0(1))
 
-        write(out_unit,*)
-        write(out_unit,*) 'WP0BasisRep',para_WP0%WP0BasisRep
-        write(out_unit,*) 'lect_WP0GridRep,lect_WP0BasisRep',         &
-                  para_WP0%lect_WP0GridRep,para_WP0%lect_WP0BasisRep
-        write(out_unit,*)
-        write(out_unit,*) 'nb_basis_act1',WP0(1)%BasisnD%nb_basis
-        CALL RecWrite_basis(WP0(1)%BasisnD)
-        write(out_unit,*)
-        flush(out_unit)
-      END IF
-
-!-----------------------------------------------------------
+      write(out_unit,*)
+      write(out_unit,*) 'WP0BasisRep',para_WP0%WP0BasisRep
+      write(out_unit,*) 'Read_WP0GridRep,Read_WP0BasisRep',         &
+                para_WP0%Read_WP0GridRep,para_WP0%Read_WP0BasisRep
+      write(out_unit,*)
+      write(out_unit,*) 'nb_basis_act1',WP0(1)%BasisnD%nb_basis
+      CALL RecWrite_basis(WP0(1)%BasisnD)
+      write(out_unit,*)
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------
 
       IF (para_WP0%New_Read_WP0) THEN
         IF(keep_MPI) CALL sub_read_psi0(WP0,para_WP0,max_WP=1)
@@ -120,24 +119,25 @@ CONTAINS
         ! for psi%CvecB,psi%RvecB,psi%CvecG,psi%RvecG
         CALL alloc_psi(WP0(1))
 
-        IF (.NOT. para_WP0%lect_WP0BasisRep .AND.                         &
-            .NOT. para_WP0%WP0restart) THEN
+        IF (.NOT. para_WP0%Read_WP0BasisRep .AND. .NOT. para_WP0%WP0restart) THEN
 
           CALL alloc_psi(WP0(1),GridRep=.TRUE.)
 
-          IF (para_WP0%lect_WP0GridRep) THEN
+          IF (para_WP0%Read_WP0GridRep) THEN
             !- read WP0 on the grid ----------------------------
-            CALL lect_psiBasisRep(WP0(1)%CvecG,para_WP0%WP0cplx,          &
-                             WP0(1)%nb_qa,WP0(1)%nb_bi,WP0(1)%nb_be,      &
-                             para_WP0%WP0n_h,para_WP0%WP0nb_elec)
+            IF (para_WP0%read_file) THEN
+              CALL file_open(para_WP0%file_WP0,nio,lformatted=para_WP0%file_WP0%formatted,old=.TRUE.)
+              CALL Read_psi_nDGrid(WP0(1),nioPsi=nio,version=0,WithTime=.TRUE.)
+              CALL file_close(para_WP0%file_WP0)
+            ELSE
+              CALL Read_psi_nDGrid(WP0(1),nioPsi=in_unit,version=0,WithTime=.TRUE.)
+            END IF
           ELSE IF (para_WP0%new_GWP0) THEN
             CALL New_WP0_GridRep(WP0(1),para_WP0,mole)
           ELSE
             !- initialisation with a gaussian WP ---------------
             CALL psi0_gaussGridRep(WP0(1),para_WP0,mole)
           END IF
-
-
 
           IF (debug) THEN
             write(out_unit,*) 'psiGridRep ini'
@@ -197,7 +197,7 @@ CONTAINS
           CALL lect_psiBasisRepnotall_nD(WP0(1),nio,WP0(1)%cplx,para_WP0%file_WP0%formatted)
           CALL file_close(para_WP0%file_WP0)
 
-        ELSE IF (para_WP0%lect_WP0BasisRep .AND. para_WP0%lect_WP0BasisRepall) THEN
+        ELSE IF (para_WP0%Read_WP0BasisRep .AND. para_WP0%Read_WP0BasisRepall) THEN
 
           IF (WP0(1)%nb_baie > WP0(1)%nb_tot) THEN
           CALL lect_psiBasisRep(WP0(1)%CvecB,para_WP0%WP0cplx,                  &
@@ -209,15 +209,15 @@ CONTAINS
                            para_WP0%WP0n_h,para_WP0%WP0nb_elec)
           END IF
 
-        ELSE IF (para_WP0%lect_WP0BasisRep                                     &
-                                .AND. .NOT. para_WP0%lect_WP0BasisRepall) THEN
+        ELSE IF (para_WP0%Read_WP0BasisRep                                     &
+                                .AND. .NOT. para_WP0%Read_WP0BasisRepall) THEN
 
           CALL lect_psiBasisRepnotall(WP0(1),para_WP0%WP0cplx)
         ELSE
           write(out_unit,*) ' ERROR in psi0'
           write(out_unit,*) ' I do not know what to do!!!'
           STOP
-        END IF ! for .NOT. para_WP0%lect_WP0BasisRep
+        END IF ! for .NOT. para_WP0%Read_WP0BasisRep
 
 !     IF (para_WP0%WP0_DIP .GT. 0) THEN
 !       IF (para_WP0%WP0BasisRep) THEN
@@ -238,68 +238,63 @@ CONTAINS
         CALL alloc_psi(WP0(1)) ! deallocate the grid representation
       END IF
 
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unit,*)
-        write(out_unit,*) 'WP0(:)%symab',WP0(:)%symab
-        write(out_unit,*) 'WP0BasisRep',WP0(1)%norm2
-        IF (para_WP0%WP0BasisRep) THEN
-          CALL ecri_psi(ZERO,WP0(1),out_unit,.FALSE.,.TRUE.)
-        ELSE
-          CALL ecri_psi(ZERO,WP0(1),out_unit,.TRUE.,.FALSE.)
-        END IF
-        write(out_unit,*) 'END psi0'
-        flush(out_unit)
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      write(out_unit,*)
+      write(out_unit,*) 'WP0(:)%symab',WP0(:)%symab
+      write(out_unit,*) 'WP0BasisRep',WP0(1)%norm2
+      IF (para_WP0%WP0BasisRep) THEN
+        CALL ecri_psi(ZERO,WP0(1),out_unit,.FALSE.,.TRUE.)
+      ELSE
+        CALL ecri_psi(ZERO,WP0(1),out_unit,.TRUE.,.FALSE.)
       END IF
-!-----------------------------------------------------------
+      write(out_unit,*) 'END psi0'
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------
+  END SUBROUTINE init_psi0
+  !==============================================================
+  !     Wave packet initialisation
+  !
+  !     for each active dimension :
+  !          psi0(qi) =  exp[-((Q-Qeq)/sigma)^2]*exp[i*imp_k*(Q-Qeq)+i*phase]
+  !
+  !     If WP0_DIP=1,2,3     => WP0 = WP0*dip(i) [i=1,2,3 => x,y,z]
+  !             =0 (default) => WP0 = WP0
+  !
+  !==============================================================
+  SUBROUTINE psi0_gaussGridRep(WP0,para_WP0,mole)
+    USE EVR_system_m
+    USE mod_Coord_KEO
+    USE mod_basis
+    USE mod_psi_set_alloc
+    USE mod_param_WP0
+    IMPLICIT NONE
 
-      END SUBROUTINE init_psi0
-!==============================================================
-!     Wave packet initialisation
-!
-!     for each active dimension :
-!          psi0(qi) =  exp[-((Q-Qeq)/sigma)^2]*exp[i*imp_k*(Q-Qeq)+i*phase]
-!
-!     If WP0_DIP=1,2,3     => WP0 = WP0*dip(i) [i=1,2,3 => x,y,z]
-!             =0 (default) => WP0 = WP0
-!
-!==============================================================
-      SUBROUTINE psi0_gaussGridRep(WP0,para_WP0,mole)
-      USE EVR_system_m
-      USE mod_Coord_KEO
-      USE mod_basis
-      USE mod_psi_set_alloc
-      USE mod_param_WP0
-      IMPLICIT NONE
+    !----- variables for the WP propagation ----------------------------
+    TYPE (param_WP0), intent(in)      :: para_WP0
+    TYPE (param_psi), intent(inout)   :: WP0
 
+    !----- for the CoordType and Tnum --------------------------------------
+    TYPE (CoordType), intent(in)      :: mole
 
-!----- variables for the WP propagation ----------------------------
-      TYPE (param_WP0), intent(in)      :: para_WP0
-      TYPE (param_psi), intent(inout)   :: WP0
+    ! local variable
+    integer            :: WP0nb_elec,WP0n_h
 
+    real (kind=Rkind)      :: Qact(WP0%nb_act1)
 
-!----- for the CoordType and Tnum --------------------------------------
-      TYPE (CoordType), intent(in)      :: mole
+    real (kind=Rkind)      :: z,ze,zk
+    real (kind=Rkind)      :: czk,szk
+    integer                :: i_act
+    integer                :: i_qa,i_qaie
+    TYPE (OldParam)        :: OldPara
+    !------ dipole moment ----------------------------------------------------
+    real (kind=Rkind)      :: rhonD
 
-      ! local variable
-      integer            :: WP0nb_elec,WP0n_h
-
-      real (kind=Rkind)      :: Qact(WP0%nb_act1)
-
-
-
-      real (kind=Rkind)      :: z,ze,zk
-      real (kind=Rkind)      :: czk,szk
-      integer                :: i_act
-      integer                :: i_qa,i_qaie
-      TYPE (OldParam)        :: OldPara
-!------ dipole moment ----------------------------------------------------
-      real (kind=Rkind)      :: rhonD
-
-!----- for debuging --------------------------------------------------
-      logical,parameter :: debug = .FALSE.
-      !logical,parameter :: debug = .TRUE.
-!-----------------------------------------------------------
+    !----- for debuging --------------------------------------------------
+    logical,parameter :: debug = .FALSE.
+    !logical,parameter :: debug = .TRUE.
+    !-----------------------------------------------------------
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING psi0_gaussGridRep'
         write(out_unit,*) 'nb_act1',WP0%nb_act1

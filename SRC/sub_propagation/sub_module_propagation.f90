@@ -1037,7 +1037,8 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
 
       logical      :: new_GWP0,New_Read_WP0,read_listWP0,read_file
       logical      :: WP0restart,WP0cplx
-      logical      :: lect_WP0DVR ,lect_WP0FBR,lect_WP0FBRall,WP0FBR
+      logical      :: WP0FBR
+      logical      :: Read_WP0GridRep,Read_WP0BasisRep,Read_WP0BasisRepall
       integer      :: WP0n_h,WP0nb_elec,WP0_DIP,WP0nrho,nb_WP0
       integer      :: WP0_nb_CleanChannel
       character (len=Line_len) :: file_WP0
@@ -1065,7 +1066,7 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
                       One_Iteration,                                    &
                       write_iter,n_WPecri,WriteWP_nDeltaT,              &
                   WPpsi2,WPpsi,file_WP,write_DVR,write_FBR,write_WPAdia,&
-                      lect_WP0DVR,lect_WP0FBR,lect_WP0FBRall,           &
+                      Read_WP0GridRep,Read_WP0BasisRep,Read_WP0BasisRepall, &
                       WP0FBR,                                           &
                       WP0n_h,WP0nb_elec,WP0_DIP,th_WP0,WP0nrho,         &
                       WP0_nb_CleanChannel,                              &
@@ -1135,9 +1136,11 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
         WP0restart          = .FALSE.
         WP0cplx             = .TRUE.
         file_WP0            = 'file_WP0'
-        lect_WP0DVR         = .FALSE.
-        lect_WP0FBR         = .FALSE.
-        lect_WP0FBRall      = .TRUE.
+
+        Read_WP0GridRep     = .FALSE.
+        Read_WP0BasisRep    = .FALSE.
+        Read_WP0BasisRepall = .FALSE.
+
         WP0FBR              = .TRUE.
         WP0n_h              = 1
         WP0nb_elec          = 1
@@ -1397,9 +1400,11 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
         para_propa%para_WP0%New_Read_WP0        = New_Read_WP0
         para_propa%para_WP0%read_file           = read_file
         para_propa%para_WP0%read_listWP0        = read_listWP0
-        para_propa%para_WP0%lect_WP0GridRep     = lect_WP0DVR
-        para_propa%para_WP0%lect_WP0BasisRep    = lect_WP0FBR
-        para_propa%para_WP0%lect_WP0BasisRepall = lect_WP0FBRall
+
+        para_propa%para_WP0%Read_WP0GridRep     = Read_WP0GridRep
+        para_propa%para_WP0%Read_WP0BasisRep    = Read_WP0BasisRep
+        para_propa%para_WP0%Read_WP0BasisRepall = Read_WP0BasisRepall
+
         para_propa%para_WP0%WP0BasisRep         = WP0FBR
         para_propa%para_WP0%WP0n_h              = WP0n_h
         para_propa%para_WP0%WP0nb_elec          = WP0nb_elec
@@ -1417,6 +1422,8 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
           write(out_unit,*) '  => check your data!!'
           STOP
         END IF
+        IF (read_file) write(out_unit,*) 'Read  WP0 from  a file: ',para_propa%para_WP0%file_WP0%name
+
         para_propa%para_WP0%WP0_nb_CleanChannel = WP0_nb_CleanChannel
         IF (WP0_nb_CleanChannel > 0) THEN
           write(out_unit,*)
@@ -1585,9 +1592,9 @@ END SUBROUTINE sub_analyze_mini_WP_OpWP
           END IF
 
         ELSE
-          IF (lect_WP0DVR) THEN
+          IF (Read_WP0GridRep) THEN
             write(out_unit,*) ' read the WP0 in GridRep'
-          ELSE IF (lect_WP0FBR) THEN
+          ELSE IF (Read_WP0BasisRep) THEN
             write(out_unit,*) ' read the WP0 in BasisRep (old way)'
           ELSE IF (New_Read_WP0) THEN
             write(out_unit,*) ' read the WP0 in BasisRep (new way)'

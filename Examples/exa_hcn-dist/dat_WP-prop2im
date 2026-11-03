@@ -60,7 +60,7 @@ sym  cos(a)      R     r    x    pi   dh
         WriteWP_nDeltaT = 1 WPpsi2 =f WPpsi=t
         type_WPpropa=2 max_poly=5000 npoly=300 poly_tol=1.d-20
         DHmax=0.0d0 auto_Hmax=t
-        WP0n_h=1 lect_WP0FBR=f
+        WP0n_h=1 Read_WP0BasisRep=f
 
         TFnexp2=16
         TFmaxE=20000.

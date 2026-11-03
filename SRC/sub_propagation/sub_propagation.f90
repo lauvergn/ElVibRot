@@ -889,7 +889,6 @@ CONTAINS
 
       RealTime = Delta_RealTime(PropaTime) ! for the timing
 
-
       DO WHILE ( (T - (para_propa%WPTmax-para_propa%WPdeltaT) <         &
                  para_propa%WPdeltaT/TEN**5) .AND. psi(1)%norm2 < para_propa%max_norm2)
 

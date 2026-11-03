@@ -62,7 +62,7 @@ sym  cos(a)      R     r    x    pi   dh
         type_WPpropa=-3,max_poly=5000,npoly=300,poly_tol=1.d-12
         DHmax=1.0d0,auto_Hmax=f
         WP0n_h=1,
-        lect_WP0FBR=f
+        Read_WP0BasisRep=f
 
         TFnexp2=16
         TFmaxE=20000.

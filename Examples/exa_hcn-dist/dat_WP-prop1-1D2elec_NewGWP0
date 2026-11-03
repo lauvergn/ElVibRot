@@ -67,7 +67,7 @@ dh 0.0
 
         type_WPpropa=1 poly_tol=1.d-12 auto_Hmax=f
 
-        new_GWP0=t nb_WP0=2 lect_WP0FBR=f
+        new_GWP0=t nb_WP0=2 Read_WP0BasisRep=f
 
         TFnexp2=16 TFmaxE=20000.
  /
