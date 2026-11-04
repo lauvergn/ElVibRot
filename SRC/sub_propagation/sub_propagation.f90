@@ -833,7 +833,6 @@ CONTAINS
       IF (nb_WP > 1) STOP 'ERROR in sub_propagation11: nb_WP > 1'
 
       para_H => tab_Op(1)
-
       IF (debug) THEN
         write(out_unit,*) 'BEGINNING sub_propagation11'
         write(out_unit,*) 'Tmax,DeltaT',para_propa%WPTmax,para_propa%WPdeltaT

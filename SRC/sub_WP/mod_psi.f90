@@ -101,7 +101,7 @@ CONTAINS
                 para_WP0%Read_WP0GridRep,para_WP0%Read_WP0BasisRep
       write(out_unit,*)
       write(out_unit,*) 'nb_basis_act1',WP0(1)%BasisnD%nb_basis
-      CALL RecWrite_basis(WP0(1)%BasisnD)
+      !CALL RecWrite_basis(WP0(1)%BasisnD)
       write(out_unit,*)
       flush(out_unit)
     END IF
@@ -122,6 +122,7 @@ CONTAINS
         IF (.NOT. para_WP0%Read_WP0BasisRep .AND. .NOT. para_WP0%WP0restart) THEN
 
           CALL alloc_psi(WP0(1),GridRep=.TRUE.)
+          IF (debug) write(out_unit,*) 'init WP0 on the G, WP0(:)%symab',WP0(:)%symab
 
           IF (para_WP0%Read_WP0GridRep) THEN
             !- read WP0 on the grid ----------------------------
@@ -140,6 +141,7 @@ CONTAINS
           END IF
 
           IF (debug) THEN
+            write(out_unit,*) 'WP0 on the G, WP0(:)%symab',WP0(:)%symab
             write(out_unit,*) 'psiGridRep ini'
             CALL ecri_psi(ZERO,WP0(1),out_unit,.TRUE.,.FALSE.)
           END IF
@@ -184,10 +186,9 @@ CONTAINS
               write(out_unit,*) ' WARNNIG in psi0'
               write(out_unit,*) ' the transformation GridRep to BasisRep is NOT exact'
               write(out_unit,*) ' => used more basis functions'
-              !CALL ecri_psi(psi=WP0(1),                                      &
-              !              ecri_BasisRep=.TRUE.,ecri_GridRep=.TRUE.)
             END IF
             IF(keep_MPI) CALL renorm_psi(WP0(1),BasisRep=.TRUE.)
+            IF (debug) write(out_unit,*) 'after G->B, WP0(:)%symab',WP0(:)%symab
           END IF
 
         ELSE IF (para_WP0%WP0restart ) THEN
@@ -209,9 +210,7 @@ CONTAINS
                            para_WP0%WP0n_h,para_WP0%WP0nb_elec)
           END IF
 
-        ELSE IF (para_WP0%Read_WP0BasisRep                                     &
-                                .AND. .NOT. para_WP0%Read_WP0BasisRepall) THEN
-
+        ELSE IF (para_WP0%Read_WP0BasisRep .AND. .NOT. para_WP0%Read_WP0BasisRepall) THEN
           CALL lect_psiBasisRepnotall(WP0(1),para_WP0%WP0cplx)
         ELSE
           write(out_unit,*) ' ERROR in psi0'

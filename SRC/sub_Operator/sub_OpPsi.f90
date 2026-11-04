@@ -272,63 +272,63 @@ CONTAINS
       END SUBROUTINE sub_OpPsi
 !===============================================================================
 
-!===============================================================================
-      SUBROUTINE sub_PrimOpPsi(Psi,OpPsi,para_Op,derOp,With_Grid,pot_only)
-      USE EVR_system_m
-      USE mod_SymAbelian,     ONLY : Calc_symab1_EOR_symab2
-      USE mod_psi,            ONLY : param_psi,ecri_psi,copy_psi2TOpsi1,&
-                                     alloc_psi,dealloc_psi,             &
-                                     Set_symab_OF_psiBasisRep,          &
-                                     sub_PsiGridRep_TO_BasisRep
-      USE mod_SetOp,          ONLY : param_Op,write_param_Op,read_OpGrid_OF_Op
-      USE mod_OpPsi_SG4_MPI,  ONLY : sub_TabOpPsi_FOR_SGtype4_SRB_MPI
-      USE mod_MPI_aux
-      IMPLICIT NONE
+  !===============================================================================
+  SUBROUTINE sub_PrimOpPsi(Psi,OpPsi,para_Op,derOp,With_Grid,pot_only)
+    USE EVR_system_m
+    USE mod_SymAbelian,     ONLY : Calc_symab1_EOR_symab2
+    USE mod_psi,            ONLY : param_psi,ecri_psi,copy_psi2TOpsi1,&
+                                   alloc_psi,dealloc_psi,             &
+                                   Set_symab_OF_psiBasisRep,          &
+                                   sub_PsiGridRep_TO_BasisRep,norm2_psi
+    USE mod_SetOp,          ONLY : param_Op,write_param_Op,read_OpGrid_OF_Op
+    USE mod_OpPsi_SG4_MPI,  ONLY : sub_TabOpPsi_FOR_SGtype4_SRB_MPI
+    USE mod_MPI_aux
+    IMPLICIT NONE
 
-      !----- variables pour la namelist minimum ------------------------
-      TYPE (param_Op)  :: para_Op
-      integer, intent(in), optional :: derOp(2)
-      logical, intent(in), optional :: With_Grid,pot_only
-      integer                       :: n
-
-
-      !----- variables for the WP --------------------------------------
-      TYPE (param_psi)   :: Psi,OpPsi
-      integer :: OpPsi_symab
-
-      integer :: derOp_loc(2)
-      logical :: With_Grid_loc,pot_only_loc
-      TYPE (param_psi)   :: RPsi,ROpPsi
-      TYPE (param_psi)   :: RCPsi(2),RCOpPsi(2)
-      TYPE (param_psi)   :: RROpPsi(1)
-
-      logical :: direct_KEO,SGtype4
+    !----- variables pour la namelist minimum ------------------------
+    TYPE (param_Op)  :: para_Op
+    integer, intent(in), optional :: derOp(2)
+    logical, intent(in), optional :: With_Grid,pot_only
+    integer                       :: n
 
 
-      !----- for debuging ------------------------------------------------------
-      integer :: err_mem,memory
-      character (len=*), parameter :: name_sub='sub_PrimOpPsi'
-      logical, parameter :: debug = .FALSE.
-      !logical, parameter :: debug = .TRUE.
-      !-------------------------------------------------------------------------
-      n = para_Op%nb_tot
-      IF (debug) THEN
-        write(out_unit,*) 'BEGINNING ',name_sub,' ',n
-        write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
-        write(out_unit,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
-        write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
-        write(out_unit,*) 'para_Op%... %Save_MemGrid_done',            &
-                    para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
-        flush(out_unit)
-        !CALL write_param_Op(para_Op)
-        !IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
-        !IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
-        write(out_unit,*)
-        write(out_unit,*) 'Psi'
-        CALL ecri_psi(Psi=Psi)
-        flush(out_unit)
-      END IF
-      !-------------------------------------------------------------------------
+    !----- variables for the WP --------------------------------------
+    TYPE (param_psi)   :: Psi,OpPsi
+    integer :: OpPsi_symab
+
+    integer :: derOp_loc(2)
+    logical :: With_Grid_loc,pot_only_loc
+    TYPE (param_psi)   :: RPsi,ROpPsi
+    TYPE (param_psi)   :: RCPsi(2),RCOpPsi(2)
+    TYPE (param_psi)   :: RROpPsi(1)
+
+    logical :: direct_KEO,SGtype4
+
+
+    !----- for debuging ------------------------------------------------------
+    integer :: err_mem,memory
+    character (len=*), parameter :: name_sub='sub_PrimOpPsi'
+    logical, parameter :: debug = .FALSE.
+    !logical, parameter :: debug = .TRUE.
+    !-------------------------------------------------------------------------
+    n = para_Op%nb_tot
+    IF (debug) THEN
+      write(out_unit,*) 'BEGINNING ',name_sub,' ',n
+      write(out_unit,*) 'nb_bie,nb_baie',para_Op%nb_bie,para_Op%nb_baie
+      write(out_unit,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
+      write(out_unit,*) 'para_Op%mat_done',para_Op%mat_done
+      write(out_unit,*) 'para_Op%... %Save_MemGrid_done',            &
+                  para_Op%para_ReadOp%para_FileGrid%Save_MemGrid_done
+      flush(out_unit)
+      !CALL write_param_Op(para_Op)
+      !IF (allocated(para_Op%Cmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Cmat,out_unit,3)
+      !IF (allocated(para_Op%Rmat) .AND. para_Op%mat_done) CALL Write_Mat_MPI(para_Op%Rmat,out_unit,5)
+      write(out_unit,*)
+      write(out_unit,*) 'Psi'
+      CALL ecri_psi(Psi=Psi)
+      flush(out_unit)
+    END IF
+    !-------------------------------------------------------------------------
 
       IF (present(derOp)) THEN
         derOp_loc(:) = derOp(:)
@@ -559,31 +559,37 @@ CONTAINS
         ENDIF ! for keep_MPI
       END IF
 
-!=====================================================================
-!
-!      Symmetrization of  Op.Psi (if psi is on the basis)
-!
-!=====================================================================
-      IF (debug) write(out_unit,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
+    IF (debug) THEN
+      CALL norm2_psi(OpPsi)
+      write(out_unit,*) 'OpPsiBasisRep, norm2',OpPsi%norm2
+    END IF
 
-      IF(keep_MPI) THEN
-        OpPsi_symab = Calc_symab1_EOR_symab2(para_Op%symab,psi%symab)
-        CALL Set_symab_OF_psiBasisRep(OpPsi,OpPsi_symab)
-      ENDIF
-      IF (debug) write(out_unit,*) 'OpPsi_symab',OpPsi%symab
+    !=====================================================================
+    !
+    !      Symmetrization of  Op.Psi (if psi is on the basis)
+    !
+    !=====================================================================
+    IF (debug) write(out_unit,*) 'symab of para_Op,psi ',para_Op%symab,psi%symab
 
-!write(out_unit,*) 'para_Op,psi symab ',para_Op%symab,psi%symab
-!write(out_unit,*) 'OpPsi_symab',OpPsi%symab
-!-----------------------------------------------------------
-      IF (debug) THEN
-        write(out_unit,*) 'OpPsiBasisRep'
-        CALL ecri_psi(Psi=OpPsi)
-        write(out_unit,*)
-        write(out_unit,*) 'END ',name_sub
-      END IF
-!-----------------------------------------------------------
+    IF(keep_MPI) THEN
+      OpPsi_symab = Calc_symab1_EOR_symab2(para_Op%symab,psi%symab)
+      CALL Set_symab_OF_psiBasisRep(OpPsi,OpPsi_symab)
+    ENDIF
+    IF (debug) write(out_unit,*) 'OpPsi_symab',OpPsi%symab
 
-      END SUBROUTINE sub_PrimOpPsi
+    !write(out_unit,*) 'para_Op,psi symab ',para_Op%symab,psi%symab
+    !write(out_unit,*) 'OpPsi_symab',OpPsi%symab
+    !-----------------------------------------------------------
+    IF (debug) THEN
+      CALL norm2_psi(OpPsi)
+      write(out_unit,*) 'OpPsiBasisRep, norm2',OpPsi%norm2
+      CALL ecri_psi(Psi=OpPsi)
+      write(out_unit,*)
+      write(out_unit,*) 'END ',name_sub
+    END IF
+    !-----------------------------------------------------------
+
+  END SUBROUTINE sub_PrimOpPsi
 
       SUBROUTINE sub_OpBasis_OneBF(Psi,OpPsi,para_Op,i)
       USE EVR_system_m
@@ -957,7 +963,7 @@ END SUBROUTINE sub_OpBasis_OneCBF
 !=======================================================================================
       SUBROUTINE sub_OpPsi_WITH_MatOp(Psi,OpPsi,para_Op)
       USE EVR_system_m
-      USE mod_psi,        ONLY : param_psi,ecri_psi
+      USE mod_psi,        ONLY : param_psi,ecri_psi,norm2_psi
       USE mod_SetOp,      ONLY : param_Op,write_param_Op
       IMPLICIT NONE
 
@@ -1056,7 +1062,8 @@ END SUBROUTINE sub_OpBasis_OneCBF
 
 !-----------------------------------------------------------
       IF (debug) THEN
-        write(out_unit,*) 'OpPsiBasisRep'
+        CALL norm2_psi(OpPsi)
+        write(out_unit,*) 'OpPsiBasisRep, norm2',OpPsi%norm2
         CALL ecri_psi(Psi=OpPsi)
         write(out_unit,*)
         write(out_unit,*) 'END ',name_sub

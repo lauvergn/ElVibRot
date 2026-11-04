@@ -651,12 +651,10 @@ SUBROUTINE Read_psi_nDGrid(Psi,nioPsi,version,WithTime)
     write(out_unit,*) 'Psi%cplx',Psi%cplx
     write(out_unit,*) 'nioPsi',nioPsi
     write(out_unit,*) 'version: ',version
+    write(out_unit,*) 'Psi%symab',Psi%symab
     flush(out_unit)
   END IF
   !-----------------------------------------------------------
-
-  CALL alloc_psi(psi,BasisRep=.FALSE.,GridRep=.TRUE.)
-  Psi = ZERO
 
   IF (psi%cplx) THEN
     CALL alloc_NParray(psiQchannel,[2*psi%nb_bi*psi%nb_be],"psiQchannel",name_sub)
@@ -724,6 +722,7 @@ SUBROUTINE Read_psi_nDGrid(Psi,nioPsi,version,WithTime)
 
   !-----------------------------------------------------------
   IF (debug) THEN
+    write(out_unit,*) 'Psi%symab',Psi%symab
     write(out_unit,*) 'PsiGridRep'
     CALL ecri_psi(T=ZERO,psi=Psi)
     write(out_unit,*) 'END ',name_sub
