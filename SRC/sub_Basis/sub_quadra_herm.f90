@@ -157,57 +157,6 @@
           CALL alloc_NParray(x_loc,[1,nq],'x_loc',name_sub)
           CALL alloc_NParray(w_loc,[nq],  'w_loc',name_sub)
           CALL hermite_grid_EVR(nq,x_loc,w_loc,option)
-          ! IF (option == 0) THEN
-          !   CALL alloc_NParray(x_loc,[1,nq],'x_loc',name_sub)
-          !   CALL alloc_NParray(w_loc,[nq],  'w_loc',name_sub)
-
-          !   CALL hercom(nq,x_loc,w_loc)
-
-          !   IF (WithRead) THEN
-          !     herm_file%name = trim(EVRT_path) //                                 &
-          !       '/Internal_data/HermQuadra/herm' // TO_string(nq) // '.txt'
-
-          !     write(out_unit,*) 'herm_file%name: ',herm_file%name
-          !     flush(out_unit)
-          !     CALL file_open(herm_file,nio,old=.TRUE.,err_file=err_io)
-
-          !     IF (err_io /= 0) THEN
-          !       write(out_unit,*) 'WARNNING in ',name_sub
-          !       write(out_unit,*) 'cannot find quadrature file: ',herm_file%name
-          !     ELSE
-
-          !       DO iq=1,nq
-          !         read(nio,*,iostat=err_io) idum,x_loc(:,iq),wdum,w_loc(iq)
-          !       END DO
-
-          !     END IF
-          !     CALL file_close(herm_file)
-          !   END IF
-          ! ELSE IF (option == 1) THEN
-          !   IF (print_level > 1) write(out_unit,*) 'New quadrature calculation: Init_Quadrature_HP',nq
-          !   flush(out_unit)
-          !   CALL Init_Quadrature_HP(xw,nq=nq,name='HO',err=err_grid)
-          !   IF (debug) THEN
-          !     CALL Write_Quadrature(xw)
-          !     S = matmul(xw%d0bgw,xw%d0gb)
-          !     CALL Write_Mat(S, nio=out_unit, nbcol=5, info='Overlap')
-          !   END IF
-          !   IF (err_grid /= 0) THEN
-          !     CALL Write_Quadrature(xw)
-          !     write(out_unit,*) 'ERROR in ',name_sub
-          !     write(out_unit,*) ' ERROR with "CALL Init_Quadrature_HP()"'
-          !     STOP 'ERROR in sub_quadra_hermite: with "CALL Init_Quadrature_HP()"'
-          !   END IF
-          !   x_loc = xw%x
-          !   w_loc = xw%w
-          ! ELSE
-          !   write(out_unit,*) 'ERROR in ',name_sub
-          !   write(out_unit,*) ' For not nested quadrature, the possible options are 0 or 1'
-          !   write(out_unit,*) ' option: ',option
-          !   write(out_unit,*) ' 0: old procedure (calculation with hercom or reading the grids)'
-          !   write(out_unit,*) ' 1: new procedure (QDUtil library)'
-          !   STOP 'ERROR in sub_quadra_hermite: For not nested quadrature, the possible options are 0 or 1'
-          ! END IF
         END SELECT
         !base%xPOGridRep_done = .TRUE.
 
@@ -1249,139 +1198,136 @@ end subroutine sub_quadra_hermite_halfLeft
       END SUBROUTINE grid_HermiteNested1
 
   SUBROUTINE sub_quadra_HermiteNested2(base,paire)
-      USE EVR_system_m
-      USE mod_basis
-      USE BasisMakeGrid
-      IMPLICIT NONE
+    USE EVR_system_m
+    USE mod_basis
+    USE BasisMakeGrid
+    IMPLICIT NONE
 
-!---------------------------------------------------------------------
-!---------- variables passees en argument ----------------------------
-      TYPE (basis) :: base
-      integer paire
-      logical num
-      real(kind=Rkind)  step
-!---------------------------------------------------------------------
-!---------------------------------------------------------------------
-      logical  :: deriv
-      real(kind=Rkind) :: A,B,xeq,scale,dx
-      integer  :: nb,nq,iq,i,j,nb_nosym,nq0,dnq,nq1,nq2,nqo
-      real(kind=Rkind), allocatable :: x_loc(:)
-      real(kind=Rkind), allocatable :: w_loc(:)
-
-
-!----- for debuging --------------------------------------------------
-      integer :: err_mem,memory
-      character (len=*), parameter :: name_sub='sub_quadra_HermiteNested2'
-      logical, parameter :: debug = .TRUE.
-      !logical, parameter :: debug = .FALSE.
-!-----------------------------------------------------------
-      nqo = get_nq_FROM_basis(base)
-      IF (debug) THEN
-        write(out_unit,*) 'BEGINNING ',name_sub
-        write(out_unit,*) 'nb,nq',base%nb,nqo
-        flush(out_unit)
-      END IF
-!-----------------------------------------------------------
-
-      deriv = .TRUE.
-      num   = .FALSE.
-      step  = ZERO
-
-      IF (base%nb <= 0) STOP 'ERROR nb<=0'
-
-!----------------------------------------------------------------------------
-!----------------------------------------------------------------------------
-!      test sur nb_herm et nb_quadra
-!      nb_quadra > nb_herm
-!----------------------------------------------------------------------------
-      IF (base%print_info_OF_basisDP) write(out_unit,*) '    Basis: Hermite polynomials+Nested'
-      base%packed            = .TRUE.
-      base%packed_done       = .TRUE.
+    !---------------------------------------------------------------------
+    !---------- variables passees en argument ----------------------------
+    TYPE (basis) :: base
+    integer paire
+    logical num
+    real(kind=Rkind)  step
+    !---------------------------------------------------------------------
+    !---------------------------------------------------------------------
+    logical  :: deriv
+    real(kind=Rkind) :: A,B,xeq,scale,dx
+    integer  :: nb,nq,iq,i,j,nb_nosym,nq0,dnq,nq1,nq2,nqo
+    real(kind=Rkind), allocatable :: x_loc(:)
+    real(kind=Rkind), allocatable :: w_loc(:)
 
 
-      IF (base%xPOGridRep_done) THEN
+    !----- for debuging --------------------------------------------------
+    integer :: err_mem,memory
+    character (len=*), parameter :: name_sub='sub_quadra_HermiteNested2'
+    !logical, parameter :: debug = .TRUE.
+    logical, parameter :: debug = .FALSE.
+    !-----------------------------------------------------------
+    nqo = get_nq_FROM_basis(base)
+    IF (debug) THEN
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'nb,nq',base%nb,nqo
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------
+
+    deriv = .TRUE.
+    num   = .FALSE.
+    step  = ZERO
+
+    IF (base%nb <= 0) STOP 'ERROR nb<=0'
+
+    !----------------------------------------------------------------------------
+    !----------------------------------------------------------------------------
+    !      test sur nb_herm et nb_quadra
+    !      nb_quadra > nb_herm
+    !----------------------------------------------------------------------------
+    IF (base%print_info_OF_basisDP) write(out_unit,*) '    Basis: Hermite polynomials+Nested'
+    base%packed            = .TRUE.
+    base%packed_done       = .TRUE.
+
+    IF (base%xPOGridRep_done) THEN
+      write(out_unit,*) 'ERROR in ',name_sub
+      write(out_unit,*) 'xPOGridRep_done=t is not possible for this basis!'
+      write(out_unit,*) 'CHECK your data'
+      flush(out_unit)
+      STOP 'ERROR in sub_quadra_HermiteNested2: xPOGridRep_done=t is not possible for this basis'
+    END IF
+
+    IF (paire == -1) THEN
+      nb_nosym = base%nb
+    ELSE IF (paire == 1) THEN ! even
+      nb_nosym = 2*base%nb - 1
+    ELSE ! no sym
+      nb_nosym = 2*base%nb
+    END IF
+
+    IF (base%check_nq_OF_basis) THEN
+      write(out_unit,*) '      nb_hermite',base%nb
+      write(out_unit,*) '      old nb_quadra',nqo
+      flush(out_unit)
+
+      IF (mod(base%nq_max_Nested,2) == 0) THEN
         write(out_unit,*) 'ERROR in ',name_sub
-        write(out_unit,*) 'xPOGridRep_done=t is not possible for this basis!'
+        write(out_unit,*) 'nq_max_Nested must be an odd number'
+        write(out_unit,*) 'nq_max_Nested',base%nq_max_Nested
         write(out_unit,*) 'CHECK your data'
         flush(out_unit)
-        STOP 'ERROR in sub_quadra_HermiteNested2: xPOGridRep_done=t is not possible for this basis'
+        STOP 'ERROR in sub_quadra_HermiteNested2: nq_max_Nested must be an odd number'
       END IF
-      IF (base%check_nq_OF_basis) THEN
-        write(out_unit,*) '      nb_hermite',base%nb
-        write(out_unit,*) '      old nb_quadra',nqo
+      IF (nb_nosym > base%nq_max_Nested) THEN
+        write(out_unit,*) 'ERROR in ',name_sub
+        write(out_unit,*) 'nb_nosym > base%nq_max_Nested'
+        write(out_unit,*) 'nb,nb_nosym',base%nb,nb_nosym
+        write(out_unit,*) 'nq_max_Nested',base%nq_max_Nested
+        write(out_unit,*) 'CHECK your data'
         flush(out_unit)
-
-        IF (paire == -1) THEN
-          nb_nosym = base%nb
-        ELSE IF (paire == 1) THEN ! even
-          nb_nosym = 2*base%nb - 1
-        ELSE ! no sym
-          nb_nosym = 2*base%nb
-        END IF
-        IF (mod(base%nq_max_Nested,2) == 0) THEN
-          write(out_unit,*) 'ERROR in ',name_sub
-          write(out_unit,*) 'nq_max_Nested must be an odd number'
-          write(out_unit,*) 'nq_max_Nested',base%nq_max_Nested
-          write(out_unit,*) 'CHECK your data'
-          flush(out_unit)
-          STOP 'ERROR in sub_quadra_HermiteNested2: nq_max_Nested must be an odd number'
-        END IF
-        IF (nb_nosym > base%nq_max_Nested) THEN
-          write(out_unit,*) 'ERROR in ',name_sub
-          write(out_unit,*) 'nb_nosym > base%nq_max_Nested'
-          write(out_unit,*) 'nb,nb_nosym',base%nb,nb_nosym
-          write(out_unit,*) 'nq_max_Nested',base%nq_max_Nested
-          write(out_unit,*) 'CHECK your data'
-          flush(out_unit)
-          STOP 'ERROR in sub_quadra_HermiteNested2: nb_nosym > base%nq_max_Nested'
-        END IF
-
+        STOP 'ERROR in sub_quadra_HermiteNested2: nb_nosym > base%nq_max_Nested'
       END IF
+    END IF
 
-        ! nqo=1 =>  nq_nested=1
-        ! nqo=2 =>  nq_nested=3
-        ! nqo=3 =>  nq_nested=5
-        ! nqo   =>  nq_nested=min((nqo-1)*2+1,nq_max_Nested)
+    nqo = 2*nqo-1
 
-        IF (mod(nqo,2) == 0) nqo = nqo + 1
-        nqo = (nqo-1)*2+1
+    IF (nqo >= base%nq_max_Nested) THEN
+      nqo      = base%nq_max_Nested
+      nq1      = 1
+      nq2      = base%nq_max_Nested
+    ELSE
+      nq0      = base%nq_max_Nested/2 + 1
+      dnq      = nqo/2
+      nq1      = nq0-dnq
+      nq2      = nq0+dnq
+      write(out_unit,*) 'nq0,dnq,nq1,nq2',nq0,dnq,nq1,nq2 ; flush(out_unit)
+    ENDIF
 
-        IF (nqo >= base%nq_max_Nested) THEN
-          nqo      = base%nq_max_Nested
-          nq1      = 1
-          nq2      = base%nq_max_Nested
-        ELSE
-          nq0      = base%nq_max_Nested/2 + 1
-          dnq      = nqo/2
-          nq1      = nq0-dnq
-          nq2      = nq0+dnq
-          write(out_unit,*) 'nq0,dnq,nq1,nq2',nq0,dnq,nq1,nq2 ; flush(out_unit)
-        ENDIF
+    write(out_unit,*) '      new nb_quadra',nqo
+    flush(out_unit)
 
-        write(out_unit,*) '      new nb_quadra',nqo
-        flush(out_unit)
+    write(out_unit,*) 'base%nq_max_Nested',base%nq_max_Nested
+    write(out_unit,*) 'nq,nq1,nq2',nqo,nq1,nq2
+    flush(out_unit)
+    CALL Set_nq_OF_basis(base,nqo)
 
-      write(out_unit,*) 'base%nq_max_Nested',base%nq_max_Nested
-      write(out_unit,*) 'nq,nq1,nq2',nqo,nq1,nq2
+    CALL alloc_xw_OF_basis(base)
+    CALL alloc_NParray(x_loc,[base%nq_max_Nested],"x_loc",name_sub)
+    CALL alloc_NParray(w_loc,[base%nq_max_Nested],"w_loc",name_sub)
+
+    CALL hercom(base%nq_max_Nested,x_loc(:),w_loc(:))
+    base%x(1,:) = x_loc(nq1:nq2)
+    IF (debug) THEN
+      write(out_unit,*) 'new x(:)',base%nb,nqo,base%x
       flush(out_unit)
-      CALL Set_nq_OF_basis(base,nqo)
+    END IF
 
-      CALL alloc_xw_OF_basis(base)
+    base%rho(:)  = ONE
 
-      CALL alloc_NParray(x_loc,[base%nq_max_Nested],"x_loc",name_sub)
-      CALL alloc_NParray(w_loc,[base%nq_max_Nested],"w_loc",name_sub)
-
-      CALL hercom(base%nq_max_Nested,x_loc(:),w_loc(:))
-      base%x(1,:) = x_loc(nq1:nq2)
-      write(out_unit,*) 'new x(:)',base%nb,nqo,base%x ; flush(out_unit)
-
-      base%rho(:)  = ONE
-
-      ! weights calculation
-      nb = base%nb ! save nb
-      base%nb = nb_nosym
-      deriv = .FALSE.
-
+    ! weights calculation
+    nb = base%nb ! save nb
+    base%nb = nb_nosym
+    write(out_unit,*) 'nb (nb_nosym)',base%nb
+    deriv = .FALSE.
+    IF (nqo < base%nq_max_Nested) THEN 
       CALL alloc_dnb_OF_basis(base)
       CALL d0d1d2poly_Hermite_exp_grille(                                       &
                              base%x(1,:),                                       &
@@ -1389,58 +1335,63 @@ end subroutine sub_quadra_hermite_halfLeft
                              base%dnRGB%d1(:,:,1),                              &
                              base%dnRGB%d2(:,:,1,1),                            &
                              base%nb,nqo,deriv,num,step)
-
       CALL Weight_OF_grid_basis(base)
       CALL dealloc_dnb_OF_basis(base)
-      base%nb = nb
+    ELSE
+      base%w(:)    = w_loc(nq1:nq2)
+      base%wrho(:) = base%w(:) * base%rho(:)
+    END IF
+    base%nb = nb ! recover nb
+    IF (debug) THEN
       write(out_unit,*) 'new w',base%w
       flush(out_unit)
+    END IF
 
 
-!     calcul des valeurs des polynomes de hermites et des derivees en chaque
-!     point de la quadrature.
-      deriv = .TRUE.
-      CALL alloc_dnb_OF_basis(base)
+    ! calcul des valeurs des polynomes de hermites et des derivees en chaque
+    ! point de la quadrature.
+    deriv = .TRUE.
+    CALL alloc_dnb_OF_basis(base)
 
-      IF (paire == 0) THEN
-        IF (base%print_info_OF_basisDP) write(out_unit,*) '      even Hermite polynomials'
-        base%tab_ndim_index(1,:) = [(2*i-1,i=1,base%nb)]
-        CALL d0d1d2poly_Hermite_0_exp_grille(                                   &
-                             base%x(1,:),                                       &
-                             base%dnRGB%d0(:,:),                                &
-                             base%dnRGB%d1(:,:,1),                              &
-                             base%dnRGB%d2(:,:,1,1),                            &
-                             base%nb,nqo,deriv,num,step)
-      ELSE IF (paire == 1) THEN
-        IF (base%print_info_OF_basisDP) write(out_unit,*) '      odd Hermite polynomials'
-        base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
-        CALL d0d1d2poly_Hermite_1_exp_grille(                                   &
-                             base%x(1,:),                                       &
-                             base%dnRGB%d0(:,:),                                &
-                             base%dnRGB%d1(:,:,1),                              &
-                             base%dnRGB%d2(:,:,1,1),                            &
-                             base%nb,nqo,deriv,num,step)
-      ELSE
-        IF (base%print_info_OF_basisDP) write(out_unit,*) '      All Hermite polynomials'
-        base%tab_ndim_index(1,:) = [(i,i=1,base%nb)]
-        CALL d0d1d2poly_Hermite_exp_grille(                                     &
-                             base%x(1,:),                                       &
-                             base%dnRGB%d0(:,:),                                &
-                             base%dnRGB%d1(:,:,1),                              &
-                             base%dnRGB%d2(:,:,1,1),                            &
-                             base%nb,nqo,deriv,num,step)
-      END IF
+    IF (paire == 0) THEN
+      IF (base%print_info_OF_basisDP) write(out_unit,*) '      even Hermite polynomials'
+      base%tab_ndim_index(1,:) = [(2*i-1,i=1,base%nb)]
+      CALL d0d1d2poly_Hermite_0_exp_grille(                                   &
+                           base%x(1,:),                                       &
+                           base%dnRGB%d0(:,:),                                &
+                           base%dnRGB%d1(:,:,1),                              &
+                           base%dnRGB%d2(:,:,1,1),                            &
+                           base%nb,nqo,deriv,num,step)
+    ELSE IF (paire == 1) THEN
+      IF (base%print_info_OF_basisDP) write(out_unit,*) '      odd Hermite polynomials'
+      base%tab_ndim_index(1,:) = [(2*i,i=1,base%nb)]
+      CALL d0d1d2poly_Hermite_1_exp_grille(                                   &
+                           base%x(1,:),                                       &
+                           base%dnRGB%d0(:,:),                                &
+                           base%dnRGB%d1(:,:,1),                              &
+                           base%dnRGB%d2(:,:,1,1),                            &
+                           base%nb,nqo,deriv,num,step)
+    ELSE
+      IF (base%print_info_OF_basisDP) write(out_unit,*) '      All Hermite polynomials'
+      base%tab_ndim_index(1,:) = [(i,i=1,base%nb)]
+      CALL d0d1d2poly_Hermite_exp_grille(                                     &
+                           base%x(1,:),                                       &
+                           base%dnRGB%d0(:,:),                                &
+                           base%dnRGB%d1(:,:,1),                              &
+                           base%dnRGB%d2(:,:,1,1),                            &
+                           base%nb,nqo,deriv,num,step)
+    END IF
 
-      CALL dealloc_NParray(x_loc,"x_loc",name_sub)
-      CALL dealloc_NParray(w_loc,"w_loc",name_sub)
+    CALL dealloc_NParray(x_loc,"x_loc",name_sub)
+    CALL dealloc_NParray(w_loc,"w_loc",name_sub)
 
-!-----------------------------------------------------------
-      IF (debug) THEN
-        CALL RecWrite_basis(base)
-        write(out_unit,*) 'END ',name_sub
-        flush(out_unit)
-      END IF
-!-----------------------------------------------------------
+   !-----------------------------------------------------------
+    IF (debug) THEN
+      CALL RecWrite_basis(base)
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
+    END IF
+   !-----------------------------------------------------------
 
   END SUBROUTINE sub_quadra_HermiteNested2
 

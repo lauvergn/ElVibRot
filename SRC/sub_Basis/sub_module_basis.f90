@@ -533,6 +533,7 @@ MODULE mod_basis
 
         IF (basis_temp%Nested == 2) THEN
           CALL sub_quadra_HermiteNested2(basis_temp,-1)
+          !CALL sub_quadra_HermiteNested2_old(basis_temp,-1)
         ELSE IF (basis_temp%Nested <= 1) THEN
           !CALL sub_quadra_hermite_old(basis_temp,-1)
           CALL sub_quadra_hermite(basis_temp,-1)
@@ -2875,8 +2876,8 @@ END SUBROUTINE pack_basis_old
 
 
         IF (max_Sii > ONETENTH**5 .OR. max_Sij > ONETENTH**5) THEN
-          write(out_unit,*) ' Overlap Matrix:'
-          CALL Write_nDindex(basis_temp%nDindB)
+          write(out_unit,*) ' Overlap Matrix:',max_Sii,max_Sij
+          !CALL Write_nDindex(basis_temp%nDindB)
           CALL Write_Mat_MPI(matS,out_unit,5)
         END IF
 
